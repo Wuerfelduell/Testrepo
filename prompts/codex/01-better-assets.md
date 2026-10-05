@@ -30,7 +30,8 @@ in Godot. You do not write any gameplay code in this task.
    (textures/HDRIs/models), OpenGameArt, itch.io (free, CC0). NO paid or "free for personal use
    only" assets, NO ripped assets from commercial games.
 2. Pick ONE consistent set that covers:
-   - 1 player hero (humanoid, animated)
+   - 3 playable hero classes (e.g. fighter, rogue, mage), humanoid and animated, ideally with
+     2-3 visual variants each - the player picks the hero in a start menu like in Baldur's Gate 3
    - 3-4 enemy types (animated) + 1 boss (animated)
    - a dungeon kit: floor, walls, doors, pillars, stairs, props (torches, barrels, chests,
      bones, chains)
@@ -41,7 +42,7 @@ in Godot. You do not write any gameplay code in this task.
 4. Create a Godot 4.3 project in the repo root (`project.godot`) if it does not exist yet, and an
    asset showcase scene `scenes/showcase/asset_showcase.tscn` that shows:
    - a small dungeon room built from the kit,
-   - the hero and every enemy, each playing its animations (button or key to switch),
+   - every hero and every enemy, each playing its animations (button or key to switch),
    - proper lighting: WorldEnvironment with SSAO, glow, fog/volumetric fog, tonemapping,
      torch lights with shadows. Lighting is where most of the "quality" comes from - spend
      time on it.
