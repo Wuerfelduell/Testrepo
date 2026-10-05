@@ -72,7 +72,7 @@ click, speed adjustable in options):
           +--------------------------------------+
 ```
 
-- The d20 rolls visibly (short 3D or animated 2D roll), then the number lands.
+- A real 3D d20 spins and tumbles visibly (owner decision), then lands showing the number.
 - Natural 20: gold flash, "CRITICAL", slow-motion on the hit. Natural 1: red crack, "FUMBLE".
 - Damage roll shows its dice right after, then floating damage numbers over the target
   (colour by damage type).
@@ -109,8 +109,7 @@ The save is deleted (ironman).
 Resolution, fullscreen, volume (master, music, effects), dice popup speed
 (slow / normal / fast / off), camera rotation speed. Language comes with the German version.
 
-## 8. Open for the owner
+## 8. Decisions
 
-- Dice popup: animated 2D die or real 3D die? (Rec: 3D die in M1 if Codex manages it,
-  otherwise 2D first.)
-- HUD style reference: closer to BG3 (ornate) or more minimal? (Rec: BG3-like but cleaner.)
+Decided 05-10-2026: real spinning 3D d20. HUD style is not a priority for now; Codex
+picks a clean, readable style that fits the assets.
