@@ -1,7 +1,11 @@
 # Codex prompt 02 - Project foundation (milestone M0)
 
 Written by: Claude (coordinator), 05-10-2026
-Status: send AFTER prompt 01 is finished and pushed (both touch project.godot - RULE 6)
+Status: send AFTER prompt 01 is finished and pushed (both touch project.godot - RULE 6).
+Prompt 03 may be running in parallel in another Codex session: do not touch src/rules/,
+data/classes/ or tests/unit/rules/. Before every push: `git pull --rebase`; if the handover file
+conflicts, keep both entries. When you are done, merge src/rules/SRD_ATTRIBUTION.md (if it
+exists) into CREDITS.md.
 
 ---
 
@@ -25,7 +29,8 @@ most important part of this task.
 1. **Folder structure** (keep what prompt 01 created under assets/ and scenes/showcase/):
    ```
    src/core/        autoloads: Game (state + mode), EventBus, CommandBus, Rng
-   src/rules/       pure rules logic, no Node / scene / UI code (filled by prompt 03)
+   src/rules/       pure rules logic - OWNED BY PROMPT 03, which runs in parallel in another
+                    Codex session. Do not create or change files there.
    src/commands/    command classes
    src/world/       scene-side code (actors, camera, level)
    src/ui/          UI code
@@ -45,11 +50,12 @@ most important part of this task.
    holds all game data (actors, HP, positions, turn order). Scenes read it and listen to
    signals; they never change it directly. Write this rule as a comment at the top of
    `src/core/game.gd`.
-4. **Seedable randomness:** `Rng` autoload wrapping RandomNumberGenerator, with `set_seed()`.
-   All randomness in the game must go through it (tests need reproducible dice).
+4. **Seedable randomness:** `Rng` autoload wrapping RandomNumberGenerator, with `set_seed()`
+   and a public `rng: RandomNumberGenerator` property. All randomness in the game must go
+   through it (tests need reproducible dice); rules functions receive `Rng.rng` as a parameter.
 5. **Tests:** add GUT (Godot Unit Test, MIT licence) under `addons/gut/`. Tests must run
    headless: `godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit -gexit`.
-   Add `tests/run_tests.sh` for that command. Write tests for CommandBus and Rng.
+   Add `tests/run_tests.sh` for that command (use `-ginclude_subdirs` so tests/unit/rules/ runs too). Write tests for CommandBus and Rng.
 6. **GitHub Actions:** `.github/workflows/tests.yml` that downloads the same Godot version,
    imports the project and runs the tests on every push to main.
 7. **Windows export:** add an `export_presets.cfg` with a "Windows Desktop" preset that

@@ -1,12 +1,16 @@
 # Codex prompts
 
-Written by Claude (coordinator). The owner forwards them to Codex ONE AT A TIME, in this order.
-Each prompt starts only after the previous one is pushed (RULE 6: no two AIs on the same file).
+Written by Claude (coordinator). Codex has no coordinator of its own, so this table is the plan.
+Two Codex sessions can run at the same time, one per track. Within a track: strictly one after
+the other, the next prompt only after the previous one is pushed (RULE 6).
 
-| # | Prompt | Milestone | Status |
-|---|---|---|---|
-| 01 | [Better-quality 3D assets](01-better-assets.md) | M0 | ready - send first |
-| 02 | [Project foundation](02-foundation.md) | M0 | waits for 01 |
-| 03 | [Rules core (5.5e / SRD 5.2)](03-rules-core.md) | M0/M1 | waits for 02 |
-| 04 | [Combat system and enemy AI](04-combat-and-ai.md) | M1 | waits for 03 |
-| 05 | First slice: start menu, hero choice, small crypt map (written after 04) | M1 | not written |
+| Track | Order | Prompt | Owns files | Status |
+|---|---|---|---|---|
+| A | 1 | [01 Better-quality 3D assets](01-better-assets.md) | assets/, scenes/showcase/, project.godot | ready |
+| A | 2 | [02 Project foundation](02-foundation.md) | everything except track B's folders | after 01 |
+| B | 1 | [03 Rules core (5.5e / SRD 5.2)](03-rules-core.md) | src/rules/, data/classes/, tests/unit/rules/ | ready - parallel to track A |
+| - | 3 | [04 Combat system and enemy AI](04-combat-and-ai.md) | - | after 02 AND 03 |
+| - | 4 | 05 First slice (written after 04) | - | not written |
+
+Both tracks append to the same handover file: `git pull --rebase` before every push, keep both
+entries on a conflict.

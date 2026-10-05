@@ -1,7 +1,7 @@
 # Codex prompt 04 - Combat system and enemy AI (milestone M1)
 
 Written by: Claude (coordinator), 05-10-2026
-Status: send AFTER prompt 03 is finished and pushed
+Status: send AFTER prompts 02 AND 03 are both finished and pushed
 
 ---
 
