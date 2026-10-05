@@ -23,6 +23,8 @@ that failed hardest in the old project (dumb AI, no animations, dice only in a l
 quality matters more than speed here.
 
 ## Tasks
+0. **Read docs/UI.md** and build the combat HUD, targeting and dice popup exactly as
+   described there (sections 2-4). Ask in the handover if something there does not work.
 1. **Test arena** `scenes/arena/arena.tscn`: a dungeon room built from the asset kit, with
    different heights (a raised platform, stairs), cover (pillars, crates) and narrow
    passages. Lit like the showcase scene. Navigation mesh baked from the level.
