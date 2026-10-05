@@ -46,5 +46,78 @@ Das kuratierte Asset-Set bleibt unter 50 MB und wird vollständig als normale Gi
 kostenlosen, überprüften Figurenpakete decken die vollständigen Anforderungen an
 12 Klassen, 3–4 Gegner und einen Boss nicht ab. Die offene Asset-Entscheidung steht
 in [handover/05-10-2026.md](handover/05-10-2026.md).
-Aufträge 02–04 bleiben in der vom Koordinator festgelegten Reihenfolge ausstehend.
-Regelkern, Kampfsystem, Windows-Export und vollständige Spielfiguren folgen später.
+Auftrag 02 baut mit Owner-Freigabe auf der Teil-Showcase auf. Auftrag 03 darf
+parallel am Regelkern arbeiten; Auftrag 04 wartet auf beide Grundlagen.
+
+
+## Foundation (Auftrag 02)
+
+Godot **4.7.2 stable** ist für Editor, Tests, CI und Export festgelegt.
+GUT **9.6.1** liegt samt MIT-Lizenz unter `addons/gut/`; keine Plugin-Installation nötig.
+
+```sh
+godot --headless --editor --import
+./tests/run_tests.sh
+```
+
+Alternativ (auch in PowerShell):
+
+```sh
+godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests/unit -ginclude_subdirs -gexit
+```
+
+`GODOT_BIN=/pfad/zu/godot ./tests/run_tests.sh` wählt unter Unix eine lokale Binary.
+Unterverzeichnisse einschließlich `tests/unit/rules/` werden mitgeprüft. GitHub Actions
+führt Import, Tests, Showcase-Check, Export und einen Windows-Starttest bei jedem
+Push auf `main` aus. Der Starttest ist headless; die grafische Windows-Prüfung bleibt
+Teil des Owner-Playtests. Das Build liegt als Actions-Artefakt `TheRPG-Windows` vor.
+
+### Architektur
+
+- `Game` besitzt den `GameState` (Actor-Daten mit HP/Position, Zugreihenfolge, Runde, Modus).
+  `Game.state` liefert eine tiefe Datenkopie; Änderungen daran ändern das Spiel nicht.
+  Actor-Daten dürfen keine Node-/Resource-Referenzen enthalten.
+- Nur `CommandBus.submit(command)` verändert den autoritativen Zustand. Validierung
+  bekommt eine separate Kopie, erfolgreiche Anwendung wird vor den Signalen übernommen.
+  `Game._commit_state()` ist die interne Bus-Schnittstelle und darf nicht aus Szenen
+  aufgerufen werden. Das ist eine Architekturgrenze, keine Sicherheits-Sandbox für Scripts.
+- Szenen beobachten `EventBus.state_changed` und lesen danach `Game.state`.
+  Der Bus meldet zusätzlich `command_applied(command, result)` beziehungsweise
+  `command_rejected(command, Error)`. Während der Verarbeitung wird ein erneuter
+  Submit mit `ERR_BUSY` abgewiesen; dessen Signal folgt deferred.
+- `EndTurnCommand` demonstriert ausschließlich einen Zugwechsel mit Rundenzähler.
+  Es gibt noch keine Kampfregeln. `CommandCodec.decode()` akzeptiert ausschließlich
+  bekannte Typen und geprüfte Felder; niemals Scriptpfade aus Netzwerkdaten laden.
+- Alle Zufallszahlen kommen aus `Rng`; reine Regeln erhalten `Rng.rng` als Parameter.
+  `Rng.set_seed(123)` ermöglicht reproduzierbare Abläufe.
+- `src/rules/`, `data/classes/` und `tests/unit/rules/` gehören zum parallelen Auftrag 03.
+
+### Eingaben und Übersetzungen
+
+Projektauflösung: 1920 × 1080, anfängliches Desktopfenster: 1280 × 720.
+Neue Gameplay-Aktionen sind in `project.godot` vorbereitet: Q/E drehen, WASD schwenken,
+rechte Maustaste drehen, mittlere Maustaste schwenken, Mausrad zoomen,
+linke Maustaste auswählen, Escape abbrechen, Enter Zug beenden.
+Sie steuern noch kein Gameplay. Die vorhandene Galerie behält ihre oben beschriebenen
+Aktionen. Spielertexte bleiben in `localization/strings.csv` (`keys,en`) und werden
+mit `tr("KEY")` angezeigt; diese Foundation fügt keine sichtbaren Texte hinzu.
+
+### Windows-EXE exportieren
+
+1. Godot 4.7.2 öffnen und unter **Editor → Manage Export Templates** die passenden
+   **4.7.2 stable** Exportvorlagen installieren.
+2. **Project → Export → Windows Desktop** auswählen.
+3. Als `build/TheRPG.exe` exportieren (Release). **Embed PCK** ist bereits aktiviert.
+
+CLI nach dem ersten Projektimport:
+
+```sh
+mkdir -p build
+godot --headless --export-release "Windows Desktop" build/TheRPG.exe
+```
+
+Unter PowerShell den Ordner mit `New-Item -ItemType Directory -Force build` anlegen.
+Die einzelne EXE enthält die Spieldaten; keine separate `.pck` verteilen. `build/`
+ist in Git ignoriert. Zum kurzen Starttest: `build/TheRPG.exe --headless --quit-after 60`.
+Die EXE startet weiterhin die vorhandene Showcase. GUT, Tests, Tools und Dokumentation
+werden vom Export ausgeschlossen.

@@ -1,0 +1,68 @@
+name: Foundation tests and Windows export
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests-and-export:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.7.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Godot and Windows templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl --fail --location --retry 3 "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          echo "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  $RUNNER_TEMP/godot.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          ln -s "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+          curl --fail --location --retry 3 "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" -o "$RUNNER_TEMP/templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -j -q "$RUNNER_TEMP/templates.tpz" 'templates/windows_*_x86_64.exe' -d "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+      - name: Import project
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --editor --import 2>&1 | tee import.log
+          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' import.log; then exit 1; fi
+      - name: Unit tests including rules subdirectory
+        run: tests/run_tests.sh
+      - name: Preserve showcase acceptance
+        run: godot --headless --script res://tools/check_showcase.gd
+      - name: Export standalone Windows executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --export-release "Windows Desktop" build/TheRPG.exe 2>&1 | tee export.log
+          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' export.log; then exit 1; fi
+          test -s build/TheRPG.exe
+          test ! -f build/TheRPG.pck
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TheRPG-Windows
+          path: build/TheRPG.exe
+          if-no-files-found: error
+  windows-smoke:
+    needs: tests-and-export
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TheRPG-Windows
+          path: build
+      - name: Start exported game on Windows
+        timeout-minutes: 3
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath ./build/TheRPG.exe -ArgumentList '--headless','--quit-after','60' -Wait -PassThru -RedirectStandardOutput smoke.log -RedirectStandardError smoke-errors.log
+          Get-Content smoke.log,smoke-errors.log
+          if ($process.ExitCode -ne 0) { throw "Export exited with $($process.ExitCode)" }
+          if (Select-String -Path smoke.log,smoke-errors.log -Pattern 'SCRIPT ERROR:|ERROR:|WARNING:') { throw 'Export reported errors or warnings' }
