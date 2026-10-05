@@ -1,7 +1,7 @@
 # Codex prompt 01 - Better-quality 3D assets
 
 Written by: Claude (coordinator), 05-10-2026
-Status: ready to send (owner forwards it to Codex)
+Status: ON HOLD - owner is considering a "pure .exe" instead of Godot (see handover Q2). Do not send yet.
 
 ---
 
