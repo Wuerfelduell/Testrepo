@@ -1,7 +1,7 @@
 # Codex prompt 01 - Better-quality 3D assets
 
 Written by: Claude (coordinator), 05-10-2026
-Status: ON HOLD - owner is considering a "pure .exe" instead of Godot (see handover Q2). Do not send yet.
+Status: ready to send (engine decided 05-10-2026: Godot 4, shipped as Windows .exe)
 
 ---
 
@@ -12,8 +12,9 @@ If anything is unclear, STOP and write the question into "Open questions for the
 today's handover file instead of guessing (RULE 7).
 
 ## Goal
-We are building a 3D, turn-based, dark-fantasy dungeon game in Godot 4.3 (isometric camera,
-in the style of Baldur's Gate 3). Your task is to assemble a set of 3D assets of BETTER quality
+We are building a 3D, turn-based, dark-fantasy dungeon game in Godot 4 (latest stable 4.x release) (isometric camera,
+in the style of Baldur's Gate 3). The game is planned for 3-5 months with quality over speed, so pick assets that can carry a
+full game, not just a prototype. Your task is to assemble a set of 3D assets of BETTER quality
 than the low-poly KayKit/Quaternius packs used in the old project, and to make them look good
 in Godot. You do not write any gameplay code in this task.
 
@@ -39,7 +40,7 @@ in Godot. You do not write any gameplay code in this task.
 3. Put the assets into `assets/` in Godot-friendly formats (.glb for models, .png textures).
    No ZIP files in the repo. Only add what is actually needed; keep the repo below 300 MB.
    If the total is above 50 MB, set up Git LFS for .glb/.png/.wav and say so in the handover.
-4. Create a Godot 4.3 project in the repo root (`project.godot`) if it does not exist yet, and an
+4. Create a Godot 4 (latest stable 4.x release) project in the repo root (`project.godot`) if it does not exist yet, and an
    asset showcase scene `scenes/showcase/asset_showcase.tscn` that shows:
    - a small dungeon room built from the kit,
    - every hero and every enemy, each playing its animations (button or key to switch),
@@ -57,6 +58,6 @@ in Godot. You do not write any gameplay code in this task.
 - Do not generate images or models with an AI yourself.
 
 ## Done when
-- The showcase scene opens in Godot 4.3 without errors and shows all assets lit and animated.
+- The showcase scene opens in Godot 4 (latest stable 4.x release) without errors and shows all assets lit and animated.
 - CREDITS.md and README.md exist.
 - Everything is committed and pushed to main, and logged in today's handover file.
