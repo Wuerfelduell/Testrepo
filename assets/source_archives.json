@@ -1,0 +1,18 @@
+[
+  {
+    "archive": "base-characters.zip",
+    "sha256": "fdbf1804c90dfc1ea03e992bff7da2dfd1a79318e13270a660180f9308455f40"
+  },
+  {
+    "archive": "outfits.zip",
+    "sha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70"
+  },
+  {
+    "archive": "animations.zip",
+    "sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+  },
+  {
+    "archive": "pbr-dungeon.zip",
+    "sha256": "004e35024fd7abdc3bc91aca235758033ad057d2b69b311e495e07695da7c51c"
+  }
+]

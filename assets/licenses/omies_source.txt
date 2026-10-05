@@ -1,0 +1,10 @@
+Source evidence for the selected FREE demo, checked 05 October 2026:
+
+Author: Omie's Assets
+Page: https://omies-assets.itch.io/dungeonkit
+Download: Free 3D Modular Dungeon Kit.zip, 17 FBX meshes with shared PBR textures
+The author's page identifies the free sample as CC0 and usable personally/commercially.
+The selected free archive contains no standalone licence file.
+This note records the author's declaration; it is not a licence written on their behalf.
+
+The paid complete pack and paid source pack were not downloaded or included.

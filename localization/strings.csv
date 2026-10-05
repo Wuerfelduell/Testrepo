@@ -1,0 +1,25 @@
+keys,en
+GALLERY_TITLE,THE RPG
+GALLERY_SUBTITLE,The collection • Human bases & fantasy outfits
+GALLERY_ANIMATIONS,Animation
+GALLERY_PREVIOUS,Previous
+GALLERY_NEXT,Next
+GALLERY_RESET,Reset view
+GALLERY_LIGHTING,Lighting
+GALLERY_CONTROLS,"Q / E — animation     Arrows / right-drag — orbit     Scroll — zoom     R — reset     L — lighting"
+GALLERY_BASE_MALE,Human • male base
+GALLERY_BASE_FEMALE,Human • female base
+GALLERY_PEASANT_MALE,Peasant • male outfit
+GALLERY_PEASANT_FEMALE,Peasant • female outfit
+GALLERY_RANGER_MALE,Ranger • male outfit
+GALLERY_RANGER_FEMALE,Ranger • female outfit
+GALLERY_ANIMATION_IDLE,Idle
+GALLERY_ANIMATION_WALK,Walk
+GALLERY_ANIMATION_RUN,Run
+GALLERY_ANIMATION_MELEE,Sword attack
+GALLERY_ANIMATION_CAST,Cast
+GALLERY_ANIMATION_HIT,Hit reaction
+GALLERY_ANIMATION_DEATH,Death
+GALLERY_ANIMATION_OTHER,More animations
+GALLERY_HEADER,The lantern hall
+GALLERY_DESCRIPTION,Stone • steel • leather • torchlight

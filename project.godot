@@ -1,0 +1,30 @@
+config_version=5
+
+[application]
+config/name="The RPG"
+run/main_scene="res://scenes/showcase/asset_showcase.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/size/window_width_override=1280
+window/size/window_height_override=800
+window/stretch/mode="canvas_items"
+
+[internationalization]
+locale/translations=PackedStringArray("res://localization/strings.en.translation")
+locale/fallback="en"
+
+[rendering]
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[input]
+gallery_previous={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":81)]}
+gallery_next={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":69)]}
+gallery_rotate_left={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194319)]}
+gallery_rotate_right={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194321)]}
+gallery_reset={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":82)]}
+gallery_toggle_lighting={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":76)]}
