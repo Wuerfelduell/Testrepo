@@ -1,7 +1,7 @@
 # Codex prompt 01 - Better-quality 3D assets
 
 Written by: Claude (coordinator), 05-10-2026
-Status: ready to send (engine decided 05-10-2026: Godot 4, shipped as Windows .exe)
+Status: ready to send FIRST (engine decided 05-10-2026: Godot 4, shipped as Windows .exe)
 
 ---
 
@@ -31,8 +31,10 @@ in Godot. You do not write any gameplay code in this task.
    (textures/HDRIs/models), OpenGameArt, itch.io (free, CC0). NO paid or "free for personal use
    only" assets, NO ripped assets from commercial games.
 2. Pick ONE consistent set that covers:
-   - 3 playable hero classes (e.g. fighter, rogue, mage), humanoid and animated, ideally with
-     2-3 visual variants each - the player picks the hero in a start menu like in Baldur's Gate 3
+   - playable human heroes (the player creates the hero in a start menu like in Baldur's Gate 3;
+     race is human only, all 12 D&D classes): male and female human models, animated, with
+     enough outfits/armour and weapons (swords, axes, bows, staffs, shields) to tell the
+     classes apart
    - 3-4 enemy types (animated) + 1 boss (animated)
    - a dungeon kit: floor, walls, doors, pillars, stairs, props (torches, barrels, chests,
      bones, chains)

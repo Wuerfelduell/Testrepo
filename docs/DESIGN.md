@@ -47,11 +47,13 @@ system and milestone below.
 
 ## 3. Rules (D&D 5e)
 
-- **Legal basis:** only the D&D System Reference Document 5.2 (CC-BY-4.0) may be used for
-  rules text, class features, spells and monsters. Nothing copied from the Player's Handbook
-  or from Baldur's Gate 3. Attribution goes into the credits.
+- **Rules version:** D&D 5.5e (2024 rules), adapted like BG3. Owner decision 05-10-2026.
+- **Legal basis:** the 2024 rules are published for free as the System Reference Document 5.2
+  (CC-BY-4.0). Rules text, class features, spells and monsters are taken from the SRD 5.2;
+  anything that is not in the SRD (e.g. most subclasses) is written in our own words, never
+  copied from the Player's Handbook or from Baldur's Gate 3. Attribution goes into the credits.
 - "Dungeons & Dragons" / "D&D" are trademarks: they must not be in the game's title or store
-  page. Inside the repo the working name "DnD game" is fine.
+  page. Working title: "the RPG" (owner decision).
 - Abilities STR/DEX/CON/INT/WIS/CHA, proficiency bonus, skills, saving throws, AC.
 - Attack roll d20 + modifiers vs. AC; critical on 20; advantage / disadvantage.
 - Action, bonus action, reaction, movement per turn. Opportunity attacks.
@@ -61,7 +63,7 @@ system and milestone below.
   (fire, ice, poison, water + lightning).
 - **12 classes:** Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue,
   Sorcerer, Warlock, Wizard. Subclasses later.
-- OPEN: level cap (rec: 10; BG3 uses 12).
+- Level cap: 10.
 
 ## 4. Core systems
 
@@ -78,7 +80,7 @@ system and milestone below.
 | Companions | Recruitable NPCs, party of up to 4, control any party member in combat | - |
 | Progression | XP, level-up screen with real choices, equipment, inventory, loot | bad level system |
 | UI | Designed before it is built: wireframes first, then implementation. Hotbar, party portraits, initiative bar, tooltips with dice math | UI not thought through |
-| Save | OPEN: rec "ironman" - one autosave slot, saving only on exit, so permadeath means something |
+| Save | Ironman: one autosave slot per run, saving only on exit, so permadeath means something |
 | Localisation | All text through translation keys (Godot `tr()`), English first |
 
 ### Multiplayer-ready architecture
@@ -97,10 +99,10 @@ playtest by the owner. Durations are a plan, not a promise.
 | # | Name | Weeks | Content | Done when |
 |---|---|---|---|---|
 | M0 | Foundation | 1 | Asset set + showcase scene (prompt 01). Project structure, rules core skeleton, command system, automated tests, Windows export, Git LFS | Showcase scene runs, tests run headless, .exe builds |
-| M1 | Combat slice | 2-4 | Real animated characters, 1 test arena with height and cover, 2 classes (Fighter, Wizard), 3 enemy types with utility AI, visible dice, combat UI | A fight the owner enjoys playing 5 times in a row |
+| M1 | First slice | 2-4 | The first ~6 minutes of act 1 (one tenth of it): start menu, simple hero choice (Fighter or Wizard), one small map with height and cover, 1-2 fights against 3 enemy types with utility AI, visible dice, combat UI, real animations | The owner plays it 5 times in a row and wants more |
 | M2 | Characters | 5-8 | Character creation (12 classes, human), levelling to the cap, spells, equipment, inventory, level-up screen | Every class playable in the arena |
 | M3 | World and dialogue | 9-12 | Exploration, dialogue system with skill checks, recruitable companions, first real map region. Story outline must be decided before this milestone | First region playable from start to finish |
-| M4 | Act 1 content | 13-17 | Full first act: maps, quests, NPCs, boss, loot, balancing, save system, audio | Act 1 playable in one go without placeholders |
+| M4 | Act 1 content | 13-17 | Full first act (~1 hour of play): maps, quests, NPCs, boss, loot, balancing, save system, audio | Act 1 playable in one go without placeholders |
 | M5 | Polish and release | 18-20 | Bug fixing, performance, UI polish, playtests, release build | .exe the owner gives to others |
 | Later | After release | - | Multiplayer, German translation, resurrection scrolls, subclasses, more acts, more races |
 
@@ -116,7 +118,8 @@ playtest by the owner. Durations are a plan, not a promise.
 
 ## 7. Open questions
 
-- Level cap (rec: 10).
-- Save model (rec: ironman, single autosave slot).
-- Story: Claude asks the owner follow-up questions before M3.
-- Length of act 1 in hours of play (rec: 4-6 hours).
+- Story: Claude asks the owner follow-up questions before M3. The first slice (M1) uses a
+  neutral placeholder setting (a ruined crypt) until then - OPEN for the owner to change.
+
+Decided 05-10-2026: level cap 10, ironman save, act 1 = about 1 hour of play, build one tenth
+of it first (M1) and review.
