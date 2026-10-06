@@ -27,3 +27,16 @@ metallic/roughness. The geometry remains the authors' work.
 
 The showcase scripts, camera, lighting and runtime animation retargeting are project
 code. These are not third-party assets. Rules/SRD content is not included in this task.
+
+### Adaptations for the enemy test (06 October 2026)
+
+`characters/undead_cultist/` adapts the existing Quaternius Male Ranger parts and
+the head/eyes of Superhero Male. Original source authors and pack-specific CC0
+licence evidence remain as listed above. The source models are unchanged. Robe
+deformation, compact derived albedo maps and eye emission are project adaptations.
+
+`weapons/sword.glb` and `weapons/axe.glb` are project geometry, modelled procedurally
+with Blender Python (`tools/build_enemy_test.py`), not AI-generated models.
+Their material variations derive from Omie's existing CC0 dungeon props albedo;
+`tools/prepare_enemy_textures.py` deterministically creates albedo, normal and ORM
+maps. Neither generator requires new third-party geometry or textures.

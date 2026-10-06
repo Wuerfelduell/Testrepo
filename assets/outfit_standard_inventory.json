@@ -1,0 +1,36 @@
+{
+  "checked_on": "2026-10-06",
+  "page": "https://quaternius.itch.io/modular-character-outfits-fantasy",
+  "archive": "Modular Character Outfits - Fantasy[Standard].zip",
+  "sha256": "c3468b18871cc8c8f05ab14df7712baf22cb9f389cbd870babf130e595187f70",
+  "complete_outfits": [
+    "Outfits/Female_Peasant.gltf",
+    "Outfits/Female_Ranger.gltf",
+    "Outfits/Male_Peasant.gltf",
+    "Outfits/Male_Ranger.gltf"
+  ],
+  "modular_parts": [
+    "Modular Parts/Female_Peasant_Arms.gltf",
+    "Modular Parts/Female_Peasant_Body.gltf",
+    "Modular Parts/Female_Peasant_Feet.gltf",
+    "Modular Parts/Female_Peasant_Legs.gltf",
+    "Modular Parts/Female_Ranger_Acc_Pauldrons.gltf",
+    "Modular Parts/Female_Ranger_Arms.gltf",
+    "Modular Parts/Female_Ranger_Body.gltf",
+    "Modular Parts/Female_Ranger_Feet.gltf",
+    "Modular Parts/Female_Ranger_Head_Hood.gltf",
+    "Modular Parts/Female_Ranger_Legs.gltf",
+    "Modular Parts/Male_Peasant_Arms.gltf",
+    "Modular Parts/Male_Peasant_Body.gltf",
+    "Modular Parts/Male_Peasant_Feet.gltf",
+    "Modular Parts/Male_Peasant_Legs.gltf",
+    "Modular Parts/Male_Ranger_Acc_Pauldron.gltf",
+    "Modular Parts/Male_Ranger_Arms.gltf",
+    "Modular Parts/Male_Ranger_Body.gltf",
+    "Modular Parts/Male_Ranger_Feet_Boots.gltf",
+    "Modular Parts/Male_Ranger_Head_Hood.gltf",
+    "Modular Parts/Male_Ranger_Legs.gltf"
+  ],
+  "blend_sources": [],
+  "licence": "This is the standard FREE version of the the Modular Character Outfits - Fantasy, which only contains \r\na portion of the models. Get all remaining outfits and separate parts by buying the Source version. \r\n\r\nYou can get the other versions from the website https://quaternius.com\r\n\r\n-------------------------------------------------------\r\nLicense:\r\nCC0 1.0 Universal (CC0 1.0) \r\nPublic Domain Dedication\r\nhttps://creativecommons.org/publicdomain/zero/1.0/\r\n\r\n------------------------------------------------------\r\nModels by @Quaternius\r\nConsider supporting me on Patreon!\r\n\r\nhttps://www.patreon.com/quaternius\r\n\r\n-------------------------------------------------------\r\nJoin the Discord Server:\r\nhttps://discord.gg/vJqnRUYRfT"
+}

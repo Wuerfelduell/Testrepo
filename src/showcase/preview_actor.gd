@@ -6,6 +6,8 @@ const ANIMATIONS: PackedScene = preload("res://assets/animations/universal.glb")
 var player: AnimationPlayer
 var skeleton: Skeleton3D
 var available: PackedStringArray = []
+var weapon_attachment: BoneAttachment3D
+var weapon: Node3D
 
 func setup(scene_path: String, title_key: String) -> void:
 	var model: Node3D = (load(scene_path) as PackedScene).instantiate()
@@ -63,6 +65,21 @@ func setup(scene_path: String, title_key: String) -> void:
 	title.no_depth_test = true
 	add_child(title)
 	play_clip("Idle")
+
+func equip_weapon(scene_path: String) -> void:
+	assert(weapon_attachment == null, "Only one preview weapon per hand")
+	assert(skeleton.find_bone("hand_r") >= 0, "Source rig must have a right hand")
+	weapon_attachment = BoneAttachment3D.new()
+	weapon_attachment.name = "RightHandWeapon"
+	weapon_attachment.bone_name = "hand_r"
+	skeleton.add_child(weapon_attachment)
+	weapon = (load(scene_path) as PackedScene).instantiate() as Node3D
+	weapon.name = "PreviewWeapon"
+	weapon_attachment.add_child(weapon)
+	# Authoring origin is the grip centre. Bone +Y runs along the fingers;
+	# blade +Y is rotated across the palm, not along the fingers/forearm.
+	weapon.position = Vector3(0.0, 0.065, 0.018)
+	weapon.rotation_degrees = Vector3(0, 0, -90)
 
 func play_clip(clip_name: String) -> void:
 	assert(player.has_animation(clip_name), "Missing requested animation: " + clip_name)

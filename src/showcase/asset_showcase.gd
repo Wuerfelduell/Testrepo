@@ -6,6 +6,7 @@ const CLIPS: PackedStringArray = ["Idle", "Walk", "Sprint", "Sword_Attack", "Spe
 const CLIP_KEYS: PackedStringArray = ["GALLERY_ANIMATION_IDLE", "GALLERY_ANIMATION_WALK", "GALLERY_ANIMATION_RUN", "GALLERY_ANIMATION_MELEE", "GALLERY_ANIMATION_CAST", "GALLERY_ANIMATION_HIT", "GALLERY_ANIMATION_DEATH"]
 const MODELS: Array[String] = ["superhero_male_fullbody", "superhero_female_fullbody", "male_peasant", "female_peasant", "male_ranger", "female_ranger"]
 const MODEL_KEYS: PackedStringArray = ["GALLERY_BASE_MALE", "GALLERY_BASE_FEMALE", "GALLERY_PEASANT_MALE", "GALLERY_PEASANT_FEMALE", "GALLERY_RANGER_MALE", "GALLERY_RANGER_FEMALE"]
+const SAMPLE_POSITIONS: Array[Vector3] = [Vector3(2.2, 0, 2.8), Vector3(-3.6, 0, 0.2), Vector3(-0.7, 0, 0.2), Vector3(2.2, 0, 0.2), Vector3(-3.6, 0, 2.8), Vector3(-0.7, 0, 2.8)]
 
 var actors: Array[PreviewActor] = []
 var camera: Camera3D
@@ -17,8 +18,11 @@ var animation_names: PackedStringArray = []
 var studio_lighting: bool = false
 var torch_lights: Array[OmniLight3D] = []
 var capture_frames: int = -1
+var camera_focus: Vector3 = Vector3(0, 0.6, 0)
+var camera_elevation: float = 11.4
 
 func _ready() -> void:
+	TranslationServer.add_translation(load("res://assets/enemy_test_strings.en.translation") as Translation)
 	_build_environment()
 	_build_room()
 	_build_actors()
@@ -27,6 +31,10 @@ func _ready() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture="):
 			capture_frames = 90
+		elif argument == "--enemy-closeup":
+			_focus_enemy()
+		elif argument.begins_with("--clip="):
+			_select_animation(animation_names.find(argument.trim_prefix("--clip=")))
 
 func _process(delta: float) -> void:
 	angle += (Input.get_action_strength("gallery_rotate_right") - Input.get_action_strength("gallery_rotate_left")) * delta
@@ -153,13 +161,23 @@ func _build_room() -> void:
 
 func _build_actors() -> void:
 	for i: int in MODELS.size():
-		var location: Vector3 = Vector3(-3.0 + (i % 3) * 3.0, 0.0, 0.8 + floorf(float(i) / 3.0) * 2.4)
+		var location: Vector3 = SAMPLE_POSITIONS[i]
 		_place_asset("SM_ShortWallEnders", location)
 		var actor: PreviewActor = ACTOR_SCRIPT.new() as PreviewActor
 		actor.position = location + Vector3(0, 0.64, 0)
 		add_child(actor)
-		actor.setup("res://assets/characters/" + MODELS[i] + "/model.glb", MODEL_KEYS[i])
+		actor.setup("res://assets/characters/" + MODELS[i] + "/model.glb", "ENEMY_TEST_HERO" if i == 0 else MODEL_KEYS[i])
 		actors.append(actor)
+	actors[0].equip_weapon("res://assets/weapons/sword.glb")
+	var location: Vector3 = Vector3(4.6, 0, 2.8)
+	_place_asset("SM_ShortWallEnders", location)
+	var cultist: PreviewActor = ACTOR_SCRIPT.new() as PreviewActor
+	cultist.name = "UndeadCultist"
+	cultist.position = location + Vector3(0, 0.64, 0)
+	add_child(cultist)
+	cultist.setup("res://assets/characters/undead_cultist/model.glb", "GALLERY_CULTIST")
+	cultist.equip_weapon("res://assets/weapons/axe.glb")
+	actors.append(cultist)
 	animation_names = CLIPS.duplicate()
 	for clip: String in actors[0].available:
 		if not animation_names.has(clip):
@@ -185,13 +203,13 @@ func _build_ui() -> void:
 	layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(layout)
 	layout.add_child(_label("GALLERY_TITLE", 38, Color("e4c78d")))
-	layout.add_child(_label("GALLERY_SUBTITLE", 18, Color("a9b3c6")))
+	layout.add_child(_label("ENEMY_TEST_SUBTITLE", 18, Color("a9b3c6")))
 	var spacer: Control = Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layout.add_child(spacer)
 	layout.add_child(_label("GALLERY_HEADER", 28, Color("e4c78d")))
-	layout.add_child(_label("GALLERY_DESCRIPTION", 17, Color("bfc7d5")))
+	layout.add_child(_label("ENEMY_TEST_DESCRIPTION", 17, Color("bfc7d5")))
 	var toolbar: HBoxContainer = HBoxContainer.new()
 	toolbar.add_theme_constant_override("separation", 12)
 	layout.add_child(toolbar)
@@ -205,6 +223,7 @@ func _build_ui() -> void:
 	_button(toolbar, "GALLERY_NEXT", func() -> void: _select_animation((selector.selected + 1) % animation_names.size()))
 	_button(toolbar, "GALLERY_RESET", _reset_view)
 	_button(toolbar, "GALLERY_LIGHTING", _toggle_lighting)
+	_button(toolbar, "ENEMY_TEST_CLOSEUP", _focus_enemy)
 	layout.add_child(_label("GALLERY_CONTROLS", 15, Color("a4aec0")))
 
 func _button(parent: Control, key: String, callback: Callable) -> void:
@@ -220,13 +239,21 @@ func _select_animation(index: int) -> void:
 		actor.play_clip(animation_names[index])
 
 func _update_camera() -> void:
-	camera.position = Vector3(sin(angle) * 15, 12, cos(angle) * 15)
+	camera.position = camera_focus + Vector3(sin(angle) * 15, camera_elevation, cos(angle) * 15)
 	camera.size = distance
-	camera.look_at(Vector3(0, 0.6, 0))
+	camera.look_at(camera_focus)
 
 func _reset_view() -> void:
 	angle = 0.65
 	distance = 18.0
+	camera_focus = Vector3(0, 0.6, 0)
+	camera_elevation = 11.4
+
+func _focus_enemy() -> void:
+	angle = 0.12
+	distance = 5.4
+	camera_focus = Vector3(3.4, 1.55, 2.8)
+	camera_elevation = 6.0
 
 func _toggle_lighting() -> void:
 	studio_lighting = not studio_lighting
@@ -240,5 +267,9 @@ func _capture() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture="):
 			var image: Image = get_viewport().get_texture().get_image()
+			if image == null:
+				push_error("Screenshot requires a graphical renderer; --headless uses dummy rendering")
+				get_tree().quit(1)
+				return
 			var error: Error = image.save_png(argument.trim_prefix("--capture="))
 			get_tree().quit(error)

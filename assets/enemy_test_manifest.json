@@ -1,0 +1,38 @@
+{
+  "cultist": {
+    "triangles": 20962,
+    "source_rig": "male_ranger",
+    "parts": [
+      "Male_Ranger_Arms",
+      "Male_Ranger_Arms_Bracer",
+      "Male_Ranger_Body",
+      "Male_Ranger_Body_Belt_1",
+      "Male_Ranger_Feet_Boots",
+      "Male_Ranger_Head_Hood",
+      "Male_Ranger_Legs",
+      "SuperHero_Male",
+      "Eyes"
+    ]
+  },
+  "weapons": {
+    "sword": {
+      "triangles": 544,
+      "grip_origin": [
+        0,
+        0,
+        0
+      ],
+      "blade_axis": "+Y in Godot"
+    },
+    "axe": {
+      "triangles": 540,
+      "grip_origin": [
+        0,
+        0,
+        0
+      ],
+      "blade_axis": "+Y in Godot"
+    }
+  },
+  "generator": "Blender 4.0.2"
+}
