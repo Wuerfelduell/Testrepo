@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="ClassDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/class_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"monk"
+hit_die = 8
+primary_abilities = Array[StringName]([&"dex", &"wis"])
+primary_mode = "and"
+saving_throws = Array[StringName]([&"str", &"dex"])
+armor_training = Array[StringName]([])
+weapon_proficiencies = Array[StringName]([&"simple", &"martial_light"])
+skill_choice_count = 2
+skill_choices = Array[StringName]([&"acrobatics", &"athletics", &"history", &"insight", &"religion", &"stealth"])
+srd_page = 49
+tool_choice_count = 1
+tool_choice_categories = Array[StringName]([&"artisan_tools", &"musical_instrument"])
+features = Array[Dictionary]([
+{"level": 1, "id": &"martial_arts", "name": "Martial Arts", "name_key": &"FEATURE_MARTIAL_ARTS"},
+{"level": 1, "id": &"unarmored_defense", "name": "Unarmored Defense", "name_key": &"FEATURE_UNARMORED_DEFENSE"},
+{"level": 2, "id": &"monk_s_focus", "name": "Monk’s Focus", "name_key": &"FEATURE_MONK_S_FOCUS"},
+{"level": 2, "id": &"unarmored_movement", "name": "Unarmored Movement", "name_key": &"FEATURE_UNARMORED_MOVEMENT"},
+{"level": 2, "id": &"uncanny_metabolism", "name": "Uncanny Metabolism", "name_key": &"FEATURE_UNCANNY_METABOLISM"},
+{"level": 3, "id": &"deflect_attacks", "name": "Deflect Attacks", "name_key": &"FEATURE_DEFLECT_ATTACKS"},
+{"level": 4, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 4, "id": &"slow_fall", "name": "Slow Fall", "name_key": &"FEATURE_SLOW_FALL"},
+{"level": 5, "id": &"extra_attack", "name": "Extra Attack", "name_key": &"FEATURE_EXTRA_ATTACK"},
+{"level": 5, "id": &"stunning_strike", "name": "Stunning Strike", "name_key": &"FEATURE_STUNNING_STRIKE"},
+{"level": 6, "id": &"empowered_strikes", "name": "Empowered Strikes", "name_key": &"FEATURE_EMPOWERED_STRIKES"},
+{"level": 7, "id": &"evasion", "name": "Evasion", "name_key": &"FEATURE_EVASION"},
+{"level": 8, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 9, "id": &"acrobatic_movement", "name": "Acrobatic Movement", "name_key": &"FEATURE_ACROBATIC_MOVEMENT"},
+{"level": 10, "id": &"heightened_focus", "name": "Heightened Focus", "name_key": &"FEATURE_HEIGHTENED_FOCUS"},
+{"level": 10, "id": &"self_restoration", "name": "Self-Restoration", "name_key": &"FEATURE_SELF_RESTORATION"}
+])

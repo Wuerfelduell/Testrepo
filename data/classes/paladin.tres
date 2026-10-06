@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="ClassDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/class_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"paladin"
+hit_die = 10
+primary_abilities = Array[StringName]([&"str", &"cha"])
+primary_mode = "and"
+saving_throws = Array[StringName]([&"wis", &"cha"])
+armor_training = Array[StringName]([&"light", &"medium", &"heavy", &"shield"])
+weapon_proficiencies = Array[StringName]([&"simple", &"martial"])
+skill_choice_count = 2
+skill_choices = Array[StringName]([&"athletics", &"insight", &"intimidation", &"medicine", &"persuasion", &"religion"])
+srd_page = 53
+features = Array[Dictionary]([
+{"level": 1, "id": &"lay_on_hands", "name": "Lay On Hands", "name_key": &"FEATURE_LAY_ON_HANDS"},
+{"level": 1, "id": &"spellcasting", "name": "Spellcasting", "name_key": &"FEATURE_SPELLCASTING"},
+{"level": 1, "id": &"weapon_mastery", "name": "Weapon Mastery", "name_key": &"FEATURE_WEAPON_MASTERY"},
+{"level": 2, "id": &"fighting_style", "name": "Fighting Style", "name_key": &"FEATURE_FIGHTING_STYLE"},
+{"level": 2, "id": &"paladin_s_smite", "name": "Paladin’s Smite", "name_key": &"FEATURE_PALADIN_S_SMITE"},
+{"level": 3, "id": &"channel_divinity", "name": "Channel Divinity", "name_key": &"FEATURE_CHANNEL_DIVINITY"},
+{"level": 4, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 5, "id": &"extra_attack", "name": "Extra Attack", "name_key": &"FEATURE_EXTRA_ATTACK"},
+{"level": 5, "id": &"faithful_steed", "name": "Faithful Steed", "name_key": &"FEATURE_FAITHFUL_STEED"},
+{"level": 6, "id": &"aura_of_protection", "name": "Aura of Protection", "name_key": &"FEATURE_AURA_OF_PROTECTION"},
+{"level": 8, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 9, "id": &"abjure_foes", "name": "Abjure Foes", "name_key": &"FEATURE_ABJURE_FOES"},
+{"level": 10, "id": &"aura_of_courage", "name": "Aura of Courage", "name_key": &"FEATURE_AURA_OF_COURAGE"}
+])

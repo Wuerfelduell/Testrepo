@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="ClassDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/class_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"druid"
+hit_die = 8
+primary_abilities = Array[StringName]([&"wis"])
+primary_mode = "single"
+saving_throws = Array[StringName]([&"int", &"wis"])
+armor_training = Array[StringName]([&"light", &"shield"])
+weapon_proficiencies = Array[StringName]([&"simple"])
+skill_choice_count = 2
+skill_choices = Array[StringName]([&"animal_handling", &"arcana", &"insight", &"medicine", &"nature", &"perception", &"religion", &"survival"])
+srd_page = 41
+tool_proficiencies = Array[StringName]([&"herbalism_kit"])
+features = Array[Dictionary]([
+{"level": 1, "id": &"spellcasting", "name": "Spellcasting", "name_key": &"FEATURE_SPELLCASTING"},
+{"level": 1, "id": &"druidic", "name": "Druidic", "name_key": &"FEATURE_DRUIDIC"},
+{"level": 1, "id": &"primal_order", "name": "Primal Order", "name_key": &"FEATURE_PRIMAL_ORDER"},
+{"level": 2, "id": &"wild_shape", "name": "Wild Shape", "name_key": &"FEATURE_WILD_SHAPE"},
+{"level": 2, "id": &"wild_companion", "name": "Wild Companion", "name_key": &"FEATURE_WILD_COMPANION"},
+{"level": 4, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 5, "id": &"wild_resurgence", "name": "Wild Resurgence", "name_key": &"FEATURE_WILD_RESURGENCE"},
+{"level": 7, "id": &"elemental_fury", "name": "Elemental Fury", "name_key": &"FEATURE_ELEMENTAL_FURY"},
+{"level": 8, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"}
+])

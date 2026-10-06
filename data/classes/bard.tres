@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="ClassDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/class_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"bard"
+hit_die = 8
+primary_abilities = Array[StringName]([&"cha"])
+primary_mode = "single"
+saving_throws = Array[StringName]([&"dex", &"cha"])
+armor_training = Array[StringName]([&"light"])
+weapon_proficiencies = Array[StringName]([&"simple"])
+skill_choice_count = 3
+skill_choices = Array[StringName]([&"acrobatics", &"animal_handling", &"arcana", &"athletics", &"deception", &"history", &"insight", &"intimidation", &"investigation", &"medicine", &"nature", &"perception", &"performance", &"persuasion", &"religion", &"sleight_of_hand", &"stealth", &"survival"])
+srd_page = 31
+tool_choice_count = 3
+tool_choice_categories = Array[StringName]([&"musical_instrument"])
+features = Array[Dictionary]([
+{"level": 1, "id": &"bardic_inspiration", "name": "Bardic Inspiration", "name_key": &"FEATURE_BARDIC_INSPIRATION"},
+{"level": 1, "id": &"spellcasting", "name": "Spellcasting", "name_key": &"FEATURE_SPELLCASTING"},
+{"level": 2, "id": &"expertise", "name": "Expertise", "name_key": &"FEATURE_EXPERTISE"},
+{"level": 2, "id": &"jack_of_all_trades", "name": "Jack of All Trades", "name_key": &"FEATURE_JACK_OF_ALL_TRADES"},
+{"level": 4, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 5, "id": &"font_of_inspiration", "name": "Font of Inspiration", "name_key": &"FEATURE_FONT_OF_INSPIRATION"},
+{"level": 7, "id": &"countercharm", "name": "Countercharm", "name_key": &"FEATURE_COUNTERCHARM"},
+{"level": 8, "id": &"ability_score_improvement", "name": "Ability Score Improvement", "name_key": &"FEATURE_ABILITY_SCORE_IMPROVEMENT"},
+{"level": 9, "id": &"expertise", "name": "Expertise", "name_key": &"FEATURE_EXPERTISE"},
+{"level": 10, "id": &"magical_secrets", "name": "Magical Secrets", "name_key": &"FEATURE_MAGICAL_SECRETS"}
+])
