@@ -6,11 +6,18 @@ mkdir -p build
 for variant in exploration combat; do
   extra=()
   if [[ "$variant" == combat ]]; then extra+=(--arena-capture-combat); fi
+  status=0
   timeout 90 xvfb-run -a -s '-screen 0 1920x1080x24' \
     env LIBGL_ALWAYS_SOFTWARE=1 "$godot_bin" --path . --rendering-method gl_compatibility \
-    --resolution 1920x1080 -- --arena-capture="$PWD/build/arena-$variant.png" "${extra[@]}" \
-    > "build/arena-$variant.log" 2>&1
+    --audio-driver Dummy --disable-vsync --resolution 1920x1080 \
+    -- --arena-capture="$PWD/build/arena-$variant.png" "${extra[@]}" \
+    > "build/arena-$variant.log" 2>&1 || status=$?
   cat "build/arena-$variant.log"
-  if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' "build/arena-$variant.log"; then exit 1; fi
+  if (( status != 0 )); then exit "$status"; fi
+  # Xvfb/llvmpipe has no V-Sync. Keep all other engine diagnostics fatal.
+  if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' "build/arena-$variant.log" | \
+    grep -Fv 'WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.'; then
+    exit 1
+  fi
   test -s "build/arena-$variant.png"
 done

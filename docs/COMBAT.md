@@ -14,7 +14,8 @@ oder Gegneroptik ausgegeben.
 `scenes/arena/arena.tscn` ist die Hauptszene. Linksklick bewegt die Figur bzw. greift einen
 Gegner an. Hover zeigt Wegkosten, Restbewegung, Gelegenheitsangriffsgefahr oder Trefferchance,
 Schadenswürfel und Deckung. Q/E dreht, WASD und mittlere Maustaste verschieben, Mausrad zoomt.
-Space beendet den Zug, 2 führt Dash aus, 3 Disengage, F3 zeigt die bewerteten KI-Optionen.
+1 aktiviert die Angriffsauswahl, Space beendet den Zug, 2 führt Dash aus, 3 Disengage,
+F3 zeigt die bewerteten KI-Optionen.
 Rechtsklick/Esc verwirft die aktuelle Zielvorschau; ein bereits validierter Befehl wird
 nicht rückgängig gemacht. Ein Klick auf die Würfelanzeige lässt die Würfel landen; der
 nächste Klick schließt den angezeigten Wurf. Kein Wurf wird dadurch neu gewürfelt.

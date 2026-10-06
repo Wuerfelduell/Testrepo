@@ -17,6 +17,8 @@ var _ai_delay: float = 0.0
 var _preview_time: float = 0.0
 var _followed_actor: String = ""
 var _capture_frames: int = -1
+var _capture_path: String = ""
+var _capture_combat: bool = false
 var auto_play: bool = false
 var _critical_focus: float = 0.0
 var _attack_mode: bool = false
@@ -53,12 +55,24 @@ func _ready() -> void:
 	camera_rig.follow(Game.state.actors["hero"]["position"])
 	hud.update_state(Game.state)
 	ready_for_input = true
+	# Parse before acting: capture behavior must not depend on argument ordering.
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--arena-capture="):
-			_capture_frames = 120
+			_capture_path = argument.trim_prefix("--arena-capture=")
 		elif argument == "--arena-capture-combat":
+			_capture_combat = true
+	if not _capture_path.is_empty():
+		if _capture_combat:
+			# Wait for an actual command-produced roll, independent of rendering speed.
+			hud.dice_popup.roll_started.connect(_hold_capture_roll, CONNECT_ONE_SHOT)
 			Rng.set_seed(6142)
-			CommandBus.submit(MoveCommand.new("hero", Vector3(0, 0, 2)))
+			if CommandBus.submit(MoveCommand.new("hero", Vector3(0, 0, 2))) != OK:
+				push_error("Combat capture could not begin the exploration move")
+				get_tree().quit(1)
+		else:
+			# First follow already snaps the camera. Allow assets and both viewports
+			# to render without waiting a minute on software-rendered CI hosts.
+			_capture_frames = 8
 
 func _exit_tree() -> void:
 	if CombatSpace.active == space:
@@ -271,13 +285,19 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 func _command_rejected(_command: Command, _reason: Error) -> void:
 	_clear_hover()
 
+func _hold_capture_roll(_event: Dictionary) -> void:
+	# The first real initiative event creates its numbered mesh before this signal.
+	# Land and hold only the presentation; gameplay state and RNG are untouched.
+	hud.dice_popup.skip()
+	hud.dice_popup.set_process(false)
+	_capture_frames = 2
+
 func _capture() -> void:
 	if DisplayServer.get_name() == "headless":
 		push_error("An actual rendering display is required for arena screenshots")
 		get_tree().quit(1)
 		return
-	for argument: String in OS.get_cmdline_user_args():
-		if argument.begins_with("--arena-capture="):
-			var captured: Image = get_viewport().get_texture().get_image()
-			var result: Error = captured.save_png(argument.trim_prefix("--arena-capture="))
-			get_tree().quit(0 if result == OK else 1)
+	await RenderingServer.frame_post_draw
+	var captured: Image = get_viewport().get_texture().get_image()
+	var result: Error = captured.save_png(_capture_path)
+	get_tree().quit(0 if result == OK else 1)
