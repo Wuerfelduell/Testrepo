@@ -248,12 +248,18 @@ func _reset_view() -> void:
 	distance = 18.0
 	camera_focus = Vector3(0, 0.6, 0)
 	camera_elevation = 11.4
+	for actor: PreviewActor in actors:
+		actor.visible = true
 
 func _focus_enemy() -> void:
 	angle = 0.12
 	distance = 5.4
 	camera_focus = Vector3(3.4, 1.55, 2.8)
 	camera_elevation = 6.0
+	# Keep the inspection pair readable; unrelated outfit labels would fill the
+	# foreground when zoomed in. Reset restores the complete seven-model gallery.
+	for i: int in actors.size():
+		actors[i].visible = i == 0 or i == 6
 
 func _toggle_lighting() -> void:
 	studio_lighting = not studio_lighting
