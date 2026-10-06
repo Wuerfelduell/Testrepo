@@ -7,7 +7,8 @@ the other, the next prompt only after the previous one is pushed (RULE 6).
 | Track | Order | Prompt | Owns files | Status |
 |---|---|---|---|---|
 | A | 1 | [01 Better-quality 3D assets](01-better-assets.md) | assets/, scenes/showcase/, project.godot | partial – Q30 open |
-| A | 2 | [02 Project foundation](02-foundation.md) | everything except track B's folders | after 01 |
+| A | 2 | [02 Project foundation](02-foundation.md) | everything except track B's folders | done |
+| A | 3 | [01b Test: build one enemy + two weapons](01b-enemy-test.md) | assets/, scenes/showcase/, src/showcase/, tools/ | ready - parallel to 03 |
 | B | 1 | [03 Rules core (5.5e / SRD 5.2)](03-rules-core.md) | src/rules/, data/classes/, tests/unit/rules/ | ready - NOT done yet, send next |
 | - | 3 | [04 Combat system and enemy AI](04-combat-and-ai.md) | - | after 02 AND 03 |
 | - | 4 | 05 First slice (written after 04) | - | not written |
