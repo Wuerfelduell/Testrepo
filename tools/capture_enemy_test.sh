@@ -7,7 +7,7 @@ for view in normal closeup; do
   extra=()
   if [[ "$view" == closeup ]]; then extra+=(--enemy-closeup); fi
   xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' \
-    env LIBGL_ALWAYS_SOFTWARE=1 "$godot_bin" --path . --rendering-method gl_compatibility \
+    env LIBGL_ALWAYS_SOFTWARE=1 "$godot_bin" --path . res://scenes/showcase/asset_showcase.tscn --rendering-method gl_compatibility \
       --audio-driver Dummy -- --capture="$(pwd)/docs/enemy-test-$view.png" "${extra[@]}"
 done
 if [[ "${2:-}" == --ci-transfer ]]; then

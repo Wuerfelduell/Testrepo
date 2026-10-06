@@ -15,7 +15,7 @@ texturierten Dungeon. Eine durchgehende Stil-Freigabe durch den Owner steht aus.
 | Animationen | 43 Originalclips; die T-Pose ist als Bewegung nicht auswählbar, 42 Clips stehen bereit |
 | Dungeon | 17 kostenlose Modelle: Boden, Wand, Durchgang, Treppe, Wandabschlüsse, Sockel, Bücherregal, Tisch, Hocker, Fass, zwei Tränke, Schild und vier Fackel-/Haltervarianten |
 | Texturen | Geteilte externe PNGs: Farb-, Normal- und Rauheits-/Metallkanäle; Figuren max. 1K, Dungeon 512 px |
-| Szene | Dungeon-Raum, sechs Modellproben, gemeinsame Animationsauswahl, Orbit/Zoom, zwei Beleuchtungsansichten |
+| Szene | Dungeon-Raum, sechs ursprüngliche Modellproben plus Kultist, gemeinsame Animationsauswahl, Orbit/Zoom, zwei Beleuchtungsansichten |
 
 Die Galerie zeigt die Paketinhalte ehrlich als Grundmodelle und Kleidungsproben.
 Kleidungsproben sind keine fertigen Helden oder Gegner. Es wurden keine nackten
@@ -95,7 +95,7 @@ Outfit übersehen. Keine kostenpflichtigen Inhalte heruntergeladen.
   Gürtel, Beine und Stiefel; Ranger-Tunika zur unregelmäßigen Robe verlängert.
   Kopf und Augen sind aus dem vorhandenen männlichen Grundkörper ausgeschnitten.
   Grau-grüne Haut, dunkle burgunderfarbene Stoffvariation, grün emittierende Augen.
-- Das Ranger-Rig mit allen 62 Knochen, Restpositionen und Restrotationen bleibt
+- Das Ranger-Rig mit allen 65 Knochen, Restpositionen und Restrotationen bleibt
   erhalten. Kein neues Rig, keine zusätzlichen Animationsclips und keine spezielle
   Retargeting-Stufe für den Gegner. Die vorhandene gemeinsame Bibliothek wird wie
   bei allen Modellproben geladen: dieselben **42 Motion-Clips**.
@@ -111,6 +111,12 @@ Outfit übersehen. Keine kostenpflichtigen Inhalte heruntergeladen.
   **Enemy close-up** fokussiert den bewaffneten Grundkörper und den Kultisten.
   **Reset view / R** stellt den normalen Zoom wieder her. Vorhandene Dateien und
   Modelle wurden nicht überschrieben oder umbenannt.
+
+Echte Godot-Aufnahmen (1280 × 720, Compatibility/OpenGL-Software-Renderer,
+dieselbe Raumbeleuchtung): [Normalzoom](../docs/enemy-test-normal.png) und
+[Nahansicht](../docs/enemy-test-closeup.png). Die Nahansicht blendet die übrigen
+Figuren aus, damit die Testobjekte und ihre Beschriftungen lesbar bleiben.
+Eine volle Forward+-Bildabnahme mit SSAO/volumetrischem Nebel steht noch aus.
 
 Reproduktion: `python tools/prepare_enemy_textures.py` (Pillow + NumPy), danach
 `blender --background --factory-startup --python tools/build_enemy_test.py` (Blender
