@@ -112,3 +112,21 @@ Reichweitenaustritt, Reaktionsreset, Treffertiming, ungültige Netzwerkdaten, De
 KI-Entscheidungen und echte Animationsclips. CI führt dieselben Prüfungen aus, rendert
 zwei Vorschauen, exportiert eine einzelne Windows-EXE und startet diese headless auf Windows.
 Ein Headless-Start ersetzt keinen visuellen Windows-Playtest durch den Owner.
+
+## Geprüfter Build und echte Aufnahmen
+
+Code-Commit `eb38877e510a5d1cce42917b272f76967e8d9f8f` wurde in
+[GitHub Actions 37419092406](https://github.com/Wuerfelduell/Testrepo/actions/runs/37419092406)
+vollständig geprüft: 118 Unit-Tests mit 2945 Assertions; 20 Arena-, 58 UI- und 26
+Actor-Navigationsprüfungen; 17779 Showcase-Prüfungen; Windows-Export und nativer
+Windows-Headless-Start. Die einzelne EXE steht im Artefakt `TheRPG-Windows`.
+
+Die folgenden unbearbeiteten 1920×1080-Aufnahmen stammen aus demselben Lauf, aus Godot
+mit Compatibility/OpenGL auf Linux. Das Kampfbild hält den ersten echten Initiativewurf
+für die Aufnahme an; es verwendet reguläre Command-/RNG-Daten. Die Bilder bestätigen
+Lesbarkeit und Anordnung des HUD, ersetzen aber keine vollständige visuelle Animations-
+oder Forward+-Abnahme. Die oben genannten Art-Lücken bleiben offen.
+
+![Arena in Exploration](arena-exploration.png)
+
+![Combat HUD mit nummeriertem d20 und Initiativewurf](arena-combat.png)
