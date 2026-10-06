@@ -119,6 +119,7 @@ func update_state(state: GameState) -> void:
 	_state = state.copy()
 	_round_label.text = tr("COMBAT_ROUND") % state.round_number
 	_mode_label.text = tr("COMBAT_MODE_" + String(state.mode).to_upper())
+	(_initiative.get_parent() as Control).visible = state.mode == &"combat" and not state.turn_order.is_empty()
 	var current_id: String = state.current_actor_id()
 	var hero: Dictionary = {}
 	for actor_id: String in state.actors:
@@ -139,7 +140,7 @@ func update_state(state: GameState) -> void:
 	_hp_bar.value = float(hero.get("hp", 0))
 	_move_bar.max_value = maxf(0.1, float(hero.get("speed_m", 9.0)))
 	_move_bar.value = float(hero.get("move_left", 0.0))
-	_move_label.text = tr("COMBAT_MOVEMENT") % [float(hero.get("move_left", 0.0)), float(hero.get("speed_m", 0.0))]
+	_move_label.text = tr("COMBAT_FREE_MOVEMENT") if state.mode == &"exploration" else tr("COMBAT_MOVEMENT") % [float(hero.get("move_left", 0.0)), float(hero.get("speed_m", 0.0))]
 	_resource_label.text = tr("COMBAT_RESOURCES") % [_pip(bool(hero.get("action_available", false))), _pip(bool(hero.get("bonus_available", false))), _pip(bool(hero.get("reaction_available", false)))]
 	_conditions.text = tr("COMBAT_DISENGAGED") if bool(hero.get("disengaged", false)) else _condition_text(hero)
 	var active: Dictionary = state.actors.get(current_id, {})
@@ -226,7 +227,7 @@ func show_path(cost: float, remaining: float, danger: bool) -> void:
 	_path_label.visible = true
 	var cursor: Vector2 = _root.get_local_mouse_position() + Vector2(24, 26)
 	_path_label.position = Vector2(clampf(cursor.x, 20, 1300), clampf(cursor.y, 180, 838))
-	_path_label.text = tr("COMBAT_PATH") % [cost, remaining]
+	_path_label.text = tr("COMBAT_PATH_FREE") % cost if remaining == INF else tr("COMBAT_PATH") % [cost, remaining]
 	if danger:
 		_path_label.text += "   " + tr("COMBAT_OPPORTUNITY_DANGER")
 	_path_label.add_theme_color_override("font_color", RED if remaining < -0.001 or danger else GREEN)
@@ -496,7 +497,6 @@ func _button(parent: Node, rect: Rect2, text: String) -> Button:
 func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
 	var bar: ProgressBar = ProgressBar.new()
 	bar.position = rect.position
-	bar.size = rect.size
 	bar.show_percentage = false
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var background: StyleBoxFlat = StyleBoxFlat.new()
@@ -508,4 +508,7 @@ func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
 	bar.add_theme_stylebox_override("background", background)
 	bar.add_theme_stylebox_override("fill", fill)
 	parent.add_child(bar)
+	# Applying size before hiding percentage text clamps it to the default font's
+	# minimum height. Godot does not shrink it again after the theme is replaced.
+	bar.size = rect.size
 	return bar

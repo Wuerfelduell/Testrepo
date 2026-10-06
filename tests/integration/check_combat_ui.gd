@@ -29,6 +29,23 @@ func _run() -> void:
 	state.mode = &"combat"
 	state.turn_order = ["hero", "enemy"]
 	_hud.update_state(state)
+	await get_tree().process_frame
+	_check(_hud._move_bar.get_rect().end.y <= _hud._conditions.position.y,
+		"Movement bar must not cover condition text")
+	_check(_hud._hp_bar.get_rect().end.y <= _hud._resource_label.position.y,
+		"Health bar must not overlap resource text")
+	_check((_hud._initiative.get_parent() as Control).visible, "Initiative appears during combat")
+	state.mode = &"exploration"
+	_hud.update_state(state)
+	_check(not (_hud._initiative.get_parent() as Control).visible,
+		"Exploration must not display an empty combat round panel")
+	_check(_hud._move_label.text == tr("COMBAT_FREE_MOVEMENT"),
+		"Exploration resources must not imply a turn movement limit")
+	_hud.show_path(5.0, INF, false)
+	_check(_hud._path_label.text == tr("COMBAT_PATH_FREE") % 5.0,
+		"Unlimited exploration movement has no false zero or infinity remainder")
+	state.mode = &"combat"
+	_hud.update_state(state)
 	var portrait_before: int = _hud._initiative.get_child(0).get_instance_id()
 	state.actors["hero"]["move_left"] = 7.5
 	_hud.update_state(state)
@@ -36,6 +53,8 @@ func _run() -> void:
 		"Movement ticks must retain portrait nodes")
 	_hud.show_target({"chance": 0.65, "legal": true, "armor_class": 16}, state.actors["enemy"])
 	_hud.show_path(5.0, 2.5, true)
+	_check(_hud._path_label.text.begins_with(tr("COMBAT_PATH") % [5.0, 2.5]),
+		"Combat paths still show the actual finite movement remainder")
 	_check(_hud._target_panel.visible and _hud._path_label.visible, "Target/path previews are visible")
 	_hud.clear_target()
 	_check(not _hud._target_panel.visible and not _hud._path_label.visible, "Cancel clears both previews")

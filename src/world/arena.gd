@@ -231,7 +231,7 @@ func _update_hover() -> void:
 	var budget: float = float(state.actors["hero"]["move_left"]) if state.mode == &"combat" else INF
 	var danger: bool = _path_danger(state, path)
 	_draw_path(path, budget)
-	hud.show_path(CombatRules.path_length(path), budget - CombatRules.path_length(path) if is_finite(budget) else 0.0, danger)
+	hud.show_path(CombatRules.path_length(path), budget - CombatRules.path_length(path), danger)
 
 func _set_attack_mode(active: bool) -> void:
 	_attack_mode = active

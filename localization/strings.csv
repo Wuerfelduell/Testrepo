@@ -49,6 +49,7 @@ COMBAT_MODE_DEFEAT,COMBAT ARENA · Defeat
 COMBAT_HP_SHORT,%d / %d
 COMBAT_HP_AC,HP %d / %d     AC %d
 COMBAT_MOVEMENT,Movement   %.1f / %.1f m
+COMBAT_FREE_MOVEMENT,Free movement
 COMBAT_RESOURCES,%s Action   %s Bonus   %s Reaction
 COMBAT_DISENGAGED,Disengaged · safe from opportunity attacks
 COMBAT_COST_ACTION,Costs 1 action
@@ -69,6 +70,7 @@ COMBAT_OUT_OF_RANGE,Out of range or line of sight blocked
 COMBAT_COVER,Cover: +%d AC
 COMBAT_EXTRA_DAMAGE,+%d %s
 COMBAT_PATH,Path %.1f m · remaining %.1f m
+COMBAT_PATH_FREE,Path %.1f m · Free movement
 COMBAT_OPPORTUNITY_DANGER,⚔ Opportunity attack risk
 COMBAT_LOG_EXPAND,COMBAT LOG  ▾
 COMBAT_LOG_COLLAPSE,COMBAT LOG  ▴
