@@ -6,7 +6,7 @@ GALLERY_PREVIOUS,Previous
 GALLERY_NEXT,Next
 GALLERY_RESET,Reset view
 GALLERY_LIGHTING,Lighting
-GALLERY_CONTROLS,"Q / E — animation     Arrows / right-drag — orbit     Scroll — zoom     R — reset     L — lighting"
+GALLERY_CONTROLS,Q / E — animation     Arrows / right-drag — orbit     Scroll — zoom     R — reset     L — lighting
 GALLERY_BASE_MALE,Human • male base
 GALLERY_BASE_FEMALE,Human • female base
 GALLERY_PEASANT_MALE,Peasant • male outfit
@@ -23,3 +23,148 @@ GALLERY_ANIMATION_DEATH,Death
 GALLERY_ANIMATION_OTHER,More animations
 GALLERY_HEADER,The lantern hall
 GALLERY_DESCRIPTION,Stone • steel • leather • torchlight
+COMBAT_ROLL_SKIP,Click to land · click again to continue
+COMBAT_ROLL_TITLE,%s · %s
+COMBAT_ROLL_ATTACK,Attack
+COMBAT_ROLL_DAMAGE,Damage
+COMBAT_ROLL_INITIATIVE,Initiative
+COMBAT_ROLLING,Rolling…
+COMBAT_DIE_DROPPED,(%s dropped)
+COMBAT_DICE_GROUP,d%s: %s
+COMBAT_ADVANTAGE,Advantage
+COMBAT_DISADVANTAGE,Disadvantage
+COMBAT_ADVANTAGE_REASON,▲ Advantage: %s
+COMBAT_DISADVANTAGE_REASON,▼ Disadvantage: %s
+COMBAT_HIT,HIT
+COMBAT_MISS,MISS
+COMBAT_CRITICAL,CRITICAL
+COMBAT_FUMBLE,FUMBLE
+COMBAT_ROLL_VS_AC,%d vs AC %d · %s
+COMBAT_ROLL_TOTAL,TOTAL %d
+COMBAT_UNKNOWN_ACTOR,Unknown combatant
+COMBAT_ROUND,ROUND %d
+COMBAT_MODE_EXPLORATION,COMBAT ARENA · Exploration
+COMBAT_MODE_COMBAT,COMBAT ARENA · Combat
+COMBAT_MODE_DEFEAT,COMBAT ARENA · Defeat
+COMBAT_HP_SHORT,%d / %d
+COMBAT_HP_AC,HP %d / %d     AC %d
+COMBAT_MOVEMENT,Movement   %.1f / %.1f m
+COMBAT_RESOURCES,%s Action   %s Bonus   %s Reaction
+COMBAT_DISENGAGED,Disengaged · safe from opportunity attacks
+COMBAT_COST_ACTION,Costs 1 action
+COMBAT_NO_ACTION,No action left
+COMBAT_WAIT_TURN,Wait for your turn
+COMBAT_NO_CONDITIONS,No conditions
+COMBAT_ATTACK,Attack
+COMBAT_DASH,Dash
+COMBAT_DISENGAGE,Disengage
+COMBAT_END_TURN,END TURN  [Space]
+COMBAT_END_TURN_HINT,End the active character’s turn. Unused resources are lost.
+COMBAT_HOTKEY_ACTION,[%s]  %s
+COMBAT_CONTROLS,"Q / E orbit · W A S D pan · Wheel zoom
+Click move / attack · Esc cancel · F3 AI"
+COMBAT_TARGET_PREVIEW,"%s · %d%% to hit
+%s %s · AC %d"
+COMBAT_OUT_OF_RANGE,Out of range or line of sight blocked
+COMBAT_COVER,Cover: +%d AC
+COMBAT_EXTRA_DAMAGE,+%d %s
+COMBAT_PATH,Path %.1f m · remaining %.1f m
+COMBAT_OPPORTUNITY_DANGER,⚔ Opportunity attack risk
+COMBAT_LOG_EXPAND,COMBAT LOG  ▾
+COMBAT_LOG_COLLAPSE,COMBAT LOG  ▴
+COMBAT_LOG_ROLL,%s · %s: %d
+COMBAT_LOG_HIT,%s · %s
+COMBAT_LOG_DAMAGE,%s takes %d %s damage.
+COMBAT_LOG_DEATH,%s falls.
+COMBAT_LOG_OPPORTUNITY,%s makes an opportunity attack against %s.
+COMBAT_VICTORY,Victory · exploration resumes.
+COMBAT_DEFEAT,The run is over.
+COMBAT_DEATH_TITLE,YOUR JOURNEY ENDS
+COMBAT_DEATH_DETAIL,"%s · %s · Level %d
+Slain by %s in round %d
+XP earned: %d
+This life is lost."
+COMBAT_MAIN_MENU,LEAVE ARENA
+COMBAT_AI_TITLE,AI CONSIDERED ACTIONS  [F3]
+COMBAT_AI_SCORE,%+.2f  %s
+COMBAT_AI_COMPONENT,%s %.2f
+COMBAT_PORTRAIT_HINT,"%s
+HP %d / %d
+%s"
+CLASS_FIGHTER,Fighter
+ROLL_SOURCE_STR,Strength
+ROLL_SOURCE_DEX,Dexterity
+ROLL_SOURCE_CON,Constitution
+ROLL_SOURCE_INT,Intelligence
+ROLL_SOURCE_WIS,Wisdom
+ROLL_SOURCE_CHA,Charisma
+ROLL_SOURCE_PROFICIENCY,Proficiency
+ROLL_SOURCE_EXPERTISE,Expertise
+ROLL_SOURCE_EXPRESSION,Dice expression
+ROLL_SOURCE_WEAPON_ATTACK,Weapon attack
+ROLL_SOURCE_WEAPON_DAMAGE,Weapon damage
+ROLL_SOURCE_RITUAL_SICKLE,Ritual sickle
+ROLL_SOURCE_HEIGHT,High ground
+ROLL_SOURCE_LONG_RANGE,Long range
+ROLL_SOURCE_RANGED_IN_MELEE,Enemy within reach
+ROLL_SOURCE_BLINDED,Blinded
+ROLL_SOURCE_FRIGHTENED,Frightened
+ROLL_SOURCE_POISONED,Poisoned
+ROLL_SOURCE_PRONE,Prone
+ROLL_SOURCE_RESTRAINED,Restrained
+ROLL_SOURCE_STUNNED,Stunned
+ROLL_SOURCE_UNCONSCIOUS,Unconscious
+ROLL_SOURCE_PRONE_NEAR,Prone target within reach
+ROLL_SOURCE_PRONE_FAR,Prone target at range
+ROLL_SOURCE_CRITICAL,Critical hit
+CONDITION_BLINDED,Blinded
+CONDITION_FRIGHTENED,Frightened
+CONDITION_POISONED,Poisoned
+CONDITION_PRONE,Prone
+CONDITION_RESTRAINED,Restrained
+CONDITION_STUNNED,Stunned
+CONDITION_UNCONSCIOUS,Unconscious
+CONDITION_INCAPACITATED,Incapacitated
+DAMAGE_ACID,acid
+DAMAGE_BLUDGEONING,bludgeoning
+DAMAGE_COLD,cold
+DAMAGE_FIRE,fire
+DAMAGE_FORCE,force
+DAMAGE_LIGHTNING,lightning
+DAMAGE_NECROTIC,necrotic
+DAMAGE_PIERCING,piercing
+DAMAGE_POISON,poison
+DAMAGE_PSYCHIC,psychic
+DAMAGE_RADIANT,radiant
+DAMAGE_SLASHING,slashing
+DAMAGE_THUNDER,thunder
+AI_FACTOR_HIT_CHANCE,Hit chance
+AI_FACTOR_EXPECTED_DAMAGE,Expected damage
+AI_FACTOR_KILL_CHANCE,Kill chance
+AI_FACTOR_PATH_COST,Path m
+AI_FACTOR_POSITION_GAIN,Position
+AI_FACTOR_PROJECTED_ATTACK,Next attack
+AI_FACTOR_OPPORTUNITY_COST,Opportunity risk
+AI_FACTOR_DANGER,Enemies in reach
+AI_FACTOR_AVOIDED_OPPORTUNITY_COST,Avoided risk
+COMBAT_DAMAGE_NUMBER,-%d
+ACTOR_FIGHTER,Fighter
+ACTOR_GUARD,Guard
+ACTOR_BANDIT,Bandit
+ACTOR_CULTIST,Cultist
+WEAPON_LONGSWORD,Longsword
+WEAPON_SPEAR,Spear
+WEAPON_LIGHT_CROSSBOW,Light crossbow
+WEAPON_SCIMITAR,Scimitar
+WEAPON_RITUAL_SICKLE,Ritual sickle
+AI_FINISH_TARGET,Finish wounded target
+AI_ATTACK_TARGET,Attack target
+AI_DASH,Dash toward a useful position
+AI_DISENGAGE,Disengage before retreat
+AI_END_TURN,End turn
+AI_RETREAT,Retreat from danger
+AI_HIGH_GROUND,Seek high ground
+AI_COVER,Seek cover
+AI_KEEP_DISTANCE,Keep firing distance
+AI_FLANK,Move around cover
+COMBAT_SELECT_ATTACK,Click an enemy to attack. Esc cancels.

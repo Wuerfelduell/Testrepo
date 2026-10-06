@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AIPersonality" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/world/ai/ai_personality.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"brute"
+hit_weight = 2.0
+damage_weight = 2.5
+kill_weight = 28.0
+danger_weight = 1.3
+cover_weight = 0.6
+height_weight = 0.5
+spacing_weight = 0.0
+retreat_weight = 0.8
+opportunity_weight = 2.0
+preferred_distance = 1.25

@@ -121,3 +121,16 @@ Die einzelne EXE enthält die Spieldaten; keine separate `.pck` verteilen. `buil
 ist in Git ignoriert. Zum kurzen Starttest: `build/TheRPG.exe --headless --quit-after 60`.
 Die EXE startet weiterhin die vorhandene Showcase. GUT, Tests, Tools und Dokumentation
 werden vom Export ausgeschlossen.
+
+## Combat arena (Auftrag 04)
+
+The project now starts in `scenes/arena/arena.tscn`. Click ground to move or an enemy to
+attack; Q/E rotate, WASD/middle mouse pan, wheel zoom, Space ends a turn, 2 dashes,
+3 disengages, F3 shows AI scores. Every roll appears on screen. The level-one Fighter
+faces Guard, Bandit and Cultist stat blocks; death ends the run.
+
+This is a **technical combat build with provisional character art**. The three enemy
+roles currently share the cultist test model; ranged weapon art and the correct ranged
+animation are still missing. See [docs/COMBAT.md](docs/COMBAT.md) for exact scope and tests.
+The original showcase remains available at `scenes/showcase/asset_showcase.tscn`.
+GitHub Actions provides `TheRPG-Windows` and `Arena-previews` artifacts.

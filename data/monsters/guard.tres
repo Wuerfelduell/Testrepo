@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MonsterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/monster_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"guard"
+name_key = &"ACTOR_GUARD"
+srd_name = "Guard"
+srd_page = 293
+hit_points = 11
+armor_class = 16
+ability_scores = {&"str": 13, &"dex": 12, &"con": 12, &"int": 10, &"wis": 11, &"cha": 10}
+skills = {&"perception": 2}
+passive_perception = 12
+personality = "brute"
+attacks = Array[Dictionary]([
+{"id": "spear", "name_key": "WEAPON_SPEAR", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 3, "damage_dice": "1d6", "damage_bonus": 1, "damage_type": "piercing", "attack_modifiers": [{"amount": 1, "source": "str"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "str"}]},
+{"id": "spear_thrown", "name_key": "WEAPON_SPEAR", "ranged": true, "reach": 1.5, "range": 6.0, "long_range": 18.0, "attack_bonus": 3, "damage_dice": "1d6", "damage_bonus": 1, "damage_type": "piercing", "attack_modifiers": [{"amount": 1, "source": "str"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "str"}]}
+])

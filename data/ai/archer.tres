@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AIPersonality" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/world/ai/ai_personality.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"archer"
+hit_weight = 3.0
+damage_weight = 1.8
+kill_weight = 28.0
+danger_weight = 3.5
+cover_weight = 2.5
+height_weight = 3.0
+spacing_weight = 2.2
+retreat_weight = 3.0
+opportunity_weight = 4.0
+preferred_distance = 10.0

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="MonsterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/monster_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"cultist"
+name_key = &"ACTOR_CULTIST"
+srd_name = "Cultist"
+srd_page = 275
+hit_points = 9
+armor_class = 12
+ability_scores = {&"str": 11, &"dex": 12, &"con": 10, &"int": 10, &"wis": 11, &"cha": 10}
+skills = {&"deception": 2, &"religion": 2}
+saving_throws = {&"wis": 2}
+personality = "coward"
+attacks = Array[Dictionary]([
+{"id": "ritual_sickle", "name_key": "WEAPON_RITUAL_SICKLE", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 3, "damage_dice": "1d4", "damage_bonus": 1, "damage_type": "slashing", "attack_modifiers": [{"amount": 1, "source": "dex"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "dex"}], "extra_damage": [{"amount": 1, "damage_type": "necrotic", "source": "ritual_sickle"}]}
+])

@@ -1,4 +1,4 @@
-name: Foundation tests and Windows export
+name: RPG tests, combat arena and Windows export
 on:
   push:
     branches: [main]
@@ -34,6 +34,21 @@ jobs:
           if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' import.log; then exit 1; fi
       - name: Unit tests including rules subdirectory
         run: tests/run_tests.sh
+      - name: Complete combat and UI integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 90 godot --headless tests/integration/check_arena.tscn 2>&1 | tee arena-check.log
+          timeout 60 godot --headless tests/integration/check_combat_ui.tscn 2>&1 | tee ui-check.log
+          timeout 60 godot --headless tests/integration/check_actor_navigation.tscn 2>&1 | tee actor-nav-check.log
+          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' arena-check.log ui-check.log actor-nav-check.log; then exit 1; fi
+      - name: Capture rendered arena and dice
+        run: bash tests/integration/capture_arena.sh godot
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Arena-previews
+          path: build/arena-*.png
+          if-no-files-found: error
       - name: Preserve showcase acceptance
         run: godot --headless --script res://tools/check_showcase.gd
       - name: Export standalone Windows executable

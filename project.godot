@@ -2,7 +2,7 @@ config_version=5
 
 [application]
 config/name="The RPG"
-run/main_scene="res://scenes/showcase/asset_showcase.tscn"
+run/main_scene="res://scenes/arena/arena.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
@@ -27,6 +27,10 @@ renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
 
+[navigation]
+3d/default_cell_size=0.15
+3d/default_cell_height=0.05
+
 [input]
 gallery_previous={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":81)]}
 gallery_next={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":69)]}
@@ -41,9 +45,14 @@ camera_pan_back={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode
 camera_pan_left={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":65)]}
 camera_pan_right={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":68)]}
 cancel={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194305)]}
-end_turn={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194309)]}
+end_turn={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":32)]}
 camera_rotate={"deadzone":0.5,"events":[Object(InputEventMouseButton,"button_index":2)]}
 camera_pan={"deadzone":0.5,"events":[Object(InputEventMouseButton,"button_index":3)]}
 camera_zoom_in={"deadzone":0.5,"events":[Object(InputEventMouseButton,"button_index":4)]}
 camera_zoom_out={"deadzone":0.5,"events":[Object(InputEventMouseButton,"button_index":5)]}
 select={"deadzone":0.5,"events":[Object(InputEventMouseButton,"button_index":1)]}
+
+combat_debug={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194334)]}
+combat_dash={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":50)]}
+combat_disengage={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":51)]}
+combat_attack={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":49)]}

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AIPersonality" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/world/ai/ai_personality.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"coward"
+hit_weight = 2.0
+damage_weight = 1.5
+kill_weight = 24.0
+danger_weight = 4.0
+cover_weight = 2.0
+height_weight = 1.5
+spacing_weight = 1.0
+retreat_weight = 12.0
+opportunity_weight = 4.0
+preferred_distance = 8.0
