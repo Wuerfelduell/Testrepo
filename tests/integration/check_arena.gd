@@ -19,9 +19,13 @@ func _run() -> void:
 	rng_node.set_seed(6142)
 	var arena: CombatArena = (load("res://scenes/arena/arena.tscn") as PackedScene).instantiate() as CombatArena
 	get_tree().root.add_child(arena)
-	for index: int in 5:
+	var startup_frames: int = 0
+	while not arena.ready_for_input and startup_frames < 120:
 		await get_tree().physics_frame
+		startup_frames += 1
 	check(arena.ready_for_input, "Arena must initialize fully")
+	check(MoveCommand.new("hero", Vector3(0, 0, 2)).validate(game.state) == OK,
+		"The first ordinary move must already be valid when input becomes ready")
 	check(arena.dungeon.navigation.navigation_mesh.get_polygon_count() > 0, "Baked navmesh must load")
 	var initial: GameState = game.state
 	check(initial.actors.size() == 4, "Fighter and three SRD enemy types must exist")

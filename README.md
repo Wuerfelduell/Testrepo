@@ -119,13 +119,13 @@ godot --headless --export-release "Windows Desktop" build/TheRPG.exe
 Unter PowerShell den Ordner mit `New-Item -ItemType Directory -Force build` anlegen.
 Die einzelne EXE enthält die Spieldaten; keine separate `.pck` verteilen. `build/`
 ist in Git ignoriert. Zum kurzen Starttest: `build/TheRPG.exe --headless --quit-after 60`.
-Die EXE startet weiterhin die vorhandene Showcase. GUT, Tests, Tools und Dokumentation
+Die EXE startet die Kampfarena. GUT, Tests, Tools und Dokumentation
 werden vom Export ausgeschlossen.
 
 ## Combat arena (Auftrag 04)
 
 The project now starts in `scenes/arena/arena.tscn`. Click ground to move or an enemy to
-attack; Q/E rotate, WASD/middle mouse pan, wheel zoom, Space ends a turn, 2 dashes,
+attack; Q/E rotate, WASD/middle mouse pan, wheel zoom, 1 selects attack, Space ends a turn, 2 dashes,
 3 disengages, F3 shows AI scores. Every roll appears on screen. The level-one Fighter
 faces Guard, Bandit and Cultist stat blocks; death ends the run.
 

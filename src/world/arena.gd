@@ -42,6 +42,18 @@ func _ready() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	NavigationServer3D.map_force_update(space.map)
+	# The first map iteration can still be the empty map, even after the
+	# region was registered. Input requires the dungeon's actual polygons.
+	var navigation_ready: bool = false
+	for attempt: int in 120:
+		if NavigationServer3D.map_get_iteration_id(space.map) > 0 and \
+				NavigationServer3D.map_get_closest_point_owner(space.map, Vector3.ZERO) == dungeon.navigation.get_rid():
+			navigation_ready = true
+			break
+		await get_tree().physics_frame
+	if not navigation_ready:
+		push_error("Arena navigation did not synchronize its dungeon polygons")
+		return
 	CommandBus.command_applied.connect(_command_applied)
 	CommandBus.command_rejected.connect(_command_rejected)
 	if Game.state.actors.is_empty():
