@@ -40,3 +40,15 @@ with Blender Python (`tools/build_enemy_test.py`), not AI-generated models.
 Their material variations derive from Omie's existing CC0 dungeon props albedo;
 `tools/prepare_enemy_textures.py` deterministically creates albedo, normal and ORM
 maps. Neither generator requires new third-party geometry or textures.
+
+### Adaptations for M1 art (10 October 2026, prompt 07)
+
+`characters/enemy_*`, `characters/boss_cult_priest`, `characters/hero_*` adapt the
+existing Quaternius Male/Female Ranger and Male Peasant parts and the heads/eyes of
+Superhero Male/Female (CC0, licence evidence above). Helmets, plates, masks, horns,
+cloaks, belts and the quiver are project geometry built by `tools/build_m1_art.py`.
+Their derived albedo maps (`characters/m1_textures/`) come from the same CC0 textures
+and Omie's CC0 dungeon props via `tools/prepare_m1_textures.py`.
+The new weapons (dagger, scimitar, sickle, mace, spear, staff, priest staff, shortbow,
+light crossbow, two shields) are project geometry from the same generator, not AI-generated.
+Hit effects are procedural Godot particles (project code). No new third-party content.

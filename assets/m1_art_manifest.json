@@ -1,0 +1,230 @@
+{
+  "generator": "Blender 5.0.1",
+  "characters": {
+    "enemy_guard": {
+      "triangles": 26007,
+      "parts": [
+        "Eyes",
+        "Guard_Pauldron_R",
+        "Kettle_Brim",
+        "Kettle_Comb",
+        "Kettle_Dome",
+        "Male_Ranger_Acc_Pauldron",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Head_Hood",
+        "Male_Ranger_Legs",
+        "SuperHero_Male",
+        "Tabard_Back",
+        "Tabard_Front"
+      ]
+    },
+    "enemy_bandit": {
+      "triangles": 20348,
+      "parts": [
+        "Bandana",
+        "Bandana_Tail",
+        "Bandana_Tail.001",
+        "Bandit_Quiver",
+        "Belt",
+        "Eyebrows",
+        "Eyes",
+        "Face_Cloth",
+        "Male_Peasant_Arms",
+        "Male_Peasant_Body",
+        "Male_Peasant_Feet",
+        "Male_Peasant_Legs",
+        "Male_Ranger_Acc_Pauldron",
+        "Male_Ranger_Arms_Bracer",
+        "SuperHero_Male"
+      ]
+    },
+    "enemy_cultist": {
+      "triangles": 22061,
+      "parts": [
+        "Bone_Mask",
+        "Cult_Rope",
+        "Eyes",
+        "Female_Ranger_Arms",
+        "Female_Ranger_Arms_Bracer",
+        "Female_Ranger_Body",
+        "Female_Ranger_Body_Belt_1",
+        "Female_Ranger_Feet",
+        "Female_Ranger_Head_Hood",
+        "Female_Ranger_Legs",
+        "Superhero_Female"
+      ]
+    },
+    "boss_cult_priest": {
+      "triangles": 26511,
+      "parts": [
+        "Bone_Crown",
+        "Cloak",
+        "Cloak_Collar",
+        "Eyes",
+        "Horn",
+        "Horn.001",
+        "Male_Ranger_Acc_Pauldron",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Body_Belt_2",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Head_Hood",
+        "Male_Ranger_Legs",
+        "Priest_Pauldron_R",
+        "Sigil",
+        "SuperHero_Male"
+      ]
+    },
+    "hero_fighter_male": {
+      "triangles": 27971,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Fighter_Pauldron_R",
+        "Lame",
+        "Lame.001",
+        "Lame.002",
+        "Lame.003",
+        "Lame.004",
+        "Lame.005",
+        "Male_Ranger_Acc_Pauldron",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Head_Hood",
+        "Male_Ranger_Legs",
+        "Plate_Cuirass",
+        "Rivets",
+        "SuperHero_Male"
+      ]
+    },
+    "hero_fighter_female": {
+      "triangles": 28573,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Female_Ranger_Acc_Pauldrons",
+        "Female_Ranger_Arms",
+        "Female_Ranger_Arms_Bracer",
+        "Female_Ranger_Body",
+        "Female_Ranger_Body_Belt_1",
+        "Female_Ranger_Feet",
+        "Female_Ranger_Head_Hood",
+        "Female_Ranger_Legs",
+        "Fighter_Pauldron_R",
+        "Lame",
+        "Lame.001",
+        "Lame.002",
+        "Lame.003",
+        "Lame.004",
+        "Lame.005",
+        "Plate_Cuirass",
+        "Rivets",
+        "Superhero_Female"
+      ]
+    },
+    "hero_wizard_male_hood": {
+      "triangles": 22587,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Head_Hood",
+        "Male_Ranger_Legs",
+        "SuperHero_Male"
+      ]
+    },
+    "hero_wizard_female_hood": {
+      "triangles": 23189,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Female_Ranger_Arms",
+        "Female_Ranger_Arms_Bracer",
+        "Female_Ranger_Body",
+        "Female_Ranger_Body_Belt_1",
+        "Female_Ranger_Feet",
+        "Female_Ranger_Head_Hood",
+        "Female_Ranger_Legs",
+        "Superhero_Female"
+      ]
+    },
+    "hero_wizard_male_hat": {
+      "triangles": 20943,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Legs",
+        "SuperHero_Male",
+        "Wizard_Hat"
+      ]
+    },
+    "hero_wizard_female_hat": {
+      "triangles": 21545,
+      "parts": [
+        "Eyebrows",
+        "Eyes",
+        "Female_Ranger_Arms",
+        "Female_Ranger_Arms_Bracer",
+        "Female_Ranger_Body",
+        "Female_Ranger_Body_Belt_1",
+        "Female_Ranger_Feet",
+        "Female_Ranger_Legs",
+        "Superhero_Female",
+        "Wizard_Hat"
+      ]
+    }
+  },
+  "weapons": {
+    "dagger": {
+      "triangles": 288
+    },
+    "scimitar": {
+      "triangles": 404
+    },
+    "sickle": {
+      "triangles": 236
+    },
+    "mace": {
+      "triangles": 552
+    },
+    "spear": {
+      "triangles": 312
+    },
+    "staff": {
+      "triangles": 448
+    },
+    "staff_priest": {
+      "triangles": 480
+    },
+    "shortbow": {
+      "triangles": 332
+    },
+    "light_crossbow": {
+      "triangles": 352
+    },
+    "shield_heater": {
+      "triangles": 388
+    },
+    "shield_round": {
+      "triangles": 356
+    }
+  }
+}

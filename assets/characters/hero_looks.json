@@ -1,0 +1,12 @@
+{
+	"_comment": "Prompt 07 hero looks for character creation (prompt 06). body: male | female. Equipment per scene is in looks.json; weapon grips in assets/weapons/weapons.json. Only Fighter and Wizard have looks so far.",
+	"version": 1,
+	"looks": [
+		{"class": "fighter", "body": "male", "look_id": "fighter_plate", "name_key": "LOOK_FIGHTER_PLATE", "scene": "res://assets/characters/hero_fighter_male/model.glb"},
+		{"class": "fighter", "body": "female", "look_id": "fighter_plate", "name_key": "LOOK_FIGHTER_PLATE", "scene": "res://assets/characters/hero_fighter_female/model.glb"},
+		{"class": "wizard", "body": "male", "look_id": "wizard_hood", "name_key": "LOOK_WIZARD_HOOD", "scene": "res://assets/characters/hero_wizard_male_hood/model.glb"},
+		{"class": "wizard", "body": "female", "look_id": "wizard_hood", "name_key": "LOOK_WIZARD_HOOD", "scene": "res://assets/characters/hero_wizard_female_hood/model.glb"},
+		{"class": "wizard", "body": "male", "look_id": "wizard_hat", "name_key": "LOOK_WIZARD_HAT", "scene": "res://assets/characters/hero_wizard_male_hat/model.glb"},
+		{"class": "wizard", "body": "female", "look_id": "wizard_hat", "name_key": "LOOK_WIZARD_HAT", "scene": "res://assets/characters/hero_wizard_female_hat/model.glb"}
+	]
+}

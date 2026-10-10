@@ -172,3 +172,9 @@ bash tests/integration/capture_spells.sh godot          # docs/arena-spell-*.png
 ```
 
 ![Burning Hands targeted](docs/arena-spell-target.png)
+
+## Enemies, hero looks and hit effects (prompt 07)
+
+Prompt 07 (10-10-2026) gives Guard, Bandit and Cultist their own models and weapons,
+adds a Cult Priest boss model, Fighter/Wizard hero looks (`assets/characters/hero_looks.json`)
+and blood/spark/dust hit effects. Details and an honest assessment: [assets/README.md](assets/README.md).

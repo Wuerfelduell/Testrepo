@@ -1,0 +1,14 @@
+{
+	"_comment": "Visual equipment per character scene. main_hand is the showcase default; combat uses the record's weapon model. off_hand is always equipped.",
+	"res://assets/characters/enemy_guard/model.glb": {"main_hand": "spear", "off_hand": "shield_round"},
+	"res://assets/characters/enemy_bandit/model.glb": {"main_hand": "light_crossbow"},
+	"res://assets/characters/enemy_cultist/model.glb": {"main_hand": "sickle"},
+	"res://assets/characters/boss_cult_priest/model.glb": {"main_hand": "staff_priest"},
+	"res://assets/characters/hero_fighter_male/model.glb": {"main_hand": "sword", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_fighter_female/model.glb": {"main_hand": "sword", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_wizard_male_hood/model.glb": {"main_hand": "staff"},
+	"res://assets/characters/hero_wizard_female_hood/model.glb": {"main_hand": "staff"},
+	"res://assets/characters/hero_wizard_male_hat/model.glb": {"main_hand": "staff"},
+	"res://assets/characters/hero_wizard_female_hat/model.glb": {"main_hand": "staff"},
+	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"}
+}

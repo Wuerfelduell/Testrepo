@@ -1,0 +1,16 @@
+{
+	"_comment": "Grip transforms in hand-bone space. Origin of every weapon model is its grip centre; weapon +Y is the blade/shaft axis. 'across' = 01b sword grip (blade across the palm).",
+	"sword": {"scene": "res://assets/weapons/sword.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"axe": {"scene": "res://assets/weapons/axe.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"dagger": {"scene": "res://assets/weapons/dagger.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"scimitar": {"scene": "res://assets/weapons/scimitar.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"sickle": {"scene": "res://assets/weapons/sickle.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"mace": {"scene": "res://assets/weapons/mace.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"spear": {"scene": "res://assets/weapons/spear.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, 180]},
+	"staff": {"scene": "res://assets/weapons/staff.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, 180]},
+	"staff_priest": {"scene": "res://assets/weapons/staff_priest.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, 180]},
+	"shortbow": {"scene": "res://assets/weapons/shortbow.glb", "hand": "left", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"light_crossbow": {"scene": "res://assets/weapons/light_crossbow.glb", "hand": "left", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, 0]},
+	"shield_heater": {"scene": "res://assets/weapons/shield_heater.glb", "hand": "left", "position": [0.0, 0.06, 0.05], "rotation_degrees": [0, 0, 180]},
+	"shield_round": {"scene": "res://assets/weapons/shield_round.glb", "hand": "left", "position": [0.0, 0.06, 0.05], "rotation_degrees": [0, 0, 90]}
+}

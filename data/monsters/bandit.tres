@@ -11,8 +11,9 @@ srd_page = 258
 hit_points = 11
 armor_class = 12
 ability_scores = {&"str": 11, &"dex": 12, &"con": 12, &"int": 10, &"wis": 10, &"cha": 10}
+model = "res://assets/characters/enemy_bandit/model.glb"
 personality = "archer"
 attacks = Array[Dictionary]([
-{"id": "light_crossbow", "name_key": "WEAPON_LIGHT_CROSSBOW", "ranged": true, "reach": 1.5, "range": 24.0, "long_range": 96.0, "attack_bonus": 3, "damage_dice": "1d8", "damage_bonus": 1, "damage_type": "piercing", "attack_modifiers": [{"amount": 1, "source": "dex"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "dex"}]},
-{"id": "scimitar", "name_key": "WEAPON_SCIMITAR", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 3, "damage_dice": "1d6", "damage_bonus": 1, "damage_type": "slashing", "attack_modifiers": [{"amount": 1, "source": "dex"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "dex"}]}
+{"id": "light_crossbow", "model": "res://assets/weapons/light_crossbow.glb", "name_key": "WEAPON_LIGHT_CROSSBOW", "ranged": true, "reach": 1.5, "range": 24.0, "long_range": 96.0, "attack_bonus": 3, "damage_dice": "1d8", "damage_bonus": 1, "damage_type": "piercing", "attack_modifiers": [{"amount": 1, "source": "dex"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "dex"}]},
+{"id": "scimitar", "model": "res://assets/weapons/scimitar.glb", "name_key": "WEAPON_SCIMITAR", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 3, "damage_dice": "1d6", "damage_bonus": 1, "damage_type": "slashing", "attack_modifiers": [{"amount": 1, "source": "dex"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 1, "source": "dex"}]}
 ])

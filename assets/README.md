@@ -130,3 +130,78 @@ mit `bash tools/capture_enemy_test.sh /pfad/zu/godot` aufnehmen (Xvfb + xauth),
 oder direkt mit Godot über `-- --capture=/absoluter/pfad.png --enemy-closeup`.
 Der normale Screenshot lässt `--enemy-closeup` weg. Ein Dummy-Headless-Renderer
 kann keine Bilder aufnehmen.
+
+## M1-Figuren, Waffen und Treffereffekte – Auftrag 07, 10.10.2026
+
+**Status: eingebaut und geprüft, Art-Freigabe durch den Owner steht aus.** Gleiche
+Methode wie 01b: vorhandene CC0-Körper und -Outfits auf dem gemeinsamen 65-Knochen-Rig,
+dazu per Skript gebaute starre Teile (Helme, Platten, Masken, Hörner, Umhänge), die an
+vorhandene Knochen gebunden sind. Kein neues Rig, keine neuen Animationen, keine Käufe,
+keine KI-Modelle, keine Downloads.
+
+| Figur | Ordner | Silhouette | Waffe(n) |
+|---|---|---|---|
+| Guard | `characters/enemy_guard` | Kettle-Hut über Kettenhaube, rotes Wappenrock, Stahl-Schulterstücke | Speer + Rundschild (links) |
+| Bandit | `characters/enemy_bandit` | rotes Kopftuch mit Knoten, schwarzes Gesichtstuch, Bolzenköcher, schwarzes Leder | leichte Armbrust (links), Scimitar für Nahkampf |
+| Cultist | `characters/enemy_cultist` | blutrote Kapuzenrobe, Knochenmaske, rot glimmende Augen, Strick mit Knochenamuletten | Sichel |
+| Cult Priest (Boss) | `characters/boss_cult_priest` | 1,22× Größe, Widderhörner + Knochenkrone, hoher Kragen, schwerer Umhang, Knochen-Schulterstücke, leuchtendes Brustsiegel und Augen | Priesterstab mit Schädel, Hörnern, grünem Edelstein |
+| Fighter m/w | `characters/hero_fighter_*` | Kettenhaube, glatter Brustpanzer, Schulterlamellen, Messingnieten | Langschwert + Heater-Schild |
+| Wizard m/w | `characters/hero_wizard_*_hood`, `*_hat` | bodenlange Robe; Kapuze **oder** Spitzhut | Stab mit leuchtendem Kristall |
+
+Waffen (`weapons/`, Blender-Python, gleiche PBR-Karten wie Schwert/Axt, je ≤ 1500 Dreiecke):
+Dolch, Scimitar, Sichel, Streitkolben, Speer, Stab, Priesterstab, Kurzbogen, leichte
+Armbrust, Heater-Schild, Rundschild. Dreieckszahlen: `m1_art_manifest.json`.
+
+**Manifeste**
+- `weapons/weapons.json`: Szene, Hand und Griff-Transform je Waffe. Bogen und Armbrust
+  sitzen links, weil der vorhandene Fernkampf-Clip `Spell_Simple_Shoot` den linken Arm
+  ausstreckt; Stangenwaffen liegen entlang des Unterarms.
+- `characters/looks.json`: Standardwaffe (`main_hand`) und immer getragenes `off_hand`
+  (Schild) je Figurenszene. `PreviewActor`/`CombatActor` lesen das automatisch.
+- `characters/hero_looks.json` (für Auftrag 06): `class`, `body` (`male`/`female`),
+  `look_id`, `name_key`, `scene`. Fighter und Wizard, je männlich und weiblich.
+
+**Arena:** `data/monsters/guard|bandit|cultist.tres` verweisen jetzt auf die eigenen
+Modelle; jeder Angriff hat sein Waffenmodell. Der Bandit zieht beim Nahkampf den
+Scimitar (`swap_weapon`). `data/monsters/cult_priest.tres` ist ein reiner Optik-Eintrag
+(ohne Werte, `is_valid() == false`, kann nicht versehentlich in einen Kampf).
+
+**Treffereffekte** (`src/world/vfx/hits/hit_effects.gd`, CPUParticles3D für den
+Compatibility-Renderer): Blutspritzer bei physischem Schaden (Hieb/Stich/Wucht) mit
+Blutfleck am Boden, stärkerer Spritzer + roter Lichtblitz bei kritischen Treffern,
+Funken bei verfehltem Nahkampfangriff, Staub, wenn ein Toter am Boden aufschlägt.
+Zauberschaden blutet nicht (Effekte dafür gehören zu Auftrag 05).
+
+**Showcase:** neue Reihen vor den alten Proben; Knöpfe *Enemies*, *Hero looks*,
+*Weapons*, *Hit effects*. Echte Godot-Aufnahmen (1280 × 720, Compatibility/llvmpipe):
+[Übersicht im Normalzoom](../docs/m1-overview.png), [Gegner nah](../docs/m1-enemies.png),
+[Heldenlooks](../docs/m1-heroes.png), [Waffen](../docs/m1-weapons.png),
+[Treffereffekte](../docs/m1-hits.png).
+
+**Reproduzieren:** `python3 tools/prepare_m1_textures.py` (Pillow + NumPy), dann
+`blender --background --factory-startup --python tools/build_m1_art.py` oder mit dem
+`bpy`-Wheel `python3.11 tools/build_m1_art.py` (gebaut mit bpy 5.0.1). Einzelne Teile:
+`... build_m1_art.py -- enemy_guard spear`. Screenshots: `bash tools/capture_m1_art.sh godot`.
+
+**Größe:** die neuen GLBs liegen zwischen 0,1 und 2,5 MB, `assets/` insgesamt ≈ 67 MB
+(vorher ≈ 50 MB). GitHub verlangt LFS erst ab 100 MB pro Datei; die Entscheidung, ob die
+50-MB-Richtlinie aus Auftrag 01 angehoben oder LFS eingerichtet wird, liegt beim Owner
+(siehe Handover 10.10.2026). Bis dahin bleiben alle Dateien normale Git-Dateien.
+
+### Ehrliche Einschätzung
+- **Gut:** Die vier Gegner sind im Normalzoom klar unterscheidbar (Hut + Schild vs.
+  Kopftuch + Armbrust vs. Kapuze + Maske vs. Hörner + Umhang + Größe). Waffen bleiben in
+  allen 42 Clips in der Hand; die Armbrust zeigt beim Schuss nach vorne. Blut, Funken und
+  Staub lesen sich in der Arena-Kamera.
+- **Schwach:** Kleidung bleibt Quaternius-Ranger/Peasant-Schnitt, nur umgefärbt und
+  ergänzt; Fighter m/w und Wizard m/w unterscheiden sich kaum, weil Haube/Kapuze die
+  Köpfe verdecken. Der Brustpanzer ist eine glatte Schale ohne Kanten/Gravur. Köpfe
+  sind kahl (keine freien Haar-Meshes), unter dem Spitzhut sichtbar. Der Umhang des
+  Bosses und die Roben haben keine Stoffsimulation und können beim Laufen mit den
+  Beinen schneiden. Metall wirkt im Compatibility-Renderer ohne Reflexionen dunkel.
+  Die Maske des Kultisten hat nur angedeutete Augenlöcher.
+- **Animation:** Es gibt weiter keinen echten Bogen-/Armbrust-Clip, keinen Schildblock
+  und keinen Speerstoß; Speer und Stab nutzen den Schwertschwung.
+- **Nicht machbar auf diesem Weg:** nicht-humanoide Monster (Untote Tiere, Spinnen,
+  Wölfe, Dämonen mit anderem Skelett) – dafür braucht es Modelle mit eigenem Rig und
+  eigenen Animationen. Auch die HUD-Porträts (Auftrag 05) zeigen noch die alten Gesichter.

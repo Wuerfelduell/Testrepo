@@ -7,8 +7,20 @@ const CLIP_KEYS: PackedStringArray = ["GALLERY_ANIMATION_IDLE", "GALLERY_ANIMATI
 const MODELS: Array[String] = ["superhero_male_fullbody", "superhero_female_fullbody", "male_peasant", "female_peasant", "male_ranger", "female_ranger"]
 const MODEL_KEYS: PackedStringArray = ["GALLERY_BASE_MALE", "GALLERY_BASE_FEMALE", "GALLERY_PEASANT_MALE", "GALLERY_PEASANT_FEMALE", "GALLERY_RANGER_MALE", "GALLERY_RANGER_FEMALE"]
 const SAMPLE_POSITIONS: Array[Vector3] = [Vector3(2.2, 0, 2.8), Vector3(-3.6, 0, 0.2), Vector3(-0.7, 0, 0.2), Vector3(2.2, 0, 0.2), Vector3(-3.6, 0, 2.8), Vector3(-0.7, 0, 2.8)]
+# Prompt 07 (M1 art): enemies and the boss in one row, hero looks in the next, weapons in front.
+const M1_ENEMIES: Array[String] = ["enemy_guard", "enemy_bandit", "enemy_cultist", "boss_cult_priest"]
+const M1_ENEMY_KEYS: PackedStringArray = ["ACTOR_GUARD", "ACTOR_BANDIT", "ACTOR_CULTIST", "ACTOR_CULT_PRIEST"]
+const M1_HEROES: Array[String] = ["hero_fighter_male", "hero_fighter_female", "hero_wizard_male_hood", "hero_wizard_female_hood", "hero_wizard_male_hat", "hero_wizard_female_hat"]
+const M1_HERO_KEYS: PackedStringArray = ["LOOK_FIGHTER_PLATE", "LOOK_FIGHTER_PLATE", "LOOK_WIZARD_HOOD", "LOOK_WIZARD_HOOD", "LOOK_WIZARD_HAT", "LOOK_WIZARD_HAT"]
+const M1_WEAPONS: PackedStringArray = ["sword", "axe", "dagger", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow", "light_crossbow", "shield_heater", "shield_round"]
+const M1_ENEMY_ROW_Z: float = 5.2
+const M1_HERO_ROW_Z: float = 7.6
+const M1_WEAPON_ROW_Z: float = 9.4
 
 var actors: Array[PreviewActor] = []
+var m1_enemies: Array[PreviewActor] = []
+var m1_heroes: Array[PreviewActor] = []
+var m1_weapons: Array[Node3D] = []
 var camera: Camera3D
 var environment: Environment
 var selector: OptionButton
@@ -20,6 +32,7 @@ var torch_lights: Array[OmniLight3D] = []
 var capture_frames: int = -1
 var camera_focus: Vector3 = Vector3(0, 0.6, 0)
 var camera_elevation: float = 11.4
+var hit_demo_pending: bool = false
 
 func _ready() -> void:
 	TranslationServer.add_translation(load("res://assets/enemy_test_strings.en.translation") as Translation)
@@ -33,6 +46,17 @@ func _ready() -> void:
 			capture_frames = 90
 		elif argument == "--enemy-closeup":
 			_focus_enemy()
+		elif argument == "--m1-enemies":
+			_focus_m1(0)
+		elif argument == "--m1-heroes":
+			_focus_m1(1)
+		elif argument == "--m1-weapons":
+			_focus_m1(2)
+		elif argument == "--m1-overview":
+			_focus_m1(3)
+		elif argument == "--m1-hits":
+			_focus_m1(0)
+			hit_demo_pending = true
 		elif argument.begins_with("--clip="):
 			_select_animation(animation_names.find(argument.trim_prefix("--clip=")))
 
@@ -40,6 +64,9 @@ func _process(delta: float) -> void:
 	angle += (Input.get_action_strength("gallery_rotate_right") - Input.get_action_strength("gallery_rotate_left")) * delta
 	_update_camera()
 	if capture_frames > 0:
+		# Effects start a few frames before the capture so sprays are mid-flight.
+		if hit_demo_pending and capture_frames == 3:
+			show_hit_effects()
 		capture_frames -= 1
 		if capture_frames == 0:
 			_capture()
@@ -131,11 +158,11 @@ func _model_bounds(model: Node3D) -> AABB:
 
 func _build_room() -> void:
 	for x: int in 4:
-		for z: int in 3:
+		for z: int in 5:
 			_place_asset("SM_TileFloor", Vector3(-4.5 + x * 3.0, 0, -3.0 + z * 3.0))
 	for x: int in 4:
 		_place_asset("SM_DoorWay" if x == 2 else "SM_Wall", Vector3(-4.5 + x * 3.0, 0, -4.5))
-	for z: int in 3:
+	for z: int in 5:
 		_place_asset("SM_Wall", Vector3(-6.0, 0, -3.0 + z * 3.0), PI / 2)
 	for x: float in [-5.8, 5.8]:
 		_place_asset("SM_WallEnders", Vector3(x, 0, -4.5))
@@ -178,10 +205,56 @@ func _build_actors() -> void:
 	cultist.setup("res://assets/characters/undead_cultist/model.glb", "GALLERY_CULTIST")
 	cultist.equip_weapon("res://assets/weapons/axe.glb")
 	actors.append(cultist)
+	_build_m1()
 	animation_names = CLIPS.duplicate()
 	for clip: String in actors[0].available:
 		if not animation_names.has(clip):
 			animation_names.append(clip)
+
+func _build_m1() -> void:
+	for i: int in M1_ENEMIES.size():
+		var actor: PreviewActor = _m1_actor(M1_ENEMIES[i], M1_ENEMY_KEYS[i], Vector3(-4.2 + i * 2.6, 0, M1_ENEMY_ROW_Z))
+		m1_enemies.append(actor)
+	for i: int in M1_HEROES.size():
+		var actor: PreviewActor = _m1_actor(M1_HEROES[i], M1_HERO_KEYS[i], Vector3(-4.6 + i * 1.84, 0, M1_HERO_ROW_Z))
+		m1_heroes.append(actor)
+	# Weapons stand upright on their grip so length and silhouette compare directly.
+	for i: int in M1_WEAPONS.size():
+		var scene_path: String = PreviewActor.weapon_scene_for(M1_WEAPONS[i])
+		var stand: Node3D = Node3D.new()
+		stand.name = "Weapon_" + M1_WEAPONS[i]
+		stand.position = Vector3(-5.1 + i * 0.85, 0.95, M1_WEAPON_ROW_Z)
+		add_child(stand)
+		var model: Node3D = (load(scene_path) as PackedScene).instantiate() as Node3D
+		stand.add_child(model)
+		if M1_WEAPONS[i].begins_with("shield"):
+			model.position.y = -0.35
+		elif M1_WEAPONS[i] in ["spear", "staff", "staff_priest"]:
+			model.position.y = -0.15
+			model.scale = Vector3.ONE * 0.62
+		var label: Label3D = Label3D.new()
+		label.text = tr("GALLERY_WEAPON_" + M1_WEAPONS[i].to_upper())
+		label.position = Vector3(0, -0.75, 0.35)
+		label.font_size = 30
+		label.pixel_size = 0.0042
+		label.modulate = Color("d9c9a3")
+		label.outline_modulate = Color("0d1421")
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		stand.add_child(label)
+		m1_weapons.append(stand)
+
+func _m1_actor(folder: String, key: String, location: Vector3) -> PreviewActor:
+	var actor: PreviewActor = ACTOR_SCRIPT.new() as PreviewActor
+	actor.name = folder.to_pascal_case()
+	actor.position = location
+	add_child(actor)
+	var scene_path: String = "res://assets/characters/" + folder + "/model.glb"
+	actor.setup(scene_path, key)
+	actor.equip_look_weapon(scene_path)
+	for label: Label3D in actor.find_children("*", "Label3D", false, false):
+		label.font_size = 30
+	actors.append(actor)
+	return actor
 
 func _label(key: String, size: int, color: Color = Color("e8e2d6")) -> Label:
 	var label: Label = Label.new()
@@ -224,6 +297,12 @@ func _build_ui() -> void:
 	_button(toolbar, "GALLERY_RESET", _reset_view)
 	_button(toolbar, "GALLERY_LIGHTING", _toggle_lighting)
 	_button(toolbar, "ENEMY_TEST_CLOSEUP", _focus_enemy)
+	_button(toolbar, "GALLERY_M1_ENEMIES", func() -> void: _focus_m1(0))
+	_button(toolbar, "GALLERY_M1_HEROES", func() -> void: _focus_m1(1))
+	_button(toolbar, "GALLERY_M1_WEAPONS", func() -> void: _focus_m1(2))
+	_button(toolbar, "GALLERY_M1_HITS", func() -> void:
+		_focus_m1(0)
+		show_hit_effects())
 	layout.add_child(_label("GALLERY_CONTROLS", 15, Color("a4aec0")))
 
 func _button(parent: Control, key: String, callback: Callable) -> void:
@@ -250,6 +329,8 @@ func _reset_view() -> void:
 	camera_elevation = 11.4
 	for actor: PreviewActor in actors:
 		actor.visible = true
+	for stand: Node3D in m1_weapons:
+		stand.visible = true
 
 func _focus_enemy() -> void:
 	angle = 0.12
@@ -260,6 +341,34 @@ func _focus_enemy() -> void:
 	# foreground when zoomed in. Reset restores the complete seven-model gallery.
 	for i: int in actors.size():
 		actors[i].visible = i == 0 or i == 6
+	for stand: Node3D in m1_weapons:
+		stand.visible = false
+
+## Blood (normal + critical), parry sparks and death dust on the enemy row.
+func show_hit_effects() -> void:
+	hit_demo_pending = false
+	var effects: Array[StringName] = [HitEffects.BLOOD_CRITICAL, HitEffects.SPARKS, HitEffects.BLOOD, HitEffects.DUST]
+	for i: int in m1_enemies.size():
+		var actor: PreviewActor = m1_enemies[i]
+		var at: Vector3 = actor.global_position + (Vector3.ZERO if effects[i] == HitEffects.DUST else Vector3(0, 1.3, 0.2))
+		HitEffects.spawn(self, effects[i], at, Vector3(0.4, 0, -1))
+
+## 0 enemies + boss, 1 hero looks, 2 weapons, 3 overview of all M1 art at normal zoom.
+func _focus_m1(group: int) -> void:
+	_reset_view()
+	var focus: Array[Vector3] = [Vector3(-0.3, 1.2, M1_ENEMY_ROW_Z), Vector3(0, 1.1, M1_HERO_ROW_Z),
+		Vector3(0, 0.9, M1_WEAPON_ROW_Z), Vector3(0, 0.8, M1_HERO_ROW_Z - 0.4)]
+	var zoom: Array[float] = [6.0, 6.4, 6.4, 10.5]
+	angle = 0.0 if group < 3 else 0.5
+	distance = zoom[group]
+	camera_focus = focus[group]
+	camera_elevation = 6.5 if group < 3 else 11.4
+	if group == 3:
+		return
+	for actor: PreviewActor in actors:
+		actor.visible = (group == 0 and m1_enemies.has(actor)) or (group == 1 and m1_heroes.has(actor))
+	for stand: Node3D in m1_weapons:
+		stand.visible = group == 2
 
 func _toggle_lighting() -> void:
 	studio_lighting = not studio_lighting

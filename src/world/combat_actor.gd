@@ -26,6 +26,7 @@ var _selection: MeshInstance3D
 var _selection_material: StandardMaterial3D
 var _dead: bool = false
 var _active_clip: String = ""
+var _last_roll_critical: bool = false
 
 
 func setup_actor(record: Dictionary) -> void:
@@ -39,6 +40,9 @@ func setup_actor(record: Dictionary) -> void:
 	var weapon_model: String = String(weapon_data.get("model", ""))
 	if not weapon_model.is_empty():
 		equip_weapon(weapon_model)
+	else:
+		# Looks without a combat weapon model still hold their default item (looks.json).
+		equip_look_weapon(String(record["model"]))
 	global_position = _as_position(record.get("position", Vector3.ZERO))
 	_last_hp = int(record.get("hp", 1))
 	_create_selection_ring()
@@ -118,6 +122,25 @@ func react_to_event(event: Dictionary, actors: Dictionary = {}) -> void:
 			aim_at(target.global_position)
 	if String(event.get("type", "")) == "damage" and String(event.get("target_id", "")) == actor_id:
 		_show_damage(int(event.get("amount", 0)), String(event.get("damage_type", "")))
+	_show_hit_effect(event, actors)
+
+
+func _show_hit_effect(event: Dictionary, actors: Dictionary) -> void:
+	var targeted: bool = String(event.get("target_id", "")) == actor_id
+	var died: bool = String(event.get("type", "")) == "death" and String(event.get("actor_id", "")) == actor_id
+	if not (targeted or died) or get_parent() == null:
+		return
+	var attacker: CombatActor = actors.get(String(event.get("actor_id" if targeted else "killer_id", ""))) as CombatActor
+	var from: Vector3 = attacker.global_position if attacker != null else global_position + Vector3.BACK
+	if String(event.get("type", "")) == "roll" and String(event.get("kind", "")) == "attack":
+		_last_roll_critical = bool(event.get("critical", false))
+	var effect: StringName = HitEffects.effect_for(event, from.distance_to(global_position), _last_roll_critical)
+	if effect == HitEffects.NONE:
+		return
+	var direction: Vector3 = global_position - from
+	# Chest height on the side facing the attacker; scaled bosses hit higher.
+	var chest: Vector3 = global_position + Vector3.UP * 1.25 * scale.y + Vector3(-direction.x, 0, -direction.z).normalized() * 0.18
+	HitEffects.spawn(get_parent(), effect, global_position if effect == HitEffects.DUST else chest, direction)
 
 
 func _sync_attack(pending: Dictionary) -> void:
@@ -125,6 +148,8 @@ func _sync_attack(pending: Dictionary) -> void:
 	if weapon_data.is_empty():
 		weapon_data = _record.get("weapon", {})
 	var ranged: bool = bool(weapon_data.get("ranged", false))
+	# The attack's own weapon is drawn: a bandit switches from crossbow to scimitar.
+	swap_weapon(String(weapon_data.get("model", "")))
 	# The supplied set has no bow/throw clip or bow model. This existing release
 	# gesture is visibly provisional ranged art, not a spell or invented equipment.
 	var clip_name: String = String(weapon_data.get("attack_clip", "Spell_Simple_Shoot" if ranged else "Sword_Attack"))

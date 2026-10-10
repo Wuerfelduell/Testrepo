@@ -82,7 +82,7 @@ func _run() -> void:
 	if arena == null:
 		return _finish()
 	var hero: Dictionary = Game.state.actors["hero"]
-	check(hero["name_key"] == "Mira" and hero["class_id"] == "wizard" and hero["look_id"] == "female_ranger",
+	check(hero["name_key"] == "Mira" and hero["class_id"] == "wizard" and hero["look_id"] == HeroLooks.for_class("wizard", "female")[1]["id"],
 		"The arena runs with the created hero, not the test Fighter")
 	check(SaveGame.run_active and not SaveGame.exists(), "A new run starts without writing a save")
 	arena.hud.dice_popup.speed = 40.0

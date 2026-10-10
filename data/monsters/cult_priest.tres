@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MonsterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/monster_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"cult_priest"
+name_key = &"ACTOR_CULT_PRIEST"
+srd_name = ""
+srd_page = 0
+model = "res://assets/characters/boss_cult_priest/model.glb"
+model_is_provisional = true

@@ -19,7 +19,7 @@ func _run() -> void:
 	var gallery: Node3D = packed.instantiate()
 	root.add_child(gallery)
 	await process_frame
-	check(gallery.actors.size() == 7, "Six original samples and the assembled cultist must be present")
+	check(gallery.actors.size() == 17, "Six original samples, the 01b cultist and ten M1 figures must be present")
 	check(gallery.animation_names.size() == 42, "42 authored motion clips must be available (T-pose excluded)")
 	for actor: PreviewActor in gallery.actors:
 		check(actor.skeleton.get_bone_count() > 40, "Imported characters must retain the humanoid rig")
@@ -34,6 +34,7 @@ func _run() -> void:
 				var path: NodePath = animation.track_get_path(track)
 				check(actor.skeleton.find_bone(path.get_subname(0)) >= 0, "No animation may target a missing bone")
 	await _check_enemy_test(gallery)
+	await _check_m1(gallery)
 	gallery._select_animation(0)
 	var old: int = gallery.selector.selected
 	var next: InputEventAction = InputEventAction.new()
@@ -117,3 +118,74 @@ func _check_enemy_test(gallery: Node3D) -> void:
 			if material != null and material.resource_name == "CultistEyes":
 				emissive_eyes = material.emission_enabled and material.emission.g > 0.8
 	check(emissive_eyes, "Cultist eyes must use an emissive material")
+
+
+## Prompt 07: distinct enemies, boss, hero looks, weapons and their manifests.
+func _check_m1(gallery: Node3D) -> void:
+	var ranger: PreviewActor = gallery.actors[4]
+	check(gallery.m1_enemies.size() == 4 and gallery.m1_heroes.size() == 6, "Three enemies, the boss and six hero looks")
+	var silhouettes: Dictionary = {}
+	for actor: PreviewActor in gallery.m1_enemies + gallery.m1_heroes:
+		check(actor.skeleton.get_bone_count() == ranger.skeleton.get_bone_count(), "M1 figures reuse the shared 65-bone rig")
+		var triangles: int = 0
+		var materials: Dictionary = {}
+		for mesh: MeshInstance3D in actor.find_children("*", "MeshInstance3D", true, false):
+			if mesh.mesh == null or (actor.weapon_attachment != null and actor.weapon_attachment.is_ancestor_of(mesh)) \
+					or (actor.offhand_attachment != null and actor.offhand_attachment.is_ancestor_of(mesh)):
+				continue
+			for surface: int in mesh.mesh.get_surface_count():
+				triangles += mesh.mesh.surface_get_arrays(surface)[Mesh.ARRAY_INDEX].size() / 3
+				var material: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
+				check(material != null, "M1 surfaces must use PBR materials")
+				materials[material.resource_name] = material
+		check(triangles > 8000 and triangles <= 40000, "M1 figure triangle budget: %d" % triangles)
+		check(actor.weapon != null, "Every M1 figure holds its look weapon")
+		silhouettes[actor.name] = materials.keys()
+	# Distinct, not recolours: every enemy has material sets no other enemy shares.
+	for i: int in gallery.m1_enemies.size():
+		for j: int in range(i + 1, gallery.m1_enemies.size()):
+			var a: Array = silhouettes[gallery.m1_enemies[i].name]
+			var b: Array = silhouettes[gallery.m1_enemies[j].name]
+			var shared: Array = a.filter(func(key: Variant) -> bool: return b.has(key))
+			check(shared.is_empty(), "Enemies must not share materials: %s" % [shared])
+	var guard: PreviewActor = gallery.m1_enemies[0]
+	check(guard.offhand != null and guard.offhand_attachment.bone_name == "hand_l", "The guard carries a shield in the left hand")
+	var bandit: PreviewActor = gallery.m1_enemies[1]
+	check(bandit.weapon_attachment.bone_name == "hand_l", "Crossbows sit in the hand the release clip extends")
+	var emissive: Array[String] = []
+	for mesh: MeshInstance3D in gallery.m1_enemies[3].find_children("*", "MeshInstance3D", true, false):
+		for surface: int in mesh.mesh.get_surface_count():
+			var material: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
+			if material != null and material.emission_enabled:
+				emissive.append(material.resource_name)
+	check(emissive.has("PriestEyes") and emissive.has("PriestGem"), "The boss has emissive eyes and gems")
+	check(gallery.m1_enemies[3].skeleton.get_parent() is Node3D, "Boss rig imported")
+	# Weapons: every manifest entry imports, is textured and stays inside the 1500-triangle budget.
+	var weapons: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/weapons/weapons.json"))
+	for id: String in weapons:
+		if id.begins_with("_"):
+			continue
+		var model: Node3D = (load(String(weapons[id]["scene"])) as PackedScene).instantiate() as Node3D
+		var triangles: int = 0
+		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			for surface: int in mesh.mesh.get_surface_count():
+				triangles += mesh.mesh.surface_get_arrays(surface)[Mesh.ARRAY_INDEX].size() / 3
+				var material: StandardMaterial3D = mesh.mesh.surface_get_material(surface) as StandardMaterial3D
+				check(material != null, "Weapon surfaces need materials: " + id)
+		check(triangles > 0 and triangles <= 1500, "Weapon triangle budget: " + id)
+		model.free()
+	# Hero looks manifest for character creation (prompt 06).
+	var looks: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/characters/hero_looks.json"))
+	var classes: Dictionary = {}
+	for look: Dictionary in looks["looks"]:
+		check(ResourceLoader.exists(String(look["scene"])), "Hero look scene exists: " + String(look["scene"]))
+		check(tr(String(look["name_key"])) != String(look["name_key"]), "Hero look name is translated")
+		classes[String(look["class"]) + ":" + String(look["body"])] = true
+	for key: String in ["fighter:male", "fighter:female", "wizard:male", "wizard:female"]:
+		check(classes.has(key), "Hero look for " + key)
+	# Ranged gesture: the crossbow stays in the extended left hand during the release clip.
+	bandit.play_clip("Spell_Simple_Shoot")
+	bandit.player.advance(0.13)
+	await process_frame
+	var hand: Vector3 = (bandit.skeleton.global_transform * bandit.skeleton.get_bone_global_pose(bandit.skeleton.find_bone("hand_l"))).origin
+	check(bandit.weapon.global_position.distance_to(hand) < 0.13, "Crossbow stays gripped while shooting")
