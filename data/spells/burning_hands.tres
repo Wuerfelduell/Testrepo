@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"burning_hands"
+name_key = &"SPELL_BURNING_HANDS"
+srd_name = "Burning Hands"
+level = 1
+school = "evocation"
+casting_time = "action"
+targeting = "self"
+range_m = 0.0
+area = "cone"
+area_size_m = 4.5
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "3d6"
+damage_type = &"fire"
+half_on_save = true
+upcast_dice = "1d6"
+vfx = &"burning_hands"

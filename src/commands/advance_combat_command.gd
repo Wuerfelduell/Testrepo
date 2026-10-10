@@ -10,6 +10,9 @@ func _init(p_delta: float = 0.0) -> void:
 func validate(state: GameState) -> Error:
 	if not is_finite(delta) or delta <= 0.0 or delta > 60.0:
 		return ERR_INVALID_PARAMETER
+	if state.pending.get("type") == "reaction":
+		# Time stands still until the reacting creature decides (CastReactionCommand).
+		return ERR_BUSY
 	return OK if not state.pending.is_empty() else ERR_UNAVAILABLE
 
 func apply(state: GameState) -> Dictionary:
@@ -26,12 +29,25 @@ func apply(state: GameState) -> Dictionary:
 			if not bool(pending["impacted"]) and float(pending["elapsed"]) + CombatRules.EPSILON >= float(pending["impact_time"]):
 				pending["impacted"] = true
 				events.append_array(CombatRules.resolve_impact(state, pending, Rng.rng))
-				if state.pending.is_empty():
+				if state.pending.is_empty() or state.pending.get("type") == "reaction":
 					break
 			if float(pending["elapsed"]) + CombatRules.EPSILON >= float(pending["duration"]):
 				state.pending = pending.get("resume", {})
 				if not state.pending.is_empty() and not CombatRules.alive(state.actors[state.pending["actor_id"]]):
 					state.pending = {}
+		elif pending["type"] == "spell":
+			var until_spell_end: float = float(pending["duration"]) - float(pending["elapsed"])
+			var spent: float = minf(remaining, until_spell_end)
+			pending["elapsed"] = float(pending["elapsed"]) + spent
+			remaining -= spent
+			if not bool(pending["impacted"]) and float(pending["elapsed"]) + CombatRules.EPSILON >= float(pending["impact_time"]):
+				events.append_array(SpellResolver.resolve_impact(state, pending, Rng.rng))
+				if state.pending.is_empty() or state.pending.get("type") == "reaction":
+					break
+			if float(pending["elapsed"]) + CombatRules.EPSILON >= float(pending["duration"]):
+				state.pending = {}
+		elif pending["type"] == "reaction":
+			break
 		else:
 			var crossings: Array = pending["interruptions"]
 			var distance: float = float(pending["distance"])

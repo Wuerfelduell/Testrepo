@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"magic_missile"
+name_key = &"SPELL_MAGIC_MISSILE"
+srd_name = "Magic Missile"
+level = 1
+school = "evocation"
+casting_time = "action"
+targeting = "darts"
+range_m = 36.0
+resolution = "auto"
+damage_dice = "1d4"
+damage_type = &"force"
+darts = 3
+dart_bonus = 1
+upcast_darts = 1
+vfx = &"magic_missile"

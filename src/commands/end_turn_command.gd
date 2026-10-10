@@ -18,6 +18,9 @@ func validate(state: GameState) -> Error:
 	return OK
 
 func apply(state: GameState) -> Dictionary:
+	var events: Array[Dictionary] = []
+	if state.mode == &"combat":
+		events.append_array(ActiveEffects.on_turn_end(state, actor_id, Rng.rng))
 	for index: int in range(state.turn_order.size()):
 		state.turn_index = (state.turn_index + 1) % state.turn_order.size()
 		if state.turn_index == 0:
@@ -25,9 +28,12 @@ func apply(state: GameState) -> Dictionary:
 		if state.mode != &"combat" or CombatRules.alive(state.actors[state.current_actor_id()]):
 			break
 	if state.mode == &"combat":
-		CombatRules.begin_turn(state, state.current_actor_id())
-	return {"previous_actor_id": actor_id, "actor_id": state.current_actor_id(),
+		events.append_array(CombatRules.begin_turn(state, state.current_actor_id()))
+	var result: Dictionary = {"previous_actor_id": actor_id, "actor_id": state.current_actor_id(),
 		"round_number": state.round_number}
+	if not events.is_empty():
+		result["events"] = events
+	return result
 
 func to_dict() -> Dictionary:
 	return {"type": "end_turn", "actor_id": actor_id}

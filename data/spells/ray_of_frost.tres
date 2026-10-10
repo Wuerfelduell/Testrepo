@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ray_of_frost"
+name_key = &"SPELL_RAY_OF_FROST"
+srd_name = "Ray of Frost"
+level = 0
+school = "evocation"
+casting_time = "action"
+targeting = "creature"
+range_m = 18.0
+resolution = "attack"
+damage_dice = "1d8"
+damage_type = &"cold"
+effect = &"speed_penalty"
+effect_amount = 3.0
+vfx = &"ray_of_frost"

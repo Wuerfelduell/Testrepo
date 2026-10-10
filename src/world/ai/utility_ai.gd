@@ -34,6 +34,8 @@ static func consider(state: GameState, actor_id: String,
 				"target_id": target_id, "destination": origin,
 				"breakdown": {"hit_chance": attack.get("chance", 0.0),
 					"expected_damage": attack.get("expected_damage", 0.0), "kill_chance": kill}})
+	# Spellcasters also score their castable spells (SpellOptions).
+	options.append_array(SpellOptions.consider(state, actor_id, targets, personality))
 	var budget: float = float(actor.get("move_left", 0.0))
 	var speed: float = float(actor.get("speed_m", 0.0))
 	if CombatRules.conditions_for(actor).speed_is_zero():
@@ -133,6 +135,8 @@ static func command_for(option: Dictionary, actor_id: String) -> Command:
 			return DisengageCommand.new(actor_id)
 		&"end_turn":
 			return EndTurnCommand.new(actor_id)
+		&"cast_spell":
+			return SpellOptions.command_for(option, actor_id)
 	return null
 
 static func _targets(state: GameState, actor: Dictionary) -> Array[String]:
@@ -150,7 +154,7 @@ static func _goals(state: GameState, actor_id: String, targets: Array[String],
 	var actor: Dictionary = state.actors[actor_id]
 	var origin: Vector3 = actor.get("position", Vector3.ZERO)
 	var weapon: Dictionary = actor.get("weapon", {})
-	var ranged: bool = weapon.get("ranged", false)
+	var ranged: bool = weapon.get("ranged", false) or SpellOptions.is_caster(actor)
 	var desired: float = personality.preferred_distance if ranged else float(weapon.get("reach", 1.5)) * 0.85
 	for target_id: String in targets:
 		var target_position: Vector3 = state.actors[target_id].get("position", Vector3.ZERO)
@@ -186,7 +190,7 @@ static func _best_offense(state: GameState, actor_id: String, position: Vector3,
 		if bool(preview.get("legal", false)):
 			best = maxf(best, _attack_score(preview,
 				_kill_chance(state.actors[actor_id], state.actors[target_id], preview), personality))
-	return best
+	return maxf(best, SpellOptions.best_offense(preview_state, actor_id, position, targets, personality))
 
 static func _attack_score(preview: Dictionary, kill: float, personality: AIPersonality) -> float:
 	return float(preview.get("chance", 0.0)) * personality.hit_weight \

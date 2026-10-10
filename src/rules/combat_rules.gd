@@ -29,13 +29,17 @@ static func valid_actor_turn(state: GameState, actor_id: String) -> Error:
 static func can_use_action(actor: Dictionary) -> bool:
 	return bool(actor.get("action_available", false)) and conditions_for(actor).can_act()
 
-static func begin_turn(state: GameState, actor_id: String) -> void:
+static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
+	# Spell effects lasting "until the start of your next turn" end before resources refresh.
+	var events: Array[Dictionary] = ActiveEffects.on_turn_start(state, actor_id)
 	var actor: Dictionary = state.actors[actor_id]
 	actor["action_available"] = true
 	actor["bonus_available"] = true
 	actor["reaction_available"] = true
 	actor["disengaged"] = false
-	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else float(actor["speed_m"])
+	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
+		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
+	return events
 
 static func path_length(path: PackedVector3Array) -> float:
 	var result: float = 0.0
@@ -151,12 +155,13 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var cover_value: int = geometry.cover(origin, destination)
 	result["cover"] = cover_value
 	result["distance"] = distance
-	result["armor_class"] = int(target.get("ac", 10)) + cover_value
+	result["armor_class"] = int(target.get("ac", 10)) + cover_value + ActiveEffects.ac_bonus(target)
 	if cover_value >= 99 or not geometry.visible(origin, destination) or \
 			distance > (long_range if ranged else reach) + EPSILON:
 		return result
 	var advantages: Array[StringName] = conditions_for(target).incoming_advantages(distance)
 	var disadvantages: Array[StringName] = conditions_for(attacker).attack_disadvantages()
+	disadvantages.append_array(ActiveEffects.attack_disadvantages(attacker))
 	disadvantages.append_array(conditions_for(target).incoming_disadvantages(distance))
 	if ranged:
 		if origin.y - destination.y >= HEIGHT_ADVANTAGE_M:
@@ -281,16 +286,23 @@ static func serialize_roll(roll: DiceResult) -> Dictionary:
 
 static func resolve_impact(state: GameState, pending: Dictionary,
 		rng: RandomNumberGenerator) -> Array[Dictionary]:
-	var events: Array[Dictionary] = []
 	var attacker_id: String = pending["actor_id"]
-	var target_id: String = pending["target_id"]
+	if not state.actors.has(attacker_id):
+		return []
 	var override_weapon: Dictionary = pending.get("weapon", {})
-	var preview: Dictionary = attack_preview(state, attacker_id, target_id, Vector3.INF, override_weapon)
+	var weapon: Dictionary = state.actors[attacker_id].get("weapon", {}) if override_weapon.is_empty() else override_weapon
+	return resolve_attack(state, attacker_id, pending["target_id"], weapon, rng, pending)
+
+## Rolls the attack. A hit that Shield could turn into a miss pauses here: the
+## target's reaction decision (CastReactionCommand) completes it with finish_attack.
+static func resolve_attack(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
+		rng: RandomNumberGenerator, source_pending: Dictionary = {}) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var preview: Dictionary = attack_preview(state, attacker_id, target_id, Vector3.INF, weapon)
 	if not bool(preview["legal"]):
 		return events
 	var attacker: Dictionary = state.actors[attacker_id]
 	var target: Dictionary = state.actors[target_id]
-	var weapon: Dictionary = attacker["weapon"] if override_weapon.is_empty() else override_weapon
 	var context: RollContext = RollContext.new()
 	# Preview already combines all geometry and condition sources; passing the same
 	# defender again would duplicate source labels. Its unconscious crit is handled below.
@@ -298,38 +310,65 @@ static func resolve_impact(state: GameState, pending: Dictionary,
 	context.disadvantages.assign(preview["disadvantages"])
 	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]),
 		weapon_modifiers(weapon, "attack"), rng, context)
+	ActiveEffects.consume_attack_riders(attacker)
 	if attack.hit and conditions_for(target).has(&"unconscious") and float(preview["distance"]) <= 1.5:
 		attack.critical = true
-	events.append({"type": "roll", "kind": "attack", "actor_id": attacker_id, "target_id": target_id,
-		"roll": serialize_roll(attack.roll), "armor_class": preview["armor_class"],
-		"hit": attack.hit, "critical": attack.critical, "cover": preview["cover"]})
-	if not attack.hit:
+	var outcome: Dictionary = {"roll": serialize_roll(attack.roll), "armor_class": preview["armor_class"],
+		"hit": attack.hit, "critical": attack.critical, "cover": preview["cover"],
+		"natural_20": attack.roll.natural_20}
+	if attack.hit and not attack.roll.natural_20 and attack.roll.total < int(preview["armor_class"]) + 5 \
+			and SpellResolver.shield_option(state, target_id):
+		state.pending = SpellResolver.reaction_pending(target_id, attacker_id, source_pending,
+			{"attack": outcome, "weapon": weapon.duplicate(true), "target_id": target_id})
+		events.append(SpellResolver.reaction_offer_event(state.pending))
 		return events
+	events.append_array(finish_attack(state, attacker_id, target_id, weapon, outcome, rng))
+	return events
+
+static func defenses_for(target: Dictionary) -> DamageRules.Defenses:
 	var defenses: DamageRules.Defenses = DamageRules.Defenses.new()
 	defenses.resistances.assign(target.get("resistances", []))
 	defenses.vulnerabilities.assign(target.get("vulnerabilities", []))
 	defenses.immunities.assign(target.get("immunities", []))
+	return defenses
+
+static func finish_attack(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
+		outcome: Dictionary, rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var target: Dictionary = state.actors[target_id]
+	events.append({"type": "roll", "kind": "attack", "actor_id": attacker_id, "target_id": target_id,
+		"roll": outcome["roll"], "armor_class": outcome["armor_class"],
+		"hit": outcome["hit"], "critical": outcome["critical"], "cover": outcome["cover"],
+		"spell_id": weapon.get("spell_id", "")})
+	if not bool(outcome["hit"]):
+		return events
+	var defenses: DamageRules.Defenses = defenses_for(target)
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
-		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), attack.critical, defenses)
+		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), bool(outcome["critical"]), defenses)
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
 	target["hp"] = maxi(0, int(target["hp"]) - damage.total)
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"amount": damage.total, "damage_type": weapon["damage_type"], "hp": target["hp"]})
+	var total_damage: int = damage.total
 	# A separate typed damage instance: flat riders are never critical dice.
 	for extra: Dictionary in weapon.get("extra_damage", []):
 		var extra_result: DamageRules.Result = DamageRules.apply(int(extra["amount"]),
 			StringName(extra["damage_type"]), defenses)
 		target["hp"] = maxi(0, int(target["hp"]) - extra_result.total)
+		total_damage += extra_result.total
 		var extra_roll: DiceResult = DiceResult.new()
 		extra_roll.add_modifiers([RuleModifier.new(int(extra["amount"]), StringName(extra["source"]))])
 		events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"roll": serialize_roll(extra_roll), "damage_type": extra["damage_type"], "amount": extra_result.total})
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"amount": extra_result.total, "damage_type": extra["damage_type"], "hp": target["hp"]})
+	events.append_array(ActiveEffects.after_damage(state, target_id, total_damage, rng))
 	if int(target["hp"]) <= 0:
 		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
 		events.append_array(check_combat_end(state))
+	else:
+		events.append_array(ActiveEffects.on_hit(state, attacker_id, target_id, weapon))
 	return events
 
 static func check_combat_end(state: GameState) -> Array[Dictionary]:

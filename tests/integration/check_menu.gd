@@ -144,6 +144,9 @@ func _play_until(arena: CombatArena, done: Callable) -> void:
 		if state.mode == &"combat" and state.pending.is_empty() and state.current_actor_id() == "hero" \
 				and not arena.hud.rolls_busy():
 			CommandBus.submit(EndTurnCommand.new("hero"))
+		elif state.pending.get("type") == "reaction" and state.pending.get("actor_id") == "hero":
+			# The passive Wizard declines the Shield reaction offer (prompt 05).
+			CommandBus.submit(CastReactionCommand.new("hero", false))
 		elif state.mode != &"defeat":
 			arena.simulation_step(0.1, true)
 		if step % 4 == 0:

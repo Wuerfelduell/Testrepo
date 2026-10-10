@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"shield"
+name_key = &"SPELL_SHIELD"
+srd_name = "Shield"
+level = 1
+school = "abjuration"
+casting_time = "reaction"
+targeting = "self"
+range_m = 0.0
+resolution = "none"
+effect = &"shield"
+effect_amount = 5.0
+vfx = &"shield"

@@ -14,6 +14,9 @@ static func decode(data: Dictionary) -> Command:
 		"equip_item": command = EquipItemCommand.new()
 		"unequip_item": command = UnequipItemCommand.new()
 		"use_item": command = UseItemCommand.new()
+		"cast_spell": command = CastSpellCommand.new()
+		"cast_reaction": command = CastReactionCommand.new()
+		"use_feature": command = UseFeatureCommand.new()
 		_: return null
 	if command.from_dict(data) != OK:
 		return null

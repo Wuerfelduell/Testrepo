@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"fire_bolt"
+name_key = &"SPELL_FIRE_BOLT"
+srd_name = "Fire Bolt"
+level = 0
+school = "evocation"
+casting_time = "action"
+targeting = "creature"
+range_m = 36.0
+resolution = "attack"
+damage_dice = "1d10"
+damage_type = &"fire"
+vfx = &"fire_bolt"

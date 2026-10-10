@@ -41,5 +41,5 @@ func apply(state: GameState) -> Dictionary:
 		state.turn_order.append(id)
 		events.append({"type": "roll", "kind": "initiative", "actor_id": id,
 			"roll": CombatRules.serialize_roll(entry.roll)})
-	CombatRules.begin_turn(state, state.current_actor_id())
+	events.append_array(CombatRules.begin_turn(state, state.current_actor_id()))
 	return {"events": events, "turn_order": state.turn_order.duplicate(), "tie_breaks": initiative.tie_breaks}
