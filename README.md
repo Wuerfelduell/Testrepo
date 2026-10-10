@@ -139,3 +139,18 @@ GitHub Actions provides `TheRPG-Windows` and `Arena-previews` artifacts.
 
 In the arena, I opens the inventory (equip weapons and armour, drink potions) and C the
 character sheet. Details and rules: [docs/UI.md](docs/UI.md) section 9.
+
+## Menü, Heldenerstellung und Ironman (Auftrag 06)
+
+**F5** startet jetzt im Hauptmenü (`scenes/menu/main_menu.tscn`): NEUES SPIEL,
+FORTSETZEN (nur mit Speicherstand), OPTIONEN, BEENDEN. Die Heldenerstellung bietet
+Kämpfer und Magier, Körper, Aussehen (aus `assets/characters/hero_looks.json`, sonst die
+vorhandenen Modelle) und Namen. Im Spiel öffnet **Esc** das Pausenmenü mit
+„Speichern und ins Menü“. Ironman: ein einziger Speicherstand in `user://ironman.save`,
+geschrieben nur beim Verlassen, gelöscht beim Tod. Optionen liegen in `user://settings.cfg`.
+Die Arena allein startet weiter mit `scenes/arena/arena.tscn` und dem Test-Kämpfer.
+
+```sh
+godot --headless tests/integration/check_menu.tscn   # ganzer Ablauf bis zum Tod
+bash tests/integration/check_menu_capture.sh godot    # Bilder (braucht xvfb-run)
+```

@@ -2,7 +2,7 @@ config_version=5
 
 [application]
 config/name="The RPG"
-run/main_scene="res://scenes/arena/arena.tscn"
+run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
 [autoload]
@@ -10,6 +10,7 @@ Game="*res://src/core/game.gd"
 EventBus="*res://src/core/event_bus.gd"
 Rng="*res://src/core/rng.gd"
 CommandBus="*res://src/core/command_bus.gd"
+Settings="*res://src/ui/options_settings.gd"
 
 [display]
 window/size/viewport_width=1920

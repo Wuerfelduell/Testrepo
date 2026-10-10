@@ -7,7 +7,7 @@ mkdir -p build
 for panel in inventory character; do
   status=0
   timeout 90 xvfb-run -a -s '-screen 0 1920x1080x24' \
-    env LIBGL_ALWAYS_SOFTWARE=1 "$godot_bin" --path . --rendering-method gl_compatibility \
+    env LIBGL_ALWAYS_SOFTWARE=1 "$godot_bin" --path . res://scenes/arena/arena.tscn --rendering-method gl_compatibility \
     --audio-driver Dummy --disable-vsync --resolution 1920x1080 \
     -- --arena-capture="$PWD/build/ui-$panel.png" --ui-open="$panel" \
     > "build/ui-$panel.log" 2>&1 || status=$?

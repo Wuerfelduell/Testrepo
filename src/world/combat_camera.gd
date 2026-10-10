@@ -6,6 +6,8 @@ const MIN_ZOOM: float = 9.0
 const MAX_ZOOM: float = 34.0
 const PAN_SPEED: float = 12.0
 const ROTATION_SPEED: float = 1.3
+## Options scale this (camera rotation speed); ROTATION_SPEED stays the default.
+var rotation_speed: float = ROTATION_SPEED
 
 var camera: Camera3D
 var _follow_position: Vector3 = Vector3.ZERO
@@ -51,7 +53,7 @@ func _process(delta: float) -> void:
 	if camera == null:
 		return
 	var rotate_axis: float = Input.get_axis("camera_rotate_left", "camera_rotate_right")
-	rotation.y += rotate_axis * ROTATION_SPEED * delta
+	rotation.y += rotate_axis * rotation_speed * delta
 	var pan: Vector2 = Input.get_vector("camera_pan_left", "camera_pan_right", "camera_pan_forward", "camera_pan_back")
 	_pan_offset += (global_basis.x * pan.x + global_basis.z * pan.y) * PAN_SPEED * delta * camera.size / 22.0
 	var target: Vector3 = _follow_position + _pan_offset

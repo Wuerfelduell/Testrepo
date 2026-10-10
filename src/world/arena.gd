@@ -23,6 +23,9 @@ var _capture_combat: bool = false
 var auto_play: bool = false
 var _critical_focus: float = 0.0
 var _attack_mode: bool = false
+var death_screen: DeathScreen
+var pause_menu: PauseMenu
+var _death_info: Dictionary = {}
 
 func _ready() -> void:
 	camera_rig = CombatCamera.new()
@@ -33,6 +36,9 @@ func _ready() -> void:
 	menus = GameMenus.new()
 	add_child(menus)
 	menus.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
+	_apply_settings()
+	if has_node("/root/Settings"):
+		get_node("/root/Settings").changed.connect(_apply_settings)
 	director = AIDirector.new()
 	path_display = MeshInstance3D.new()
 	add_child(path_display)
@@ -163,6 +169,8 @@ func _process(delta: float) -> void:
 	if _preview_time >= 0.06:
 		_preview_time = 0.0
 		_update_hover()
+	if state.mode == &"defeat" and death_screen == null and not hud.rolls_busy():
+		_show_death_screen(state)
 	if _capture_frames > 0:
 		_capture_frames -= 1
 		if _capture_frames == 0:
@@ -178,8 +186,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("combat_debug"):
 		hud.toggle_debug()
 	elif event.is_action_pressed("cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
+		var was_targeting: bool = _attack_mode
 		_set_attack_mode(false)
 		_clear_hover()
+		# Esc with nothing to cancel opens the pause menu (save and quit lives there).
+		if event.is_action_pressed("cancel") and not was_targeting and death_screen == null:
+			open_pause_menu()
 	elif event.is_action_pressed("combat_attack"):
 		_action_requested("attack")
 	elif event.is_action_pressed("end_turn"):
@@ -199,7 +211,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _action_requested(kind: String) -> void:
 	if kind == "main_menu":
-		get_tree().change_scene_to_file("res://scenes/showcase/asset_showcase.tscn")
+		RunFlow.back_to_menu(get_tree())
 		return
 	if not _can_control():
 		return
@@ -301,6 +313,7 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 			_swap_weapon_model(actors[str(event["actor_id"])], str(event.get("model", "")))
 		for actor: CombatActor in actors.values():
 			actor.react_to_event(event, actors)
+		_run_event(event)
 	hud.consume_events(events)
 	hud.update_state(Game.state)
 
@@ -332,3 +345,76 @@ func _capture() -> void:
 	var captured: Image = get_viewport().get_texture().get_image()
 	var result: Error = captured.save_png(_capture_path)
 	get_tree().quit(0 if result == OK else 1)
+
+## Ironman bookkeeping: death deletes the save, a cleared area pays XP.
+func _run_event(event: Dictionary) -> void:
+	match String(event.get("type", "")):
+		"death":
+			if String(event.get("actor_id", "")) == "hero":
+				var state: GameState = Game.state
+				var killer: Dictionary = state.actors.get(String(event.get("killer_id", "")), {})
+				_death_info = {"killer_name": tr(String(killer.get("name_key", ""))) if not killer.is_empty() else "",
+					"round": state.round_number}
+		"combat_end":
+			if String(event.get("mode", "")) == "defeat":
+				RunFlow.on_defeat()
+			elif String(event.get("mode", "")) == "exploration":
+				# CommandBus is still inside this submit; award right after it.
+				CommandBus.submit.call_deferred(AwardVictoryXpCommand.new())
+		"xp_awarded":
+			var banner: AreaBanner = AreaBanner.new()
+			add_child(banner)
+			banner.setup(event)
+
+func _show_death_screen(state: GameState) -> void:
+	RunFlow.on_defeat()
+	var hero: Dictionary = state.actors.get("hero", {})
+	var info: Dictionary = _death_info.duplicate()
+	info["name"] = tr(String(hero.get("name_key", "")))
+	info["class_id"] = String(hero.get("class_id", "fighter"))
+	info["level"] = int(hero.get("level", 1))
+	info["xp"] = int(hero.get("xp", 0))
+	info["round"] = int(info.get("round", state.round_number))
+	if pause_menu != null:
+		close_pause_menu()
+	# The death screen replaces the HUD's old leave-arena panel.
+	hud.visible = false
+	if menus != null:
+		menus.close_all()
+		menus.visible = false
+	death_screen = DeathScreen.new()
+	add_child(death_screen)
+	death_screen.setup(info)
+	death_screen.main_menu_requested.connect(func() -> void: RunFlow.back_to_menu(get_tree()))
+
+func open_pause_menu() -> void:
+	if pause_menu != null:
+		close_pause_menu()
+		return
+	pause_menu = PauseMenu.new()
+	add_child(pause_menu)
+	pause_menu.resume_requested.connect(close_pause_menu)
+	pause_menu.save_and_quit_to_menu.connect(func() -> void: RunFlow.save_and_leave_to_menu(get_tree()))
+	pause_menu.save_and_quit_game.connect(func() -> void:
+		RunFlow.save_run()
+		get_tree().quit())
+	get_tree().paused = true
+
+func close_pause_menu() -> void:
+	if pause_menu != null:
+		pause_menu.queue_free()
+		pause_menu = null
+	get_tree().paused = false
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		RunFlow.save_run()
+
+func _apply_settings() -> void:
+	var settings: Node = get_node_or_null("/root/Settings")
+	if settings == null:
+		return
+	if hud != null and hud.dice_popup != null:
+		hud.dice_popup.speed = settings.dice_speed_value()
+	if camera_rig != null:
+		camera_rig.rotation_speed = CombatCamera.ROTATION_SPEED * float(settings.camera_rotation_speed)

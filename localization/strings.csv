@@ -289,3 +289,85 @@ SHEET_SKILL_RELIGION,Religion
 SHEET_SKILL_SLEIGHT_OF_HAND,Sleight of Hand
 SHEET_SKILL_STEALTH,Stealth
 SHEET_SKILL_SURVIVAL,Survival
+MENU_TITLE,THE RPG
+MENU_SUBTITLE,A dark descent. One life. No second chances.
+MENU_NEW_GAME,New Game
+MENU_CONTINUE,Continue
+MENU_OPTIONS,Options
+MENU_QUIT,Quit
+MENU_BACK,Back
+MENU_OK,OK
+MENU_IRONMAN_HINT,"Ironman: one save, written when you leave. Death erases it."
+SAVE_ERROR_CORRUPT,The saved run is damaged and cannot be loaded.
+SAVE_ERROR_NEWER_VERSION,The saved run was made by a newer version of the game and cannot be loaded.
+SAVE_ERROR_MISSING,There is no saved run.
+CREATION_TITLE,Create your hero
+CREATION_CLASS,Class
+CREATION_BODY,Body
+CREATION_BODY_MALE,Male
+CREATION_BODY_FEMALE,Female
+CREATION_LOOK,Look
+CREATION_LOOK_COUNTER,%d / %d
+CREATION_NAME,Name
+CREATION_NAME_PLACEHOLDER,Enter a name
+CREATION_BEGIN,Begin
+CREATION_COMING_LATER,%s (later)
+CREATION_COMING_LATER_HINT,Coming later
+CREATION_M1_NOTE,"Ability scores use the standard array, set by class. Point buy and skill choices come later."
+CREATION_PERMADEATH,"When you die, this run is over."
+CREATION_PERMADEATH_DETAIL,There is one save. It is written when you leave and deleted when you die.
+CREATION_OVERWRITES_SAVE,Your current saved run will be lost.
+CREATION_ERROR,This hero could not be created.
+CREATION_STAT_HP,Hit points: %d
+CREATION_STAT_AC,Armour class: %d
+CREATION_STAT_MAIN,Main ability: %s
+CREATION_STAT_SKILLS,Skills: %s
+CREATION_ABILITY_STR,Strength
+CREATION_ABILITY_DEX,Dexterity
+CREATION_ABILITY_CON,Constitution
+CREATION_ABILITY_INT,Intelligence
+CREATION_ABILITY_WIS,Wisdom
+CREATION_ABILITY_CHA,Charisma
+CREATION_CLASS_FIGHTER,Fighter
+CREATION_CLASS_WIZARD,Wizard
+CREATION_CLASS_BARBARIAN,Barbarian
+CREATION_CLASS_BARD,Bard
+CREATION_CLASS_CLERIC,Cleric
+CREATION_CLASS_DRUID,Druid
+CREATION_CLASS_MONK,Monk
+CREATION_CLASS_PALADIN,Paladin
+CREATION_CLASS_RANGER,Ranger
+CREATION_CLASS_ROGUE,Rogue
+CREATION_CLASS_SORCERER,Sorcerer
+CREATION_CLASS_WARLOCK,Warlock
+CREATION_DESCRIPTION_FIGHTER,"A trained killer in heavy armour. Chain mail, shield and longsword. Hard to bring down, deadly up close."
+CREATION_DESCRIPTION_WIZARD,A scholar of the arcane who bends the world with spells. Frail and unarmoured: one bad step and the run is over.
+WEAPON_QUARTERSTAFF,Quarterstaff
+OPTIONS_TITLE,Options
+OPTIONS_RESOLUTION,Resolution
+OPTIONS_FULLSCREEN,Fullscreen
+OPTIONS_VOLUME_MASTER,Master volume
+OPTIONS_VOLUME_MUSIC,Music volume
+OPTIONS_VOLUME_EFFECTS,Effects volume
+OPTIONS_DICE_SPEED,Dice popup speed
+OPTIONS_DICE_SLOW,Slow
+OPTIONS_DICE_NORMAL,Normal
+OPTIONS_DICE_FAST,Fast
+OPTIONS_DICE_OFF,Off
+OPTIONS_CAMERA_SPEED,Camera rotation speed
+PAUSE_TITLE,Paused
+PAUSE_RESUME,Resume
+PAUSE_SAVE_MENU,Save and quit to menu
+PAUSE_SAVE_QUIT,Save and quit game
+PAUSE_IRONMAN_HINT,Ironman: the run is only saved when you leave.
+DEATH_TITLE,YOU DIED
+DEATH_CLASS_LEVEL,"%s, level %d"
+DEATH_CAUSE,"Slain by %s, round %d"
+DEATH_CAUSE_UNKNOWN,Died in round %d
+DEATH_XP,XP earned: %d
+DEATH_SAVE_DELETED,This run is over. The save has been deleted.
+AREA_CLEARED,Area cleared
+AREA_XP,+%d XP · %s: %s
+AREA_LEVEL_UP,Level %d reached
+XP_REASON_AREA_CLEARED,Every enemy defeated
+DEATH_MAIN_MENU,Main Menu

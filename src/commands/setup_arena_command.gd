@@ -9,8 +9,12 @@ const MONSTERS: Array[String] = [
 ]
 const ENEMY_POSITIONS: Array[Vector3] = [Vector3(-5, 0, -5), Vector3(5, 2, -5), Vector3(0, 0, -9)]
 
-func _init() -> void:
+## Optional hero record from character creation (HeroFactory); empty = test Fighter.
+var hero_record: Dictionary = {}
+
+func _init(p_hero_record: Dictionary = {}) -> void:
 	super("arena")
+	hero_record = p_hero_record.duplicate(true)
 
 func validate(state: GameState) -> Error:
 	if not state.actors.is_empty() or state.mode != &"exploration" or \
@@ -20,10 +24,12 @@ func validate(state: GameState) -> Error:
 		var monster: MonsterDefinition = load(path) as MonsterDefinition
 		if monster == null or not monster.is_valid():
 			return ERR_INVALID_DATA
+	if not hero_record.is_empty():
+		return OK if HeroFactory.valid_record(hero_record) else ERR_INVALID_DATA
 	return OK if not _hero().is_empty() else ERR_INVALID_DATA
 
 func apply(state: GameState) -> Dictionary:
-	state.actors["hero"] = _hero()
+	state.actors["hero"] = _hero() if hero_record.is_empty() else hero_record.duplicate(true)
 	for index: int in MONSTERS.size():
 		var definition: MonsterDefinition = load(MONSTERS[index]) as MonsterDefinition
 		var id: String = String(definition.id)
