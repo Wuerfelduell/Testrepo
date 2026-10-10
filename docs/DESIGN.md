@@ -91,6 +91,15 @@ Multiplayer is not built now, but two rules from day one keep it possible later:
 2. **Game state is separate from presentation.** The rules core never touches nodes, UI or
    animations; scenes only display the state.
 
+### Dialogue rules (owner, 10-10-2026)
+- Style reference: the owner's innkeeper dialogue in the old repo (dark, dry black humour,
+  informal "du" in German). That dialogue itself is NOT used in this game.
+- Every NPC can be talked to: at least 2-4 lines. Important NPCs get full branching trees.
+- No answer is marked as recommended, right or wrong. Every choice is valid and simply has
+  consequences (see the XP rule: good decisions and killing everyone both give XP).
+- The owner writes in German; Claude converts to the game format and writes the English base
+  version, keeping the German text for the later translation.
+
 ## 5. Milestones
 
 Each milestone ends with a playable build, a Grok review (owner sends the ZIP) and a short
