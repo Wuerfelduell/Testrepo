@@ -151,7 +151,7 @@ func _next() -> void:
 	var roll: Dictionary = _current.get("roll", {})
 	var kind: String = String(_current.get("kind", "attack"))
 	var actor_name: String = tr(String(_current.get("actor_name_key", "COMBAT_UNKNOWN_ACTOR")))
-	_title.text = tr("COMBAT_ROLL_TITLE") % [actor_name, tr("COMBAT_ROLL_" + kind.to_upper())]
+	_title.text = tr("COMBAT_ROLL_TITLE") % [actor_name, String(_current.get("title_kind", tr("COMBAT_ROLL_" + kind.to_upper())))]
 	_style.border_color = Color("b99859")
 	_style.shadow_color = Color(0, 0, 0, 0.6)
 	_style.shadow_size = 20
@@ -226,6 +226,14 @@ func _reveal() -> void:
 			_style.border_color = Color("fa6761")
 			_style.shadow_color = Color(0.9, 0.1, 0.1, 0.5)
 		_outcome.text = tr("COMBAT_ROLL_VS_AC") % [total, int(_current.get("armor_class", 10)), tr(result_key)]
+	elif kind == "save":
+		# Saving throws read like attacks: the target's roll against the caster's DC.
+		var saved: bool = bool(_current.get("success", false))
+		if bool(_current.get("automatic", false)):
+			_outcome.text = tr("COMBAT_SAVE_AUTOMATIC") % source_name(String(_current.get("reason", "unconscious")))
+		else:
+			_outcome.text = tr("COMBAT_ROLL_VS_DC") % [total, int(_current.get("dc", 10)), tr("COMBAT_SAVE_SUCCESS" if saved else "COMBAT_SAVE_FAIL")]
+		_style.border_color = Color("9ed5ac") if saved else Color("ed867d")
 	else:
 		_outcome.text = tr("COMBAT_ROLL_TOTAL") % total
 	_outcome.add_theme_color_override("font_color", _style.border_color)

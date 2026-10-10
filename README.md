@@ -154,3 +154,21 @@ Die Arena allein startet weiter mit `scenes/arena/arena.tscn` und dem Test-Kämp
 godot --headless tests/integration/check_menu.tscn   # ganzer Ablauf bis zum Tod
 bash tests/integration/check_menu_capture.sh godot    # Bilder (braucht xvfb-run)
 ```
+
+## Spells and class features (prompt 05)
+
+The Wizard casts Fire Bolt, Ray of Frost, Magic Missile, Burning Hands, Sleep and, as a
+reaction, Shield (SRD 5.2, data in `data/spells/`, rules in `src/rules/spells/`). In the arena
+the spell buttons sit above the action bar (keys **4-9**, slot pips show what is left);
+clicking one shows the range, the area template on the ground, who is caught (red enemy,
+yellow ally) and the hit chance or "DC 12 DEX save" before you cast. When an enemy hits the
+Wizard and Shield would turn it into a miss, the game asks before any damage. The Fighter
+gets Second Wind (key 4, bonus action) and Weapon Mastery (Sap on the longsword). **F4**
+outside combat swaps the arena hero between Fighter and Wizard.
+
+```sh
+godot --headless tests/integration/check_spells.tscn   # auto-played Wizard fight
+bash tests/integration/capture_spells.sh godot          # docs/arena-spell-*.png (needs xvfb-run)
+```
+
+![Burning Hands targeted](docs/arena-spell-target.png)

@@ -26,6 +26,8 @@ var _attack_mode: bool = false
 var death_screen: DeathScreen
 var pause_menu: PauseMenu
 var _death_info: Dictionary = {}
+var spell_targeting: SpellTargeting
+var spell_vfx: SpellVFX
 
 func _ready() -> void:
 	camera_rig = CombatCamera.new()
@@ -40,6 +42,19 @@ func _ready() -> void:
 	if has_node("/root/Settings"):
 		get_node("/root/Settings").changed.connect(_apply_settings)
 	director = AIDirector.new()
+	# Spells (prompt 05): targeting templates, spell effects, hotbar and Shield prompt.
+	spell_targeting = SpellTargeting.new()
+	spell_targeting.hud = hud
+	add_child(spell_targeting)
+	spell_targeting.command_ready.connect(func(command: Command) -> void: CommandBus.submit(command))
+	spell_vfx = SpellVFX.new()
+	spell_vfx.actors = actors
+	add_child(spell_vfx)
+	hud.spell_requested.connect(_spell_requested)
+	hud.feature_requested.connect(func(feature_id: String) -> void:
+		if _can_control():
+			CommandBus.submit(UseFeatureCommand.new("hero", feature_id)))
+	hud.reaction_answered.connect(func(accept: bool) -> void: CommandBus.submit(CastReactionCommand.new("hero", accept)))
 	path_display = MeshInstance3D.new()
 	add_child(path_display)
 	space = ArenaSpace.new()
@@ -113,6 +128,12 @@ func simulation_step(delta: float, fast: bool = false) -> void:
 	var state: GameState = Game.state
 	if state.mode == &"defeat":
 		return
+	if state.pending.get("type") == "reaction":
+		# The hero answers in the HUD; enemies (and an auto-played hero) always take Shield.
+		var reactor: String = String(state.pending.get("actor_id", ""))
+		if state.actors.get(reactor, {}).get("team") != "hero" or auto_play:
+			CommandBus.submit(CastReactionCommand.new(reactor, SpellResolver.shield_option(state, reactor)))
+		return
 	if not state.pending.is_empty():
 		CommandBus.submit(AdvanceCombatCommand.new(minf(delta, 0.1)))
 		state = Game.state
@@ -157,7 +178,7 @@ func _process(delta: float) -> void:
 	var state: GameState = Game.state
 	for id: String in actors:
 		var actor: CombatActor = actors[id]
-		actor.update_actor(state.actors[id], state.pending, delta)
+		actor.update_actor(state.actors[id], SpellVFX.animation_pending(state.pending), delta)
 		actor.set_selected(id == state.current_actor_id() if state.mode == &"combat" else id == "hero")
 	var followed: String = state.current_actor_id() if state.mode == &"combat" else "hero"
 	if not state.pending.is_empty() and state.pending.get("type") == "move":
@@ -165,6 +186,9 @@ func _process(delta: float) -> void:
 	if state.actors.has(followed):
 		camera_rig.follow(state.actors[followed]["position"])
 	_followed_actor = followed
+	spell_vfx.sync(state, delta)
+	if spell_targeting.is_active() and not _can_control():
+		spell_targeting.cancel()
 	_preview_time += delta
 	if _preview_time >= 0.06:
 		_preview_time = 0.0
@@ -183,7 +207,9 @@ func _can_control() -> bool:
 func _unhandled_input(event: InputEvent) -> void:
 	if not ready_for_input:
 		return
-	if event.is_action_pressed("combat_debug"):
+	if _spell_input(event):
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("combat_debug"):
 		hud.toggle_debug()
 	elif event.is_action_pressed("cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
 		var was_targeting: bool = _attack_mode
@@ -219,7 +245,9 @@ func _action_requested(kind: String) -> void:
 		"dash": CommandBus.submit(DashCommand.new("hero"))
 		"disengage": CommandBus.submit(DisengageCommand.new("hero"))
 		"end_turn": CommandBus.submit(EndTurnCommand.new("hero"))
-		"attack": _set_attack_mode(true)
+		"attack":
+			spell_targeting.cancel()
+			_set_attack_mode(true)
 
 func _update_hover() -> void:
 	if not _can_control() or get_viewport().gui_get_hovered_control() != null or (menus != null and menus.is_open()):
@@ -236,6 +264,10 @@ func _update_hover() -> void:
 	var collider: Object = hit["collider"]
 	var id: String = str(collider.get_meta("actor_id", ""))
 	var state: GameState = Game.state
+	if spell_targeting.is_active():
+		path_display.mesh = null
+		spell_targeting.hover(id if state.actors.has(id) and int(state.actors[id]["hp"]) > 0 else "", hit["position"])
+		return
 	if not id.is_empty() and id != "hero" and int(state.actors[id]["hp"]) > 0:
 		hovered_actor = id
 		hovered_ground = Vector3.INF
@@ -309,6 +341,16 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 			if actors.has(source) and actors.has(target):
 				actors[source].aim_at(actors[target].global_position)
 				camera_rig.focus_target(actors[target].global_position, 0.65)
+		if event.get("type") == "start_spell" and actors.has(str(event["actor_id"])):
+			var caster: CombatActor = actors[str(event["actor_id"])]
+			var aim: Vector3 = event["point"]
+			if not event["target_ids"].is_empty() and actors.has(str(event["target_ids"][0])):
+				aim = actors[str(event["target_ids"][0])].global_position
+			caster.aim_at(aim)
+			camera_rig.focus_target(aim, 0.65)
+		spell_vfx.on_event(event)
+		if event.get("type") == "hero_swapped":
+			_rebuild_hero()
 		if event.get("type") == "equipment_changed" and actors.has(str(event["actor_id"])):
 			_swap_weapon_model(actors[str(event["actor_id"])], str(event.get("model", "")))
 		for actor: CombatActor in actors.values():
@@ -316,6 +358,60 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 		_run_event(event)
 	hud.consume_events(events)
 	hud.update_state(Game.state)
+
+## Spell hotkeys (4-9 follow the hotbar), F4 hero switch, and clicks while targeting.
+func _spell_input(event: InputEvent) -> bool:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key: Key = (event as InputEventKey).physical_keycode
+		if key == KEY_F4:
+			# Arena test switch until character creation is used everywhere (prompt 06).
+			if CommandBus.submit(DebugSwapHeroCommand.new()) == OK:
+				spell_targeting.cancel()
+			return true
+		if key >= KEY_4 and key <= KEY_9:
+			var entries: Array[String] = hud.hotbar_entries()
+			var index: int = key - KEY_4
+			if index < entries.size():
+				var entry: String = entries[index]
+				if entry.begins_with("feature:"):
+					if _can_control():
+						CommandBus.submit(UseFeatureCommand.new("hero", entry.get_slice(":", 1)))
+				else:
+					_spell_requested(entry.get_slice(":", 1))
+				return true
+	if not spell_targeting.is_active():
+		return false
+	if event.is_action_pressed("cancel") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed):
+		spell_targeting.cancel()
+		return true
+	if event.is_action_pressed("select") and _can_control():
+		_update_hover()
+		spell_targeting.click()
+		return true
+	return false
+
+func _spell_requested(spell_id: String) -> void:
+	if not _can_control() or Game.state.mode != &"combat":
+		return
+	if spell_targeting.spell_id == spell_id:
+		spell_targeting.cancel()
+		return
+	_set_attack_mode(false)
+	_clear_hover()
+	spell_targeting.cancel()
+	spell_targeting.begin(spell_id)
+
+## The F4 switch replaced the hero record: rebuild its view and give the new class its kit.
+func _rebuild_hero() -> void:
+	var hero_record: Dictionary = Game.state.actors.get("hero", {})
+	if not EquipmentRules.has_inventory(hero_record) and hero_record.has("class_id"):
+		CommandBus.submit.call_deferred(SetupInventoryCommand.new("hero"))
+	if actors.has("hero"):
+		actors["hero"].queue_free()
+	var actor: CombatActor = CombatActor.new()
+	add_child(actor)
+	actor.setup_actor(hero_record)
+	actors["hero"] = actor
 
 func _swap_weapon_model(actor: CombatActor, model_path: String) -> void:
 	if actor.weapon_attachment != null:

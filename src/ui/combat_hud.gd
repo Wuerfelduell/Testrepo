@@ -6,6 +6,9 @@ signal action_requested(kind: String)
 signal actor_selected(actor_id: String)
 signal skip_roll()
 signal rolls_finished()
+signal spell_requested(spell_id: String)
+signal feature_requested(feature_id: String)
+signal reaction_answered(accept: bool)
 
 const GOLD: Color = Color("dab776")
 const INK: Color = Color(0.025, 0.035, 0.05, 0.92)
@@ -93,6 +96,15 @@ var _portrait_signature: int = -1
 var _glow_time: float = 0.0
 var _can_end: bool = false
 var _action_left: bool = false
+var _spell_panel: Panel
+var _spell_row: HBoxContainer
+var _spell_buttons: Dictionary = {}
+var _spell_order: Array[String] = []
+var _spell_signature: int = -1
+var _spell_mode: String = ""
+var _reaction_panel: Panel
+var _reaction_text: Label
+var _reaction_accept: Button
 
 func _ready() -> void:
 	layer = 10
@@ -103,6 +115,7 @@ func _ready() -> void:
 	_build_initiative()
 	_build_resources()
 	_build_hotbar()
+	_build_spellbar()
 	_build_log()
 	_build_target()
 	_build_debug()
@@ -112,6 +125,7 @@ func _ready() -> void:
 	_root.add_child(dice_popup)
 	dice_popup.rolls_finished.connect(func() -> void: rolls_finished.emit())
 	_build_death()
+	_build_reaction()
 	get_viewport().size_changed.connect(_resize)
 	_resize()
 
@@ -142,6 +156,8 @@ func update_state(state: GameState) -> void:
 	_move_bar.value = float(hero.get("move_left", 0.0))
 	_move_label.text = tr("COMBAT_FREE_MOVEMENT") if state.mode == &"exploration" else tr("COMBAT_MOVEMENT") % [float(hero.get("move_left", 0.0)), float(hero.get("speed_m", 0.0))]
 	_resource_label.text = tr("COMBAT_RESOURCES") % [_pip(bool(hero.get("action_available", false))), _pip(bool(hero.get("bonus_available", false))), _pip(bool(hero.get("reaction_available", false)))]
+	if hero.has("spell_slots"):
+		_resource_label.text += "   " + tr("COMBAT_SLOTS") % slot_pips(hero, 1)
 	_conditions.text = tr("COMBAT_DISENGAGED") if bool(hero.get("disengaged", false)) else _condition_text(hero)
 	var active: Dictionary = state.actors.get(current_id, {})
 	var pending: Dictionary = state.get("pending") as Dictionary
@@ -153,6 +169,8 @@ func update_state(state: GameState) -> void:
 		button.disabled = not player_turn or not _action_left
 		button.tooltip_text = tr("COMBAT_COST_ACTION") if not button.disabled else tr("COMBAT_NO_ACTION" if player_turn else "COMBAT_WAIT_TURN")
 	_end_button.disabled = not player_turn
+	_update_spellbar(state, hero, player_turn)
+	_update_reaction(state)
 	_death.visible = state.mode == &"defeat" and not dice_popup.is_busy()
 	if state.mode == &"defeat":
 		_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(hero), tr("CLASS_FIGHTER"), int(hero.get("level", 1)), _death_killer if not _death_killer.is_empty() else tr("COMBAT_UNKNOWN_ACTOR"), state.round_number, int(hero.get("xp", 0))]
@@ -244,11 +262,16 @@ func consume_events(events: Array[Dictionary]) -> void:
 			"roll":
 				var description: Dictionary = event.duplicate(true)
 				description["actor_name_key"] = actor.get("name_key", "COMBAT_UNKNOWN_ACTOR")
-				dice_popup.enqueue(description)
 				var roll: Dictionary = event.get("roll", {})
 				var kind: String = String(event.get("kind", "attack"))
 				var total: int = int(roll.get("total", 0))
 				var detail: String = tr("COMBAT_LOG_ROLL") % [_actor_name(actor), tr("COMBAT_ROLL_" + kind.to_upper()), total]
+				if kind == "save":
+					var ability: String = tr("ABILITY_" + String(event.get("ability", "")).to_upper())
+					description["title_kind"] = tr("COMBAT_ROLL_SAVE") % ability
+					detail = tr("COMBAT_LOG_SAVE") % [_actor_name(actor), ability,
+						tr("COMBAT_SAVE_SUCCESS" if bool(event.get("success", false)) else "COMBAT_SAVE_FAIL")]
+				dice_popup.enqueue(description)
 				if kind == "attack":
 					detail += " · " + tr("COMBAT_LOG_HIT") % [_actor_name(target), tr("COMBAT_HIT" if bool(event.get("hit", false)) else "COMBAT_MISS")]
 				_append_log(detail)
@@ -262,6 +285,26 @@ func consume_events(events: Array[Dictionary]) -> void:
 					_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(actor), tr("CLASS_FIGHTER"), int(actor.get("level", 1)), _death_killer, _state.round_number, int(actor.get("xp", 0))]
 			"combat_end":
 				_append_log(tr("COMBAT_DEFEAT" if String(event.get("mode", "")) == "defeat" else "COMBAT_VICTORY"))
+			"start_spell":
+				var spell: SpellDefinition = SpellBook.get_spell(String(event.get("spell_id", "")))
+				if spell != null:
+					_append_log(tr("COMBAT_LOG_CAST") % [_actor_name(actor), tr(String(spell.name_key))])
+			"cast_reaction":
+				_append_log(tr("COMBAT_LOG_SHIELD") % _actor_name(actor))
+			"spell_blocked":
+				_append_log(tr("COMBAT_LOG_BLOCKED") % _actor_name(actor))
+			"condition":
+				_append_log(tr("COMBAT_LOG_UNCONSCIOUS" if String(event.get("condition", "")) == "unconscious" else "COMBAT_LOG_ASLEEP") % _actor_name(actor))
+			"condition_end":
+				_append_log(tr("COMBAT_LOG_WAKES") % _actor_name(actor))
+			"concentration_end":
+				var ended: SpellDefinition = SpellBook.get_spell(String(event.get("spell_id", "")))
+				_append_log(tr("COMBAT_LOG_CONCENTRATION_END") % [_actor_name(actor), tr(String(ended.name_key)) if ended != null else ""])
+			"heal":
+				_append_log(tr("COMBAT_LOG_HEAL") % [_actor_name(actor), int(event.get("amount", 0))])
+			"effect":
+				if String(event.get("kind", "")) == "sap":
+					_append_log(tr("COMBAT_LOG_SAPPED") % _actor_name(actor))
 			"start_attack":
 				if bool(event.get("opportunity", false)):
 					_append_log(tr("COMBAT_LOG_OPPORTUNITY") % [_actor_name(actor), _actor_name(target)])
@@ -287,6 +330,159 @@ func is_roll_busy() -> bool:
 
 func rolls_busy() -> bool:
 	return is_roll_busy()
+
+## Spell and feature buttons for the hero, rebuilt only when the hero's kit changes.
+func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> void:
+	var entries: Array[String] = []
+	if hero.get("features", {}).has("second_wind"):
+		entries.append("feature:second_wind")
+	for spell_id: Variant in hero.get("spells", []):
+		entries.append("spell:" + String(spell_id))
+	var signature: int = hash(entries)
+	if signature != _spell_signature:
+		_spell_signature = signature
+		for child: Node in _spell_row.get_children():
+			_spell_row.remove_child(child)
+			child.queue_free()
+		_spell_buttons.clear()
+		_spell_order.clear()
+		for index: int in entries.size():
+			var entry: String = entries[index]
+			var button: Button = _button(_spell_row, Rect2(0, 0, 135, 62), "")
+			button.custom_minimum_size = Vector2(135, 62)
+			button.add_theme_font_size_override("font_size", 14)
+			button.clip_text = true
+			var kind: String = entry.get_slice(":", 0)
+			var id: String = entry.get_slice(":", 1)
+			if kind == "feature":
+				button.pressed.connect(func() -> void: feature_requested.emit(id))
+			else:
+				button.pressed.connect(func() -> void: spell_requested.emit(id))
+			_spell_buttons[entry] = button
+			_spell_order.append(entry)
+	_spell_panel.visible = not entries.is_empty()
+	var hero_id: String = String(hero.get("id", "hero"))
+	for index: int in _spell_order.size():
+		var entry: String = _spell_order[index]
+		var button: Button = _spell_buttons[entry]
+		var id: String = entry.get_slice(":", 1)
+		var hotkey: String = str(index + 4) if index < 6 else ""
+		var reason: String = ""
+		if entry.begins_with("feature:"):
+			var feature: Dictionary = hero["features"][id]
+			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("FEATURE_SECOND_WIND_BUTTON") % [int(feature.get("uses", 0)), int(feature.get("max", 0))]]
+			if not player_turn:
+				reason = "COMBAT_WAIT_TURN"
+			elif not bool(hero.get("bonus_available", false)):
+				reason = "COMBAT_NO_BONUS"
+			elif int(feature.get("uses", 0)) <= 0:
+				reason = "FEATURE_NO_USES"
+			button.disabled = not reason.is_empty()
+			button.tooltip_text = tr(reason) if not reason.is_empty() else tr("FEATURE_SECOND_WIND_HINT") % int(hero.get("level", 1))
+			continue
+		var spell: SpellDefinition = SpellBook.get_spell(id)
+		if spell == null:
+			button.disabled = true
+			continue
+		var cost_line: String = tr("SPELL_CANTRIP") if spell.is_cantrip() else tr("SPELL_LEVEL_SLOTS") % [spell.level, slot_pips(hero, spell.level)]
+		button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr(String(spell.name_key))] + "\n" + cost_line
+		if spell.casting_time == "reaction":
+			button.disabled = true
+			button.tooltip_text = tr("SPELL_REACTION_HINT") + ("\n" + tr("SPELL_REASON_NO_SLOT") if SpellRules.lowest_slot(hero.get("spell_slots", []), 1) == 0 else "")
+			continue
+		reason = "COMBAT_WAIT_TURN" if not player_turn else SpellResolver.availability_reason(state, hero_id, spell)
+		button.disabled = not reason.is_empty()
+		button.tooltip_text = tr(reason) if not reason.is_empty() else (tr("COMBAT_COST_ACTION") if spell.is_cantrip() else tr("COMBAT_SPELL_COST_SLOT") % spell.level)
+		button.toggle_mode = true
+		button.set_pressed_no_signal(_spell_mode == id)
+
+## "●●○" for the hero's slots of one level.
+static func slot_pips(hero: Dictionary, slot_level: int) -> String:
+	var slots: Array = hero.get("spell_slots", [])
+	var maximum: Array = hero.get("spell_slots_max", slots)
+	if slot_level < 1 or slot_level > maximum.size():
+		return ""
+	var left: int = int(slots[slot_level - 1]) if slot_level <= slots.size() else 0
+	var text: String = ""
+	for index: int in int(maximum[slot_level - 1]):
+		text += "●" if index < left else "○"
+	return text
+
+## Hotbar order of spell/feature entries for the number keys 4-9.
+func hotbar_entries() -> Array[String]:
+	return _spell_order.duplicate()
+
+func set_spell_mode(spell_id: String) -> void:
+	_spell_mode = spell_id
+	for entry: String in _spell_buttons:
+		var button: Button = _spell_buttons[entry]
+		if button.toggle_mode:
+			button.set_pressed_no_signal(entry == "spell:" + spell_id)
+
+## Spell targeting preview: hit chance, or DC and save chances, allies caught, reason.
+func show_spell_preview(preview: Dictionary, spell: SpellDefinition, caster: Dictionary, darts_chosen: int = 0) -> void:
+	_target_panel.visible = true
+	_target_title.text = tr(String(spell.name_key))
+	var damage_type: String = tr("DAMAGE_" + String(spell.damage_type).to_upper()) if spell.damage_type != &"" else ""
+	var expression: String = SpellRules.damage_expression(spell, int(caster.get("level", 1)), maxi(1, int(preview.get("slot_level", 1))))
+	var reasons: PackedStringArray = []
+	match spell.resolution:
+		"attack":
+			var chance: int = 0
+			if not preview.get("targets", []).is_empty():
+				chance = roundi(float(preview["targets"][0].get("chance", 0.0)) * 100.0)
+				for source: Variant in preview["targets"][0].get("advantages", []):
+					reasons.append(tr("COMBAT_ADVANTAGE_REASON") % DicePopup.source_name(String(source)))
+				for source: Variant in preview["targets"][0].get("disadvantages", []):
+					reasons.append(tr("COMBAT_DISADVANTAGE_REASON") % DicePopup.source_name(String(source)))
+				if int(preview["targets"][0].get("cover", 0)) > 0:
+					reasons.append(tr("COMBAT_COVER") % int(preview["targets"][0]["cover"]))
+			_target_detail.text = tr("COMBAT_SPELL_ATTACK") % [tr(String(spell.name_key)), chance, expression, damage_type]
+		"auto":
+			var darts: int = SpellRules.dart_count(spell, maxi(1, int(preview.get("slot_level", 1))))
+			_target_detail.text = tr("COMBAT_SPELL_DARTS") % [tr(String(spell.name_key)), mini(darts_chosen + 1, darts), darts,
+				"%s%+d" % [spell.damage_dice, spell.dart_bonus], damage_type]
+		"save":
+			var effect: String = tr("COMBAT_SPELL_SAVE_DAMAGE") % [expression, damage_type] if not spell.damage_dice.is_empty() else tr("COMBAT_SPELL_SAVE_SLEEP")
+			_target_detail.text = tr("COMBAT_SPELL_SAVE") % [tr(String(spell.name_key)), int(caster.get("spell_save_dc", 10)),
+				tr("ABILITY_" + String(spell.save_ability).to_upper()), effect]
+			var allies: PackedStringArray = []
+			for target: Dictionary in preview.get("targets", []):
+				var record: Dictionary = _state.actors.get(String(target["id"]), {}) if _state != null else {}
+				if bool(target.get("ally", false)):
+					allies.append(_actor_name(record))
+				elif spell.damage_dice.is_empty():
+					reasons.append(tr("COMBAT_SPELL_TARGET_SLEEP") % [_actor_name(record), roundi(float(target["save_chance"]) * 100.0)])
+				else:
+					reasons.append(tr("COMBAT_SPELL_TARGET_LINE") % [_actor_name(record), roundi(float(target["save_chance"]) * 100.0), float(target["expected_damage"])])
+			if not allies.is_empty():
+				reasons.insert(0, tr("COMBAT_SPELL_ALLY_WARNING") % ", ".join(allies))
+			if preview.get("targets", []).is_empty() and bool(preview.get("legal", false)):
+				reasons.append(tr("COMBAT_SPELL_NO_TARGETS"))
+	if not bool(preview.get("legal", false)) and not String(preview.get("reason_key", "")).is_empty():
+		reasons.insert(0, tr(String(preview["reason_key"])))
+	reasons.append(tr("COMBAT_SPELL_CANCEL"))
+	_target_reasons.text = "\n".join(reasons.slice(0, 5))
+	_target_reasons.tooltip_text = "\n".join(reasons)
+	_target_reasons.add_theme_color_override("font_color", RED if reasons.size() > 1 and not (preview.get("targets", []) as Array).filter(func(t: Dictionary) -> bool: return bool(t.get("ally", false))).is_empty() else GOLD)
+
+## The Shield prompt appears when the hero may react before damage lands.
+func _update_reaction(state: GameState) -> void:
+	var pending: Dictionary = state.pending
+	var offer: bool = pending.get("type") == "reaction" and _friendly(state.actors.get(String(pending.get("actor_id", "")), {}))
+	_reaction_panel.visible = offer and not dice_popup.is_busy()
+	if not offer:
+		return
+	var attacker: Dictionary = state.actors.get(String(pending.get("attacker_id", "")), {})
+	var trigger: Dictionary = pending.get("trigger", {})
+	if trigger.has("attack"):
+		var attack: Dictionary = trigger["attack"]
+		_reaction_text.text = tr("COMBAT_REACTION_TEXT") % [_actor_name(attacker), int(attack["roll"].get("total", 0)), int(attack.get("armor_class", 10))]
+	else:
+		_reaction_text.text = tr("COMBAT_REACTION_TEXT_MISSILE") % _actor_name(attacker)
+
+func is_reaction_open() -> bool:
+	return _reaction_panel != null and _reaction_panel.visible
 
 func _process(delta: float) -> void:
 	_glow_time += delta
@@ -335,6 +531,26 @@ func _build_hotbar() -> void:
 	_end_button = _button(panel, Rect2(578, 16, 268, 80), tr("COMBAT_END_TURN"))
 	_end_button.pressed.connect(func() -> void: action_requested.emit("end_turn"))
 	_end_button.tooltip_text = tr("COMBAT_END_TURN_HINT")
+
+func _build_spellbar() -> void:
+	_spell_panel = _panel(Rect2(523, 852, 862, 82))
+	_spell_row = HBoxContainer.new()
+	_spell_row.position = Vector2(10, 10)
+	_spell_row.size = Vector2(842, 62)
+	_spell_row.add_theme_constant_override("separation", 6)
+	_spell_panel.add_child(_spell_row)
+	_spell_panel.visible = false
+
+func _build_reaction() -> void:
+	_reaction_panel = _panel(Rect2(610, 600, 700, 200))
+	var title: Label = _label(_reaction_panel, Rect2(20, 14, 660, 34), tr("COMBAT_REACTION_TITLE"), 26)
+	title.add_theme_color_override("font_color", GOLD)
+	_reaction_text = _label(_reaction_panel, Rect2(20, 52, 660, 70), "", 19)
+	_reaction_accept = _button(_reaction_panel, Rect2(20, 130, 380, 54), tr("COMBAT_REACTION_ACCEPT"))
+	_reaction_accept.pressed.connect(func() -> void: reaction_answered.emit(true))
+	var decline: Button = _button(_reaction_panel, Rect2(416, 130, 264, 54), tr("COMBAT_REACTION_DECLINE"))
+	decline.pressed.connect(func() -> void: reaction_answered.emit(false))
+	_reaction_panel.visible = false
 
 func _build_log() -> void:
 	_log_panel = _panel(Rect2(1440, 180, 452, 292))

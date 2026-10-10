@@ -43,11 +43,14 @@ jobs:
           timeout 60 godot --headless tests/integration/check_actor_navigation.tscn 2>&1 | tee actor-nav-check.log
           timeout 90 godot --headless tests/integration/check_inventory_ui.tscn 2>&1 | tee inventory-check.log
           timeout 180 godot --headless tests/integration/check_menu.tscn 2>&1 | tee menu-check.log
-          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' arena-check.log ui-check.log actor-nav-check.log inventory-check.log menu-check.log; then exit 1; fi
+          timeout 120 godot --headless tests/integration/check_spells.tscn 2>&1 | tee spells-check.log
+          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' arena-check.log spells-check.log ui-check.log actor-nav-check.log inventory-check.log menu-check.log; then exit 1; fi
       - name: Capture rendered arena and dice
         run: bash tests/integration/capture_arena.sh godot
       - name: Capture inventory and character sheet
         run: bash tests/integration/capture_ui.sh godot
+      - name: Capture spell targeting and casting
+        run: bash tests/integration/capture_spells.sh godot
       - name: Capture main menu, character creation and death screen
         run: bash tests/integration/check_menu_capture.sh godot
       - uses: actions/upload-artifact@v4

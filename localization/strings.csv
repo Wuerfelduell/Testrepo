@@ -371,3 +371,80 @@ AREA_XP,+%d XP · %s: %s
 AREA_LEVEL_UP,Level %d reached
 XP_REASON_AREA_CLEARED,Every enemy defeated
 DEATH_MAIN_MENU,Main Menu
+ACTOR_WIZARD,Wizard
+WEAPON_DAGGER,Dagger
+SPELL_FIRE_BOLT,Fire Bolt
+SPELL_RAY_OF_FROST,Ray of Frost
+SPELL_MAGIC_MISSILE,Magic Missile
+SPELL_BURNING_HANDS,Burning Hands
+SPELL_SHIELD,Shield
+SPELL_SLEEP,Sleep
+SPELL_CANTRIP,Cantrip
+SPELL_LEVEL_SLOTS,Level %d · %s
+SPELL_REACTION_HINT,"Reaction: offered when you are hit (+5 AC, 1 slot)"
+SPELL_REASON_UNKNOWN,Cannot cast this now
+SPELL_REASON_NOT_PREPARED,Not prepared
+SPELL_REASON_INCAPACITATED,You cannot act
+SPELL_REASON_ARMOR,Your armour does not allow spellcasting
+SPELL_REASON_NO_SLOT,No spell slot left
+SPELL_REASON_PICK_TARGET,Pick a target
+SPELL_REASON_PICK_DARTS,Pick a target for each dart
+SPELL_REASON_PICK_POINT,Point at the ground
+SPELL_REASON_TARGET,Out of range or not visible
+SPELL_REASON_RANGE,Out of range
+SPELL_REASON_SIGHT,No line of sight
+COMBAT_NO_BONUS,No bonus action left
+COMBAT_NO_REACTION,No reaction left
+COMBAT_COST_BONUS,Costs 1 bonus action
+COMBAT_SLOTS,Spell slots %s
+COMBAT_SPELL_ATTACK,%s · %d%% to hit · %s %s
+COMBAT_SPELL_DARTS,%s · dart %d of %d · always hits · %s %s each
+COMBAT_SPELL_SAVE,%s · DC %d %s save · %s
+COMBAT_SPELL_SAVE_DAMAGE,%s %s (half on a success)
+COMBAT_SPELL_SAVE_SLEEP,fail twice: unconscious
+COMBAT_SPELL_TARGET_LINE,%s · %d%% save · ~%.0f damage
+COMBAT_SPELL_TARGET_SLEEP,%s · %d%% save
+COMBAT_SPELL_ALLY_WARNING,Hits your ally: %s
+COMBAT_SPELL_NO_TARGETS,Nobody inside the area
+COMBAT_SPELL_COST_SLOT,Costs 1 action and a level %d slot
+COMBAT_SPELL_CANCEL,Right click or Esc to cancel
+ABILITY_STR,STR
+ABILITY_DEX,DEX
+ABILITY_CON,CON
+ABILITY_INT,INT
+ABILITY_WIS,WIS
+ABILITY_CHA,CHA
+FEATURE_SECOND_WIND_BUTTON,Second Wind (%d/%d)
+FEATURE_SECOND_WIND_HINT,"Bonus action: regain 1d10 + %d HP"
+FEATURE_NO_USES,No uses left
+COMBAT_ROLL_SAVE,%s saving throw
+COMBAT_ROLL_VS_DC,%d vs DC %d · %s
+COMBAT_SAVE_SUCCESS,SAVED
+COMBAT_SAVE_FAIL,FAILED
+COMBAT_SAVE_AUTOMATIC,Automatic failure · %s
+COMBAT_REACTION_TITLE,Shield?
+COMBAT_REACTION_TEXT,"%s hits you: %d vs AC %d. Shield gives +5 AC until your next turn and turns this into a miss."
+COMBAT_REACTION_TEXT_MISSILE,%s casts Magic Missile at you. Shield blocks every dart.
+COMBAT_REACTION_ACCEPT,Cast Shield (level 1 slot)
+COMBAT_REACTION_DECLINE,Take the hit
+COMBAT_LOG_CAST,%s casts %s.
+COMBAT_LOG_SAVE,%s · %s save: %s
+COMBAT_LOG_SHIELD,%s casts Shield: +5 AC.
+COMBAT_LOG_BLOCKED,Shield blocks %s's Magic Missile.
+COMBAT_LOG_ASLEEP,%s falls asleep.
+COMBAT_LOG_UNCONSCIOUS,%s sinks into a deep sleep.
+COMBAT_LOG_WAKES,%s wakes up.
+COMBAT_LOG_CONCENTRATION_END,%s loses concentration on %s.
+COMBAT_LOG_HEAL,%s regains %d HP.
+COMBAT_LOG_SAPPED,%s is sapped: disadvantage on its next attack.
+COMBAT_DEBUG_SWAP,F4 · Swap hero (Fighter / Wizard)
+ROLL_SOURCE_COVER,Cover
+ROLL_SOURCE_MAGIC_MISSILE,Magic Missile darts
+ROLL_SOURCE_SAP,Sapped (Weapon Mastery)
+ROLL_SOURCE_SECOND_WIND,Second Wind
+AI_CAST_SPELL,Cast a spell
+AI_CAST_AREA,Catch enemies in an area
+AI_AREA_ALLIES,Area would hit allies
+AI_FACTOR_SLOT_COST,Slot cost
+AI_FACTOR_ALLIES_HIT,Allies hit
+COMBAT_HOTKEY_SPELL,%s · %s

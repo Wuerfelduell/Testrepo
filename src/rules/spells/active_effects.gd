@@ -121,7 +121,7 @@ static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGen
 static func save_event(caster_id: String, target_id: String, spell_id: String, save: Dictionary) -> Dictionary:
 	return {"type": "roll", "kind": "save", "actor_id": target_id, "caster_id": caster_id,
 		"target_id": target_id, "spell_id": spell_id, "ability": save["ability"], "dc": save["dc"],
-		"success": save["success"], "automatic": save.get("automatic", false), "roll": save["roll"]}
+		"success": save["success"], "automatic": save.get("automatic", false), "reason": save.get("reason", ""), "roll": save["roll"]}
 
 ## Called once per damage instance after HP changed: Sleep ends on a damaged
 ## creature, and a concentrating creature makes a CON save (or loses it at 0 HP).
