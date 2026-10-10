@@ -10,6 +10,10 @@ static func decode(data: Dictionary) -> Command:
 		"attack": command = AttackCommand.new()
 		"dash": command = DashCommand.new()
 		"disengage": command = DisengageCommand.new()
+		"setup_inventory": command = SetupInventoryCommand.new()
+		"equip_item": command = EquipItemCommand.new()
+		"unequip_item": command = UnequipItemCommand.new()
+		"use_item": command = UseItemCommand.new()
 		_: return null
 	if command.from_dict(data) != OK:
 		return null

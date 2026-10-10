@@ -7,6 +7,7 @@ extends Node3D
 var space: ArenaSpace
 var camera_rig: CombatCamera
 var hud: CombatHUD
+var menus: GameMenus
 var director: AIDirector
 var actors: Dictionary = {}
 var path_display: MeshInstance3D
@@ -29,6 +30,9 @@ func _ready() -> void:
 	hud = CombatHUD.new()
 	add_child(hud)
 	hud.action_requested.connect(_action_requested)
+	menus = GameMenus.new()
+	add_child(menus)
+	menus.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
 	director = AIDirector.new()
 	path_display = MeshInstance3D.new()
 	add_child(path_display)
@@ -59,6 +63,10 @@ func _ready() -> void:
 	if Game.state.actors.is_empty():
 		if CommandBus.submit(SetupArenaCommand.new()) != OK:
 			return
+	# Inventory and equipment (src/rules/items/): a hero without a bag gets their class kit.
+	var hero_record: Dictionary = Game.state.actors.get("hero", {})
+	if not EquipmentRules.has_inventory(hero_record) and hero_record.has("class_id"):
+		CommandBus.submit(SetupInventoryCommand.new("hero"))
 	for id: String in Game.state.actors:
 		var actor: CombatActor = CombatActor.new()
 		add_child(actor)
@@ -202,7 +210,7 @@ func _action_requested(kind: String) -> void:
 		"attack": _set_attack_mode(true)
 
 func _update_hover() -> void:
-	if not _can_control() or get_viewport().gui_get_hovered_control() != null:
+	if not _can_control() or get_viewport().gui_get_hovered_control() != null or (menus != null and menus.is_open()):
 		_clear_hover()
 		return
 	var cursor: Vector2 = get_viewport().get_mouse_position()
@@ -289,10 +297,21 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 			if actors.has(source) and actors.has(target):
 				actors[source].aim_at(actors[target].global_position)
 				camera_rig.focus_target(actors[target].global_position, 0.65)
+		if event.get("type") == "equipment_changed" and actors.has(str(event["actor_id"])):
+			_swap_weapon_model(actors[str(event["actor_id"])], str(event.get("model", "")))
 		for actor: CombatActor in actors.values():
 			actor.react_to_event(event, actors)
 	hud.consume_events(events)
 	hud.update_state(Game.state)
+
+func _swap_weapon_model(actor: CombatActor, model_path: String) -> void:
+	if actor.weapon_attachment != null:
+		actor.weapon_attachment.get_parent().remove_child(actor.weapon_attachment)
+		actor.weapon_attachment.queue_free()
+		actor.weapon_attachment = null
+		actor.weapon = null
+	if not model_path.is_empty() and ResourceLoader.exists(model_path):
+		actor.equip_weapon(model_path)
 
 func _command_rejected(_command: Command, _reason: Error) -> void:
 	_clear_hover()

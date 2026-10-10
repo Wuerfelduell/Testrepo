@@ -170,3 +170,122 @@ AI_COVER,Seek cover
 AI_KEEP_DISTANCE,Keep firing distance
 AI_FLANK,Move around cover
 COMBAT_SELECT_ATTACK,Click an enemy to attack. Esc cancels.
+INV_BUTTON,Inventory [I]
+SHEET_BUTTON,Character [C]
+INV_TITLE,INVENTORY
+INV_CLOSE,Close (Esc)
+INV_EQUIPPED,EQUIPPED
+INV_BAG,BAG
+INV_SLOT_MAIN_HAND,Main hand
+INV_SLOT_OFF_HAND,Off hand
+INV_SLOT_ARMOR,Armour
+INV_FOOTER,"Carrying %.1f kg   ·   %d gold   ·   Click an item to equip or drink it, click an equipped item to put it away   ·   I / Esc closes"
+INV_STAT_AC,Armour Class %d
+INV_STAT_ATTACK,%s: %+d to hit · %s %s
+INV_STAT_SPEED,Speed %.1f m
+INV_STAT_TWO_HANDED_GRIP,Off hand free: versatile weapon held in two hands
+INV_COMBAT_RULES,"In combat: weapon swaps are free on your turn, armour and shields are locked, potions cost a bonus action."
+INV_CLICK_EQUIP,Click: equip
+INV_CLICK_UNEQUIP,Click: put in bag
+INV_CLICK_USE,Click: drink
+INV_FREE_SWAP,free on your turn
+INV_REASON_NO_INVENTORY,No inventory
+INV_REASON_DEAD,The dead carry nothing
+INV_REASON_BUSY,Wait until the current action ends
+INV_REASON_NOT_YOUR_TURN,Not your turn
+INV_REASON_NOT_OWNED,Not in your bag
+INV_REASON_NOT_EQUIPPABLE,Cannot be equipped
+INV_REASON_NOT_USABLE,Cannot be used
+INV_REASON_ARMOR_IN_COMBAT,Armour and shields cannot be changed during combat
+INV_REASON_TWO_HANDED,Your weapon needs both hands
+INV_REASON_SHIELD_IN_COMBAT,"Needs both hands, and your shield cannot be taken off during combat"
+INV_REASON_SLOT_EMPTY,Nothing equipped
+INV_REASON_KEEP_WEAPON,Equip another weapon from the bag to swap
+INV_REASON_FULL_HP,You are not hurt
+INV_REASON_NO_BONUS_ACTION,No bonus action left this turn
+ITEM_SHORTSWORD,Shortsword
+ITEM_BATTLEAXE,Battleaxe
+ITEM_DAGGER,Dagger
+ITEM_MACE,Mace
+ITEM_QUARTERSTAFF,Quarterstaff
+ITEM_SHORTBOW,Shortbow
+ITEM_LEATHER_ARMOR,Leather armour
+ITEM_CHAIN_SHIRT,Chain shirt
+ITEM_CHAIN_MAIL,Chain mail
+ITEM_SHIELD,Shield
+ITEM_POTION_OF_HEALING,Potion of Healing
+ITEM_TYPE_SIMPLE_MELEE,Simple melee weapon
+ITEM_TYPE_MARTIAL_MELEE,Martial melee weapon
+ITEM_TYPE_SIMPLE_RANGED,Simple ranged weapon
+ITEM_TYPE_MARTIAL_RANGED,Martial ranged weapon
+ITEM_TYPE_ARMOR_LIGHT,Light armour
+ITEM_TYPE_ARMOR_MEDIUM,Medium armour
+ITEM_TYPE_ARMOR_HEAVY,Heavy armour
+ITEM_TYPE_SHIELD,Shield
+ITEM_TYPE_CONSUMABLE,Potion
+ITEM_ATTACK_LINE,%+d to hit · %s %s
+ITEM_VERSATILE,"Versatile: %s one-handed, %s with the off hand free"
+ITEM_RANGE,"Range %.0f m, long range %.0f m (disadvantage)"
+ITEM_PROPERTY_FINESSE,Finesse (STR or DEX)
+ITEM_PROPERTY_LIGHT,Light
+ITEM_PROPERTY_THROWN,Thrown (not usable yet)
+ITEM_PROPERTY_AMMUNITION,Ammunition
+ITEM_PROPERTY_LOADING,Loading
+ITEM_PROPERTY_TWO_HANDED,Two-handed
+ITEM_MASTERY,Mastery: %s
+ITEM_MASTERY_SAP,Sap
+ITEM_MASTERY_VEX,Vex
+ITEM_MASTERY_TOPPLE,Topple
+ITEM_MASTERY_NICK,Nick
+ITEM_MASTERY_SLOW,Slow
+ITEM_NOT_PROFICIENT,Not proficient: no proficiency bonus to hit
+ITEM_AC_HEAVY,AC %d
+ITEM_AC_DEX_CAP,AC %d + Dex modifier (max %d)
+ITEM_AC_DEX,AC %d + Dex modifier
+ITEM_STRENGTH_REQUIREMENT,"Needs Strength %d, otherwise speed -3 m"
+ITEM_STEALTH_DISADVANTAGE,Disadvantage on Stealth
+ITEM_UNTRAINED_ARMOR,"Untrained armour: disadvantage on STR and DEX rolls, no spellcasting"
+ITEM_SHIELD_AC,+2 AC
+ITEM_UNTRAINED_SHIELD,Untrained: gives no AC
+ITEM_HEAL,Regain %s + %d HP
+ITEM_COST_BONUS_ACTION,Bonus action in combat
+ITEM_WEIGHT_VALUE,%.1f kg · %d gp
+COMBAT_ROLL_HEALING,Healing
+ROLL_SOURCE_POTION_OF_HEALING,Potion of Healing
+SHEET_SUBTITLE,Level %d %s · %s
+SHEET_SPECIES_HUMAN,Human
+SHEET_XP,XP %d / %d to level %d
+SHEET_XP_MAX,XP %d · maximum level
+SHEET_ABILITIES,ABILITIES
+SHEET_COMBAT,COMBAT
+SHEET_FEATURES,CLASS FEATURES
+SHEET_SKILLS,SKILLS
+SHEET_SAVE,Saving throw %+d
+SHEET_SAVE_PROFICIENT,Saving throw %+d (proficient)
+SHEET_HP,Hit points %d / %d
+SHEET_AC,Armour Class %d
+SHEET_SPEED,Speed %.1f m
+SHEET_INITIATIVE,Initiative %+d
+SHEET_PROFICIENCY,Proficiency bonus %+d
+SHEET_PASSIVE_PERCEPTION,Passive Perception %d
+SHEET_UNARMORED,Unarmoured
+SHEET_NOT_ACTIVE,(not active yet)
+SHEET_NEXT_LEVEL,Level %d: %s
+SHEET_SKILL_ACROBATICS,Acrobatics
+SHEET_SKILL_ANIMAL_HANDLING,Animal Handling
+SHEET_SKILL_ARCANA,Arcana
+SHEET_SKILL_ATHLETICS,Athletics
+SHEET_SKILL_DECEPTION,Deception
+SHEET_SKILL_HISTORY,History
+SHEET_SKILL_INSIGHT,Insight
+SHEET_SKILL_INTIMIDATION,Intimidation
+SHEET_SKILL_INVESTIGATION,Investigation
+SHEET_SKILL_MEDICINE,Medicine
+SHEET_SKILL_NATURE,Nature
+SHEET_SKILL_PERCEPTION,Perception
+SHEET_SKILL_PERFORMANCE,Performance
+SHEET_SKILL_PERSUASION,Persuasion
+SHEET_SKILL_RELIGION,Religion
+SHEET_SKILL_SLEIGHT_OF_HAND,Sleight of Hand
+SHEET_SKILL_STEALTH,Stealth
+SHEET_SKILL_SURVIVAL,Survival

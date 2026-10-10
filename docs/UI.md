@@ -113,3 +113,40 @@ Resolution, fullscreen, volume (master, music, effects), dice popup speed
 
 Decided 05-10-2026: real spinning 3D d20. HUD style is not a priority for now; Codex
 picks a clean, readable style that fits the assets.
+
+## 9. Inventory, equipment and character sheet (built 10-10-2026)
+
+Added by Claude (UI thread). Screenshots from CI: `docs/ui-inventory.png`, `docs/ui-character.png`.
+
+```
+ +-------------------------------------------------------------+   (bottom right, next to END TURN)
+ | INVENTORY                                               [x] |   [ Inventory [I] ] [ Character [C] ]
+ | EQUIPPED          [Armour]      | BAG  [][][][][][][][]     |
+ |              [Main]    [Off]    |      [][][][][][][][]     |
+ | AC 18 · Longsword +5 · 1d8+3    |      ... 8 x 5 slots      |
+ | Carrying 35.5 kg · 4 gold · click hints                     |
+ +-------------------------------------------------------------+
+```
+
+- **Open/close:** I = inventory, C = character sheet, Esc or [x] closes. Buttons bottom right.
+  The windows sit under the combat HUD layer, so dice rolls stay on top, and keep clear of
+  the HUD panels. While a window is open, clicks in the world do nothing.
+- **Inventory:** paper doll (main hand, off hand, armour) and an 8 x 5 bag. Hover = tooltip
+  with every number (to hit, damage, range, AC formula, strength requirement, mastery,
+  weight, value) plus what a click does or, in red, why it is not possible. Click a bag item =
+  equip / drink, click an equipped item = put it in the bag.
+- **Rules (SRD 5.2, BG3 feel):** weapon swaps are free on your own turn; armour and shields
+  are locked during combat; a potion costs a bonus action in combat (2d4 + 2, shown with the
+  dice popup). Two-handed weapons push the shield into the bag. Versatile weapons use the
+  bigger die when the off hand is free. The main hand always holds a weapon (no unarmed
+  strike yet).
+- **Character sheet:** six abilities with modifier and saving throw, combat numbers (HP, AC
+  with its sources, speed, initiative, proficiency, passive perception, current attack),
+  all 18 skills with proficiency markers, class features up to the current level plus a
+  preview of the next level, XP bar to the next level.
+- **Code:** items are data (`data/items/items.json`), rules in `src/rules/items/`, commands
+  `SetupInventoryCommand`, `EquipItemCommand`, `UnequipItemCommand`, `UseItemCommand`, UI in
+  `src/ui/inventory/`.
+- **Provisional:** icons are drawn in code (no icon art yet); only shields go in the off hand
+  (no dual wielding); no ammunition count, no throwing, no dropping or selling, no loot from
+  enemies yet; starting kits are SRD-based but trimmed (potions added for the arena).

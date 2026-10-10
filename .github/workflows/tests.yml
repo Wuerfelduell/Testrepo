@@ -41,13 +41,18 @@ jobs:
           timeout 90 godot --headless tests/integration/check_arena.tscn 2>&1 | tee arena-check.log
           timeout 60 godot --headless tests/integration/check_combat_ui.tscn 2>&1 | tee ui-check.log
           timeout 60 godot --headless tests/integration/check_actor_navigation.tscn 2>&1 | tee actor-nav-check.log
-          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' arena-check.log ui-check.log actor-nav-check.log; then exit 1; fi
+          timeout 90 godot --headless tests/integration/check_inventory_ui.tscn 2>&1 | tee inventory-check.log
+          if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' arena-check.log ui-check.log actor-nav-check.log inventory-check.log; then exit 1; fi
       - name: Capture rendered arena and dice
         run: bash tests/integration/capture_arena.sh godot
+      - name: Capture inventory and character sheet
+        run: bash tests/integration/capture_ui.sh godot
       - uses: actions/upload-artifact@v4
         with:
           name: Arena-previews
-          path: build/arena-*.png
+          path: |
+            build/arena-*.png
+            build/ui-*.png
           if-no-files-found: error
       - name: Preserve showcase acceptance
         run: godot --headless --script res://tools/check_showcase.gd

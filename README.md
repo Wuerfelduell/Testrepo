@@ -134,3 +134,8 @@ roles currently share the cultist test model; ranged weapon art and the correct 
 animation are still missing. See [docs/COMBAT.md](docs/COMBAT.md) for exact scope and tests.
 The original showcase remains available at `scenes/showcase/asset_showcase.tscn`.
 GitHub Actions provides `TheRPG-Windows` and `Arena-previews` artifacts.
+
+## Inventory and character sheet
+
+In the arena, I opens the inventory (equip weapons and armour, drink potions) and C the
+character sheet. Details and rules: [docs/UI.md](docs/UI.md) section 9.
