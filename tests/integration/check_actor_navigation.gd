@@ -45,6 +45,15 @@ func _map(width: float) -> void:
 	NavigationServer3D.region_set_navigation_mesh(region, mesh)
 	NavigationServer3D.map_force_update(navigation_map)
 
+func _sync_map(width: float) -> void:
+	# Region meshes reach the map asynchronously; wait until its edge sits at the new width.
+	var probe: Vector3 = Vector3(width + 5.0, 0, 0)
+	for frame: int in 600:
+		await get_tree().physics_frame
+		if frame >= 4 and absf(NavigationServer3D.map_get_closest_point(navigation_map, probe).x - width) < 0.01:
+			return
+	check(false, "Navigation map never received the test mesh")
+
 func _check_route(path: PackedVector3Array, bodies: Array[Vector3]) -> void:
 	check(path.size() >= 2, "Open space must offer a route around actors")
 	if path.size() < 2:
@@ -64,9 +73,7 @@ func _check_route(path: PackedVector3Array, bodies: Array[Vector3]) -> void:
 
 func _run() -> void:
 	_map(10.0)
-	for frame: int in 5:
-		await get_tree().physics_frame
-	NavigationServer3D.map_force_update(navigation_map)
+	await _sync_map(10.0)
 	var space: ArenaSpace = ArenaSpace.new()
 	space.map = navigation_map
 	var start: Vector3 = Vector3(0, 0, 4)
@@ -94,9 +101,7 @@ func _run() -> void:
 	_check_route(route, [Vector3.ZERO, Vector3(0.7, 0, -1.1)])
 	_fixture([{"hp": 10, "position": Vector3.ZERO}])
 	_map(0.3)
-	for frame: int in 5:
-		await get_tree().physics_frame
-	NavigationServer3D.map_force_update(navigation_map)
+	await _sync_map(0.3)
 	check(space.query_path(start, goal).is_empty(), "Body fully blocking a narrow corridor yields no path")
 	check(space.query_path(Vector3(3, 0, 4), goal).is_empty(), "Off-mesh source cannot teleport onto navigation")
 	NavigationServer3D.free_rid(region)
