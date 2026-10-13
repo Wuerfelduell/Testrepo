@@ -38,6 +38,7 @@ func _ready() -> void:
 	menus = GameMenus.new()
 	add_child(menus)
 	menus.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
+	add_child(LootMarkers.new())
 	_apply_settings()
 	if has_node("/root/Settings"):
 		get_node("/root/Settings").changed.connect(_apply_settings)
@@ -228,6 +229,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_action_requested("disengage")
 	elif event.is_action_pressed("select") and _can_control():
 		_update_hover()
+		# Loot (src/ui/inventory/): a click on a body or a pile searches it, walking there first.
+		if menus.search_hovered_loot():
+			_clear_hover()
+			return
 		if not hovered_actor.is_empty() and hovered_actor != "hero":
 			CommandBus.submit(AttackCommand.new("hero", hovered_actor))
 			_set_attack_mode(false)
@@ -268,6 +273,7 @@ func _update_hover() -> void:
 		path_display.mesh = null
 		spell_targeting.hover(id if state.actors.has(id) and int(state.actors[id]["hp"]) > 0 else "", hit["position"])
 		return
+	menus.hover_loot(LootRules.source_at(state, hit["position"]) if id.is_empty() or not CombatRules.alive(state.actors.get(id, {})) else "")
 	if not id.is_empty() and id != "hero" and int(state.actors[id]["hp"]) > 0:
 		hovered_actor = id
 		hovered_ground = Vector3.INF
@@ -321,6 +327,8 @@ func _draw_path(path: PackedVector3Array, budget: float) -> void:
 	path_display.mesh = mesh
 
 func _clear_hover() -> void:
+	if menus != null:
+		menus.hover_loot("")
 	hovered_actor = ""
 	hovered_ground = Vector3.INF
 	if path_display != null:
@@ -351,8 +359,15 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 		spell_vfx.on_event(event)
 		if event.get("type") == "hero_swapped":
 			_rebuild_hero()
+		if event.get("type") == "death" and Game.state.actors.get(str(event.get("actor_id", "")), {}).get("team") == "enemy":
+			# The body's loot is rolled once, right after this submit (data/items/loot_tables.json).
+			CommandBus.submit.call_deferred(LootRollCommand.new(str(event["actor_id"])))
 		if event.get("type") == "equipment_changed" and actors.has(str(event["actor_id"])):
-			_swap_weapon_model(actors[str(event["actor_id"])], str(event.get("model", "")))
+			var holder: CombatActor = actors[str(event["actor_id"])]
+			_swap_weapon_model(holder, str(event.get("model", "")))
+			# The look's shield shows only while a shield is actually equipped.
+			if holder.offhand != null:
+				holder.offhand.visible = str(event.get("equipment", {}).get("off_hand", "")) != ""
 		for actor: CombatActor in actors.values():
 			actor.react_to_event(event, actors)
 		_run_event(event)
@@ -419,6 +434,7 @@ func _swap_weapon_model(actor: CombatActor, model_path: String) -> void:
 		actor.weapon_attachment.queue_free()
 		actor.weapon_attachment = null
 		actor.weapon = null
+		actor.weapon_scene = ""
 	if not model_path.is_empty() and ResourceLoader.exists(model_path):
 		actor.equip_weapon(model_path)
 

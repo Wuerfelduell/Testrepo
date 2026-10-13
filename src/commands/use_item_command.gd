@@ -17,6 +17,7 @@ func apply(state: GameState) -> Dictionary:
 	var actor: Dictionary = state.actors[actor_id]
 	var item: Dictionary = ItemCatalog.get_item(item_id)
 	EquipmentRules.remove_item(actor, item_id)
+	EquipmentRules.refresh_speed(actor)
 	if state.mode == &"combat" and String(item.get("cost", "")) == "bonus_action":
 		actor["bonus_available"] = false
 	var bonus: Array[RuleModifier] = [RuleModifier.new(int(item.get("bonus", 0)), StringName(item_id))]

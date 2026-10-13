@@ -179,7 +179,7 @@ INV_BAG,BAG
 INV_SLOT_MAIN_HAND,Main hand
 INV_SLOT_OFF_HAND,Off hand
 INV_SLOT_ARMOR,Armour
-INV_FOOTER,"Carrying %.1f kg   ·   %d gold   ·   Click an item to equip or drink it, click an equipped item to put it away   ·   I / Esc closes"
+INV_FOOTER,"Carrying %.1f / %.0f kg (above: slowed, above %.0f kg: badly slowed)   ·   %d gold   ·   Click: equip or drink   ·   Right-click: drop   ·   I / Esc closes"
 INV_STAT_AC,Armour Class %d
 INV_STAT_ATTACK,%s: %+d to hit · %s %s
 INV_STAT_SPEED,Speed %.1f m
@@ -471,3 +471,29 @@ GALLERY_WEAPON_SHIELD_ROUND,Round shield
 GALLERY_M1_HITS,Hit effects
 COMBAT_DIE_RAISED,%s→%s
 ROLL_SOURCE_GREAT_WEAPON_FIGHTING,Great Weapon Fighting (1s and 2s count as 3)
+ITEM_SICKLE,Sickle
+INV_ENCUMBERED_1,Slowed by weight: speed -%.0f m
+INV_ENCUMBERED_2,Badly slowed by weight: speed -%.0f m
+INV_RIGHT_CLICK_DROP,Right-click: drop it here (stays on the ground)
+LOOT_PROMPT,[F]  Search %s
+LOOT_TITLE,%s · searched
+LOOT_TAKE_ALL,Take all [F]
+LOOT_GOLD,Take %d gold
+LOOT_NO_GOLD,No gold
+LOOT_CLICK_TAKE,Click: take
+LOOT_HINT,Click or drag an item into your bag · F takes everything · Esc closes
+LOOT_FORECAST,"After taking everything: %.1f kg of %.0f kg."
+LOOT_REASON_ALIVE,Still alive
+LOOT_REASON_TOO_FAR,"Too far away, walk closer"
+LOOT_REASON_NOTHING,Nothing left to take
+LOOT_TITLE_PILE,On the ground
+LOOT_PROMPT_PILE,[F]  Pick up items
+LOOT_COMBAT_COST,"In combat: one item or the gold is your free interaction this turn, everything costs your action."
+LOOT_REASON_NO_ACTION,Taking everything needs your action
+LOOT_REASON_INTERACTION_USED,Free interaction already used this turn
+ITEM_COMPARE_WEAPON,Equipped: %s %+d · %s
+ITEM_COMPARE_AC,"AC %d now, %d with this"
+ITEM_TYPE_VALUABLE,Valuable (sell later)
+ITEM_SILVER_RING,Silver ring
+ITEM_CULT_AMULET,Cult amulet
+ITEM_BONE_DICE,Bone dice

@@ -52,6 +52,11 @@ func _draw() -> void:
 		"shield": _shield()
 		"leather", "chain_shirt", "chain_mail": _armor()
 		"potion_of_healing": _potion()
+		"scimitar": _scimitar()
+		"sickle": _sickle()
+		"silver_ring": _ring()
+		"cult_amulet": _amulet()
+		"bone_dice": _dice()
 		_: draw_circle(_p(50, 50), _w(30), STEEL_DARK)
 
 func _sword(long: bool) -> void:
@@ -126,3 +131,33 @@ func _potion() -> void:
 	draw_circle(_p(42, 56), _w(6), Color(1, 1, 1, 0.45))
 	draw_rect(Rect2(_p(42, 22), _p(58, 40) - _p(42, 22)), Color("b9d2dc"))
 	draw_rect(Rect2(_p(40, 14), _p(60, 24) - _p(40, 14)), WOOD)
+
+func _scimitar() -> void:
+	var points: PackedVector2Array = []
+	for step: int in range(9):
+		var t: float = step / 8.0
+		points.append(_p(30 + t * 52, 70 - t * 58 + sin(t * PI) * 10))
+	draw_polyline(points, STEEL, _w(7))
+	draw_line(_p(24, 62), _p(38, 78), BRASS, _w(6))
+	draw_line(_p(31, 71), _p(16, 86), LEATHER, _w(7))
+
+func _sickle() -> void:
+	draw_line(_p(28, 90), _p(44, 58), WOOD, _w(7))
+	draw_arc(_p(58, 40), _w(24), PI * 0.9, PI * 2.2, 24, STEEL, _w(6))
+
+func _ring() -> void:
+	draw_arc(_p(50, 56), _w(24), 0, TAU, 40, Color("d8dde4"), _w(8))
+	draw_circle(_p(50, 28), _w(9), Color("7fc4e8"))
+
+func _amulet() -> void:
+	draw_arc(_p(50, 30), _w(26), PI * 0.1, PI * 0.9, 24, LEATHER, _w(3))
+	draw_circle(_p(50, 62), _w(20), Color("3a1418"))
+	draw_circle(_p(50, 62), _w(12), Color("c3313b"))
+	draw_line(_p(50, 50), _p(50, 74), BRASS, _w(3))
+
+func _dice() -> void:
+	draw_rect(Rect2(_p(18, 40), _p(52, 74) - _p(18, 40)), Color("e8e0cf"))
+	draw_rect(Rect2(_p(48, 26), _p(82, 60) - _p(48, 26)), Color("d9cfb8"))
+	for dot: Vector2 in [Vector2(28, 50), Vector2(42, 64), Vector2(65, 43)]:
+		draw_circle(_p(dot.x, dot.y), _w(4), Color("3a1418"))
+

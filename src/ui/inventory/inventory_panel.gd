@@ -5,6 +5,8 @@ extends Panel
 
 signal command_requested(command: Command)
 signal close_requested()
+## An item was dragged from the loot window onto the bag.
+signal loot_dropped(item_id: String)
 
 const RECT: Rect2 = Rect2(40, 176, 1380, 640)
 const COLUMNS: int = 8
@@ -65,10 +67,14 @@ func _build_bag() -> void:
 		slot.size = Vector2(BAG_SLOT, BAG_SLOT)
 		add_child(slot)
 		_wire(slot)
+		slot.drop_handler = func(data: Dictionary) -> void:
+			if String(data.get("from", "")) == "loot":
+				loot_dropped.emit(String(data["item_id"]))
 		bag_slots.append(slot)
 
 func _wire(slot: ItemSlot) -> void:
 	slot.clicked.connect(_on_clicked)
+	slot.right_clicked.connect(_on_right_clicked)
 	slot.hovered.connect(_on_hovered)
 	slot.unhovered.connect(func(left_slot: ItemSlot) -> void:
 		if _hovered == left_slot:
@@ -93,7 +99,9 @@ func update_state(state: GameState) -> void:
 		else:
 			bag_slots[index].set_item("")
 	_stats.text = _stat_text(actor)
-	_footer.text = MenuStyle.text("INV_FOOTER") % [EquipmentRules.total_weight_kg(actor), int(actor.get("gold", 0))]
+	_footer.text = MenuStyle.text("INV_FOOTER") % [EquipmentRules.total_weight_kg(actor),
+		EquipmentRules.capacity_kg(actor), EquipmentRules.capacity_kg(actor) * 2.0, int(actor.get("gold", 0))]
+	_footer.add_theme_color_override("font_color", [MenuStyle.MUTED, Color("e8b45a"), MenuStyle.RED][EquipmentRules.encumbrance(actor)])
 	if _hovered != null and tooltip != null and tooltip.visible:
 		_on_hovered(_hovered)
 
@@ -108,6 +116,9 @@ func _stat_text(actor: Dictionary) -> String:
 			int(weapon.get("attack_bonus", 0)), damage, MenuStyle.text("DAMAGE_" + String(weapon.get("damage_type", "")).to_upper())],
 		MenuStyle.text("INV_STAT_SPEED") % float(actor.get("speed_m", 9.0)),
 	]
+	var burden: int = EquipmentRules.encumbrance(actor)
+	if burden > 0:
+		lines.append("[color=#ed867d]%s[/color]" % (MenuStyle.text("INV_ENCUMBERED_%d" % burden) % EquipmentRules.ENCUMBRANCE_PENALTY_M[burden]))
 	if bool(weapon.get("two_handed_grip", false)):
 		lines.append("[color=#9aa1ad]%s[/color]" % MenuStyle.text("INV_STAT_TWO_HANDED_GRIP"))
 	if bool(actor.get("armor_untrained", false)):
@@ -135,6 +146,11 @@ func _on_clicked(slot: ItemSlot) -> void:
 		else:
 			command_requested.emit(EquipItemCommand.new(actor_id, slot.item_id))
 
+## Right-click throws one item from the bag away for good.
+func _on_right_clicked(slot: ItemSlot) -> void:
+	if _state != null and slot.slot_name.is_empty() and EquipmentRules.drop_reason(_state, actor_id, slot.item_id).is_empty():
+		command_requested.emit(DropItemCommand.new(actor_id, slot.item_id))
+
 func _on_hovered(slot: ItemSlot) -> void:
 	_hovered = slot
 	if tooltip == null or _state == null or slot.item_id.is_empty():
@@ -156,5 +172,13 @@ func _on_hovered(slot: ItemSlot) -> void:
 		hint = MenuStyle.text("INV_CLICK_EQUIP")
 		if ItemCatalog.slot_for(item) == "main_hand":
 			hint += " · " + MenuStyle.text("INV_FREE_SWAP")
-	tooltip.show_item(item, actor, InventoryCommand.training_for(actor), hint if reason.is_empty() else "",
+	if not reason.is_empty():
+		hint = ""
+	if slot.slot_name.is_empty() and EquipmentRules.drop_reason(_state, actor_id, slot.item_id).is_empty():
+		hint += ("\n" if not hint.is_empty() else "") + MenuStyle.text("INV_RIGHT_CLICK_DROP")
+	if slot.slot_name.is_empty():
+		var compare: String = ItemText.compare_line(item, actor, InventoryCommand.training_for(actor))
+		if not compare.is_empty():
+			hint = compare + ("\n" + hint if not hint.is_empty() else "")
+	tooltip.show_item(item, actor, InventoryCommand.training_for(actor), hint,
 		MenuStyle.text(reason) if not reason.is_empty() else "", slot.get_global_rect())

@@ -148,5 +148,30 @@ Added by Claude (UI thread). Screenshots from CI: `docs/ui-inventory.png`, `docs
   `SetupInventoryCommand`, `EquipItemCommand`, `UnequipItemCommand`, `UseItemCommand`, UI in
   `src/ui/inventory/`.
 - **Provisional:** icons are drawn in code (no icon art yet); only shields go in the off hand
-  (no dual wielding); no ammunition count, no throwing, no dropping or selling, no loot from
-  enemies yet; starting kits are SRD-based but trimmed (potions added for the arena).
+  (no dual wielding); no ammunition count, no throwing, no selling; starting kits are
+  SRD-based but trimmed (potions added for the arena).
+
+### 9.1 Loot, dropping and carry weight (built 13-10-2026, package 09)
+
+Screenshots from CI: `docs/ui-loot.png`, `docs/ui-overload.png`.
+
+- **Loot drops:** a defeated enemy keeps its stat block gear and rolls gold plus extras from
+  `data/items/loot_tables.json` (seeded RNG, rolled once at death). Bodies and piles with
+  loot get a glowing ring; the ring under the mouse lights up.
+- **Searching:** click the body (the hero walks there if needed), press F or the
+  "[F] Search ..." button within 3 m. The loot window opens over the equipment column and
+  the bag stays visible: click an item to take it, drag it into the bag, take the gold, or
+  "Take all [F]". Tooltips compare with what is equipped (damage or AC now vs. with this).
+  The window shows the weight after taking everything against the limit.
+- **Combat rule (project rule, SRD 5.2 object interaction + Utilize):** only on your own
+  turn; one item or the gold = the free object interaction (once per round); take all = your
+  action. Outside combat it is free.
+- **Dropping:** right-click a bag item drops one at the hero's feet. It stays on the ground
+  as a loot pile (drops close together share one pile) and can be picked up again.
+- **Carry weight (project rule):** capacity = STR x 15 lb, shown in kg (1 lb = 0.45 kg;
+  Fighter STR 16 = 108 kg). Above capacity: speed -3 m; above double: speed -6 m. The
+  inventory footer shows weight / limit, a red "Slowed by weight" badge sits above the
+  Search button while slowed.
+- **Save/load:** dropped piles (`GameState.loot_piles`) and what is left on bodies are part
+  of the save. Commands: `LootTakeCommand`, `LootTakeAllCommand`, `DropItemCommand`
+  (network-safe), `LootRollCommand` (internal, never sent by a client).

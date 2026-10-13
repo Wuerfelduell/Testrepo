@@ -3,11 +3,13 @@ extends RefCounted
 ## SRD 5.2 equipment as data (data/items/items.json). Pure lookups, no scene access.
 
 const PATH: String = "res://data/items/items.json"
-const TYPES: Array[String] = ["weapon", "armor", "shield", "consumable"]
+const TYPES: Array[String] = ["weapon", "armor", "shield", "consumable", "valuable"]
+const LOOT_PATH: String = "res://data/items/loot_tables.json"
 const SLOTS: Array[String] = ["main_hand", "off_hand", "armor"]
 
 static var _items: Dictionary = {}
 static var _kits: Dictionary = {}
+static var _monster_loot: Dictionary = {}
 
 static func _ensure_loaded() -> void:
 	if not _items.is_empty():
@@ -26,6 +28,13 @@ static func _ensure_loaded() -> void:
 		else:
 			push_error("Invalid item in catalog: " + id)
 	_kits = (parsed as Dictionary).get("starting_kits", {}).duplicate(true)
+	var tables: Variant = JSON.parse_string(FileAccess.get_file_as_string(LOOT_PATH))
+	if tables is Dictionary:
+		for monster_id: String in tables:
+			if not monster_id.begins_with("_"):
+				_monster_loot[monster_id] = tables[monster_id]
+	else:
+		push_error("Loot tables could not be parsed: " + LOOT_PATH)
 
 static func valid_item(item: Dictionary) -> bool:
 	if not String(item.get("type", "")) in TYPES or not item.get("name_key") is String:
@@ -69,6 +78,11 @@ static func ids() -> Array[String]:
 static func starting_kit(class_id: String) -> Dictionary:
 	_ensure_loaded()
 	return _kits.get(class_id, _kits.get("default", {})).duplicate(true)
+
+## Loot table of a monster kind: {"gear": {item_id: count}, "gold": "NdS", "rolls": [{item, chance}]}.
+static func monster_loot(monster_id: String) -> Dictionary:
+	_ensure_loaded()
+	return _monster_loot.get(monster_id, {}).duplicate(true)
 
 ## Which equipment slot an item goes into; empty for items that are used, not worn.
 static func slot_for(item: Dictionary) -> String:

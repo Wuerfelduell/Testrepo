@@ -1,0 +1,11 @@
+{
+	"_comment": "What a defeated creature leaves behind, keyed by monster id. 'gear' is what its SRD 5.2 stat block wears and wields (always dropped), 'gold' is a dice expression, every entry in 'rolls' drops with its chance. All rolls go through Rng when the creature dies.",
+	"guard": {"gear": {"spear": 1, "shield": 1, "chain_shirt": 1}, "gold": "2d6",
+		"rolls": [{"item": "potion_of_healing", "chance": 0.3}, {"item": "bone_dice", "chance": 0.4}]},
+	"bandit": {"gear": {"light_crossbow": 1, "scimitar": 1, "leather": 1}, "gold": "3d6",
+		"rolls": [{"item": "silver_ring", "chance": 0.35}, {"item": "potion_of_healing", "chance": 0.25}, {"item": "dagger", "chance": 0.3}]},
+	"cultist": {"gear": {"sickle": 1, "leather": 1}, "gold": "1d6",
+		"rolls": [{"item": "cult_amulet", "chance": 0.6}, {"item": "potion_of_healing", "chance": 0.4}]},
+	"cult_priest": {"gear": {"quarterstaff": 1}, "gold": "5d10",
+		"rolls": [{"item": "potion_of_healing", "chance": 1.0}, {"item": "cult_amulet", "chance": 1.0}, {"item": "silver_ring", "chance": 0.5}]}
+}

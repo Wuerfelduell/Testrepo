@@ -138,7 +138,9 @@ GitHub Actions provides `TheRPG-Windows` and `Arena-previews` artifacts.
 ## Inventory and character sheet
 
 In the arena, I opens the inventory (equip weapons and armour, drink potions) and C the
-character sheet. Details and rules: [docs/UI.md](docs/UI.md) section 9.
+character sheet. Defeated enemies drop loot: click the body or press F to search it,
+right-click a bag item to drop it. Too much weight slows the hero. Details and rules:
+[docs/UI.md](docs/UI.md) section 9 and 9.1.
 
 ## Menü, Heldenerstellung und Ironman (Auftrag 06)
 

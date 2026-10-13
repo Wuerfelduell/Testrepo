@@ -11,6 +11,8 @@ static func type_line(item: Dictionary) -> String:
 			return tr_key("ITEM_TYPE_ARMOR_" + String(data["category"]).to_upper())
 		"shield":
 			return tr_key("ITEM_TYPE_SHIELD")
+		"valuable":
+			return tr_key("ITEM_TYPE_VALUABLE")
 	return tr_key("ITEM_TYPE_CONSUMABLE")
 
 ## BBCode lines: stats first, then properties, weight and value.
@@ -60,6 +62,34 @@ static func stat_lines(item: Dictionary, actor: Dictionary, training: EquipmentR
 			lines.append(tr_key("ITEM_COST_BONUS_ACTION"))
 	lines.append("[color=#9aa1ad]%s[/color]" % (tr_key("ITEM_WEIGHT_VALUE") % [float(item.get("weight_kg", 0.0)), int(item.get("value_gp", 0))]))
 	return lines
+
+## "Equipped: ..." comparison for weapons, armour and shields, empty for other items.
+static func compare_line(item: Dictionary, actor: Dictionary, training: EquipmentRules.Training) -> String:
+	var equipment: Dictionary = actor.get("equipment", {})
+	match String(item.get("type", "")):
+		"weapon":
+			var current: Dictionary = actor.get("weapon", {})
+			if current.is_empty() or String(current.get("item_id", "")) == String(item["id"]):
+				return ""
+			return "[color=#9aa1ad]%s[/color]" % (tr_key("ITEM_COMPARE_WEAPON") % [tr_key(String(current.get("name_key", ""))),
+				int(current.get("attack_bonus", 0)), String(current.get("damage_dice", "")) + _signed(int(current.get("damage_bonus", 0)))])
+		"armor", "shield":
+			var armor_id: StringName = &"none"
+			var shield: bool = String(equipment.get("off_hand", "")) == "shield"
+			if String(item["type"]) == "armor":
+				armor_id = StringName(String(item["armor_id"]))
+			else:
+				shield = true
+				if String(equipment.get("armor", "")) != "":
+					armor_id = StringName(String(ItemCatalog.get_item(String(equipment["armor"]))["armor_id"]))
+			var scores: Dictionary = actor.get("ability_scores", {})
+			var dex: int = int(scores.get(&"dex", scores.get("dex", 10)))
+			var strength: int = int(scores.get(&"str", scores.get("str", 10)))
+			var with_item: int = ArmorRules.calculate(armor_id, dex, strength, training.armor, shield).armor_class
+			var now: int = int(actor.get("ac", 10))
+			var color: String = "#9ed5ac" if with_item > now else ("#ed867d" if with_item < now else "#9aa1ad")
+			return "[color=%s]%s[/color]" % [color, tr_key("ITEM_COMPARE_AC") % [now, with_item]]
+	return ""
 
 static func _signed(value: int) -> String:
 	if value == 0:

@@ -71,5 +71,38 @@ func _run() -> void:
 	check(menus.character._skills.text.contains("Athletics"), "The sheet lists skills")
 	menus.close_all()
 	check(not menus.is_open(), "Esc / close hides every window")
+	# Loot: a dead bandit next to the hero can be searched; its loot is rolled on death.
+	var loot_state: GameState = game.state
+	# Every enemy down, otherwise the arena starts combat as soon as the hero is near them.
+	for id: String in loot_state.actors:
+		if loot_state.actors[id]["team"] == "enemy":
+			loot_state.actors[id]["hp"] = 0
+	loot_state.actors["hero"]["position"] = (loot_state.actors["bandit"]["position"] as Vector3) + Vector3(1, 0, 0)
+	loot_state.mode = &"exploration"
+	game._commit_state(loot_state)
+	check(CommandBus.submit(LootRollCommand.new("bandit")) == OK, "The body's loot is rolled")
+	check(menus._loot_prompt.visible, "Standing next to a body shows the search prompt")
+	var markers: LootMarkers = null
+	for child: Node in arena.get_children():
+		if child is LootMarkers:
+			markers = child
+	check(markers != null and markers._rings.has("bandit"), "The body gets a loot ring")
+	var loot: Dictionary = LootRules.remaining(game.state.actors["bandit"])
+	var gold_before: int = int(game.state.actors["hero"].get("gold", 0))
+	menus.open_loot()
+	check(menus.loot.visible and menus.inventory.visible, "Loot opens next to the bag")
+	check(menus.loot.slots[0].item_id != "", "The loot window lists the bandit's gear")
+	menus.inventory.bag_slots[menus.inventory.bag_slots.size() - 1].drop_handler.call({"from": "loot", "item_id": "scimitar"})
+	check(EquipmentRules.count(game.state.actors["hero"], "scimitar") == 1, "Dragging an item into the bag takes it")
+	menus.loot.take_all()
+	await get_tree().process_frame
+	check(int(game.state.actors["hero"]["gold"]) == gold_before + int(loot["gold"]), "Take all moves the gold")
+	check(not menus.loot.visible and not menus._loot_prompt.visible, "An empty body closes the window and prompt")
+	check(not markers._rings.has("bandit"), "The ring disappears once the body is empty")
+	check(CommandBus.submit(DropItemCommand.new("hero", "scimitar")) == OK, "Items can be dropped")
+	var pile_ring: bool = false
+	for ring_id: String in markers._rings:
+		pile_ring = pile_ring or ring_id.begins_with("pile_")
+	check(pile_ring and menus._loot_prompt.visible, "A dropped item lies on the ground as loot")
 	print("Inventory UI checks: %d, failed: %s" % [checks, failed])
 	get_tree().quit(1 if failed else 0)

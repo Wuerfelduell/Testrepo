@@ -8,6 +8,8 @@ var turn_order: Array[String] = []
 var turn_index: int = 0
 var round_number: int = 1
 var mode: StringName = &"exploration"
+## Items lying on the ground (dropped by the hero): id -> {"position", "items", "gold"}.
+var loot_piles: Dictionary = {}
 
 func current_actor_id() -> String:
 	if turn_order.is_empty() or turn_index < 0 or turn_index >= turn_order.size():
@@ -22,6 +24,7 @@ func copy() -> GameState:
 	result.turn_index = turn_index
 	result.round_number = round_number
 	result.mode = mode
+	result.loot_piles = loot_piles.duplicate(true)
 	return result
 
 ## Plain-data snapshot for the ironman save (see SaveGame). Values stay Variants;
@@ -29,7 +32,7 @@ func copy() -> GameState:
 func to_dict() -> Dictionary:
 	return {"actors": actors.duplicate(true), "pending": pending.duplicate(true),
 		"turn_order": turn_order.duplicate(), "turn_index": turn_index,
-		"round_number": round_number, "mode": mode}
+		"round_number": round_number, "mode": mode, "loot_piles": loot_piles.duplicate(true)}
 
 ## Returns null for anything that is not a complete snapshot from to_dict().
 static func from_dict(data: Dictionary) -> GameState:
@@ -50,4 +53,7 @@ static func from_dict(data: Dictionary) -> GameState:
 	result.turn_index = data["turn_index"]
 	result.round_number = data["round_number"]
 	result.mode = StringName(data["mode"])
+	# Optional: saves written before ground loot existed have no piles.
+	if data.get("loot_piles") is Dictionary:
+		result.loot_piles = (data["loot_piles"] as Dictionary).duplicate(true)
 	return result

@@ -3,6 +3,7 @@ extends Control
 ## One square in the bag or an equipment slot. Hover shows the tooltip, left click acts.
 
 signal clicked(slot: ItemSlot)
+signal right_clicked(slot: ItemSlot)
 signal hovered(slot: ItemSlot)
 signal unhovered(slot: ItemSlot)
 
@@ -10,6 +11,10 @@ var item_id: String = ""
 var count: int = 0
 var slot_name: String = ""
 var blocked: bool = false
+## Non-empty: the item can be dragged from here ("loot" or "bag").
+var drag_source: String = ""
+## Called with the drag data when something is dropped on this slot.
+var drop_handler: Callable
 var _icon: ItemIcon
 var _count_label: Label
 var _hover: bool = false
@@ -67,7 +72,29 @@ func _draw() -> void:
 		draw_arc(size * 0.5, size.x * 0.22, 0, TAU, 32, Color(1, 1, 1, 0.07), 2.0)
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
 		accept_event()
-		if not item_id.is_empty():
+		if item_id.is_empty():
+			return
+		if event.button_index == MOUSE_BUTTON_LEFT:
 			clicked.emit(self)
+		else:
+			right_clicked.emit(self)
+
+func _get_drag_data(_at: Vector2) -> Variant:
+	if drag_source.is_empty() or item_id.is_empty() or blocked:
+		return null
+	var preview: ItemIcon = ItemIcon.new()
+	preview.item_id = item_id
+	preview.size = Vector2(72, 72)
+	preview.position = Vector2(-36, -36)
+	var holder: Control = Control.new()
+	holder.add_child(preview)
+	set_drag_preview(holder)
+	return {"from": drag_source, "item_id": item_id}
+
+func _can_drop_data(_at: Vector2, data: Variant) -> bool:
+	return drop_handler.is_valid() and data is Dictionary and (data as Dictionary).has("item_id")
+
+func _drop_data(_at: Vector2, data: Variant) -> void:
+	drop_handler.call(data)

@@ -5,6 +5,12 @@ extends RefCounted
 ## Equipping recalculates the derived combat values ("weapon", "attacks", "ac", "speed_m").
 
 const BASE_SPEED_M: float = 9.0
+## Carry weight. SRD 5.2 carrying capacity = Strength score x 15 lb (1 lb = 0.45 kg). SRD 5.2 has
+## no encumbrance rule, so this is a project rule (owner, Q32): above the capacity the hero is
+## slowed by 3 m, above twice the capacity by 6 m.
+const KG_PER_LB: float = 0.45
+const CAPACITY_LB_PER_STR: float = 15.0
+const ENCUMBRANCE_PENALTY_M: Array[float] = [0.0, 3.0, 6.0]
 
 class Training extends RefCounted:
 	var armor: Array[StringName] = []
@@ -83,7 +89,7 @@ static func total_weight_kg(actor: Dictionary) -> float:
 	return total
 
 ## Locked while an attack or move is resolving, during someone else's turn and after death.
-static func _turn_reason(state: GameState, actor_id: String) -> String:
+static func turn_reason(state: GameState, actor_id: String) -> String:
 	if not state.actors.has(actor_id) or not has_inventory(state.actors[actor_id]):
 		return "INV_REASON_NO_INVENTORY"
 	if not CombatRules.alive(state.actors[actor_id]) or state.mode == &"defeat":
@@ -96,7 +102,7 @@ static func _turn_reason(state: GameState, actor_id: String) -> String:
 
 ## Empty string when allowed, otherwise a translation key with the reason.
 static func equip_reason(state: GameState, actor_id: String, item_id: String) -> String:
-	var reason: String = _turn_reason(state, actor_id)
+	var reason: String = turn_reason(state, actor_id)
 	if not reason.is_empty():
 		return reason
 	var actor: Dictionary = state.actors[actor_id]
@@ -118,7 +124,7 @@ static func equip_reason(state: GameState, actor_id: String, item_id: String) ->
 	return ""
 
 static func unequip_reason(state: GameState, actor_id: String, slot: String) -> String:
-	var reason: String = _turn_reason(state, actor_id)
+	var reason: String = turn_reason(state, actor_id)
 	if not reason.is_empty():
 		return reason
 	if not slot in ItemCatalog.SLOTS:
@@ -132,7 +138,7 @@ static func unequip_reason(state: GameState, actor_id: String, slot: String) -> 
 	return ""
 
 static func use_reason(state: GameState, actor_id: String, item_id: String) -> String:
-	var reason: String = _turn_reason(state, actor_id)
+	var reason: String = turn_reason(state, actor_id)
 	if not reason.is_empty():
 		return reason
 	var actor: Dictionary = state.actors[actor_id]
@@ -148,6 +154,12 @@ static func use_reason(state: GameState, actor_id: String, item_id: String) -> S
 			not bool(actor.get("bonus_available", false)):
 		return "INV_REASON_NO_BONUS_ACTION"
 	return ""
+
+static func drop_reason(state: GameState, actor_id: String, item_id: String) -> String:
+	var reason: String = turn_reason(state, actor_id)
+	if not reason.is_empty():
+		return reason
+	return "" if count(state.actors[actor_id], item_id) > 0 else "INV_REASON_NOT_OWNED"
 
 ## Moves the item from the bag into its slot; the previous item goes back into the bag.
 static func equip(actor: Dictionary, item_id: String, training: Training) -> void:
@@ -238,7 +250,30 @@ static func refresh_armor(actor: Dictionary, training: Training) -> void:
 	for modifier: RuleModifier in result.breakdown:
 		breakdown.append({"amount": modifier.amount, "source": String(modifier.source)})
 	actor["ac_breakdown"] = breakdown
+	refresh_speed(actor)
+
+static func capacity_kg(actor: Dictionary) -> float:
+	return _score(actor, "str") * CAPACITY_LB_PER_STR * KG_PER_LB
+
+## 0 = free, 1 = slowed (above capacity), 2 = badly slowed (above twice the capacity).
+static func encumbrance(actor: Dictionary) -> int:
+	var weight: float = total_weight_kg(actor)
+	if weight > capacity_kg(actor) * 2.0:
+		return 2
+	return 1 if weight > capacity_kg(actor) else 0
+
+## Speed = 9 m minus the armour's strength penalty minus the encumbrance penalty.
+static func refresh_speed(actor: Dictionary) -> void:
+	if not has_inventory(actor):
+		return
+	var armor_penalty: float = 0.0
+	var armor_item: String = String(actor["equipment"].get("armor", ""))
+	if armor_item != "":
+		var data: Dictionary = ArmorRules.ARMOR[StringName(String(ItemCatalog.get_item(armor_item)["armor_id"]))]
+		armor_penalty = 3.0 if _score(actor, "str") < int(data["strength"]) else 0.0
+	var level: int = encumbrance(actor)
+	actor["encumbrance"] = level
 	var previous_speed: float = float(actor.get("speed_m", BASE_SPEED_M))
-	actor["speed_m"] = maxf(0.0, BASE_SPEED_M - result.speed_penalty_m)
-	if float(actor.get("move_left", previous_speed)) >= previous_speed:
-		actor["move_left"] = actor["speed_m"]
+	actor["speed_m"] = maxf(0.0, BASE_SPEED_M - armor_penalty - ENCUMBRANCE_PENALTY_M[level])
+	var move_left: float = float(actor.get("move_left", previous_speed))
+	actor["move_left"] = actor["speed_m"] if move_left >= previous_speed else minf(move_left, actor["speed_m"])
