@@ -166,14 +166,14 @@
         }
       ],
       "position": [
-        5.0,
+        -11.0,
         0.0,
-        -11.0
+        -12.5
       ],
       "model": "res://assets/characters/hero_fighter_female/model.glb",
       "pose": "Idle",
       "facing": [
-        -1.0,
+        1.0,
         0.0,
         0.0
       ]
@@ -187,16 +187,16 @@
         }
       ],
       "position": [
-        6.5,
+        2.5,
         0.0,
-        -20.5
+        -21.0
       ],
       "model": "res://assets/characters/hero_wizard_male_hood/model.glb",
       "pose": "Idle",
       "facing": [
-        -1.0,
         0.0,
-        0.0
+        0.0,
+        1.0
       ]
     },
     {
