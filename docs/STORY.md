@@ -124,7 +124,10 @@ marked as right or wrong (docs/DESIGN.md, dialogue rules).
   invulnerable until the player later finds out how to take that protection away.
 - **The cultists** (the existing crypt level with the Cult Priest) are a **small side story**
   that has nothing to do with the Underground City.
-- **All 3 companions are found only in the Overcity.**
+- **All 3 companions are found only in the Overcity.** The knight boy from the Underground
+  City joins as a **short-term 4th companion**.
+- **Act 1 will be long** (a lot of Overcity before the descent), but it is built in small
+  slices; the whole story does not need to be in the game yet.
 
 ## Open questions for the owner
 
