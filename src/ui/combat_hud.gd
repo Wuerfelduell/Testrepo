@@ -634,12 +634,13 @@ func _portrait(actor: Dictionary, active: bool, dimensions: Vector2) -> Portrait
 	portrait.actor = actor.duplicate(true)
 	portrait.active = active
 	var model: String = String(actor.get("model", ""))
-	portrait.texture = PortraitStudio.texture_for(model)
+	var colors: Variant = actor.get("colors", {})
+	portrait.texture = PortraitStudio.texture_for(model, colors)
 	if portrait.texture == null and is_inside_tree():
 		var studio: PortraitStudio = PortraitStudio.shared(get_tree())
 		if not studio.portrait_ready.is_connected(_portrait_rendered):
 			studio.portrait_ready.connect(_portrait_rendered)
-		studio.request(model)
+		studio.request(model, colors)
 	portrait.custom_minimum_size = dimensions
 	portrait.tooltip_text = tr("COMBAT_PORTRAIT_HINT") % [_actor_name(actor), int(actor.get("hp", 0)), int(actor.get("max_hp", 0)), _condition_text(actor)]
 	return portrait

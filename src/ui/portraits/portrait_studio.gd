@@ -2,7 +2,8 @@ class_name PortraitStudio
 extends Node
 ## HUD and initiative portraits rendered from the actual 3D models (package 10): each
 ## character scene is posed in its own SubViewport world, the camera frames the head bone,
-## one frame is rendered and kept as a texture. One render per model per session.
+## one frame is rendered and kept as a texture. One render per model (and per-piece hero
+## colours, HeroColors) per session.
 ## Without a renderer (headless tests) no texture exists and the HUD draws a plain disc.
 
 signal portrait_ready(model_path: String)
@@ -12,6 +13,7 @@ const NODE_NAME: String = "PortraitStudio"
 
 static var cache: Dictionary = {}
 var _queue: Array[String] = []
+var _colors: Dictionary = {}
 var _busy: bool = false
 
 ## The studio living under the scene tree root (created on first use).
@@ -27,14 +29,21 @@ static func shared(tree: SceneTree) -> PortraitStudio:
 static func can_render() -> bool:
 	return DisplayServer.get_name() != "headless"
 
-static func texture_for(model_path: String) -> Texture2D:
-	return cache.get(model_path) as Texture2D
+## Cache key: the model path, plus the colour choice when the hero has one.
+static func key_for(model_path: String, colors: Variant = {}) -> String:
+	var signature: String = HeroColors.signature(colors)
+	return model_path if signature.is_empty() else "%s|%s" % [model_path, signature]
+
+static func texture_for(model_path: String, colors: Variant = {}) -> Texture2D:
+	return cache.get(key_for(model_path, colors)) as Texture2D
 
 ## Queues a render; portrait_ready fires once the texture is in the cache.
-func request(model_path: String) -> void:
-	if not can_render() or cache.has(model_path) or model_path in _queue or not ResourceLoader.exists(model_path):
+func request(model_path: String, colors: Variant = {}) -> void:
+	var key: String = key_for(model_path, colors)
+	if not can_render() or cache.has(key) or key in _queue or not ResourceLoader.exists(model_path):
 		return
-	_queue.append(model_path)
+	_colors[key] = HeroColors.clean(colors)
+	_queue.append(key)
 	if not _busy:
 		_work.call_deferred()
 
@@ -46,15 +55,16 @@ func _work() -> void:
 		return
 	_busy = true
 	while not _queue.is_empty():
-		var model_path: String = _queue.pop_front()
-		var texture: Texture2D = await render(model_path)
+		var key: String = _queue.pop_front()
+		var texture: Texture2D = await render(key.get_slice("|", 0), _colors.get(key, {}))
+		_colors.erase(key)
 		if texture != null:
-			cache[model_path] = texture
-			portrait_ready.emit(model_path)
+			cache[key] = texture
+			portrait_ready.emit(key)
 	_busy = false
 
 ## Renders one head shot. Returns null when nothing could be rendered.
-func render(model_path: String) -> Texture2D:
+func render(model_path: String, colors: Variant = {}) -> Texture2D:
 	var viewport: SubViewport = SubViewport.new()
 	viewport.size = SIZE
 	viewport.own_world_3d = true
@@ -74,6 +84,7 @@ func render(model_path: String) -> Texture2D:
 	var figure: PreviewActor = PreviewActor.new()
 	viewport.add_child(figure)
 	figure.setup(model_path, "")
+	HeroColors.apply(figure, colors)
 	for label: Node in figure.find_children("*", "Label3D", true, false):
 		label.queue_free()
 	# A calm idle frame instead of the bind pose.

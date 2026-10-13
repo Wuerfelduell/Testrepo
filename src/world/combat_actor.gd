@@ -38,6 +38,7 @@ func setup_actor(record: Dictionary) -> void:
 	_record = record.duplicate(true)
 	set_meta("actor_id", actor_id)
 	setup(String(record["model"]), String(record["name_key"]))
+	HeroColors.apply(self, record.get("colors", {}))
 	# Playback shares the command clock, never an independent AnimationPlayer clock.
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	var weapon_data: Dictionary = record.get("weapon", {})

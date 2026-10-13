@@ -56,7 +56,8 @@ static func summary(class_id: String) -> Dictionary:
 		"scores": sheet.ability_scores(), "skills": sheet.skill_proficiencies(), "speed_m": sheet.speed_m()}
 
 ## Returns {} when the class, look or name is not valid.
-static func build_record(class_id: String, look: Dictionary, hero_name: String) -> Dictionary:
+## colors: per-piece colours from character creation (HeroColors), slot id -> palette id.
+static func build_record(class_id: String, look: Dictionary, hero_name: String, colors: Dictionary = {}) -> Dictionary:
 	var display_name: String = clean_name(hero_name)
 	var sheet: CharacterSheet = create_sheet(class_id)
 	var scene: String = String(look.get("scene", ""))
@@ -72,6 +73,7 @@ static func build_record(class_id: String, look: Dictionary, hero_name: String) 
 		"disengaged": false, "weapon": weapon, "attacks": [weapon.duplicate(true)],
 		"model": scene, "model_is_provisional": true, "personality": "", "conditions": [],
 		"body": String(look.get("body", "")), "look_id": String(look.get("id", "")),
+		"colors": HeroColors.clean(colors),
 		"class_id": String(sheet.class_id), "level": sheet.level, "species": String(sheet.species),
 		"xp": sheet.xp, "xp_history": sheet.xp_history(),
 		"ability_scores": sheet.ability_scores(), "proficiency_bonus": sheet.proficiency_bonus(),

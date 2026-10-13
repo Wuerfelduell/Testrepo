@@ -107,6 +107,22 @@ for name, color in [("cloth_red.png", [.36, .06, .05]), ("cloth_black.png", [.13
     rgb = (.45 + .9 * (weave_lum - weave_lum.mean()) + .55)[..., None] * np.array(color)
     Image.fromarray(np.uint8(np.clip(rgb, 0, 1) * 255)).save(OUT / name)
 
+# Recolour masks for the hero colour choice in character creation (hero_colors.json and
+# shaders/hero_recolor.gdshader). Not quantised; read as data, not colour.
+# R = cloth weight, G = leather weight, B = luminance. The shader repeats ranger()'s maths:
+# cloth = (.30 + 1.6 * B) * colour, leather = (.35 + 1.4 * B) * colour.
+rgb = load("T_Ranger_BaseColor.png")
+hue, saturation, value = hsv(rgb)
+green = smooth(.12, .30, saturation) * smooth(55, 75, hue) * (1 - smooth(165, 185, hue))
+brown = smooth(.18, .35, saturation) * (1 - smooth(45, 60, hue))
+mask = np.stack([green, brown, rgb @ np.array([.2126, .7152, .0722])], -1)
+Image.fromarray(np.uint8(np.clip(mask, 0, 1) * 255)).save(OUT / "ranger_recolor_mask.png")
+# Plain cloth (hat): all cloth; B chosen so (.30 + 1.6 * B) gives the weave shade used above,
+# scaled towards the Ranger cloth's shade so one swatch looks alike on robe and hat.
+shade = .9 * (.45 + .9 * (weave_lum - weave_lum.mean()) + .55)
+mask = np.stack([np.ones_like(weave_lum), np.zeros_like(weave_lum), (shade - .30) / 1.6], -1)
+Image.fromarray(np.uint8(np.clip(mask, 0, 1) * 255)).save(OUT / "weave_recolor_mask.png")
+
 # Bone (horns, crown, cultist mask): pale, slightly yellow, from the existing stone grain.
 stone = Image.open(ROOT / "assets/dungeon/textures/Mat_GeneralProps_BaseColor.png").convert("RGB").resize((256, 256))
 grain = np.asarray(stone, dtype=np.float32) / 255 @ np.array([.2126, .7152, .0722])

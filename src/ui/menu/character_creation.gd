@@ -7,6 +7,10 @@ signal back_requested
 signal begin_requested(record: Dictionary)
 
 const PREVIEW_RECT: Rect2 = Rect2(760, 90, 640, 640)
+const COLORS_RECT: Rect2 = Rect2(1420, 90, 420, 640)
+const SWATCH_SIZE: float = 40.0
+const SWATCH_STEP: float = 47.0
+const SWATCHES_PER_ROW: int = 8
 
 var class_id: String = "fighter"
 var body: String = "male"
@@ -23,6 +27,11 @@ var confirm: Control
 var preview_viewport: SubViewport
 var preview_pivot: Node3D
 var preview_actor: PreviewActor
+## Per-piece colours, slot id -> palette id (hero_colors.json). Kept across looks and
+## classes; the record only takes the slots the chosen look has.
+var colors: Dictionary = {}
+var color_slots: Array[String] = []
+var colors_box: Control
 var _dragging: bool = false
 
 func _ready() -> void:
@@ -71,6 +80,12 @@ func _ready() -> void:
 	name_edit.text_changed.connect(func(_text: String) -> void: _refresh_begin())
 	MenuTheme.label(self, Rect2(110, 850, 560, 120), tr("CREATION_M1_NOTE"), 17, MenuTheme.MUTED)
 	_build_preview()
+	MenuTheme.panel(self, COLORS_RECT)
+	MenuTheme.label(self, Rect2(COLORS_RECT.position + Vector2(20, 12), Vector2(380, 34)), tr("CREATION_COLORS"), 22, MenuTheme.GOLD)
+	colors_box = Control.new()
+	colors_box.position = COLORS_RECT.position + Vector2(20, 56)
+	colors_box.size = COLORS_RECT.size - Vector2(40, 66)
+	add_child(colors_box)
 	MenuTheme.panel(self, Rect2(760, 750, 1080, 240))
 	description = MenuTheme.label(self, Rect2(790, 765, 640, 210), "", 20)
 	stats = MenuTheme.label(self, Rect2(1450, 765, 370, 210), "", 20, MenuTheme.PAPER)
@@ -170,7 +185,20 @@ func set_hero_name(value: String) -> void:
 func current_record() -> Dictionary:
 	if looks.is_empty():
 		return {}
-	return HeroFactory.build_record(class_id, looks[look_index], name_edit.text)
+	return HeroFactory.build_record(class_id, looks[look_index], name_edit.text, chosen_colors())
+
+## Colours for the current look only; defaults are left out.
+func chosen_colors() -> Dictionary:
+	return HeroColors.clean(colors, color_slots) if not color_slots.is_empty() else {}
+
+func set_color(slot: String, color_id: String) -> void:
+	if color_id == HeroColors.default_id(slot):
+		colors.erase(slot)
+	else:
+		colors[slot] = color_id
+	if preview_actor != null:
+		HeroColors.apply(preview_actor, colors)
+	_rebuild_colors()
 
 func request_begin() -> void:
 	if current_record().is_empty() or confirm != null:
@@ -240,11 +268,52 @@ func _refresh_look() -> void:
 		preview_actor = PreviewActor.new()
 		preview_pivot.add_child(preview_actor)
 		preview_actor.setup(String(looks[look_index]["scene"]), "")
+		color_slots = HeroColors.slots_for(preview_actor)
+		HeroColors.apply(preview_actor, colors)
 		var record: Dictionary = HeroFactory.build_record(class_id, looks[look_index], "preview")
 		var weapon_model: String = String(record.get("weapon", {}).get("model", ""))
 		if not weapon_model.is_empty():
 			preview_actor.equip_weapon(weapon_model)
+	else:
+		color_slots = []
+	_rebuild_colors()
 	_refresh_begin()
+
+func _rebuild_colors() -> void:
+	if colors_box == null:
+		return
+	for child: Node in colors_box.get_children():
+		child.queue_free()
+	var y: float = 0.0
+	for slot: String in color_slots:
+		var current: String = String(colors.get(slot, HeroColors.default_id(slot)))
+		var color_name: String = tr(String(HeroColors.entry(slot, current).get("name_key", "")))
+		MenuTheme.label(colors_box, Rect2(0, y, 380, 30), "%s: %s" % [tr(HeroColors.slot_name_key(slot)), color_name], 18, MenuTheme.PAPER)
+		y += 32.0
+		var entries: Array = HeroColors.palette(slot)
+		for index: int in entries.size():
+			var color_id: String = String(entries[index]["id"])
+			var at: Vector2 = Vector2((index % SWATCHES_PER_ROW) * SWATCH_STEP, y + floori(index / float(SWATCHES_PER_ROW)) * SWATCH_STEP)
+			_swatch(slot, color_id, Rect2(at, Vector2(SWATCH_SIZE, SWATCH_SIZE)), color_id == current)
+		y += ceili(entries.size() / float(SWATCHES_PER_ROW)) * SWATCH_STEP + 10.0
+
+func _swatch(slot: String, color_id: String, rect: Rect2, selected: bool) -> void:
+	var button: Button = Button.new()
+	button.name = "Swatch_%s_%s" % [slot, color_id]
+	button.position = rect.position
+	button.size = rect.size
+	button.focus_mode = Control.FOCUS_ALL
+	button.tooltip_text = tr(String(HeroColors.entry(slot, color_id).get("name_key", "")))
+	for state: String in ["normal", "hover", "pressed", "focus"]:
+		var style: StyleBoxFlat = StyleBoxFlat.new()
+		style.bg_color = HeroColors.swatch(slot, color_id)
+		style.draw_center = state != "focus"
+		style.border_color = MenuTheme.GOLD if selected or state in ["hover", "focus"] else Color("665b46")
+		style.set_border_width_all(3 if selected else (2 if state in ["hover", "focus"] else 1))
+		style.set_corner_radius_all(6)
+		button.add_theme_stylebox_override(state, style)
+	button.pressed.connect(set_color.bind(slot, color_id))
+	colors_box.add_child(button)
 
 func _refresh_begin() -> void:
 	if begin_button != null:
