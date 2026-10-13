@@ -10,6 +10,7 @@ AI-generated models are included.
 | `characters/*_peasant`, `characters/*_ranger`, clothing textures | Quaternius | [Modular Character Outfits – Fantasy](https://quaternius.itch.io/modular-character-outfits-fantasy) | CC0 1.0, original `License_Standard.txt` copied to `licenses/quaternius_outfits.txt` |
 | `animations/universal.glb` | Quaternius; pack page also thanks animator Gonzalo Furnier | [Universal Animation Library](https://quaternius.itch.io/universal-animation-library) | CC0 1.0, original `License.txt` copied to `licenses/quaternius_animations.txt` |
 | `dungeon/SM_*.glb`, `dungeon/textures/*` | Omie's Assets | [Free 3D Modular Dungeon Kit](https://omies-assets.itch.io/dungeonkit) | CC0 declared on the author's page for the free 17-piece demo; source note in `licenses/omies_source.txt` |
+| `town/*.glb`, `town/textures/*` | Quaternius | [Medieval Village MegaKit](https://quaternius.itch.io/medieval-village-megakit) (free Standard version) | CC0 1.0, original `License_Standard.txt` copied to `licenses/quaternius_medieval_village.txt`; prepared by `tools/prepare_town.py` (glTF to GLB, textures downscaled to 1K/512 px, geometry and materials unchanged) |
 
 CC0 licence: <https://creativecommons.org/publicdomain/zero/1.0/>.
 

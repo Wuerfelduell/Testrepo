@@ -14,5 +14,9 @@
   {
     "archive": "pbr-dungeon.zip",
     "sha256": "004e35024fd7abdc3bc91aca235758033ad057d2b69b311e495e07695da7c51c"
+  },
+  {
+    "archive": "medieval-village-megakit-standard.zip",
+    "sha256": "e60dea67c10f30dccccfbff92a7933f5ea5cfe99be0e2a0fa5118cceabeec5c4"
   }
 ]
