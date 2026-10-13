@@ -184,9 +184,8 @@ Zauberschaden blutet nicht (Effekte dafür gehören zu Auftrag 05).
 `... build_m1_art.py -- enemy_guard spear`. Screenshots: `bash tools/capture_m1_art.sh godot`.
 
 **Größe:** die neuen GLBs liegen zwischen 0,1 und 2,5 MB, `assets/` insgesamt ≈ 67 MB
-(vorher ≈ 50 MB). GitHub verlangt LFS erst ab 100 MB pro Datei; die Entscheidung, ob die
-50-MB-Richtlinie aus Auftrag 01 angehoben oder LFS eingerichtet wird, liegt beim Owner
-(siehe Handover 10.10.2026). Bis dahin bleiben alle Dateien normale Git-Dateien.
+(vorher ≈ 50 MB). Entscheidung des Owners (13.10.2026): Die Richtlinie ist vorerst 100 MB
+(kann später erhöht werden), alle Dateien bleiben normale Git-Dateien, kein LFS.
 
 ### Ehrliche Einschätzung
 - **Gut:** Die vier Gegner sind im Normalzoom klar unterscheidbar (Hut + Schild vs.

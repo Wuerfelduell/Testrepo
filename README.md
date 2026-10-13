@@ -40,7 +40,7 @@ sechs Proben, Knochenreferenzen, PBR-Texturzuordnung, Tastatur-Umschaltung und
 
 Details zu Quellen, Lizenzen, Animationen und fehlenden Modellen stehen in
 [assets/README.md](assets/README.md) und [assets/CREDITS.md](assets/CREDITS.md).
-Das kuratierte Asset-Set bleibt unter 50 MB und wird vollständig als normale Git-Dateien gespeichert. Falls spätere Assets diesen Umfang überschreiten, muss Git LFS gemäß Auftrag 01 eingerichtet werden.
+Das kuratierte Asset-Set bleibt unter 100 MB (Richtlinie des Owners seit 13.10.2026, vorher 50 MB; kann erhöht werden) und wird vollständig als normale Git-Dateien gespeichert, ohne Git LFS.
 
 **Auftrag 01 ist teilweise umgesetzt und noch nicht abgeschlossen.** Die
 kostenlosen, überprüften Figurenpakete decken die vollständigen Anforderungen an
