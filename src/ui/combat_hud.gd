@@ -339,11 +339,13 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 			child.queue_free()
 		_spell_buttons.clear()
 		_spell_order.clear()
+		# Up to six buttons keep 135 px; more share the bar's width.
+		var width: float = minf(135.0, (_spell_row.size.x - 6.0 * (entries.size() - 1)) / maxf(1.0, entries.size()))
 		for index: int in entries.size():
 			var entry: String = entries[index]
-			var button: Button = _button(_spell_row, Rect2(0, 0, 135, 62), "")
-			button.custom_minimum_size = Vector2(135, 62)
-			button.add_theme_font_size_override("font_size", 14)
+			var button: Button = _button(_spell_row, Rect2(0, 0, width, 62), "")
+			button.custom_minimum_size = Vector2(width, 62)
+			button.add_theme_font_size_override("font_size", 14 if width >= 135.0 else 13)
 			button.clip_text = true
 			var kind: String = entry.get_slice(":", 0)
 			var id: String = entry.get_slice(":", 1)
@@ -359,7 +361,7 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var entry: String = _spell_order[index]
 		var button: Button = _spell_buttons[entry]
 		var id: String = entry.get_slice(":", 1)
-		var hotkey: String = str(index + 4) if index < 6 else ""
+		var hotkey: String = str((index + 4) % 10) if index < 7 else ""
 		var reason: String = ""
 		if entry.begins_with("feature:"):
 			var feature: Dictionary = hero["features"][id]

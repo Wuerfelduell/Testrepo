@@ -397,9 +397,9 @@ func _spell_input(event: InputEvent) -> bool:
 			if CommandBus.submit(DebugSwapHeroCommand.new()) == OK:
 				spell_targeting.cancel()
 			return true
-		if key >= KEY_4 and key <= KEY_9:
+		if (key >= KEY_4 and key <= KEY_9) or key == KEY_0:
 			var entries: Array[String] = hud.hotbar_entries()
-			var index: int = key - KEY_4
+			var index: int = 6 if key == KEY_0 else key - KEY_4
 			if index < entries.size():
 				var entry: String = entries[index]
 				if entry.begins_with("feature:"):

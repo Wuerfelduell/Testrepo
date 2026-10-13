@@ -297,12 +297,12 @@ func test_wizard_levels_one_to_five_with_cantrip_and_fireball() -> void:
 	assert_eq(level({"hp": "roll", "feat": "ability_score_improvement", "ability_increases": {"int": 1, "con": 1}}),
 		ERR_INVALID_PARAMETER, "level 4 also asks for a cantrip")
 	assert_eq(level({"hp": "roll", "feat": "ability_score_improvement", "ability_increases": {"int": 1, "con": 1},
-		"cantrips": ["poison_spray"]}), OK)
+		"cantrips": ["acid_splash"]}), OK)
 	assert_eq(level({"hp": "average", "spellbook": ["fireball"]}), OK)
 	var wizard: Dictionary = current()
 	assert_eq(wizard["level"], 5)
 	assert_eq(wizard["spell_slots_max"], [4, 3, 2])
-	assert_has(wizard["spells"], "poison_spray")
+	assert_has(wizard["spells"], "acid_splash")
 	assert_has(wizard["spells"], "fireball")
 	assert_eq(ClassFeatures.prepared_spells(wizard).size(), 6)
 	assert_true(wizard["features"].has("memorize_spell"))

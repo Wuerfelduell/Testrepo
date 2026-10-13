@@ -203,3 +203,28 @@ func test_graze_needs_weapon_mastery() -> void:
 func test_greatsword_damage_dice_use_great_weapon_fighting() -> void:
 	var fighter: Dictionary = HeroKit.create(&"fighter")
 	assert_eq(CombatRules.damage_die_minimum(fighter, fighter["weapon"]), 3)
+
+func test_wizard_knows_three_cantrips_with_poison_spray() -> void:
+	var wizard: Dictionary = HeroKit.create(&"wizard")
+	assert_eq(ClassFeatures.known_cantrips(wizard), ["fire_bolt", "ray_of_frost", "poison_spray"] as Array[String])
+	assert_false(&"wizard_cantrip" in wizard["pending_character_choices"])
+	var spell: SpellDefinition = SpellBook.get_spell("poison_spray")
+	assert_eq(spell.damage_dice, "1d12")
+	var old_save: Dictionary = wizard.duplicate(true)
+	old_save["spells"].erase("poison_spray")
+	old_save["pending_character_choices"].append(&"wizard_cantrip")
+	var upgraded: Dictionary = HeroKit.activate(old_save)
+	assert_eq(upgraded["spells"], wizard["spells"], "older saves gain the third cantrip in its place")
+	assert_false(&"wizard_cantrip" in upgraded["pending_character_choices"])
+	assert_false("poison_spray" in ClassFeatures.wizard_cantrip_options(ClassFeatures.known_cantrips(wizard)),
+		"level-up does not offer it again")
+
+func test_poison_spray_is_a_ranged_spell_attack_for_1d12_poison() -> void:
+	var wizard: Dictionary = HeroKit.create(&"wizard", Vector3.ZERO)
+	start(wizard)
+	assert_eq(CommandBus.submit(CastSpellCommand.new("hero", "poison_spray", ["enemy"])), OK)
+	CommandBus.submit(AdvanceCombatCommand.new(3.0))
+	var hp: int = int(Game.state.actors["enemy"]["hp"])
+	assert_between(hp, 60 - 12, 60)
+	assert_false(bool(Game.state.actors["hero"]["action_available"]))
+	assert_eq(Game.state.actors["hero"]["spell_slots"], wizard["spell_slots"], "cantrips cost no slot")

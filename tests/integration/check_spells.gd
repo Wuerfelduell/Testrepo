@@ -27,7 +27,7 @@ func _run() -> void:
 	await get_tree().process_frame
 	var hero: Dictionary = Game.state.actors["hero"]
 	check(hero["class_id"] == "wizard" and hero["spell_slots"] == [2], "Wizard with two level 1 slots")
-	check(arena.hud.hotbar_entries().size() == 6, "Six spell buttons in the hotbar")
+	check(arena.hud.hotbar_entries().size() == 7, "Seven spell buttons in the hotbar (three cantrips)")
 	check(CommandBus.submit(DebugSwapHeroCommand.new()) == OK and Game.state.actors["hero"]["class_id"] == "fighter", "F4 swaps back")
 	check(arena.hud.hotbar_entries() == ["feature:second_wind"], "Fighter shows Second Wind")
 	CommandBus.submit(DebugSwapHeroCommand.new())

@@ -14,8 +14,11 @@ const DEFAULT_SKILLS: Dictionary = {
 }
 const DEFAULT_HUMAN_SKILL: Dictionary = {&"fighter": &"arcana", &"wizard": &"perception"}
 const FIGHTER_STYLE: String = "great_weapon_fighting"
-## SRD 5.2 Wizard, level 1: cantrips and prepared level-1 spells for the first slice.
-const WIZARD_SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "burning_hands", "shield", "sleep"]
+## SRD 5.2 Wizard, level 1: three cantrips and the prepared level-1 spells. The third
+## cantrip, Poison Spray (1d12), is the owner's wish for a strong one (13-10-2026).
+const WIZARD_CANTRIP: String = "poison_spray"
+const WIZARD_SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", WIZARD_CANTRIP, "magic_missile",
+	"burning_hands", "shield", "sleep"]
 
 static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), scores: Dictionary = {},
 		class_skills: Array[StringName] = [], human_skill: StringName = &"") -> Dictionary:
@@ -74,6 +77,13 @@ static func activate(source: Dictionary) -> Dictionary:
 			record["features"]["fighting_style"] = FIGHTER_STYLE
 			record["pending_character_choices"] = record.get("pending_character_choices", []).filter(
 				func(choice: Variant) -> bool: return String(choice) != "fighting_style")
+		# Wizards saved with two cantrips receive the third one.
+		if class_id == "wizard" and record.has("spells") and not WIZARD_CANTRIP in record["spells"]:
+			var spells: Array = record["spells"].duplicate()
+			spells.insert(mini(2, spells.size()), WIZARD_CANTRIP)
+			record["spells"] = spells
+			record["pending_character_choices"] = record.get("pending_character_choices", []).filter(
+				func(choice: Variant) -> bool: return String(choice) != "wizard_cantrip")
 		return record
 	var level: int = int(record.get("level", 1))
 	var definition: ClassDefinition = load("res://data/classes/%s.tres" % class_id) as ClassDefinition
@@ -105,8 +115,6 @@ static func activate(source: Dictionary) -> Dictionary:
 		if String(record.get("personality", "")).is_empty():
 			# Only used when the arena auto-plays the hero: keep range like a caster should.
 			record["personality"] = "archer"
-		# SRD 5.2 Wizards know three cantrips at level 1; the third is a creation choice.
-		choices.append(&"wizard_cantrip")
 	record["pending_character_choices"] = choices
 	return record
 
