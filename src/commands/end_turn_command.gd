@@ -20,6 +20,9 @@ func validate(state: GameState) -> Error:
 func apply(state: GameState) -> Dictionary:
 	var events: Array[Dictionary] = []
 	if state.mode == &"combat":
+		# Spirit Guardians: a creature that ends its turn inside an enemy's aura saves.
+		events.append_array(ActiveEffects.aura_triggers(state, actor_id, Rng.rng, false))
+	if state.mode == &"combat":
 		events.append_array(ActiveEffects.on_turn_end(state, actor_id, Rng.rng))
 	for index: int in range(state.turn_order.size()):
 		state.turn_index = (state.turn_index + 1) % state.turn_order.size()

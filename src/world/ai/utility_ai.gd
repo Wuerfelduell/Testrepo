@@ -25,15 +25,18 @@ static func consider(state: GameState, actor_id: String,
 	var origin: Vector3 = actor.get("position", Vector3.ZERO)
 	var can_act: bool = CombatRules.can_use_action(actor)
 	var current_offense: float = _best_offense(state, actor_id, origin, targets, personality)
+	# Extra Attack / Multiattack: later attacks of an Attack action already taken.
+	var can_attack: bool = can_act or (int(actor.get("attacks_left", 0)) > 0 and CombatRules.conditions_for(actor).can_act())
 	for target_id: String in targets:
-		var attack: Dictionary = CombatRules.attack_preview(state, actor_id, target_id)
-		if can_act and bool(attack.get("legal", false)):
-			var kill: float = _kill_chance(actor, state.actors[target_id], attack)
-			options.append({"kind": &"attack", "score": _attack_score(attack, kill, personality),
-				"reason_key": &"AI_FINISH_TARGET" if kill >= 0.25 else &"AI_ATTACK_TARGET",
-				"target_id": target_id, "destination": origin,
-				"breakdown": {"hit_chance": attack.get("chance", 0.0),
-					"expected_damage": attack.get("expected_damage", 0.0), "kill_chance": kill}})
+		for weapon_choice: Dictionary in attack_choices(actor):
+			var attack: Dictionary = CombatRules.attack_preview(state, actor_id, target_id, Vector3.INF, weapon_choice["weapon"])
+			if can_attack and bool(attack.get("legal", false)):
+				var kill: float = _kill_chance(actor, state.actors[target_id], attack, weapon_choice["weapon"])
+				options.append({"kind": &"attack", "score": _attack_score(attack, kill, personality),
+					"reason_key": &"AI_FINISH_TARGET" if kill >= 0.25 else &"AI_ATTACK_TARGET",
+					"target_id": target_id, "weapon_id": weapon_choice["id"], "destination": origin,
+					"breakdown": {"hit_chance": attack.get("chance", 0.0),
+						"expected_damage": attack.get("expected_damage", 0.0), "kill_chance": kill}})
 	# Spellcasters also score their castable spells (SpellOptions).
 	options.append_array(SpellOptions.consider(state, actor_id, targets, personality))
 	var budget: float = float(actor.get("move_left", 0.0))
@@ -126,7 +129,7 @@ static func choose(state: GameState, actor_id: String,
 static func command_for(option: Dictionary, actor_id: String) -> Command:
 	match StringName(option.get("kind", &"")):
 		&"attack":
-			return AttackCommand.new(actor_id, str(option["target_id"]))
+			return AttackCommand.new(actor_id, str(option["target_id"]), str(option.get("weapon_id", "")))
 		&"move":
 			return MoveCommand.new(actor_id, option["destination"])
 		&"dash":
@@ -186,10 +189,11 @@ static func _best_offense(state: GameState, actor_id: String, position: Vector3,
 	preview_state.actors[actor_id]["action_available"] = true
 	var best: float = 0.0
 	for target_id: String in targets:
-		var preview: Dictionary = CombatRules.attack_preview(preview_state, actor_id, target_id, position)
-		if bool(preview.get("legal", false)):
-			best = maxf(best, _attack_score(preview,
-				_kill_chance(state.actors[actor_id], state.actors[target_id], preview), personality))
+		for weapon_choice: Dictionary in attack_choices(state.actors[actor_id]):
+			var preview: Dictionary = CombatRules.attack_preview(preview_state, actor_id, target_id, position, weapon_choice["weapon"])
+			if bool(preview.get("legal", false)):
+				best = maxf(best, _attack_score(preview,
+					_kill_chance(state.actors[actor_id], state.actors[target_id], preview, weapon_choice["weapon"]), personality))
 	return maxf(best, SpellOptions.best_offense(preview_state, actor_id, position, targets, personality))
 
 static func _attack_score(preview: Dictionary, kill: float, personality: AIPersonality) -> float:
@@ -332,8 +336,21 @@ static func _move_reason(state: GameState, actor: Dictionary, destination: Vecto
 static func _low_hp(actor: Dictionary) -> bool:
 	return float(actor.get("hp", 0)) / maxf(float(actor.get("max_hp", 1)), 1.0) < 0.3
 
-static func _kill_chance(actor: Dictionary, target: Dictionary, preview: Dictionary) -> float:
-	var weapon: Dictionary = actor.get("weapon", {})
+## The attacks a creature can pick from: the equipped weapon (id ""), or each entry of
+## "attacks" for a Multiattack stat block that mixes them (Cult Priest: mace or Radiant Flame).
+static func attack_choices(actor: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var attacks: Array = actor.get("attacks", [])
+	if bool(actor.get("chooses_attack", false)) and attacks.size() > 1:
+		for attack: Variant in attacks:
+			if attack is Dictionary and not String(attack.get("id", "")).is_empty():
+				result.append({"id": String(attack["id"]), "weapon": attack})
+	if result.is_empty():
+		result.append({"id": "", "weapon": actor.get("weapon", {})})
+	return result
+
+static func _kill_chance(actor: Dictionary, target: Dictionary, preview: Dictionary, weapon_override: Dictionary = {}) -> float:
+	var weapon: Dictionary = actor.get("weapon", {}) if weapon_override.is_empty() else weapon_override
 	var parsed: Dictionary = Dice.parse(str(weapon.get("damage_dice", "1d6")))
 	if parsed.has("error"):
 		return 0.0

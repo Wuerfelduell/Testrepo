@@ -31,6 +31,8 @@ const GATE_CENTER: Vector3 = Vector3(16.5, 0, -9)
 ## Tall walls, pillars and shelves the camera fades when they hide an actor:
 ## {"visual": Node3D, "body": StaticBody3D, "box": AABB}.
 var occluders: Array[Dictionary] = []
+## All static kit meshes end up in MultiMeshes (StaticBatcher) once the level is built.
+var batcher: StaticBatcher
 var _cells: Dictionary = {}
 
 func build() -> void:
@@ -58,6 +60,8 @@ func build() -> void:
 	_ossuary()
 	_shrine()
 	_crypt_lights()
+	if is_inside_tree():
+		_batch_meshes()
 	navigation = NavigationRegion3D.new()
 	navigation.name = "BakedNavigation"
 	add_child(navigation)
@@ -80,6 +84,18 @@ func bake() -> void:
 	navigation.navigation_mesh = mesh
 	assert(mesh.get_polygon_count() > 0, "Crypt navigation bake must contain polygons")
 	assert(ResourceSaver.save(mesh, CRYPT_NAVIGATION_PATH) == OK, "Crypt navigation bake must persist")
+
+## Hundreds of kit pieces become a few dozen MultiMeshes; the fading walls keep their
+## wrapper nodes and the fader re-places their instances (see LevelWallFader).
+func _batch_meshes() -> void:
+	batcher = StaticBatcher.new()
+	batcher.name = "StaticBatches"
+	add_child(batcher)
+	var wrappers: Array[Node3D] = []
+	for entry: Dictionary in occluders:
+		wrappers.append(entry["visual"] as Node3D)
+		entry["batcher"] = batcher
+	batcher.batch(geometry, wrappers)
 
 func is_floor_cell(cell: Vector2i) -> bool:
 	return _cells.has(cell) and not cell in SEALED_CELLS

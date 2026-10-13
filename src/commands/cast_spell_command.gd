@@ -38,12 +38,14 @@ func apply(state: GameState) -> Dictionary:
 	match spell.casting_time:
 		"action": caster["action_available"] = false
 		"bonus_action": caster["bonus_available"] = false
-	if used_slot > 0:
+	if caster.get("spell_uses", {}).has(spell_id):
+		caster["spell_uses"][spell_id] = int(caster["spell_uses"][spell_id]) - 1
+	elif used_slot > 0:
 		SpellRules.spend_slot(caster["spell_slots"], used_slot)
 	if spell.concentration:
 		# A new concentration spell ends the previous one.
 		events.append_array(ActiveEffects.end_concentration(state, actor_id, "new_spell"))
-		caster["concentration"] = {"spell_id": spell_id, "rounds_left": spell.duration_rounds}
+		caster["concentration"] = {"spell_id": spell_id, "rounds_left": spell.duration_rounds, "slot_level": used_slot}
 	state.pending = SpellResolver.cast_pending(state, actor_id, spell, used_slot, target_ids, point)
 	events.append(SpellResolver.start_event(state.pending))
 	return {"events": events}
