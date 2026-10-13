@@ -37,12 +37,12 @@ func _run() -> void:
 	check(arena.ready_for_input, "Arena must initialize fully")
 	var hero: Dictionary = game.state.actors["hero"]
 	check(EquipmentRules.has_inventory(hero), "The arena hero receives the Fighter starting kit")
-	check(int(hero["ac"]) == 18 and String(hero["weapon"]["id"]) == "longsword", "Kit keeps the arena hero's numbers")
+	check(int(hero["ac"]) == 16 and String(hero["weapon"]["id"]) == "greatsword", "Kit keeps the arena hero's numbers")
 	var menus: GameMenus = arena.menus
 	check(not menus.is_open(), "Windows start closed")
 	menus.toggle_inventory()
 	check(menus.inventory.visible and not menus.character.visible, "I opens only the inventory")
-	check((menus.inventory.equipment_slots["main_hand"] as ItemSlot).item_id == "longsword", "Main hand slot shows the sword")
+	check((menus.inventory.equipment_slots["main_hand"] as ItemSlot).item_id == "greatsword", "Main hand slot shows the greatsword")
 	var axe_state: GameState = game.state
 	EquipmentRules.add_item(axe_state.actors["hero"], "battleaxe")
 	# Test-only state injection, the same way the unit tests set up fixtures.

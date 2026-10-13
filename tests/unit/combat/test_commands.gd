@@ -186,7 +186,7 @@ func test_arena_setup_is_internal_one_shot_and_never_revives_defeated_run() -> v
 	assert_eq(CommandBus.submit(SetupArenaCommand.new()), OK)
 	assert_eq(Game.state.actors.size(), 4)
 	assert_eq(Game.state.actors["hero"]["hp"], 12)
-	assert_eq(Game.state.actors["hero"]["ac"], 18)
+	assert_eq(Game.state.actors["hero"]["ac"], 16, "chain mail, greatsword in both hands")
 	assert_eq(CommandBus.submit(SetupArenaCommand.new()), ERR_ALREADY_IN_USE)
 	var defeated: GameState = GameState.new()
 	defeated.mode = &"defeat"

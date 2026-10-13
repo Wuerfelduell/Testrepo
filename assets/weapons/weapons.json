@@ -1,6 +1,7 @@
 {
 	"_comment": "Grip transforms in hand-bone space. Origin of every weapon model is its grip centre; weapon +Y is the blade/shaft axis. 'across' = 01b sword grip (blade across the palm).",
 	"sword": {"scene": "res://assets/weapons/sword.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"greatsword": {"scene": "res://assets/weapons/greatsword.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"axe": {"scene": "res://assets/weapons/axe.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"dagger": {"scene": "res://assets/weapons/dagger.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"scimitar": {"scene": "res://assets/weapons/scimitar.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},

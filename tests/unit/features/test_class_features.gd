@@ -41,9 +41,10 @@ func test_fighter_has_active_level_one_features() -> void:
 	var fighter: Dictionary = HeroKit.create(&"fighter")
 	assert_true(bool(fighter["class_features_active"]))
 	assert_eq(fighter["features"]["second_wind"]["uses"], 2)
-	assert_eq(fighter["weapon"]["mastery"], "sap")
+	assert_eq(fighter["weapon"]["mastery"], "graze")
+	assert_eq(fighter["weapon"]["damage_dice"], "2d6")
 	assert_eq(fighter["hp"], 12)
-	assert_eq(fighter["ac"], 18)
+	assert_eq(fighter["ac"], 16, "chain mail, no shield")
 
 func test_second_wind_heals_as_bonus_action_and_spends_a_use() -> void:
 	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
@@ -70,6 +71,7 @@ func test_wizard_cannot_use_second_wind() -> void:
 
 func test_sap_gives_the_hit_target_disadvantage_on_its_next_attack_only() -> void:
 	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	fighter["weapon"]["mastery"] = "sap"
 	fighter["weapon"]["attack_modifiers"] = [{"amount": 50, "source": "str"}]
 	start(fighter)
 	assert_eq(CommandBus.submit(AttackCommand.new("hero", "enemy")), OK)
@@ -85,6 +87,7 @@ func test_sap_gives_the_hit_target_disadvantage_on_its_next_attack_only() -> voi
 
 func test_sap_expires_at_the_start_of_the_fighters_next_turn() -> void:
 	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	fighter["weapon"]["mastery"] = "sap"
 	fighter["weapon"]["attack_modifiers"] = [{"amount": 50, "source": "str"}]
 	start(fighter)
 	CommandBus.submit(AttackCommand.new("hero", "enemy"))
@@ -179,3 +182,24 @@ func test_damage_dice_below_minimum_count_as_three_and_are_recorded() -> void:
 		assert_eq(roll.total, sum)
 	var serialized: Dictionary = CombatRules.serialize_roll(Dice.roll("1d4", Rng.rng, [], false, 3))
 	assert_true(serialized["groups"][0].has("raised_indices"))
+
+func test_graze_deals_the_strength_modifier_on_a_miss() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	fighter["weapon"]["attack_modifiers"] = [{"amount": -50, "source": "str"}]
+	start(fighter)
+	assert_eq(CommandBus.submit(AttackCommand.new("hero", "enemy")), OK)
+	CommandBus.submit(AdvanceCombatCommand.new(1.0))
+	assert_eq(Game.state.actors["enemy"]["hp"], 57, "STR 16: a miss still deals 3 slashing")
+
+func test_graze_needs_weapon_mastery() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	fighter["weapon"]["attack_modifiers"] = [{"amount": -50, "source": "str"}]
+	fighter["features"].erase("weapon_mastery")
+	start(fighter)
+	CommandBus.submit(AttackCommand.new("hero", "enemy"))
+	CommandBus.submit(AdvanceCombatCommand.new(1.0))
+	assert_eq(Game.state.actors["enemy"]["hp"], 60)
+
+func test_greatsword_damage_dice_use_great_weapon_fighting() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter")
+	assert_eq(CombatRules.damage_die_minimum(fighter, fighter["weapon"]), 3)

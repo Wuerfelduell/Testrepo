@@ -4,6 +4,9 @@
 		"longsword": {"type": "weapon", "name_key": "WEAPON_LONGSWORD", "category": "martial", "kind": "melee",
 			"damage_dice": "1d8", "versatile_dice": "1d10", "damage_type": "slashing", "properties": ["versatile"],
 			"mastery": "sap", "weight_kg": 1.35, "value_gp": 15, "model": "res://assets/weapons/sword.glb"},
+		"greatsword": {"type": "weapon", "name_key": "ITEM_GREATSWORD", "category": "martial", "kind": "melee",
+			"damage_dice": "2d6", "damage_type": "slashing", "properties": ["heavy", "two_handed"],
+			"mastery": "graze", "weight_kg": 1.35, "value_gp": 50, "model": "res://assets/weapons/greatsword.glb"},
 		"shortsword": {"type": "weapon", "name_key": "ITEM_SHORTSWORD", "category": "martial", "kind": "melee",
 			"damage_dice": "1d6", "damage_type": "piercing", "properties": ["finesse", "light"],
 			"mastery": "vex", "weight_kg": 0.9, "value_gp": 10, "model": "res://assets/weapons/sword.glb"},
@@ -47,8 +50,8 @@
 			"dice": "2d4", "bonus": 2, "cost": "bonus_action", "weight_kg": 0.225, "value_gp": 50}
 	},
 	"starting_kits": {
-		"fighter": {"equipped": {"main_hand": "longsword", "off_hand": "shield", "armor": "chain_mail"},
-			"bag": {"light_crossbow": 1, "dagger": 1, "potion_of_healing": 2}, "gold": 4},
+		"fighter": {"equipped": {"main_hand": "greatsword", "armor": "chain_mail"},
+			"bag": {"longsword": 1, "shield": 1, "light_crossbow": 1, "dagger": 1, "potion_of_healing": 2}, "gold": 4},
 		"wizard": {"equipped": {"main_hand": "quarterstaff"},
 			"bag": {"dagger": 2, "potion_of_healing": 1}, "gold": 5},
 		"default": {"equipped": {"main_hand": "dagger"}, "bag": {"potion_of_healing": 1}, "gold": 0}

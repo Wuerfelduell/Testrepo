@@ -272,6 +272,36 @@ static func attack_start_event(pending: Dictionary) -> Dictionary:
 		"opportunity": pending["opportunity"], "duration": pending["duration"], "impact_time": pending["impact_time"],
 		"weapon": pending.get("weapon", {}).duplicate(true)}
 
+## SRD 5.2 Weapon Mastery Graze: a miss still deals the attack's ability modifier as
+## damage of the weapon's type (never less than 0, no dice, not increased otherwise).
+static func _graze(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
+		rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var attacker: Dictionary = state.actors.get(attacker_id, {})
+	if String(weapon.get("mastery", "")) != "graze" or not attacker.get("features", {}).has("weapon_mastery"):
+		return events
+	var ability: Dictionary = {}
+	for modifier: Dictionary in weapon.get("damage_modifiers", []):
+		if String(modifier.get("source", "")) in ["str", "dex"]:
+			ability = modifier
+	var amount: int = int(ability.get("amount", 0))
+	var target: Dictionary = state.actors[target_id]
+	if amount <= 0 or not alive(target):
+		return events
+	var result: DamageRules.Result = DamageRules.apply(amount, StringName(weapon["damage_type"]), defenses_for(target))
+	target["hp"] = maxi(0, int(target["hp"]) - result.total)
+	var roll: DiceResult = DiceResult.new()
+	roll.add_modifiers([RuleModifier.new(amount, &"graze")])
+	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
+		"roll": serialize_roll(roll), "damage_type": weapon["damage_type"], "amount": result.total, "graze": true})
+	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
+		"amount": result.total, "damage_type": weapon["damage_type"], "hp": target["hp"], "graze": true})
+	events.append_array(ActiveEffects.after_damage(state, target_id, result.total, rng))
+	if int(target["hp"]) <= 0:
+		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
+		events.append_array(check_combat_end(state))
+	return events
+
 ## SRD 5.2 Great Weapon Fighting: with a melee weapon held in two hands (Two-Handed or
 ## Versatile), a 1 or 2 on a damage die counts as a 3.
 static func damage_die_minimum(attacker: Dictionary, weapon: Dictionary) -> int:
@@ -354,6 +384,7 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		"hit": outcome["hit"], "critical": outcome["critical"], "cover": outcome["cover"],
 		"spell_id": weapon.get("spell_id", "")})
 	if not bool(outcome["hit"]):
+		events.append_array(_graze(state, attacker_id, target_id, weapon, rng))
 		return events
 	var defenses: DamageRules.Defenses = defenses_for(target)
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),

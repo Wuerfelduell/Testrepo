@@ -73,8 +73,14 @@ func _run() -> void:
 	var state: GameState = game.state
 	check(state.mode == &"combat" and "cult_priest" in state.turn_order, "The Cult Priest's fight starts")
 	check(state.actors.has("cult_priest") and int(state.actors["cult_priest"]["max_hp"]) == 38, "Boss uses the SRD Priest's hit points")
-	check(_count("xp_awarded") == 3, "Each cleared fight pays XP once")
-	check(_count("combat_end") == 3, "Three fights ended before the boss")
+	check(_count("xp_awarded") == _count("combat_end") and _count("combat_end") >= 2, "Each cleared fight pays XP once")
+	# A nearby group may hear a fight and join it, so two of the three fights can merge.
+	var cleared: bool = true
+	for event: Dictionary in events:
+		if event.get("type") == "encounter_triggered" and event.get("encounter_id") != "shrine":
+			for actor_id: Variant in event.get("actor_ids", []):
+				cleared = cleared and not CombatRules.alive(state.actors.get(String(actor_id), {"hp": 1}))
+	check(cleared and _count("encounter_triggered") == 4, "All three fights are cleared before the boss")
 	print("LEVEL_CHECKS: %d, failed: %s, hero hp at boss %d" % [checks, failed, hero_hp])
 	level.queue_free()
 	await get_tree().process_frame

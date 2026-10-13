@@ -57,13 +57,17 @@ func test_catalog_items_and_kits_are_valid() -> void:
 
 func test_fighter_kit_keeps_the_arena_hero_numbers() -> void:
 	var actor: Dictionary = hero()
-	assert_eq(actor["equipment"], {"main_hand": "longsword", "off_hand": "shield", "armor": "chain_mail"})
-	assert_eq(int(actor["ac"]), 18)
+	# Owner's choice (13-10-2026): greatsword in both hands, longsword and shield in the bag.
+	assert_eq(actor["equipment"], {"main_hand": "greatsword", "off_hand": "", "armor": "chain_mail"})
+	assert_eq(int(actor["ac"]), 16)
 	assert_eq(float(actor["speed_m"]), 9.0)
 	assert_eq(int(actor["weapon"]["attack_bonus"]), 5)
-	assert_eq(String(actor["weapon"]["damage_dice"]), "1d8")
+	assert_eq(String(actor["weapon"]["damage_dice"]), "2d6")
 	assert_eq(int(actor["weapon"]["damage_bonus"]), 3)
-	assert_eq(String(actor["weapon"]["model"]), "res://assets/weapons/sword.glb")
+	assert_eq(String(actor["weapon"]["mastery"]), "graze")
+	assert_eq(String(actor["weapon"]["model"]), "res://assets/weapons/greatsword.glb")
+	assert_eq(EquipmentRules.count(actor, "longsword"), 1)
+	assert_eq(EquipmentRules.count(actor, "shield"), 1)
 	assert_true(CombatRules.weapon_valid(actor["weapon"]))
 	assert_eq(EquipmentRules.count(actor, "potion_of_healing"), 2)
 	assert_eq(CommandBus.submit(SetupInventoryCommand.new("hero")), ERR_ALREADY_IN_USE)
@@ -75,6 +79,7 @@ func test_two_handed_crossbow_puts_the_shield_in_the_bag() -> void:
 	assert_eq(actor["equipment"]["off_hand"], "")
 	assert_eq(EquipmentRules.count(actor, "shield"), 1)
 	assert_eq(EquipmentRules.count(actor, "longsword"), 1)
+	assert_eq(EquipmentRules.count(actor, "greatsword"), 1)
 	assert_eq(EquipmentRules.count(actor, "light_crossbow"), 0)
 	assert_eq(int(actor["ac"]), 16)
 	assert_true(bool(actor["weapon"]["ranged"]))
@@ -87,7 +92,7 @@ func test_two_handed_crossbow_puts_the_shield_in_the_bag() -> void:
 	assert_eq(EquipmentRules.equip_reason(Game.state, "hero", "shield"), "INV_REASON_TWO_HANDED")
 
 func test_versatile_weapon_uses_bigger_die_with_free_off_hand() -> void:
-	assert_eq(CommandBus.submit(UnequipItemCommand.new("hero", "off_hand")), OK)
+	assert_eq(CommandBus.submit(EquipItemCommand.new("hero", "longsword")), OK)
 	assert_eq(String(hero()["weapon"]["damage_dice"]), "1d10")
 	assert_eq(int(hero()["ac"]), 16)
 	assert_eq(CommandBus.submit(EquipItemCommand.new("hero", "shield")), OK)
@@ -109,6 +114,8 @@ func test_finesse_dagger_uses_dexterity_when_higher() -> void:
 	assert_eq(int(record["attack_bonus"]), 6)
 
 func test_combat_locks_armour_but_allows_weapon_swap_on_own_turn() -> void:
+	assert_eq(CommandBus.submit(EquipItemCommand.new("hero", "longsword")), OK)
+	assert_eq(CommandBus.submit(EquipItemCommand.new("hero", "shield")), OK)
 	enter_combat(true)
 	assert_eq(EquipmentRules.unequip_reason(Game.state, "hero", "armor"), "INV_REASON_ARMOR_IN_COMBAT")
 	assert_eq(CommandBus.submit(UnequipItemCommand.new("hero", "off_hand")), ERR_UNAVAILABLE)

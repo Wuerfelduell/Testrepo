@@ -29,7 +29,7 @@ func _run() -> void:
 	check(arena.dungeon.navigation.navigation_mesh.get_polygon_count() > 0, "Baked navmesh must load")
 	var initial: GameState = game.state
 	check(initial.actors.size() == 4, "Fighter and three SRD enemy types must exist")
-	check(int(initial.actors["hero"]["max_hp"]) == 12 and int(initial.actors["hero"]["ac"]) == 18, "Level-one Fighter derived stats")
+	check(int(initial.actors["hero"]["max_hp"]) == 12 and int(initial.actors["hero"]["ac"]) == 16, "Level-one Fighter derived stats (chain mail, greatsword)")
 	var staircase: PackedVector3Array = arena.space.query_path(Vector3(6, 0, 3), Vector3(8, 2, -5))
 	check(staircase.size() >= 3, "Navigation reaches raised platform through stairs")
 	if not staircase.is_empty():

@@ -621,3 +621,6 @@ ROOM_SHRINE,Shrine
 DIALOGUE_PLACEHOLDER,Dialogue: %s
 WEAPON_PRIEST_MACE,Mace
 WEAPON_RADIANT_FLAME,Radiant Flame
+ITEM_GREATSWORD,Greatsword
+ROLL_SOURCE_GRAZE,Graze (Weapon Mastery)
+ITEM_MASTERY_GRAZE,"Graze: a miss still deals your Strength modifier as damage"

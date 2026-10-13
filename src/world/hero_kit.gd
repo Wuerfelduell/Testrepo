@@ -33,10 +33,10 @@ static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), s
 	# These explicit skills do not silently activate feats or other deferred choices.
 	if not sheet.select_class_skills(skills) or not sheet.select_human_skill(extra_skill):
 		return {}
-	if class_id == &"fighter" and not sheet.equip(&"chain_mail", true):
+	if class_id == &"fighter" and not sheet.equip(&"chain_mail"):
 		return {}
 	var proficiency: int = sheet.proficiency_bonus()
-	var weapon: Dictionary = _fighter_longsword(sheet) if class_id == &"fighter" else HeroFactory._weapon("wizard", sheet)
+	var weapon: Dictionary = fighter_weapon(sheet) if class_id == &"fighter" else HeroFactory._weapon("wizard", sheet)
 	var record: Dictionary = {
 		"id": "hero", "team": "hero", "name_key": "ACTOR_" + String(class_id).to_upper(),
 		"position": position, "hp": sheet.maximum_hp(), "max_hp": sheet.maximum_hp(),
@@ -87,8 +87,8 @@ static func activate(source: Dictionary) -> Dictionary:
 		var uses: int = SpellRules.second_wind_uses(level)
 		# Fighting Style chosen by the owner (Q34): Great Weapon Fighting.
 		record["features"] = {"second_wind": {"uses": uses, "max": uses},
-			"weapon_mastery": {"weapons": ["longsword"]}, "fighting_style": FIGHTER_STYLE}
-		# The other two mastery weapons still wait for the owner.
+			"weapon_mastery": {"weapons": ["greatsword", "longsword"]}, "fighting_style": FIGHTER_STYLE}
+		# The third mastery weapon still waits for the owner.
 		choices.append(&"weapon_mastery_kinds")
 	else:
 		var intelligence: int = int(SpellRules._lookup(record.get("ability_scores", {}), &"int", 10))
@@ -110,16 +110,19 @@ static func activate(source: Dictionary) -> Dictionary:
 	record["pending_character_choices"] = choices
 	return record
 
-static func _fighter_longsword(sheet: CharacterSheet) -> Dictionary:
+## SRD 5.2 Greatsword (martial, two-handed, 2d6 slashing, mastery Graze): the owner's
+## choice for the Fighter's start, so Great Weapon Fighting works from the first swing.
+static func fighter_weapon(sheet: CharacterSheet) -> Dictionary:
 	var strength: int = sheet.ability_modifier(&"str")
 	var proficiency: int = sheet.proficiency_bonus()
 	return {
-		"id": "longsword", "name_key": "WEAPON_LONGSWORD", "ranged": false,
+		"id": "greatsword", "item_id": "greatsword", "name_key": "ITEM_GREATSWORD", "ranged": false,
 		"reach": 1.5, "range": 0.0, "long_range": 0.0,
-		"attack_bonus": strength + proficiency, "damage_dice": "1d8",
+		"attack_bonus": strength + proficiency, "damage_dice": "2d6",
 		"damage_bonus": strength, "damage_type": "slashing",
 		"attack_modifiers": [{"amount": strength, "source": "str"},
 			{"amount": proficiency, "source": "proficiency"}],
 		"damage_modifiers": [{"amount": strength, "source": "str"}],
-		"mastery": "sap", "model": "res://assets/weapons/sword.glb",
+		"mastery": "graze", "properties": ["heavy", "two_handed"], "proficient": true,
+		"model": "res://assets/weapons/greatsword.glb",
 	}

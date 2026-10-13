@@ -43,7 +43,7 @@ static func create_sheet(class_id: String) -> CharacterSheet:
 	class_skills.assign(SKILLS[class_id]["class"])
 	if not sheet.select_class_skills(class_skills) or not sheet.select_human_skill(SKILLS[class_id]["human"]):
 		return null
-	var equipped: bool = sheet.equip(&"chain_mail", true) if class_id == "fighter" else sheet.equip(&"none")
+	var equipped: bool = sheet.equip(&"chain_mail") if class_id == "fighter" else sheet.equip(&"none")
 	return sheet if equipped else null
 
 ## Summary for the creation screen: hp, ac, main ability, ability scores.
@@ -93,16 +93,7 @@ static func _weapon(class_id: String, sheet: CharacterSheet) -> Dictionary:
 	var proficiency: int = sheet.proficiency_bonus()
 	var strength: int = sheet.ability_modifier(&"str")
 	if class_id == "fighter":
-		return {
-			"id": "longsword", "name_key": "WEAPON_LONGSWORD", "ranged": false,
-			"reach": 1.5, "range": 0.0, "long_range": 0.0,
-			"attack_bonus": strength + proficiency, "damage_dice": "1d8",
-			"damage_bonus": strength, "damage_type": "slashing",
-			"attack_modifiers": [{"amount": strength, "source": "str"},
-				{"amount": proficiency, "source": "proficiency"}],
-			"damage_modifiers": [{"amount": strength, "source": "str"}],
-			"model": "res://assets/weapons/sword.glb",
-		}
+		return HeroKit.fighter_weapon(sheet)
 	# SRD Quarterstaff (simple melee, 1d6 bludgeoning). The art package adds a staff model;
 	# until it exists the Wizard fights bare-handed visually.
 	var staff: Dictionary = {

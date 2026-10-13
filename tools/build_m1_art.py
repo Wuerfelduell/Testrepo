@@ -843,6 +843,16 @@ def build_weapon(kind):
         prism("Blade", [(-.022, .07), (.022, .07), (.02, .22), (0, .33), (-.02, .22)], .014, steel)
         prism("Guard", [(-.065, .055), (.065, .055), (.06, .075), (-.06, .075)], .026, iron)
         grip(.11, 0, .017); cylinder("Pommel", .024, .025, (0, 0, -.065), iron, sides=8)
+    elif kind == "greatsword":
+        # Two-handed: long grip centred on the origin, blade about 0.95 m, wide guard.
+        prism("Blade", [(-.034, .17), (.034, .17), (.03, .98), (0, 1.12), (-.03, .98)], .016, steel)
+        prism("Fuller", [(-.007, .2), (.007, .2), (.006, .9), (-.006, .9)], .02, iron, bevel=.001)
+        prism("Ricasso", [(-.04, .13), (.04, .13), (.036, .2), (-.036, .2)], .022, iron)
+        prism("Guard", [(-.19, .115), (-.17, .095), (.17, .095), (.19, .115), (.17, .14), (-.17, .14)], .03, iron)
+        for side in (-1, 1):
+            sphere("Guard tip", .016, (side * .19, 0, .118), iron, 6, 4)
+        grip(.2, 0, .022)
+        cylinder("Pommel", .032, .045, (0, 0, -.125), iron, sides=8, radius2=.026)
     elif kind == "scimitar":
         edge = [(-.03 + .10 * (t / 8) ** 2, .10 + .70 * t / 8) for t in range(9)]
         back = [(.022 + .12 * (t / 8) ** 2.2, .10 + .62 * t / 8) for t in range(8, -1, -1)]
@@ -933,7 +943,7 @@ if __name__ == "__main__":
         "hero_wizard_male_hood": lambda: wizard("male", "hood"), "hero_wizard_female_hood": lambda: wizard("female", "hood"),
         "hero_wizard_male_hat": lambda: wizard("male", "hat"), "hero_wizard_female_hat": lambda: wizard("female", "hat"),
     }
-    weapon_kinds = ["dagger", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
+    weapon_kinds = ["dagger", "greatsword", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
                     "light_crossbow", "shield_heater", "shield_round"]
     for name, build in builders.items():
         if not only or name in only:
