@@ -13,11 +13,12 @@ func setup(event: Dictionary) -> void:
 	layer = 15
 	var root: Control = MenuTheme.design_root(self)
 	panel = MenuTheme.panel(root, Rect2(560, 150, 800, 170))
-	title = MenuTheme.label(panel, Rect2(0, 18, 800, 60), tr("AREA_CLEARED"), 48, MenuTheme.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
+	title = MenuTheme.label(panel, Rect2(0, 18, 800, 60), tr(String(event.get("title_key", "AREA_CLEARED"))), 48, MenuTheme.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	var names: PackedStringArray = []
 	for key: Variant in event.get("defeated", []):
 		names.append(tr(String(key)))
-	var text: String = tr("AREA_XP") % [int(event.get("amount", 0)), tr(String(event.get("reason_key", ""))), ", ".join(names)]
+	var text: String = tr("AREA_XP") % [int(event.get("amount", 0)), tr(String(event.get("reason_key", ""))), ", ".join(names)] \
+		if not names.is_empty() else tr("AREA_XP_SHORT") % [int(event.get("amount", 0)), tr(String(event.get("reason_key", "")))]
 	if not (event.get("gained_levels", []) as Array).is_empty():
 		text += "\n" + tr("AREA_LEVEL_UP") % int(event.get("level", 1))
 	detail = MenuTheme.label(panel, Rect2(30, 88, 740, 70), text, 22, MenuTheme.PAPER, HORIZONTAL_ALIGNMENT_CENTER)

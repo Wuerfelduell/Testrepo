@@ -47,10 +47,20 @@ func _run() -> void:
 	bus.command_applied.connect(func(_command: Command, result: Dictionary) -> void:
 		for event: Dictionary in result.get("events", []):
 			events.append(event))
-	# Hooks open their placeholder line.
+	# Hooks open their conversation (campaign package 1).
 	check(level.interact("crypt_inscription"), "Inscription hook exists")
-	check(level.interaction.text_label.text == tr("DIALOGUE_PLACEHOLDER") % "crypt_inscription", "Hook shows the placeholder line")
-	level.interaction.close()
+	check(level.dialogue.is_open(), "The inscription opens the dialogue window")
+	check(level.dialogue.choice_buttons.size() == 3, "Three answers at the inscription")
+	check(level.dialogue.choice_buttons[0].text.contains(tr("SHEET_SKILL_RELIGION")), "Check answers name their skill")
+	level.dialogue.choice_buttons[0].pressed.emit()
+	check(_count("roll") == 1 and game.state.world["conversation"]["node"] != "first", "The Religion check is rolled once")
+	while level.hud.dice_popup.is_busy():
+		level.hud.dice_popup.skip()
+		await get_tree().process_frame
+	level.dialogue.refresh()
+	level.dialogue.choice_buttons[0].pressed.emit()
+	await get_tree().process_frame
+	check(not level.dialogue.is_open() and not game.state.world.has("conversation"), "The conversation ends")
 	await _walk(Vector3(0, 0, 6.0), "hall")
 	await _walk(Vector3(-0.7, 0, -10.0), "")
 	check(bool(game.state.world.get("trap_sprung", false)), "Stepping on the plate springs the dart trap")

@@ -1,0 +1,62 @@
+{
+	"version": 1,
+	"id": "crypt_wounded_cultist",
+	"speaker": "Wounded cultist",
+	"start": [
+		{"if": [{"flag": "crypt_wounded_cultist", "is": "spared"}], "node": "spared_again"},
+		{"node": "first"}
+	],
+	"nodes": {
+		"first": {
+			"text": "[Placeholder: a wounded cultist kneels in the hall and presses a hand on his wound.]",
+			"choices": [
+				{"text": "[Placeholder: ask who leads the cult down here]", "next": "who"},
+				{"text": "[Placeholder: threaten him for answers]", "check": {"skill": "intimidation", "dc": 13, "success": "talks", "failure": "spits"}},
+				{"text": "[Placeholder: patch up his wound]", "if": [{"proficient": "medicine"}], "next": "healed"},
+				{"text": "[Placeholder: let him go]", "next": "spared"},
+				{"text": "[Placeholder: kill him]", "next": "killed"}
+			]
+		},
+		"who": {
+			"text": "[Placeholder: he refuses to name his master.]",
+			"choices": [
+				{"text": "[Placeholder: threaten him for answers]", "check": {"skill": "intimidation", "dc": 13, "success": "talks", "failure": "spits"}},
+				{"text": "[Placeholder: let him go]", "next": "spared"},
+				{"text": "[Placeholder: kill him]", "next": "killed"}
+			]
+		},
+		"talks": {
+			"text": "[Placeholder: he tells the hero about the priest in the shrine and his guards.]",
+			"effects": {"flags": {"crypt_knows_priest": true}, "xp": 25},
+			"choices": [
+				{"text": "[Placeholder: let him go]", "next": "spared"},
+				{"text": "[Placeholder: kill him]", "next": "killed"}
+			]
+		},
+		"spits": {
+			"text": "[Placeholder: he spits at the hero and says nothing more.]",
+			"choices": [
+				{"text": "[Placeholder: let him go]", "next": "spared"},
+				{"text": "[Placeholder: kill him]", "next": "killed"}
+			]
+		},
+		"healed": {
+			"text": "[Placeholder: grateful, he warns the hero about the trap in the corridor.]",
+			"effects": {"flags": {"crypt_knows_trap": true}, "xp": 25},
+			"choices": [
+				{"text": "[Placeholder: let him go]", "next": "spared"}
+			]
+		},
+		"spared": {
+			"text": "[Placeholder: he stays kneeling, too weak to leave.]",
+			"effects": {"flags": {"crypt_wounded_cultist": "spared"}, "xp": 25}
+		},
+		"killed": {
+			"text": "[Placeholder: the hero kills him. Short, hard line.]",
+			"effects": {"flags": {"crypt_wounded_cultist": "killed"}, "xp": 25}
+		},
+		"spared_again": {
+			"text": "[Placeholder: he looks up and says nothing.]"
+		}
+	}
+}

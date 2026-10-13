@@ -257,6 +257,11 @@ func consume_events(events: Array[Dictionary]) -> void:
 				var kind: String = String(event.get("kind", "attack"))
 				var total: int = int(roll.get("total", 0))
 				var detail: String = tr("COMBAT_LOG_ROLL") % [_actor_name(actor), tr("COMBAT_ROLL_" + kind.to_upper()), total]
+				if kind == "check":
+					var skill: String = tr("SHEET_SKILL_" + String(event.get("skill", "")).to_upper())
+					description["title_kind"] = tr("COMBAT_ROLL_CHECK") % skill
+					detail = tr("COMBAT_LOG_CHECK") % [_actor_name(actor), skill,
+						tr("DIALOGUE_CHECK_SUCCESS" if bool(event.get("success", false)) else "DIALOGUE_CHECK_FAIL")]
 				if kind == "save":
 					var ability: String = tr("ABILITY_" + String(event.get("ability", "")).to_upper())
 					description["title_kind"] = tr("COMBAT_ROLL_SAVE") % ability

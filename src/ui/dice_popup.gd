@@ -234,6 +234,11 @@ func _reveal() -> void:
 			_style.border_color = Color("fa6761")
 			_style.shadow_color = Color(0.9, 0.1, 0.1, 0.5)
 		_outcome.text = tr("COMBAT_ROLL_VS_AC") % [total, int(_current.get("armor_class", 10)), tr(result_key)]
+	elif kind == "check":
+		# Skill checks in conversations: the hero's roll against the line's DC.
+		var passed: bool = bool(_current.get("success", false))
+		_outcome.text = tr("COMBAT_ROLL_VS_DC") % [total, int(_current.get("dc", 10)), tr("DIALOGUE_CHECK_SUCCESS" if passed else "DIALOGUE_CHECK_FAIL")]
+		_style.border_color = Color("9ed5ac") if passed else Color("ed867d")
 	elif kind == "save":
 		# Saving throws read like attacks: the target's roll against the caster's DC.
 		var saved: bool = bool(_current.get("success", false))

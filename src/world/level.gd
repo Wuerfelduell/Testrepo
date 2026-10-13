@@ -11,6 +11,8 @@ var level: Dictionary = {}
 var dormant_views: Dictionary = {}
 var hook_views: Dictionary = {}
 var interaction: LevelInteraction
+## Conversations with hooks that have a tree in data/dialogue/ (campaign package 1).
+var dialogue: DialoguePanel
 var fader: LevelWallFader
 var trap_marker: MeshInstance3D
 var _patrol_time: float = 0.0
@@ -40,11 +42,14 @@ func _ready() -> void:
 	interaction = LevelInteraction.new()
 	interaction.visible = false
 	add_child(interaction)
+	dialogue = DialoguePanel.new()
+	add_child(dialogue)
 	await super._ready()
 	if not ready_for_input:
 		return
 	CommandBus.command_applied.connect(_level_command_applied)
 	hud.area_key = String(level.get("name_key", ""))
+	dialogue.dice_popup = hud.dice_popup
 	hud.update_state(Game.state)
 	fader = LevelWallFader.new()
 	add_child(fader)
@@ -129,7 +134,7 @@ func _process(delta: float) -> void:
 			_capture_level()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if interaction != null and interaction.is_open():
+	if (interaction != null and interaction.is_open()) or (dialogue != null and dialogue.is_open()):
 		return
 	if ready_for_input and event.is_action_pressed("select") and not spell_targeting.is_active() and \
 			Game.state.mode == &"exploration" and _can_control():
@@ -143,7 +148,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	super._unhandled_input(event)
 
-## Opens a dialogue hook's placeholder or uses the rest point. Returns false if unknown.
+## Opens a hook's conversation (or its placeholder line when it has no tree yet) or uses
+## the rest point. Returns false if unknown.
 func interact(hook_id: String) -> bool:
 	var rest: Dictionary = level.get("rest", {})
 	if hook_id == String(rest.get("id", "")):
@@ -153,7 +159,9 @@ func interact(hook_id: String) -> bool:
 		return true
 	for hook: Dictionary in level.get("hooks", []):
 		if String(hook["id"]) == hook_id:
-			interaction.show_text(tr("DIALOGUE_PLACEHOLDER") % hook_id)
+			var dialogue_id: String = String(hook.get("dialogue", ""))
+			if not DialogueData.exists(dialogue_id) or not dialogue.open(dialogue_id):
+				interaction.show_text(tr("DIALOGUE_PLACEHOLDER") % hook_id)
 			return true
 	return false
 
@@ -252,6 +260,8 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 			"trap_sprung":
 				if trap_marker != null:
 					trap_marker.visible = true
+			"dialogue_end":
+				_hide_finished_hooks.call_deferred()
 
 # Trap, rest and hooks ------------------------------------------------------------------
 
@@ -295,6 +305,8 @@ func _build_hooks() -> void:
 		entries.append({"id": String(rest["id"]), "position": rest["position"], "model": "", "rest": true})
 	for hook: Dictionary in entries:
 		var id: String = String(hook["id"])
+		if _hook_hidden(hook):
+			continue
 		var position: Vector3 = EncounterData.vector(hook["position"])
 		var anchor: Node3D = Node3D.new()
 		anchor.name = "Hook_" + id
@@ -341,6 +353,18 @@ func _build_hooks() -> void:
 		area.add_child(shape)
 		anchor.add_child(area)
 		hook_views[id] = anchor
+
+## A hook with "hide_if" conditions (DialogueData format) disappears once they hold,
+## e.g. a figure that was killed in its conversation.
+func _hook_hidden(hook: Dictionary) -> bool:
+	return hook.has("hide_if") and DialogueData.conditions_met(hook["hide_if"], Game.state)
+
+func _hide_finished_hooks() -> void:
+	for hook: Dictionary in level.get("hooks", []):
+		var id: String = String(hook["id"])
+		if hook_views.has(id) and _hook_hidden(hook):
+			(hook_views[id] as Node3D).queue_free()
+			hook_views.erase(id)
 
 func _rest_marker(anchor: Node3D) -> void:
 	var roll: MeshInstance3D = MeshInstance3D.new()

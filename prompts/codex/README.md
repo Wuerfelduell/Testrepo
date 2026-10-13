@@ -18,7 +18,7 @@ file ownership table). Everything else runs strictly one after the other (RULE 6
 | G | 1 | [09 Loot and carry weight](09-loot-weight.md) | ownership table in the file | ready - parallel (Claude thread) |
 | H | 1 | [10 Crypt level, hero model, portraits](10-crypt-level.md) | ownership table in the file | done (Claude thread, 13-10-2026) |
 | I | 1 | [11 Music and sound](11-music-sound.md) | ownership table in the file | ready - parallel (Claude thread) |
-| - | next | Dialogue system + crypt dialogues - needs the owner's story answers (S1-S7) | - | not written |
+| K | 1 | Campaign packages K1-K4, plan in [docs/CAMPAIGN.md](../../docs/CAMPAIGN.md) | see the plan | K1 dialogue system done (Claude thread, 13-10-2026) |
 
 All sessions append to the same handover file: `git pull --rebase` before every push, keep both
 entries on a conflict.

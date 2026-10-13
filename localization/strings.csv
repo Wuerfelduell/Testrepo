@@ -663,3 +663,12 @@ SPELL_REASON_NO_USES,No uses left today
 AI_HEAL_ALLY,Heal a badly hurt ally
 AI_FACTOR_EXPECTED_HEAL,Expected healing
 ROLL_SOURCE_SPELLCASTING,Spellcasting ability
+DIALOGUE_END,End the conversation
+DIALOGUE_CHECK,[%s DC %d]
+DIALOGUE_CHECK_SUCCESS,SUCCESS
+DIALOGUE_CHECK_FAIL,FAILED
+DIALOGUE_XP_TITLE,A choice with weight
+XP_REASON_DIALOGUE,Conversation
+AREA_XP_SHORT,+%d XP · %s
+COMBAT_ROLL_CHECK,%s check
+COMBAT_LOG_CHECK,%s · %s check: %s

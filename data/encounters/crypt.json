@@ -56,8 +56,8 @@
 	"trap": {"id": "corridor_darts", "min": [-1.5, -0.2, -11.0], "max": [0.2, 0.6, -9.0], "save_ability": "dex", "save_dc": 13, "damage_dice": "1d10", "damage_type": "piercing", "notice_dc": 13},
 	"rest": {"id": "rest_alcove", "position": [-3.0, 0.0, -36.0], "radius": 2.5},
 	"hooks": [
-		{"id": "crypt_inscription", "position": [-4.0, 0.0, 16.5], "model": "", "pose": ""},
-		{"id": "crypt_wounded_cultist", "position": [8.5, 0.0, -0.3], "model": "res://assets/characters/enemy_cultist/model.glb", "pose": "Fixing_Kneeling", "facing": [-1.0, 0.0, 0.0]},
-		{"id": "crypt_prisoner", "position": [18.0, 0.0, -9.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Sitting_Idle", "facing": [-1.0, 0.0, 0.0], "interact_at": [15.6, 0.0, -9.0]}
+		{"id": "crypt_inscription", "dialogue": "crypt_inscription", "position": [-4.0, 0.0, 16.5], "model": "", "pose": ""},
+		{"id": "crypt_wounded_cultist", "dialogue": "crypt_wounded_cultist", "hide_if": [{"flag": "crypt_wounded_cultist", "is": "killed"}], "position": [8.5, 0.0, -0.3], "model": "res://assets/characters/enemy_cultist/model.glb", "pose": "Fixing_Kneeling", "facing": [-1.0, 0.0, 0.0]},
+		{"id": "crypt_prisoner", "dialogue": "crypt_prisoner", "position": [18.0, 0.0, -9.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Sitting_Idle", "facing": [-1.0, 0.0, 0.0], "interact_at": [15.6, 0.0, -9.0]}
 	]
 }

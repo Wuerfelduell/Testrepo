@@ -1,0 +1,58 @@
+{
+	"version": 1,
+	"id": "crypt_prisoner",
+	"speaker": "Prisoner",
+	"start": [
+		{"if": [{"flag": "crypt_prisoner_promised"}], "node": "waiting"},
+		{"node": "first"}
+	],
+	"nodes": {
+		"first": {
+			"text": "[Placeholder: a prisoner sits behind the iron gate and calls out to the hero.]",
+			"choices": [
+				{"text": "[Placeholder: ask who he is]", "next": "who"},
+				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"},
+				{"text": "[Placeholder: check if he is lying]", "check": {"skill": "insight", "dc": 12, "success": "honest", "failure": "unsure"}},
+				{"text": "[Placeholder: walk away]"}
+			]
+		},
+		"who": {
+			"text": "[Placeholder: he says his name and where he comes from in the city.]",
+			"choices": [
+				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"},
+				{"text": "[Placeholder: walk away]"}
+			]
+		},
+		"why": {
+			"text": "[Placeholder: he says the priest has the key to the gate.]",
+			"effects": {"flags": {"crypt_prisoner_key_hint": true}},
+			"choices": [
+				{"text": "[Placeholder: promise to come back with the key]", "next": "promised"},
+				{"text": "[Placeholder: refuse to help]", "next": "refused"}
+			]
+		},
+		"honest": {
+			"text": "[Placeholder: the hero sees he is telling the truth.]",
+			"effects": {"flags": {"crypt_prisoner_honest": true}, "xp": 15},
+			"choices": [
+				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"}
+			]
+		},
+		"unsure": {
+			"text": "[Placeholder: the hero cannot read him.]",
+			"choices": [
+				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"}
+			]
+		},
+		"promised": {
+			"text": "[Placeholder: he thanks the hero and begs him to hurry.]",
+			"effects": {"flags": {"crypt_prisoner_promised": true}}
+		},
+		"refused": {
+			"text": "[Placeholder: he curses the hero.]"
+		},
+		"waiting": {
+			"text": "[Placeholder: he asks if the hero has the key yet.]"
+		}
+	}
+}

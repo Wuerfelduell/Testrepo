@@ -23,6 +23,9 @@ static func decode(data: Dictionary) -> Command:
 		"level_up": command = LevelUpCommand.new()
 		"short_rest": command = ShortRestCommand.new()
 		"long_rest": command = LongRestCommand.new()
+		"dialogue_start": command = DialogueStartCommand.new()
+		"dialogue_choose": command = DialogueChooseCommand.new()
+		"dialogue_end": command = DialogueEndCommand.new()
 		_: return null
 	if command.from_dict(data) != OK:
 		return null

@@ -1,0 +1,34 @@
+{
+	"version": 1,
+	"id": "crypt_inscription",
+	"speaker": "Worn inscription",
+	"start": [
+		{"if": [{"flag": "crypt_inscription_read"}], "node": "again"},
+		{"node": "first"}
+	],
+	"nodes": {
+		"first": {
+			"text": "[Placeholder: the hero finds a worn inscription above the crypt door. Owner writes the text.]",
+			"choices": [
+				{"text": "[Placeholder: read it as a prayer]", "check": {"skill": "religion", "dc": 12, "success": "religion_success", "failure": "unreadable"}},
+				{"text": "[Placeholder: read it as old history]", "check": {"skill": "history", "dc": 12, "success": "history_success", "failure": "unreadable"}},
+				{"text": "[Placeholder: leave it]"}
+			]
+		},
+		"religion_success": {
+			"text": "[Placeholder: the hero recognises a prayer of the cult. Hint at the Cult Priest.]",
+			"effects": {"flags": {"crypt_inscription_read": true, "crypt_knows_cult_prayer": true}, "xp": 15}
+		},
+		"history_success": {
+			"text": "[Placeholder: the hero recognises who was buried here long ago.]",
+			"effects": {"flags": {"crypt_inscription_read": true, "crypt_knows_crypt_history": true}, "xp": 15}
+		},
+		"unreadable": {
+			"text": "[Placeholder: the letters make no sense to the hero.]",
+			"effects": {"flags": {"crypt_inscription_read": true}}
+		},
+		"again": {
+			"text": "[Placeholder: short line when the hero looks at the inscription again.]"
+		}
+	}
+}
