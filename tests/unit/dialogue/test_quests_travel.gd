@@ -96,10 +96,10 @@ func test_quests_follow_flags() -> void:
 	assert_eq(QuestLog.status(cult, state)["state"], "hidden")
 	var before: Dictionary = QuestLog.snapshot(state)
 	state.world["flags"]["visited_crypt"] = true
-	assert_eq(QuestLog.status(cult, state), {"state": "active", "text": String(cult["stages"][0]["text"])})
+	assert_eq(QuestLog.status(cult, state), {"state": "active", "text": String(cult["stages"][1]["text"])})
 	assert_eq(QuestLog.changed(before, QuestLog.snapshot(state)), PackedStringArray(["crypt_cult"]))
 	state.world["flags"]["crypt_knows_priest"] = true
-	assert_eq(QuestLog.status(cult, state)["text"], String(cult["stages"][1]["text"]))
+	assert_eq(QuestLog.status(cult, state)["text"], String(cult["stages"][2]["text"]))
 	state.world["flags"]["defeated_cult_priest"] = true
 	assert_eq(QuestLog.status(cult, state)["state"], "done")
 	var prisoner: Dictionary = QuestLog.load_quest("crypt_prisoner")
@@ -126,3 +126,27 @@ func test_codec() -> void:
 	var decoded: Command = CommandCodec.decode(JSON.parse_string(JSON.stringify(TravelCommand.new("yard_to_crypt").to_dict())))
 	assert_not_null(decoded)
 	assert_eq(decoded.to_dict(), TravelCommand.new("yard_to_crypt").to_dict())
+
+func test_notice_board_starts_the_cult_quest() -> void:
+	var state: GameState = GameState.new()
+	LevelSetupCommand.new({}, "res://data/encounters/torviertel.json").apply(state)
+	var cult: Dictionary = QuestLog.load_quest("crypt_cult")
+	assert_eq(QuestLog.status(cult, state)["state"], "hidden")
+	var start: DialogueStartCommand = DialogueStartCommand.new("torviertel_notice_board")
+	assert_eq(start.validate(state), OK)
+	start.apply(state)
+	DialogueChooseCommand.new(0).apply(state)
+	assert_eq(QuestLog.status(cult, state), {"state": "active", "text": String(cult["stages"][0]["text"])},
+		"Any of its start conditions starts the quest")
+	var board: Dictionary = {}
+	for hook: Dictionary in EncounterData.load_level("res://data/encounters/torviertel.json")["hooks"]:
+		if hook["id"] == "torviertel_notice_board":
+			board = hook
+	assert_eq(board.get("dialogue"), "torviertel_notice_board")
+
+func test_any_condition() -> void:
+	var state: GameState = GameState.new()
+	state.world["flags"] = {"b": true}
+	assert_true(DialogueData.conditions_met([{"any": [{"flag": "a"}, {"flag": "b"}]}], state))
+	assert_false(DialogueData.conditions_met([{"any": [{"flag": "a"}, {"flag": "c"}]}], state))
+	assert_eq(DialogueData.condition_problems([{"any": []}], "x").size(), 1)

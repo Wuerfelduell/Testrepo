@@ -1,0 +1,29 @@
+{
+	"version": 1,
+	"id": "torviertel_notice_board",
+	"speaker": "Notice board",
+	"start": [
+		{"node": "first"}
+	],
+	"nodes": {
+		"first": {
+			"text": "[Placeholder: notices on the board on the Torplatz. Owner writes them.]",
+			"choices": [
+				{"text": "[Placeholder: read the torn notice about the Kellergasse]", "next": "crypt_notice"},
+				{"text": "[Placeholder: look for hidden marks between the notices]", "check": {"skill": "investigation", "dc": 13, "success": "cult_mark", "failure": "nothing"}},
+				{"text": "[Placeholder: step back]"}
+			]
+		},
+		"crypt_notice": {
+			"text": "[Placeholder: people saw hooded figures at the old charnel house in the Kellergasse at night.]",
+			"effects": {"flags": {"torviertel_heard_of_crypt": true}}
+		},
+		"cult_mark": {
+			"text": "[Placeholder: a small cult sign is scratched into the wood, the same as in the crypt.]",
+			"effects": {"flags": {"torviertel_heard_of_crypt": true, "torviertel_cult_mark": true}, "xp": 15}
+		},
+		"nothing": {
+			"text": "[Placeholder: only old notices.]"
+		}
+	}
+}

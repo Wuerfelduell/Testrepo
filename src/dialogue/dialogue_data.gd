@@ -7,7 +7,7 @@ extends RefCounted
 ## later be added as a catalogue keyed by these strings.
 
 const DIRECTORY: String = "res://data/dialogue/"
-const CONDITION_KEYS: Array[String] = ["flag", "is", "class", "proficient", "in_party", "party_room"]
+const CONDITION_KEYS: Array[String] = ["flag", "is", "class", "proficient", "in_party", "party_room", "any"]
 
 static var _cache: Dictionary = {}
 
@@ -105,6 +105,11 @@ static func condition_problems(conditions: Variant, where: String) -> PackedStri
 			found.append(where + ": unknown companion " + String(condition["in_party"]))
 		if condition.has("party_room") and not condition["party_room"] is bool:
 			found.append(where + ": party_room must be true or false")
+		if condition.has("any"):
+			if not condition["any"] is Array or (condition["any"] as Array).is_empty():
+				found.append(where + ": any must be a non-empty list")
+			else:
+				found.append_array(condition_problems(condition["any"], where + " any"))
 	return found
 
 static func _effect_problems(effects: Variant, where: String) -> PackedStringArray:
@@ -132,6 +137,7 @@ static func flags(state: GameState) -> Dictionary:
 ## or "is": <value> for an exact value. {"class": id}, {"proficient": skill} test the hero.
 ## {"in_party": companion} needs that companion in the party ("is": false = not in it);
 ## {"party_room": true} needs a free place in the party (package K4).
+## {"any": [conditions]} holds when at least one of them does.
 static func conditions_met(conditions: Variant, state: GameState) -> bool:
 	if not conditions is Array:
 		return false
@@ -154,6 +160,9 @@ static func conditions_met(conditions: Variant, state: GameState) -> bool:
 			if member != (bool(condition.get("is", true)) if condition.get("is", true) is bool else true):
 				return false
 		if condition.has("party_room") and PartyRules.has_room(state) != bool(condition["party_room"]):
+			return false
+		if condition.has("any") and not (condition["any"] as Array).any(
+				func(option: Dictionary) -> bool: return conditions_met([option], state)):
 			return false
 	return true
 

@@ -144,6 +144,7 @@
     },
     {
       "id": "torviertel_notice_board",
+      "dialogue": "torviertel_notice_board",
       "position": [
         -3.9,
         0.0,
