@@ -672,3 +672,9 @@ XP_REASON_DIALOGUE,Conversation
 AREA_XP_SHORT,+%d XP · %s
 COMBAT_ROLL_CHECK,%s check
 COMBAT_LOG_CHECK,%s · %s check: %s
+TRAVEL_LOCKED,The way is closed for now.
+JOURNAL_TITLE,Journal
+JOURNAL_EMPTY,No quests yet.
+JOURNAL_DONE,done
+JOURNAL_FAILED,failed
+JOURNAL_UPDATED,Journal updated: %s

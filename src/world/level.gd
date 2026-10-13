@@ -13,6 +13,8 @@ var hook_views: Dictionary = {}
 var interaction: LevelInteraction
 ## Conversations with hooks that have a tree in data/dialogue/ (campaign package 1).
 var dialogue: DialoguePanel
+## Quest journal on J (campaign package K3).
+var journal: JournalPanel
 var fader: LevelWallFader
 var trap_marker: MeshInstance3D
 var _patrol_time: float = 0.0
@@ -44,6 +46,8 @@ func _ready() -> void:
 	add_child(interaction)
 	dialogue = DialoguePanel.new()
 	add_child(dialogue)
+	journal = JournalPanel.new()
+	add_child(journal)
 	await super._ready()
 	if not ready_for_input:
 		return
@@ -148,9 +152,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	super._unhandled_input(event)
 
-## Opens a hook's conversation (or its placeholder line when it has no tree yet) or uses
-## the rest point. Returns false if unknown.
+## Opens a hook's conversation (or its placeholder line when it has no tree yet), uses
+## the rest point or takes an exit into another area. Returns false if unknown.
 func interact(hook_id: String) -> bool:
+	if not AreaTravel.exit_by_id(level, hook_id).is_empty():
+		var travel: Error = CommandBus.submit(TravelCommand.new(hook_id))
+		if travel == ERR_UNAVAILABLE:
+			interaction.show_text(tr("TRAVEL_LOCKED"))
+		return true
 	var rest: Dictionary = level.get("rest", {})
 	if hook_id == String(rest.get("id", "")):
 		var refused: String = _long_rest()
@@ -262,6 +271,11 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 					trap_marker.visible = true
 			"dialogue_end":
 				_hide_finished_hooks.call_deferred()
+			"travel":
+				# The old area's views must not read the new area's state until the scene changes.
+				ready_for_input = false
+				set_process(false)
+				RunFlow.enter_area.call_deferred(get_tree())
 
 # Trap, rest and hooks ------------------------------------------------------------------
 
@@ -303,6 +317,8 @@ func _build_hooks() -> void:
 	var rest: Dictionary = level.get("rest", {})
 	if not rest.is_empty():
 		entries.append({"id": String(rest["id"]), "position": rest["position"], "model": "", "rest": true})
+	for exit: Dictionary in level.get("exits", []):
+		entries.append({"id": String(exit["id"]), "position": exit["position"], "model": "", "exit": true})
 	for hook: Dictionary in entries:
 		var id: String = String(hook["id"])
 		if _hook_hidden(hook):
@@ -335,7 +351,8 @@ func _build_hooks() -> void:
 		rune.rotation_degrees.z = 180.0
 		var glow: StandardMaterial3D = StandardMaterial3D.new()
 		glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		glow.albedo_color = Color("7fe0c4") if bool(hook.get("rest", false)) else Color("e9c46a")
+		glow.albedo_color = Color("7fe0c4") if bool(hook.get("rest", false)) else \
+			(Color("8fb8ff") if bool(hook.get("exit", false)) else Color("e9c46a"))
 		glow.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 		rune.material_override = glow
 		rune.position = Vector3(0, 2.3, 0)
@@ -393,6 +410,9 @@ func _hook_under_cursor() -> String:
 	return String((hit["collider"] as Object).get_meta("interact_id", "")) if not hit.is_empty() else ""
 
 func _interact_point(hook_id: String) -> Vector3:
+	var exit: Dictionary = AreaTravel.exit_by_id(level, hook_id)
+	if not exit.is_empty():
+		return EncounterData.vector(exit["position"])
 	for hook: Dictionary in level.get("hooks", []):
 		if String(hook["id"]) == hook_id:
 			return EncounterData.vector(hook.get("interact_at", hook["position"]))

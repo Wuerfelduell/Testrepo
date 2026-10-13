@@ -1,0 +1,13 @@
+{
+	"version": 1,
+	"id": "crypt_cult",
+	"title": "[Placeholder] The cult in the crypt",
+	"start_if": [{"flag": "visited_crypt"}],
+	"stages": [
+		{"text": "[Placeholder: cultists hide in an old crypt. Find out what they are doing.]"},
+		{"if": [{"flag": "crypt_knows_priest"}], "text": "[Placeholder: a priest leads them from the shrine at the back.]"},
+		{"if": [{"flag": "crypt_knows_cult_prayer"}], "text": "[Placeholder: the inscription is one of their prayers.]"}
+	],
+	"done_if": [{"flag": "defeated_cult_priest"}],
+	"done_text": "[Placeholder: the Cult Priest is dead.]"
+}

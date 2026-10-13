@@ -1,0 +1,15 @@
+{
+	"_comment": "Test fixture for campaign package K3 (travel): a second area without enemies whose exit leads into the crypt.",
+	"version": 1,
+	"level": "travel_yard",
+	"scene": "res://scenes/levels/crypt/crypt.tscn",
+	"name_key": "LEVEL_CRYPT",
+	"hero_spawn": [0.0, 0.0, 0.0],
+	"rooms": [],
+	"encounters": [],
+	"hooks": [],
+	"exits": [
+		{"id": "yard_to_crypt", "position": [0.0, 0.0, 0.0], "to": "res://data/encounters/crypt.json", "arrive": [0.0, 0.0, 17.5]},
+		{"id": "yard_locked", "position": [0.0, 0.0, 0.0], "to": "res://data/encounters/crypt.json", "arrive": [0.0, 0.0, 17.5], "if": [{"flag": "never_set"}]}
+	]
+}

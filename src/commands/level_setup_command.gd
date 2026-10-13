@@ -30,14 +30,8 @@ func apply(state: GameState) -> Dictionary:
 	var hero: Dictionary = HeroKit.activate(HeroKit.create(&"fighter") if hero_record.is_empty() else hero_record)
 	hero["position"] = EncounterData.vector(level["hero_spawn"])
 	state.actors = {"hero": hero}
-	var dormant: Dictionary = {}
-	for encounter: Dictionary in level["encounters"]:
-		var members: Dictionary = {}
-		for member: Dictionary in encounter["members"]:
-			members[String(member["id"])] = EncounterData.member_record(member, String(encounter["id"]))
-		dormant[String(encounter["id"])] = members
-	state.world = {"level": String(level["level"]), "data_path": level_path,
-		"dormant": dormant, "triggered": [], "trap_sprung": false, "rest_used": false}
+	state.world = AreaTravel.fresh_area(level, level_path)
+	state.world["flags"] = {"visited_" + String(level["level"]): true}
 	state.mode = &"exploration"
 	state.turn_order.clear()
 	state.turn_index = 0

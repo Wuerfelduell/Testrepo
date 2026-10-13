@@ -29,6 +29,7 @@ func apply(state: GameState) -> Dictionary:
 	var hero: Dictionary = state.actors["hero"]
 	var amount: int = 0
 	var defeated: Array[String] = []
+	var flags: Dictionary = state.world.get("flags", {})
 	var ids: Array = state.actors.keys()
 	ids.sort()
 	for id: String in ids:
@@ -37,6 +38,9 @@ func apply(state: GameState) -> Dictionary:
 			amount += maxi(0, int(actor.get("experience", 0)))
 			defeated.append(String(actor.get("name_key", "")))
 			actor["xp_awarded"] = true
+			# Quests and dialogue read who is dead from the flags (data/quests/).
+			flags["defeated_" + id] = true
+	state.world["flags"] = flags
 	var sheet: CharacterSheet = rebuild_sheet(hero)
 	var award: Progression.Award = sheet.grant_xp(amount, REASON_KEY)
 	hero["xp"] = sheet.xp

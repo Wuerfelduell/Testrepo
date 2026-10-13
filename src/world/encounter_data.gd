@@ -65,6 +65,14 @@ static func problems(level: Dictionary) -> PackedStringArray:
 				result.append(member_id + ": unknown pose " + pose)
 			if pose == "patrol" and patrol_route(member).size() < 2:
 				result.append(member_id + ": patrol needs two points")
+	for exit: Variant in level.get("exits", []):
+		if not exit is Dictionary or String(exit.get("id", "")).is_empty():
+			result.append("exit without id")
+			continue
+		if not vector(exit.get("position")).is_finite() or not vector(exit.get("arrive")).is_finite():
+			result.append(String(exit["id"]) + ": exit needs position and arrive")
+		if not FileAccess.file_exists(String(exit.get("to", ""))):
+			result.append(String(exit["id"]) + ": exit target missing: " + String(exit.get("to", "")))
 	for encounter: Variant in level.get("encounters", []):
 		if encounter is Dictionary:
 			for joiner: Variant in encounter.get("joins", []):

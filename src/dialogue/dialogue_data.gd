@@ -53,7 +53,7 @@ static func problems(data: Dictionary) -> PackedStringArray:
 			if not entry is Dictionary or not nodes.has(String(entry.get("node", ""))):
 				found.append("start entry points to a missing node: %s" % str(entry))
 			else:
-				found.append_array(_condition_problems(entry.get("if", []), "start"))
+				found.append_array(condition_problems(entry.get("if", []), "start"))
 	for node_id: Variant in nodes:
 		var node: Variant = nodes[node_id]
 		var where: String = "node %s" % node_id
@@ -71,7 +71,7 @@ static func problems(data: Dictionary) -> PackedStringArray:
 			if not choice is Dictionary or not choice.get("text") is String:
 				found.append(at + ": text is required")
 				continue
-			found.append_array(_condition_problems(choice.get("if", []), at))
+			found.append_array(condition_problems(choice.get("if", []), at))
 			found.append_array(_effect_problems(choice.get("effects", {}), at))
 			var check: Variant = choice.get("check")
 			if check != null:
@@ -87,7 +87,7 @@ static func problems(data: Dictionary) -> PackedStringArray:
 				found.append(at + ": next points to a missing node")
 	return found
 
-static func _condition_problems(conditions: Variant, where: String) -> PackedStringArray:
+static func condition_problems(conditions: Variant, where: String) -> PackedStringArray:
 	var found: PackedStringArray = []
 	if not conditions is Array:
 		return PackedStringArray([where + ": if must be a list"])

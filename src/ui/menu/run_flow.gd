@@ -1,6 +1,6 @@
 class_name RunFlow
 extends RefCounted
-## Scene transitions of a run: menu -> crypt level (the arena only with --debug-arena), back to menu. Game state changes still go
+## Scene transitions of a run: menu -> level (the arena only with --debug-arena), between areas, back to menu. Game state changes still go
 ## through CommandBus; this only orders the commands and the ironman save.
 
 const MENU_SCENE: String = "res://scenes/menu/main_menu.tscn"
@@ -21,9 +21,18 @@ static func start_new(tree: SceneTree, hero_record: Dictionary) -> Error:
 	SaveGame.run_active = true
 	return tree.change_scene_to_file(ARENA_SCENE if debug_arena else CRYPT_SCENE)
 
-## The scene a (restored) run belongs to: its level, or the arena for arena runs.
+## The scene a (restored) run belongs to: its level's scene, or the arena for arena runs.
 static func scene_for(state: GameState) -> String:
-	return CRYPT_SCENE if String(state.world.get("level", "")) == "crypt" else ARENA_SCENE
+	var path: String = String(state.world.get("data_path", ""))
+	if path.is_empty():
+		return CRYPT_SCENE if String(state.world.get("level", "")) == "crypt" else ARENA_SCENE
+	var scene: String = String(EncounterData.load_level(path).get("scene", ""))
+	return scene if ResourceLoader.exists(scene) else ARENA_SCENE
+
+## After a TravelCommand: load the new area's scene. Ironman saves on leaving only, so
+## travelling writes nothing; the state already holds both areas.
+static func enter_area(tree: SceneTree) -> Error:
+	return tree.change_scene_to_file(scene_for(Game.state))
 
 ## CONTINUE: returns the load result so the menu can show a message instead of crashing.
 static func continue_saved(tree: SceneTree) -> SaveGame.LoadResult:
