@@ -50,7 +50,8 @@ func _sync_map(width: float) -> void:
 	var probe: Vector3 = Vector3(width + 5.0, 0, 0)
 	for frame: int in 600:
 		await get_tree().physics_frame
-		if frame >= 4 and absf(NavigationServer3D.map_get_closest_point(navigation_map, probe).x - width) < 0.01:
+		if frame >= 4 and NavigationServer3D.map_get_iteration_id(navigation_map) > 0 \
+				and absf(NavigationServer3D.map_get_closest_point(navigation_map, probe).x - width) < 0.01:
 			return
 	check(false, "Navigation map never received the test mesh")
 
