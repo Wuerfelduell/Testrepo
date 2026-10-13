@@ -37,6 +37,8 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	actor["bonus_available"] = true
 	actor["reaction_available"] = true
 	actor["disengaged"] = false
+	# Extra Attack: further attacks of an Attack action already taken this turn.
+	actor["attacks_left"] = 0
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
 		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
 	return events

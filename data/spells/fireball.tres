@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"fireball"
+name_key = &"SPELL_FIREBALL"
+srd_name = "Fireball"
+level = 3
+school = "evocation"
+casting_time = "action"
+targeting = "point"
+range_m = 45.0
+area = "sphere"
+area_size_m = 6.0
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "8d6"
+damage_type = &"fire"
+half_on_save = true
+upcast_dice = "1d6"
+vfx = &"fireball"

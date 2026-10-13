@@ -1,10 +1,12 @@
 class_name UseFeatureCommand
 extends Command
-## Level-1 class features that are actions of their own: Fighter Second Wind
-## (bonus action) and Wizard Arcane Recovery (only during a short rest, which
-## does not exist yet, so it is validated and tested but never available in play).
+## Class features that are actions of their own: Fighter Second Wind (bonus action;
+## with Tactical Shift at level 5 it also grants half Speed of movement without
+## opportunity attacks), Fighter Action Surge (level 2: one more action on your turn)
+## and Wizard Arcane Recovery (in play it runs through ShortRestCommand; this path
+## needs a "short_rest" mode that the instant rest never sets).
 
-const FEATURES: Array[String] = ["second_wind", "arcane_recovery"]
+const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge"]
 
 var feature_id: String = ""
 var slot_levels: Array[int] = []
@@ -31,6 +33,14 @@ func validate(state: GameState) -> Error:
 			if not bool(actor.get("bonus_available", false)) or not CombatRules.conditions_for(actor).can_act() \
 					or int(feature.get("uses", 0)) <= 0:
 				return ERR_UNAVAILABLE
+		"action_surge":
+			var reason: Error = CombatRules.valid_actor_turn(state, actor_id)
+			if reason != OK:
+				return reason
+			# Only once the action is spent, so the extra action is never wasted.
+			if bool(actor.get("action_available", false)) or not CombatRules.conditions_for(actor).can_act() \
+					or int(feature.get("uses", 0)) <= 0:
+				return ERR_UNAVAILABLE
 		"arcane_recovery":
 			if state.mode != &"short_rest" or bool(feature.get("used", false)):
 				return ERR_UNAVAILABLE
@@ -53,6 +63,15 @@ func apply(state: GameState) -> Dictionary:
 			events.append({"type": "roll", "kind": "healing", "actor_id": actor_id, "target_id": actor_id,
 				"feature_id": feature_id, "roll": CombatRules.serialize_roll(roll), "amount": healed})
 			events.append({"type": "heal", "actor_id": actor_id, "target_id": actor_id, "amount": healed, "hp": actor["hp"]})
+			if actor.get("features", {}).has("tactical_shift"):
+				# Approximation: the whole rest of this turn's movement avoids opportunity attacks.
+				actor["move_left"] = float(actor.get("move_left", 0.0)) + float(actor.get("speed_m", 9.0)) * 0.5
+				actor["disengaged"] = true
+				events.append({"type": "feature", "actor_id": actor_id, "feature_id": "tactical_shift"})
+		"action_surge":
+			feature["uses"] = int(feature["uses"]) - 1
+			actor["action_available"] = true
+			events.append({"type": "feature", "actor_id": actor_id, "feature_id": feature_id})
 		"arcane_recovery":
 			SpellRules.arcane_recovery(actor["spell_slots"], actor["spell_slots_max"], int(actor.get("level", 1)), slot_levels)
 			feature["used"] = true

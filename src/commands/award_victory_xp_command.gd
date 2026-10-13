@@ -40,11 +40,12 @@ func apply(state: GameState) -> Dictionary:
 	var sheet: CharacterSheet = rebuild_sheet(hero)
 	var award: Progression.Award = sheet.grant_xp(amount, REASON_KEY)
 	hero["xp"] = sheet.xp
-	hero["level"] = sheet.level
+	# The level itself rises only through LevelUpCommand, with the player's choices.
 	hero["xp_history"] = sheet.xp_history()
 	return {"events": [{"type": "xp_awarded", "actor_id": "hero", "amount": amount,
 		"reason_key": REASON_KEY, "defeated": defeated, "total_xp": award.total_xp,
-		"level": award.level, "gained_levels": award.gained_levels}]}
+		"level": award.level, "gained_levels": award.gained_levels,
+		"level_up_available": ProgressionRules.can_level_up(hero)}]}
 
 func to_dict() -> Dictionary:
 	return {"type": "award_victory_xp", "actor_id": actor_id}

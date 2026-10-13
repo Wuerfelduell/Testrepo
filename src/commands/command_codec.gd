@@ -20,6 +20,9 @@ static func decode(data: Dictionary) -> Command:
 		"cast_spell": command = CastSpellCommand.new()
 		"cast_reaction": command = CastReactionCommand.new()
 		"use_feature": command = UseFeatureCommand.new()
+		"level_up": command = LevelUpCommand.new()
+		"short_rest": command = ShortRestCommand.new()
+		"long_rest": command = LongRestCommand.new()
 		_: return null
 	if command.from_dict(data) != OK:
 		return null

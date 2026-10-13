@@ -166,7 +166,9 @@ func update_state(state: GameState) -> void:
 	_can_end = player_turn
 	for kind: String in _buttons:
 		var button: Button = _buttons[kind]
-		button.disabled = not player_turn or not _action_left
+		# Extra Attack: the Attack button stays usable for the remaining attacks.
+		var attack_left: bool = kind == "attack" and int(active.get("attacks_left", 0)) > 0
+		button.disabled = not player_turn or not (_action_left or attack_left)
 		button.tooltip_text = tr("COMBAT_COST_ACTION") if not button.disabled else tr("COMBAT_NO_ACTION" if player_turn else "COMBAT_WAIT_TURN")
 	_end_button.disabled = not player_turn
 	_update_spellbar(state, hero, player_turn)
@@ -228,7 +230,7 @@ func show_target(preview: Dictionary, enemy: Dictionary) -> void:
 	var reasons: PackedStringArray = []
 	if not bool(preview.get("legal", false)):
 		reasons.append(tr("COMBAT_OUT_OF_RANGE"))
-	if not bool(attacker.get("action_available", false)):
+	if not bool(attacker.get("action_available", false)) and int(attacker.get("attacks_left", 0)) <= 0:
 		reasons.append(tr("COMBAT_NO_ACTION"))
 	for source: Variant in preview.get("advantages", []):
 		reasons.append(tr("COMBAT_ADVANTAGE_REASON") % DicePopup.source_name(String(source)))
@@ -336,6 +338,8 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 	var entries: Array[String] = []
 	if hero.get("features", {}).has("second_wind"):
 		entries.append("feature:second_wind")
+	if hero.get("features", {}).has("action_surge"):
+		entries.append("feature:action_surge")
 	for spell_id: Variant in hero.get("spells", []):
 		entries.append("spell:" + String(spell_id))
 	var signature: int = hash(entries)
@@ -370,15 +374,18 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var reason: String = ""
 		if entry.begins_with("feature:"):
 			var feature: Dictionary = hero["features"][id]
-			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("FEATURE_SECOND_WIND_BUTTON") % [int(feature.get("uses", 0)), int(feature.get("max", 0))]]
+			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("FEATURE_%s_BUTTON" % id.to_upper()) % [int(feature.get("uses", 0)), int(feature.get("max", 0))]]
 			if not player_turn:
 				reason = "COMBAT_WAIT_TURN"
-			elif not bool(hero.get("bonus_available", false)):
+			elif id == "second_wind" and not bool(hero.get("bonus_available", false)):
 				reason = "COMBAT_NO_BONUS"
+			elif id == "action_surge" and bool(hero.get("action_available", false)):
+				reason = "FEATURE_ACTION_SURGE_SPEND_FIRST"
 			elif int(feature.get("uses", 0)) <= 0:
 				reason = "FEATURE_NO_USES"
 			button.disabled = not reason.is_empty()
-			button.tooltip_text = tr(reason) if not reason.is_empty() else tr("FEATURE_SECOND_WIND_HINT") % int(hero.get("level", 1))
+			button.tooltip_text = tr(reason) if not reason.is_empty() else \
+				(tr("FEATURE_SECOND_WIND_HINT") % int(hero.get("level", 1)) if id == "second_wind" else tr("FEATURE_ACTION_SURGE_HINT"))
 			continue
 		var spell: SpellDefinition = SpellBook.get_spell(id)
 		if spell == null:

@@ -11,14 +11,22 @@ func validate(state: GameState) -> Error:
 	var reason: Error = CombatRules.valid_actor_turn(state, actor_id)
 	if reason != OK:
 		return reason
-	if not CombatRules.can_use_action(state.actors[actor_id]):
+	var actor: Dictionary = state.actors[actor_id]
+	if not CombatRules.can_use_action(actor) and \
+			not (int(actor.get("attacks_left", 0)) > 0 and CombatRules.conditions_for(actor).can_act()):
 		return ERR_UNAVAILABLE
 	if not bool(CombatRules.attack_preview(state, actor_id, target_id)["legal"]):
 		return ERR_INVALID_PARAMETER
 	return OK
 
 func apply(state: GameState) -> Dictionary:
-	state.actors[actor_id]["action_available"] = false
+	var actor: Dictionary = state.actors[actor_id]
+	if bool(actor.get("action_available", false)):
+		# Extra Attack (Fighter 5): the Attack action holds more than one attack.
+		actor["action_available"] = false
+		actor["attacks_left"] = ClassFeatures.attacks_per_action(actor) - 1
+	else:
+		actor["attacks_left"] = int(actor["attacks_left"]) - 1
 	state.pending = CombatRules.attack_pending(actor_id, target_id)
 	return {"events": [CombatRules.attack_start_event(state.pending)]}
 

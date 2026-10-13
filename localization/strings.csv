@@ -497,3 +497,113 @@ ITEM_TYPE_VALUABLE,Valuable (sell later)
 ITEM_SILVER_RING,Silver ring
 ITEM_CULT_AMULET,Cult amulet
 ITEM_BONE_DICE,Bone dice
+CLASS_WIZARD,Wizard
+LEVELUP_BUTTON,Level up to %d
+LEVELUP_TITLE,LEVEL %d · %s
+LEVELUP_GAINS,WHAT YOU GAIN
+LEVELUP_CHOICES,YOUR CHOICES
+LEVELUP_HIT_POINTS,HIT POINTS
+LEVELUP_HP_ROLL,Roll d%d %+d
+LEVELUP_HP_AVERAGE,Take %d %+d
+LEVELUP_HP_NOTE,"Rolling can give more or less than the fixed value. A roll below 1 still gives 1 hit point."
+LEVELUP_PROFICIENCY,Proficiency bonus +%d → +%d
+LEVELUP_PROFICIENCY_SAME,Proficiency bonus stays +%d
+LEVELUP_HIT_DIE,One more Hit Point Die (d%d) for short rests
+LEVELUP_FEATURE_ACTIVE,new
+LEVELUP_FEATURE_DATA_ONLY,listed only (no effect in play yet)
+LEVELUP_SLOTS,Spell slots: %s
+LEVELUP_SLOT_ENTRY,level %d ×%d
+LEVELUP_PREPARED_LIMIT,You can prepare %d level 1+ spells
+LEVELUP_SECTION_FEAT,ABILITY SCORE IMPROVEMENT OR FEAT
+LEVELUP_SECTION_FEAT_NOTE,"Pick one: raise your ability scores, or take a feat instead."
+LEVELUP_ASI_NOTE,"+2 to one score or +1 to two scores, never above 20. Click a raised score again to reset it."
+LEVELUP_ASI_ENTRY,%s %d
+LEVELUP_ASI_RAISED," → %d"
+LEVELUP_SKILLED_NOTE,Pick %d new skill proficiencies
+LEVELUP_SECTION_STYLE,FIGHTING STYLE
+LEVELUP_SECTION_EXPERTISE,SCHOLAR · EXPERTISE
+LEVELUP_SECTION_EXPERTISE_NOTE,Double your proficiency bonus for one of these skills.
+LEVELUP_SECTION_CANTRIPS,NEW CANTRIP (%d)
+LEVELUP_SECTION_SPELLBOOK,ADD TO YOUR SPELLBOOK (%d)
+LEVELUP_SPELLBOOK_NONE,There are no new Wizard spells of a level you can cast yet.
+LEVELUP_SPELLBOOK_FEWER,Fewer new spells exist than the two a level allows.
+LEVELUP_SECTION_PREPARED,PREPARED SPELLS (UP TO %d)
+LEVELUP_SECTION_PREPARED_NOTE,Only prepared spells and cantrips appear on your hotbar. You can change them on a long rest.
+LEVELUP_NO_CHOICES,This level asks for no choices.
+LEVELUP_SPELL_LEVEL,level %d
+LEVELUP_SPELL_SAVE,%s save
+LEVELUP_SPELL_ATTACK,spell attack
+LEVELUP_SPELL_AREA_SPHERE,%.1f m radius
+LEVELUP_SPELL_AREA_CONE,%.1f m cone
+LEVELUP_SPELL_AREA_LINE,%.1f m line
+LEVELUP_SPELL_RANGE,range %.0f m
+LEVELUP_LATER,Later
+LEVELUP_CONFIRM,Level up
+LEVELUP_DONE,"Level %d! +%d maximum hit points"
+LEVELUP_REASON_NOT_READY,Not enough experience for the next level
+LEVELUP_REASON_INVALID,These choices do not fit this level
+LEVELUP_REASON_HP,Choose how to gain hit points
+LEVELUP_REASON_FEAT,Choose an improvement or a feat
+LEVELUP_REASON_ASI,Spend exactly two ability points
+LEVELUP_REASON_ASI_CAP,An ability score cannot go above 20
+LEVELUP_REASON_SKILLS,Pick the new skills
+LEVELUP_REASON_STYLE,Choose a Fighting Style
+LEVELUP_REASON_EXPERTISE,Choose a skill for Scholar
+LEVELUP_REASON_SPELLBOOK,Pick the new spellbook spells
+LEVELUP_REASON_CANTRIPS,Pick the new cantrip
+LEVELUP_REASON_PREPARED,Too many prepared spells
+FEAT_ABILITY_SCORE_IMPROVEMENT,Ability Score Improvement
+FEAT_ABILITY_SCORE_IMPROVEMENT_HINT,+2 to one ability score or +1 to two (max 20)
+FEAT_SKILLED,Skilled
+FEAT_SKILLED_HINT,Proficiency in three skills of your choice
+FEAT_GREAT_WEAPON_FIGHTING,Great Weapon Fighting
+FEAT_GREAT_WEAPON_FIGHTING_HINT,"With a melee weapon held in two hands, every 1 or 2 on a damage die counts as a 3."
+FEATURE_FIGHTING_STYLE,Fighting Style
+FEATURE_SECOND_WIND,Second Wind
+FEATURE_WEAPON_MASTERY,Weapon Mastery
+FEATURE_ACTION_SURGE_ONE_USE,Action Surge
+FEATURE_ACTION_SURGE_ONE_USE_HINT_LEVELUP,"Once per short or long rest: take one more action on your turn."
+FEATURE_TACTICAL_MIND,Tactical Mind
+FEATURE_ABILITY_SCORE_IMPROVEMENT,Ability Score Improvement
+FEATURE_EXTRA_ATTACK,Extra Attack
+FEATURE_EXTRA_ATTACK_HINT_LEVELUP,The Attack action now makes two attacks.
+FEATURE_TACTICAL_SHIFT,Tactical Shift
+FEATURE_TACTICAL_SHIFT_HINT_LEVELUP,"Second Wind also lets you move half your Speed without opportunity attacks."
+FEATURE_INDOMITABLE_ONE_USE,Indomitable
+FEATURE_TACTICAL_MASTER,Tactical Master
+FEATURE_SPELLCASTING,Spellcasting
+FEATURE_RITUAL_ADEPT,Ritual Adept
+FEATURE_ARCANE_RECOVERY,Arcane Recovery
+FEATURE_SCHOLAR,Scholar
+FEATURE_MEMORIZE_SPELL,Memorize Spell
+FEATURE_MEMORIZE_SPELL_HINT_LEVELUP,"After a short rest, swap one prepared spell for another from your spellbook."
+FEATURE_ACTION_SURGE_BUTTON,Surge %d/%d
+FEATURE_ACTION_SURGE_HINT,Free: take one more action this turn
+FEATURE_ACTION_SURGE_SPEND_FIRST,Use your action first
+COMBAT_ROLL_HIT_POINTS,Hit points
+SPELL_ACID_SPLASH,Acid Splash
+SPELL_POISON_SPRAY,Poison Spray
+SPELL_SHATTER,Shatter
+SPELL_FIREBALL,Fireball
+REST_SHORT_BUTTON,Short rest
+REST_SHORT_HINT,"Spend Hit Point Dice to heal, recharge Second Wind and Action Surge"
+REST_SHORT_TITLE,SHORT REST
+REST_LONG_TITLE,LONG REST
+REST_SHORT_DETAIL,"Second Wind regains one use, Action Surge recharges."
+REST_LONG_DETAIL,"Full hit points, all spell slots, all Hit Point Dice and every feature use."
+REST_HP,Hit points %d / %d
+REST_HIT_DICE,Spend %d of %d Hit Point Dice (d%d)
+REST_ARCANE_TITLE,Arcane Recovery: slots worth up to %d levels
+REST_ARCANE_SLOT,Level %d
+REST_CANCEL,Cancel
+REST_CONFIRM,Rest
+REST_DONE_SHORT,Short rest: +%d hit points
+REST_DONE_LONG,Long rest: +%d hit points · everything restored
+REST_REASON_UNKNOWN,You cannot rest now
+REST_REASON_COMBAT,No resting during combat
+REST_REASON_BUSY,Wait until the current action finishes
+REST_REASON_ENEMIES,Enemies are too close to rest
+REST_REASON_HIT_DICE,Not that many Hit Point Dice left
+REST_REASON_ARCANE,Arcane Recovery: those slots do not fit
+REST_REASON_MEMORIZE,That spell swap is not possible
+REST_REASON_PREPARED,Those spells cannot be prepared

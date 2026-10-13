@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"shatter"
+name_key = &"SPELL_SHATTER"
+srd_name = "Shatter"
+level = 2
+school = "evocation"
+casting_time = "action"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"con"
+damage_dice = "3d8"
+damage_type = &"thunder"
+half_on_save = true
+upcast_dice = "1d8"
+vfx = &"shatter"

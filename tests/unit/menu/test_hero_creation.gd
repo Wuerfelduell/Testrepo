@@ -106,4 +106,7 @@ func test_level_up_reported_by_the_sheet() -> void:
 			state.actors[id]["experience"] = 100
 	var event: Dictionary = AwardVictoryXpCommand.new().apply(state)["events"][0]
 	assert_eq(event["gained_levels"], [2])
-	assert_eq(state.actors["hero"]["level"], 2)
+	# Prompt 08: XP only makes the level available; LevelUpCommand applies it with the choices.
+	assert_eq(state.actors["hero"]["level"], 1)
+	assert_true(bool(event["level_up_available"]))
+	assert_true(ProgressionRules.can_level_up(state.actors["hero"]))

@@ -28,6 +28,8 @@ var pause_menu: PauseMenu
 var _death_info: Dictionary = {}
 var spell_targeting: SpellTargeting
 var spell_vfx: SpellVFX
+var level_up_prompt: LevelUpPrompt
+var rest_panel: RestPanel
 
 func _ready() -> void:
 	camera_rig = CombatCamera.new()
@@ -56,6 +58,15 @@ func _ready() -> void:
 		if _can_control():
 			CommandBus.submit(UseFeatureCommand.new("hero", feature_id)))
 	hud.reaction_answered.connect(func(accept: bool) -> void: CommandBus.submit(CastReactionCommand.new("hero", accept)))
+	# Level-up and rests (prompt 08): own buttons and screens; changes go through the bus.
+	level_up_prompt = LevelUpPrompt.new()
+	level_up_prompt.hud = hud
+	add_child(level_up_prompt)
+	level_up_prompt.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
+	rest_panel = RestPanel.new()
+	rest_panel.hud = hud
+	add_child(rest_panel)
+	rest_panel.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
 	path_display = MeshInstance3D.new()
 	add_child(path_display)
 	space = ArenaSpace.new()
