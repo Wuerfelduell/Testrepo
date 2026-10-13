@@ -163,9 +163,8 @@ Screenshots from CI: `docs/ui-loot.png`, `docs/ui-overload.png`.
   the bag stays visible: click an item to take it, drag it into the bag, take the gold, or
   "Take all [F]". Tooltips compare with what is equipped (damage or AC now vs. with this).
   The window shows the weight after taking everything against the limit.
-- **Combat rule (project rule, SRD 5.2 object interaction + Utilize):** only on your own
-  turn; one item or the gold = the free object interaction (once per round); take all = your
-  action. Outside combat it is free.
+- **Combat rule (owner decision 13-10-2026):** only on your own turn; looting costs your
+  action, after that you may take as much as you like that turn. Outside combat it is free.
 - **Dropping:** right-click a bag item drops one at the hero's feet. It stays on the ground
   as a loot pile (drops close together share one pile) and can be picked up again.
 - **Carry weight (project rule):** capacity = STR x 15 lb, shown in kg (1 lb = 0.45 kg;

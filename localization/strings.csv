@@ -488,9 +488,8 @@ LOOT_REASON_TOO_FAR,"Too far away, walk closer"
 LOOT_REASON_NOTHING,Nothing left to take
 LOOT_TITLE_PILE,On the ground
 LOOT_PROMPT_PILE,[F]  Pick up items
-LOOT_COMBAT_COST,"In combat: one item or the gold is your free interaction this turn, everything costs your action."
-LOOT_REASON_NO_ACTION,Taking everything needs your action
-LOOT_REASON_INTERACTION_USED,Free interaction already used this turn
+LOOT_COMBAT_COST,"In combat: looting costs your action, then take as much as you like this turn."
+LOOT_REASON_NO_ACTION,Looting in combat needs your action
 ITEM_COMPARE_WEAPON,Equipped: %s %+d · %s
 ITEM_COMPARE_AC,"AC %d now, %d with this"
 ITEM_TYPE_VALUABLE,Valuable (sell later)

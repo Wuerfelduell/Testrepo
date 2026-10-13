@@ -3,9 +3,9 @@ extends RefCounted
 ## Loot on bodies and on the ground. Pure: randomness only through the RNG passed in.
 ## A source is either a defeated creature (actor id) or a pile on the ground (GameState.loot_piles).
 ##
-## Project rule (SRD 5.2 "Interacting with things" + Utilize action), owner decision pending:
-## in combat, on your own turn, taking ONE item or the gold is your free object interaction
-## (once per round); taking everything is the Utilize action. Outside combat it is free.
+## Project rule (owner, 13-10-2026): in combat, on your own turn, searching a body or pile costs
+## your action; once paid, you may take as much as you like for the rest of that turn.
+## Outside combat it is free.
 
 const RANGE_M: float = 3.0
 const PILE_MERGE_M: float = 1.5
@@ -130,11 +130,13 @@ static func take_reason(state: GameState, actor_id: String, source_id: String, i
 			return "LOOT_REASON_NOTHING"
 	if state.mode == &"combat":
 		var actor: Dictionary = state.actors[actor_id]
-		if take_all and not CombatRules.can_use_action(actor):
+		if not paid_this_turn(state, actor) and not CombatRules.can_use_action(actor):
 			return "LOOT_REASON_NO_ACTION"
-		if not take_all and int(actor.get("interaction_round", -1)) == state.round_number:
-			return "LOOT_REASON_INTERACTION_USED"
 	return ""
+
+## True once the actor spent its action on looting this round.
+static func paid_this_turn(state: GameState, actor: Dictionary) -> bool:
+	return int(actor.get("loot_round", -1)) == state.round_number
 
 ## Moves loot onto the actor and pays the combat cost. Returns what was taken.
 static func take(state: GameState, actor_id: String, source_id: String, item_id: String,
@@ -161,11 +163,9 @@ static func take(state: GameState, actor_id: String, source_id: String, item_id:
 			record["gold"] = loot["gold"]
 	else:
 		record["loot"] = loot
-	if state.mode == &"combat":
-		if take_all:
-			actor["action_available"] = false
-		else:
-			actor["interaction_round"] = state.round_number
+	if state.mode == &"combat" and not paid_this_turn(state, actor):
+		actor["action_available"] = false
+		actor["loot_round"] = state.round_number
 	EquipmentRules.refresh_speed(actor)
 	return taken
 

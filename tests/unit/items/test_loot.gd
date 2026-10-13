@@ -98,14 +98,23 @@ func test_take_one_item_then_everything_keeps_counts() -> void:
 		assert_gte(EquipmentRules.count(hero(), item_id), int(loot["items"][item_id]), item_id)
 	assert_false(LootRules.lootable(Game.state.actors["bandit"]))
 
-func test_combat_looting_costs_interaction_or_action() -> void:
+func test_combat_looting_costs_the_action_once_per_turn() -> void:
 	bandit_down()
 	enter_combat()
 	assert_eq(CommandBus.submit(LootTakeCommand.new("hero", "bandit", "scimitar")), OK)
-	assert_true(bool(hero()["action_available"]), "One item is the free object interaction")
-	assert_eq(LootRules.take_reason(Game.state, "hero", "bandit", "leather"), "LOOT_REASON_INTERACTION_USED")
-	assert_eq(CommandBus.submit(LootTakeAllCommand.new("hero", "bandit")), OK)
-	assert_false(bool(hero()["action_available"]), "Everything is the Utilize action")
+	assert_false(bool(hero()["action_available"]), "Looting in combat costs the action")
+	assert_eq(CommandBus.submit(LootTakeAllCommand.new("hero", "bandit")), OK, "Already paid this turn")
+	var state: GameState = Game.state
+	state.round_number += 1
+	CommandBus.submit(Setup.new(state))
+	assert_eq(CommandBus.submit(DropItemCommand.new("hero", "dagger")), OK)
+	var pile_id: String = Game.state.loot_piles.keys()[0]
+	assert_eq(LootRules.take_reason(Game.state, "hero", pile_id, "dagger"), "LOOT_REASON_NO_ACTION", "Next turn without an action")
+	state = Game.state
+	state.actors["hero"]["action_available"] = false
+	state.mode = &"exploration"
+	CommandBus.submit(Setup.new(state))
+	assert_eq(LootRules.take_reason(Game.state, "hero", pile_id, "dagger"), "", "Outside combat it is free")
 
 func test_dropped_items_stay_on_the_ground_and_can_be_picked_up() -> void:
 	var daggers: int = EquipmentRules.count(hero(), "dagger")
