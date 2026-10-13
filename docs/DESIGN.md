@@ -38,7 +38,7 @@ system and milestone below.
 | Character | Created in the start menu like BG3. Race: human only. All 12 classes, no subclasses at first |
 | Party | Singleplayer hero + recruitable NPC companions |
 | Multiplayer | Later (online co-op up to 4, local 2-player). Not in the first release |
-| Story | Fixed story. Story proposals come later; Claude asks the owner questions first |
+| Story | Fixed story: "Rabenfels - the city beneath the city" (owner, 13-10-2026), see docs/STORY.md |
 | Death | Permadeath. Resurrection scrolls later |
 | XP | Good decisions give XP. Wrong decisions can still give XP if you kill everyone |
 | Language | English base game; German translation later |
