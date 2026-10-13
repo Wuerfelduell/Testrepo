@@ -63,6 +63,11 @@ var _hp_bar: ProgressBar
 var _move_bar: ProgressBar
 var _move_label: Label
 var _party: HBoxContainer
+## Party (package K4): one portrait per member above the resources panel; a click takes
+## command of that member out of combat.
+var _party_column: VBoxContainer
+## The member whose bars, spells and resources are shown (set by the arena); "" = first ally.
+var controlled_id: String = ""
 var _buttons: Dictionary = {}
 var _end_button: Button
 var _target_panel: Panel
@@ -124,12 +129,13 @@ func update_state(state: GameState) -> void:
 		tr("LEVEL_MODE_" + String(state.mode).to_upper()) % tr(area_key)
 	(_initiative.get_parent() as Control).visible = state.mode == &"combat" and not state.turn_order.is_empty()
 	var current_id: String = state.current_actor_id()
-	var hero: Dictionary = {}
-	for actor_id: String in state.actors:
-		if _friendly(state.actors[actor_id]):
-			hero = state.actors[actor_id]
-			break
-	var signature_data: Array = [current_id, state.turn_order]
+	var hero: Dictionary = state.actors.get(controlled_id, {})
+	if hero.is_empty():
+		for actor_id: String in state.actors:
+			if _friendly(state.actors[actor_id]):
+				hero = state.actors[actor_id]
+				break
+	var signature_data: Array = [current_id, state.turn_order, controlled_id, state.world.get("party", [])]
 	for actor_id: String in state.actors:
 		var record: Dictionary = state.actors[actor_id]
 		signature_data.append([actor_id, record.get("name_key"), record.get("hp"), record.get("max_hp"), record.get("conditions"), record.get("team"), record.get("weapon", {}).get("ranged", false), record.get("model")])
@@ -164,7 +170,8 @@ func update_state(state: GameState) -> void:
 	_update_reaction(state)
 	_death.visible = state.mode == &"defeat" and not dice_popup.is_busy()
 	if state.mode == &"defeat":
-		_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(hero), tr("CLASS_FIGHTER"), int(hero.get("level", 1)), _death_killer if not _death_killer.is_empty() else tr("COMBAT_UNKNOWN_ACTOR"), state.round_number, int(hero.get("xp", 0))]
+		var fallen: Dictionary = state.actors.get("hero", hero)
+		_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(fallen), tr("CLASS_FIGHTER"), int(fallen.get("level", 1)), _death_killer if not _death_killer.is_empty() else tr("COMBAT_UNKNOWN_ACTOR"), state.round_number, int(fallen.get("xp", 0))]
 
 func _rebuild_portraits(state: GameState, current_id: String) -> void:
 	for child: Node in _initiative.get_children():
@@ -186,14 +193,29 @@ func _rebuild_portraits(state: GameState, current_id: String) -> void:
 	for child: Node in _party.get_children():
 		_party.remove_child(child)
 		child.queue_free()
-	for actor_id: String in state.actors:
+	var shown_id: String = String(state.actors.get(controlled_id, {}).get("id", controlled_id))
+	if not state.actors.has(shown_id):
+		for actor_id: String in state.actors:
+			if _friendly(state.actors[actor_id]):
+				shown_id = actor_id
+				break
+	if state.actors.has(shown_id):
+		var shown: Portrait = _portrait(state.actors[shown_id], shown_id == current_id, Vector2(78, 78))
+		shown.mouse_filter = Control.MOUSE_FILTER_STOP
+		shown.gui_input.connect(_party_clicked.bind(shown_id))
+		_party.add_child(shown)
+	for child: Node in _party_column.get_children():
+		_party_column.remove_child(child)
+		child.queue_free()
+	var members: Array[String] = PartyRules.members(state)
+	_party_column.get_parent().visible = members.size() > 1
+	for actor_id: String in members:
 		var member: Dictionary = state.actors[actor_id]
-		if not _friendly(member):
-			continue
-		var portrait: Portrait = _portrait(member, actor_id == current_id, Vector2(78, 78))
+		var portrait: Portrait = _portrait(member, actor_id == shown_id, Vector2(72, 72))
+		portrait.name = "Party_" + actor_id
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.gui_input.connect(_party_clicked.bind(actor_id))
-		_party.add_child(portrait)
+		_party_column.add_child(portrait)
 
 func set_attack_mode(active: bool) -> void:
 	var button: Button = _buttons["attack"]
@@ -301,6 +323,13 @@ func consume_events(events: Array[Dictionary]) -> void:
 			"effect":
 				if String(event.get("kind", "")) == "sap":
 					_append_log(tr("COMBAT_LOG_SAPPED") % _actor_name(actor))
+			"party_joined":
+				var joined: Dictionary = PartyRules.definition(String(event.get("actor_id", "")))
+				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))
+			"party_left":
+				_append_log(tr("PARTY_LOG_LEFT") % _actor_name(actor))
+			"party_refused":
+				_append_log(tr(String(event.get("reason_key", "PARTY_REASON_UNKNOWN"))))
 			"start_attack":
 				if bool(event.get("opportunity", false)):
 					_append_log(tr("COMBAT_LOG_OPPORTUNITY") % [_actor_name(actor), _actor_name(target)])
@@ -514,6 +543,15 @@ func _build_resources() -> void:
 	_party.position = Vector2(12, 12)
 	_party.size = Vector2(90, 85)
 	panel.add_child(_party)
+	var column: Panel = _panel(Rect2(26, 470, 92, 346))
+	column.name = "PartyColumn"
+	column.visible = false
+	_party_column = VBoxContainer.new()
+	_party_column.position = Vector2(10, 8)
+	_party_column.size = Vector2(72, 330)
+	_party_column.alignment = BoxContainer.ALIGNMENT_END
+	_party_column.add_theme_constant_override("separation", 10)
+	column.add_child(_party_column)
 	_name_label = _label(panel, Rect2(108, 14, 346, 32), "", 23)
 	_stats_label = _label(panel, Rect2(108, 49, 346, 28), "", 19)
 	_hp_bar = _bar(panel, Rect2(108, 81, 342, 10), RED)

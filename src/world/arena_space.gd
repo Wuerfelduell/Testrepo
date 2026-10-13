@@ -80,6 +80,11 @@ func query_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 			routes[next] = route
 	return PackedVector3Array()
 
+func closest_point(point: Vector3) -> Vector3:
+	if not point.is_finite() or not map.is_valid() or NavigationServer3D.map_get_iteration_id(map) == 0:
+		return Vector3.INF
+	return NavigationServer3D.map_get_closest_point(map, point)
+
 func _living_bodies(from: Vector3) -> Array[Vector3]:
 	var state: GameState = Game.state
 	var moving_id: String = ""

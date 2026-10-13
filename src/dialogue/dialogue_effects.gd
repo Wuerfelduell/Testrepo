@@ -30,7 +30,13 @@ static func apply(state: GameState, effects: Dictionary, reward_key: String) -> 
 			events.append({"type": "xp_awarded", "actor_id": "hero", "amount": amount,
 				"reason_key": XP_REASON_KEY, "title_key": "DIALOGUE_XP_TITLE", "defeated": [],
 				"total_xp": award.total_xp, "level": award.level, "gained_levels": award.gained_levels,
-				"level_up_available": ProgressionRules.can_level_up(hero)})
+				"level_up_available": ProgressionRules.can_level_up(hero),
+				"shared": PartyRules.share_xp(state, amount, XP_REASON_KEY)})
+	# Party (package K4): companions join or leave through conversations.
+	if effects.has("recruit"):
+		events.append_array(PartyRules.recruit(state, String(effects["recruit"])))
+	if effects.has("dismiss"):
+		events.append_array(PartyRules.dismiss(state, String(effects["dismiss"])))
 	return events
 
 ## Moves the open conversation to a node and applies that node's own effects.

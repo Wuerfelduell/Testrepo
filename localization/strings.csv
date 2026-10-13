@@ -63,7 +63,7 @@ COMBAT_END_TURN,END TURN  [Space]
 COMBAT_END_TURN_HINT,End the active character’s turn. Unused resources are lost.
 COMBAT_HOTKEY_ACTION,[%s]  %s
 COMBAT_CONTROLS,"Q / E orbit · W A S D pan · Wheel zoom
-Click move / attack · Esc cancel · F3 AI"
+Click move / attack · Tab party · Esc cancel · F3 AI"
 COMBAT_TARGET_PREVIEW,"%s · %d%% to hit
 %s %s · AC %d"
 COMBAT_OUT_OF_RANGE,Out of range or line of sight blocked
@@ -683,3 +683,10 @@ JOURNAL_EMPTY,No quests yet.
 JOURNAL_DONE,done
 JOURNAL_FAILED,failed
 JOURNAL_UPDATED,Journal updated: %s
+PARTY_LOG_JOINED,%s joins the party
+PARTY_LOG_LEFT,%s leaves the party
+PARTY_REASON_UNKNOWN,Nobody by that name can join.
+PARTY_REASON_MEMBER,Already in the party.
+PARTY_REASON_FULL,The party is full (4 at most).
+PARTY_REASON_NO_HERO,Only a living hero can lead a party.
+PARTY_REASON_NOT_MEMBER,Not in the party.

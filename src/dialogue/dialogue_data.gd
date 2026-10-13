@@ -7,7 +7,7 @@ extends RefCounted
 ## later be added as a catalogue keyed by these strings.
 
 const DIRECTORY: String = "res://data/dialogue/"
-const CONDITION_KEYS: Array[String] = ["flag", "is", "class", "proficient"]
+const CONDITION_KEYS: Array[String] = ["flag", "is", "class", "proficient", "in_party", "party_room"]
 
 static var _cache: Dictionary = {}
 
@@ -100,6 +100,11 @@ static func condition_problems(conditions: Variant, where: String) -> PackedStri
 				found.append(where + ": unknown condition " + String(key))
 		if condition.has("proficient") and not Abilities.SKILLS.has(StringName(String(condition["proficient"]))):
 			found.append(where + ": unknown skill " + String(condition["proficient"]))
+		if condition.has("in_party") and String(condition["in_party"]) != "hero" and \
+				PartyRules.definition(String(condition["in_party"])).is_empty():
+			found.append(where + ": unknown companion " + String(condition["in_party"]))
+		if condition.has("party_room") and not condition["party_room"] is bool:
+			found.append(where + ": party_room must be true or false")
 	return found
 
 static func _effect_problems(effects: Variant, where: String) -> PackedStringArray:
@@ -107,8 +112,11 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 		return PackedStringArray([where + ": effects must be an object"])
 	var found: PackedStringArray = []
 	for key: Variant in effects:
-		if not String(key) in ["flags", "xp"]:
+		if not String(key) in ["flags", "xp", "recruit", "dismiss"]:
 			found.append(where + ": unknown effect " + String(key))
+	for key: String in ["recruit", "dismiss"]:
+		if effects.has(key) and PartyRules.definition(String(effects[key])).is_empty():
+			found.append(where + ": %s needs a companion id from %s" % [key, PartyRules.DATA_PATH])
 	if effects.has("flags") and not effects["flags"] is Dictionary:
 		found.append(where + ": flags must be an object")
 	if effects.has("xp") and (not (effects["xp"] is float or effects["xp"] is int) or int(effects["xp"]) < 0):
@@ -122,6 +130,8 @@ static func flags(state: GameState) -> Dictionary:
 
 ## All conditions must hold. {"flag": f} needs the flag set; add "is": false for unset,
 ## or "is": <value> for an exact value. {"class": id}, {"proficient": skill} test the hero.
+## {"in_party": companion} needs that companion in the party ("is": false = not in it);
+## {"party_room": true} needs a free place in the party (package K4).
 static func conditions_met(conditions: Variant, state: GameState) -> bool:
 	if not conditions is Array:
 		return false
@@ -138,6 +148,12 @@ static func conditions_met(conditions: Variant, state: GameState) -> bool:
 		if condition.has("class") and String(hero.get("class_id", "")) != String(condition["class"]):
 			return false
 		if condition.has("proficient") and not has_skill(hero, String(condition["proficient"])):
+			return false
+		if condition.has("in_party"):
+			var member: bool = PartyRules.is_member(state, String(condition["in_party"]))
+			if member != (bool(condition.get("is", true)) if condition.get("is", true) is bool else true):
+				return false
+		if condition.has("party_room") and PartyRules.has_room(state) != bool(condition["party_room"]):
 			return false
 	return true
 

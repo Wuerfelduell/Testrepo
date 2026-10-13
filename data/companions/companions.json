@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"companions": [
+		{"id": "companion_a", "name": "Companion A", "class_id": "fighter", "model": "res://assets/characters/hero_fighter_female/model.glb", "colors": {}, "dialogue": "companion_a"},
+		{"id": "companion_b", "name": "Companion B", "class_id": "wizard", "model": "res://assets/characters/hero_wizard_male_hood/model.glb", "colors": {}, "dialogue": "companion_b"},
+		{"id": "companion_c", "name": "Companion C", "class_id": "fighter", "model": "res://assets/characters/male_ranger/model.glb", "colors": {}, "dialogue": "companion_c"}
+	]
+}

@@ -22,6 +22,8 @@ var _root: Control
 var _inventory_button: Button
 var _character_button: Button
 var _capture_hover: bool = false
+## Party (package K4): the member whose bag, sheet and looting the windows show.
+var actor_id: String = "hero"
 
 func _ready() -> void:
 	layer = 9
@@ -78,6 +80,18 @@ func _open_for_capture(open_inventory: bool) -> void:
 	else:
 		toggle_character()
 
+## The arena passes the member the player commands; open windows switch to them.
+func set_actor(id: String) -> void:
+	if id == actor_id:
+		return
+	actor_id = id
+	inventory.actor_id = id
+	character.actor_id = id
+	loot.actor_id = id
+	_walk_to_loot = ""
+	if is_inside_tree():
+		_refresh()
+
 func is_open() -> bool:
 	return inventory.visible or character.visible or loot.visible
 
@@ -105,12 +119,12 @@ func search_hovered_loot() -> bool:
 	if hovered_loot.is_empty():
 		return false
 	var state: GameState = Game.state
-	var reason: String = LootRules.take_reason(state, "hero", hovered_loot, "", true)
+	var reason: String = LootRules.take_reason(state, actor_id, hovered_loot, "", true)
 	if reason != "LOOT_REASON_TOO_FAR":
 		open_loot(hovered_loot)
 		return true
 	var target: Vector3 = LootRules.source(state, hovered_loot).get("position", Vector3.ZERO)
-	if CommandBus.submit(MoveCommand.new("hero", target)) == OK:
+	if CommandBus.submit(MoveCommand.new(actor_id, target)) == OK:
 		_walk_to_loot = hovered_loot
 	return true
 
@@ -142,16 +156,16 @@ func _refresh() -> void:
 			inventory._on_hovered(inventory.bag_slots[0])
 	if character.visible:
 		character.update_state(state)
-	_nearby_body = LootRules.nearest(state, "hero") if state.mode != &"defeat" else ""
+	_nearby_body = LootRules.nearest(state, actor_id) if state.mode != &"defeat" else ""
 	if not _walk_to_loot.is_empty() and state.pending.is_empty():
-		var arrived: bool = LootRules.take_reason(state, "hero", _walk_to_loot, "", true) != "LOOT_REASON_TOO_FAR"
+		var arrived: bool = LootRules.take_reason(state, actor_id, _walk_to_loot, "", true) != "LOOT_REASON_TOO_FAR"
 		var walked_to: String = _walk_to_loot
 		_walk_to_loot = ""
 		if arrived and LootRules.lootable(LootRules.source(state, walked_to)):
 			open_loot(walked_to)
 	if loot.visible:
 		# Close once the source is empty or the hero walked away.
-		var reason: String = LootRules.take_reason(state, "hero", loot.source_id, "", true)
+		var reason: String = LootRules.take_reason(state, actor_id, loot.source_id, "", true)
 		if reason in ["LOOT_REASON_NOTHING", "LOOT_REASON_TOO_FAR", "INV_REASON_DEAD"]:
 			close_all()
 		else:
@@ -160,7 +174,7 @@ func _refresh() -> void:
 	if _loot_prompt.visible:
 		_loot_prompt.text = MenuStyle.text("LOOT_PROMPT_PILE") if LootRules.is_pile(_nearby_body) else \
 			MenuStyle.text("LOOT_PROMPT") % MenuStyle.text(String(state.actors[_nearby_body].get("name_key", "")))
-	var hero: Dictionary = state.actors.get("hero", {})
+	var hero: Dictionary = state.actors.get(actor_id, {})
 	var burden: int = int(hero.get("encumbrance", 0))
 	_slowed_badge.visible = burden > 0 and state.mode != &"defeat"
 	if _slowed_badge.visible:

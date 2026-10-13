@@ -30,6 +30,9 @@ var spell_targeting: SpellTargeting
 var spell_vfx: SpellVFX
 var level_up_prompt: LevelUpPrompt
 var rest_panel: RestPanel
+## Party (package K4): the member the player picked out of combat (portrait click or Tab).
+## In combat the member whose turn it is takes the commands instead; see controlled_id().
+var selected_id: String = "hero"
 
 func _ready() -> void:
 	camera_rig = CombatCamera.new()
@@ -37,6 +40,7 @@ func _ready() -> void:
 	hud = CombatHUD.new()
 	add_child(hud)
 	hud.action_requested.connect(_action_requested)
+	hud.actor_selected.connect(select_member)
 	menus = GameMenus.new()
 	add_child(menus)
 	menus.command_requested.connect(func(command: Command) -> void: CommandBus.submit(command))
@@ -56,8 +60,9 @@ func _ready() -> void:
 	hud.spell_requested.connect(_spell_requested)
 	hud.feature_requested.connect(func(feature_id: String) -> void:
 		if _can_control():
-			CommandBus.submit(UseFeatureCommand.new("hero", feature_id)))
-	hud.reaction_answered.connect(func(accept: bool) -> void: CommandBus.submit(CastReactionCommand.new("hero", accept)))
+			CommandBus.submit(UseFeatureCommand.new(controlled_id(), feature_id)))
+	hud.reaction_answered.connect(func(accept: bool) -> void:
+		CommandBus.submit(CastReactionCommand.new(String(Game.state.pending.get("actor_id", "hero")), accept)))
 	# Level-up and rests (prompt 08): own buttons and screens; changes go through the bus.
 	level_up_prompt = LevelUpPrompt.new()
 	level_up_prompt.hud = hud
@@ -100,12 +105,16 @@ func _ready() -> void:
 	var hero_record: Dictionary = Game.state.actors.get("hero", {})
 	if not EquipmentRules.has_inventory(hero_record) and hero_record.has("class_id"):
 		CommandBus.submit(SetupInventoryCommand.new("hero"))
+	# Companions who arrived off the walkable ground (area travel) step next to the hero.
+	if not PartyRegroupCommand.stranded(Game.state).is_empty():
+		CommandBus.submit(PartyRegroupCommand.new())
 	for id: String in Game.state.actors:
 		var actor: CombatActor = CombatActor.new()
 		add_child(actor)
 		actor.setup_actor(Game.state.actors[id])
 		actors[id] = actor
 	camera_rig.follow(Game.state.actors["hero"]["position"])
+	_sync_controlled()
 	hud.update_state(Game.state)
 	ready_for_input = true
 	# Parse before acting: capture behavior must not depend on argument ordering.
@@ -149,16 +158,9 @@ func simulation_step(delta: float, fast: bool = false) -> void:
 	if not state.pending.is_empty():
 		CommandBus.submit(AdvanceCombatCommand.new(minf(delta, 0.1)))
 		state = Game.state
-	if state.mode == &"exploration":
-		for id: String in state.actors:
-			var enemy: Dictionary = state.actors[id]
-			if enemy["team"] != "enemy" or int(enemy["hp"]) <= 0:
-				continue
-			var hero: Dictionary = state.actors["hero"]
-			if (enemy["position"] as Vector3).distance_to(hero["position"]) <= 12.0 and space.visible(enemy["position"], hero["position"]):
-				CommandBus.submit(StartCombatCommand.new())
-				state = Game.state
-				break
+	if state.mode == &"exploration" and _enemy_sees_party(state):
+		CommandBus.submit(StartCombatCommand.new())
+		state = Game.state
 	if not state.pending.is_empty() or state.mode != &"combat":
 		return
 	if not fast and hud.rolls_busy():
@@ -187,15 +189,70 @@ func simulation_step(delta: float, fast: bool = false) -> void:
 			CommandBus.submit(EndTurnCommand.new(active))
 	_ai_delay = 0.45
 
+## An awake enemy within 12 m that sees any living party member starts the fight.
+func _enemy_sees_party(state: GameState) -> bool:
+	for id: String in state.actors:
+		var enemy: Dictionary = state.actors[id]
+		if enemy["team"] != "enemy" or int(enemy["hp"]) <= 0:
+			continue
+		for member_id: String in PartyRules.living_members(state):
+			var member: Vector3 = state.actors[member_id]["position"]
+			if (enemy["position"] as Vector3).distance_to(member) <= 12.0 and space.visible(enemy["position"], member):
+				return true
+	return false
+
+## The party member the player commands right now: the active member in combat, else the
+## selected one (the hero when the selection is gone or dead).
+func controlled_id() -> String:
+	var state: GameState = Game.state
+	if state.mode == &"combat" and PartyRules.is_member(state, state.current_actor_id()):
+		return state.current_actor_id()
+	if PartyRules.is_member(state, selected_id) and CombatRules.alive(state.actors[selected_id]):
+		return selected_id
+	return "hero"
+
+## Picks the party member to command out of combat (portrait click, Tab, click on them).
+func select_member(actor_id: String) -> void:
+	var state: GameState = Game.state
+	if state.mode == &"combat" or not PartyRules.is_member(state, actor_id) or not CombatRules.alive(state.actors[actor_id]):
+		return
+	if actor_id != selected_id:
+		selected_id = actor_id
+		spell_targeting.cancel()
+		_set_attack_mode(false)
+		_clear_hover()
+	_sync_controlled()
+	hud.update_state(Game.state)
+
+func _select_next_member() -> void:
+	var living: Array[String] = PartyRules.living_members(Game.state)
+	if living.size() > 1:
+		select_member(living[(living.find(controlled_id()) + 1) % living.size()])
+
+## Panels that act for "the hero" follow the commanded member.
+func _sync_controlled() -> void:
+	var id: String = controlled_id()
+	hud.controlled_id = id
+	spell_targeting.caster_id = id
+	level_up_prompt.actor_id = id
+	rest_panel.actor_id = id
+	menus.set_actor(id)
+
 func _process(delta: float) -> void:
 	if not ready_for_input:
 		return
 	var state: GameState = Game.state
+	var commanded: String = controlled_id()
+	if hud.controlled_id != commanded:
+		_sync_controlled()
+		hud.update_state(state)
 	for id: String in actors:
+		if not state.actors.has(id):
+			continue
 		var actor: CombatActor = actors[id]
 		actor.update_actor(state.actors[id], SpellVFX.animation_pending(state.pending), delta)
-		actor.set_selected(id == state.current_actor_id() if state.mode == &"combat" else id == "hero")
-	var followed: String = state.current_actor_id() if state.mode == &"combat" else "hero"
+		actor.set_selected(id == state.current_actor_id() if state.mode == &"combat" else id == commanded)
+	var followed: String = state.current_actor_id() if state.mode == &"combat" else commanded
 	if not state.pending.is_empty() and state.pending.get("type") == "move":
 		followed = str(state.pending.get("actor_id", followed))
 	if state.actors.has(followed):
@@ -217,7 +274,8 @@ func _process(delta: float) -> void:
 
 func _can_control() -> bool:
 	var state: GameState = Game.state
-	return ready_for_input and state.pending.is_empty() and not hud.rolls_busy() and state.mode != &"defeat" and (state.mode == &"exploration" or state.current_actor_id() == "hero")
+	return ready_for_input and state.pending.is_empty() and not hud.rolls_busy() and state.mode != &"defeat" and \
+		(state.mode == &"exploration" or PartyRules.is_member(state, state.current_actor_id()))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not ready_for_input:
@@ -241,17 +299,23 @@ func _unhandled_input(event: InputEvent) -> void:
 		_action_requested("dash")
 	elif event.is_action_pressed("combat_disengage"):
 		_action_requested("disengage")
+	elif event.is_action_pressed("party_next"):
+		_select_next_member()
 	elif event.is_action_pressed("select") and _can_control():
 		_update_hover()
 		# Loot (src/ui/inventory/): a click on a body or a pile searches it, walking there first.
 		if menus.search_hovered_loot():
 			_clear_hover()
 			return
-		if not hovered_actor.is_empty() and hovered_actor != "hero":
-			CommandBus.submit(AttackCommand.new("hero", hovered_actor))
+		var commanded: String = controlled_id()
+		if not hovered_actor.is_empty() and PartyRules.is_member(Game.state, hovered_actor):
+			# A click on a party member takes command of them (out of combat).
+			select_member(hovered_actor)
+		elif not hovered_actor.is_empty():
+			CommandBus.submit(AttackCommand.new(commanded, hovered_actor))
 			_set_attack_mode(false)
 		elif hovered_ground.is_finite() and not _attack_mode:
-			CommandBus.submit(MoveCommand.new("hero", hovered_ground))
+			CommandBus.submit(MoveCommand.new(commanded, hovered_ground))
 		_clear_hover()
 
 func _action_requested(kind: String) -> void:
@@ -260,10 +324,11 @@ func _action_requested(kind: String) -> void:
 		return
 	if not _can_control():
 		return
+	var commanded: String = controlled_id()
 	match kind:
-		"dash": CommandBus.submit(DashCommand.new("hero"))
-		"disengage": CommandBus.submit(DisengageCommand.new("hero"))
-		"end_turn": CommandBus.submit(EndTurnCommand.new("hero"))
+		"dash": CommandBus.submit(DashCommand.new(commanded))
+		"disengage": CommandBus.submit(DisengageCommand.new(commanded))
+		"end_turn": CommandBus.submit(EndTurnCommand.new(commanded))
 		"attack":
 			spell_targeting.cancel()
 			_set_attack_mode(true)
@@ -288,19 +353,23 @@ func _update_hover() -> void:
 		spell_targeting.hover(id if state.actors.has(id) and int(state.actors[id]["hp"]) > 0 else "", hit["position"])
 		return
 	menus.hover_loot(LootRules.source_at(state, hit["position"]) if id.is_empty() or not CombatRules.alive(state.actors.get(id, {})) else "")
-	if not id.is_empty() and id != "hero" and int(state.actors[id]["hp"]) > 0:
+	var commanded: String = controlled_id()
+	if not id.is_empty() and id != commanded and state.actors.has(id) and int(state.actors[id]["hp"]) > 0:
 		hovered_actor = id
 		hovered_ground = Vector3.INF
 		path_display.mesh = null
-		hud.show_target(CombatRules.attack_preview(state, "hero", id), state.actors[id])
+		if PartyRules.is_member(state, id):
+			hud.clear_target()
+		else:
+			hud.show_target(CombatRules.attack_preview(state, commanded, id), state.actors[id])
 		return
 	hovered_actor = ""
 	hovered_ground = hit["position"]
-	var path: PackedVector3Array = space.query_path(state.actors["hero"]["position"], hovered_ground)
+	var path: PackedVector3Array = space.query_path(state.actors[commanded]["position"], hovered_ground)
 	if path.size() < 2:
 		_clear_hover()
 		return
-	var budget: float = float(state.actors["hero"]["move_left"]) if state.mode == &"combat" else INF
+	var budget: float = float(state.actors[commanded]["move_left"]) if state.mode == &"combat" else INF
 	var danger: bool = _path_danger(state, path)
 	_draw_path(path, budget)
 	hud.show_path(CombatRules.path_length(path), budget - CombatRules.path_length(path), danger)
@@ -310,7 +379,7 @@ func _set_attack_mode(active: bool) -> void:
 	hud.set_attack_mode(active)
 
 func _path_danger(state: GameState, path: PackedVector3Array) -> bool:
-	return state.mode == &"combat" and not CombatRules.opportunity_crossings(state, "hero", path).is_empty()
+	return state.mode == &"combat" and not CombatRules.opportunity_crossings(state, controlled_id(), path).is_empty()
 
 func _draw_path(path: PackedVector3Array, budget: float) -> void:
 	var mesh: ImmediateMesh = ImmediateMesh.new()
@@ -373,6 +442,11 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 		spell_vfx.on_event(event)
 		if event.get("type") == "hero_swapped":
 			_rebuild_hero()
+		if event.get("type") == "party_joined":
+			_add_member_view(str(event["actor_id"]))
+		if event.get("type") == "party_left" and actors.has(str(event["actor_id"])):
+			actors[str(event["actor_id"])].queue_free()
+			actors.erase(str(event["actor_id"]))
 		if event.get("type") == "death" and Game.state.actors.get(str(event.get("actor_id", "")), {}).get("team") == "enemy":
 			# The body's loot is rolled once, right after this submit (data/items/loot_tables.json).
 			CommandBus.submit.call_deferred(LootRollCommand.new(str(event["actor_id"])))
@@ -386,7 +460,17 @@ func _command_applied(_command: Command, result: Dictionary) -> void:
 			actor.react_to_event(event, actors)
 		_run_event(event)
 	hud.consume_events(events)
+	_sync_controlled()
 	hud.update_state(Game.state)
+
+## A companion who just joined appears where the party rules placed them.
+func _add_member_view(actor_id: String) -> void:
+	if actors.has(actor_id) or not Game.state.actors.has(actor_id):
+		return
+	var actor: CombatActor = CombatActor.new()
+	add_child(actor)
+	actor.setup_actor(Game.state.actors[actor_id])
+	actors[actor_id] = actor
 
 ## Spell hotkeys (4-9 follow the hotbar), F4 hero switch, and clicks while targeting.
 func _spell_input(event: InputEvent) -> bool:
@@ -404,7 +488,7 @@ func _spell_input(event: InputEvent) -> bool:
 				var entry: String = entries[index]
 				if entry.begins_with("feature:"):
 					if _can_control():
-						CommandBus.submit(UseFeatureCommand.new("hero", entry.get_slice(":", 1)))
+						CommandBus.submit(UseFeatureCommand.new(controlled_id(), entry.get_slice(":", 1)))
 				else:
 					_spell_requested(entry.get_slice(":", 1))
 				return true
@@ -428,6 +512,7 @@ func _spell_requested(spell_id: String) -> void:
 	_set_attack_mode(false)
 	_clear_hover()
 	spell_targeting.cancel()
+	spell_targeting.caster_id = controlled_id()
 	spell_targeting.begin(spell_id)
 
 ## The F4 switch replaced the hero record: rebuild its view and give the new class its kit.

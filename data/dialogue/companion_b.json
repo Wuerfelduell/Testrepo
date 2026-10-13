@@ -1,0 +1,25 @@
+{
+	"version": 1,
+	"id": "companion_b",
+	"speaker": "Companion B",
+	"start": [
+		{"node": "first"}
+	],
+	"nodes": {
+		"first": {
+			"text": "[Placeholder: companion B introduces themselves. The owner decides who this is.]",
+			"choices": [
+				{"text": "[Placeholder: ask them to join the party]", "if": [{"party_room": true}], "next": "joined"},
+				{"text": "[Placeholder: ask them to join, but the party is full]", "if": [{"party_room": false}], "next": "full"},
+				{"text": "[Placeholder: walk away]"}
+			]
+		},
+		"joined": {
+			"text": "[Placeholder: companion B agrees and joins the party.]",
+			"effects": {"recruit": "companion_b"}
+		},
+		"full": {
+			"text": "[Placeholder: companion B says the party is already too big (4 at most).]"
+		}
+	}
+}

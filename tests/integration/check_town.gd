@@ -48,6 +48,11 @@ func _run() -> void:
 		if hook.has("to"):
 			continue
 		check(level.interact(id), "%s is a known hook" % id)
+		if hook.has("dialogue"):
+			# Companions (package K4) already have a conversation: it opens and is left again.
+			check(level.dialogue.is_open(), "%s opens its conversation" % id)
+			bus.submit(DialogueEndCommand.new())
+			continue
 		check(level.interaction.text_label.text == tr("DIALOGUE_PLACEHOLDER") % id, "%s shows the placeholder line" % id)
 		level.interaction.close()
 	# Walk to the crypt entrance on the real navmesh.

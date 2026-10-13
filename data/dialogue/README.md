@@ -39,9 +39,15 @@ Texts are the English source strings; a German translation can later key on them
   dice popup. Each check is rolled **once**: after that the answer is gone (RULE 4).
 - **conditions** (`if`, all must hold): `{"flag": "x"}` flag set, `{"flag": "x", "is": false}`
   not set, `{"flag": "x", "is": "killed"}` exact value, `{"class": "wizard"}`,
-  `{"proficient": "arcana"}`.
+  `{"proficient": "arcana"}`, and the party conditions below.
 - **effects**: `flags` (set world flags, any value) and `xp` (paid once per node or choice,
   never farmed by repeating). Good choices and violent choices both give XP (DESIGN.md).
+  Companions in the party get the same XP.
+- **party** (package K4): effect `"recruit": "companion_a"` adds that companion to the party
+  (4 at most, hero included), `"dismiss": "companion_a"` sends them away (they keep their
+  state and can be recruited again). Conditions `{"in_party": "companion_a"}` (add
+  `"is": false` for "not in the party") and `{"party_room": true}` / `false`. Companion ids
+  come from data/companions/companions.json.
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
 
 Flags live in `Game.state.world["flags"]` and are saved. `tests/unit/dialogue/` checks every

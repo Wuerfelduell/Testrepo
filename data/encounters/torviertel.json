@@ -156,6 +156,69 @@
         0.0,
         -21.6
       ]
+    },
+    {
+      "id": "companion_a",
+      "dialogue": "companion_a",
+      "hide_if": [
+        {
+          "in_party": "companion_a"
+        }
+      ],
+      "position": [
+        5.0,
+        0.0,
+        -11.0
+      ],
+      "model": "res://assets/characters/hero_fighter_female/model.glb",
+      "pose": "Idle",
+      "facing": [
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "companion_b",
+      "dialogue": "companion_b",
+      "hide_if": [
+        {
+          "in_party": "companion_b"
+        }
+      ],
+      "position": [
+        6.5,
+        0.0,
+        -20.5
+      ],
+      "model": "res://assets/characters/hero_wizard_male_hood/model.glb",
+      "pose": "Idle",
+      "facing": [
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "companion_c",
+      "dialogue": "companion_c",
+      "hide_if": [
+        {
+          "in_party": "companion_c"
+        }
+      ],
+      "position": [
+        -6.0,
+        0.0,
+        -9.5
+      ],
+      "model": "res://assets/characters/male_ranger/model.glb",
+      "pose": "Idle",
+      "facing": [
+        1.0,
+        0.0,
+        0.0
+      ]
     }
   ],
   "exits": [

@@ -419,11 +419,14 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append_array(ActiveEffects.on_hit(state, attacker_id, target_id, weapon))
 	return events
 
+## The run ends when the hero dies (permadeath). A fallen companion stays dead but the fight
+## goes on (package K4). Records without a "hero" actor keep the old rule: any fallen ally.
 static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	var enemy_alive: bool = false
+	var has_hero: bool = state.actors.has("hero")
 	for id: String in state.actors:
 		var actor: Dictionary = state.actors[id]
-		if actor.get("team") == "hero" and not alive(actor):
+		if actor.get("team") == "hero" and not alive(actor) and (id == "hero" or not has_hero):
 			state.mode = &"defeat"
 		elif actor.get("team") == "enemy" and alive(actor):
 			enemy_alive = true

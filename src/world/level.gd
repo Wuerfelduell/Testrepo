@@ -119,8 +119,8 @@ func _process(delta: float) -> void:
 			camera_rig.follow(EncounterData.vector(room["center"]))
 	if fader != null:
 		var focus: Array[Vector3] = []
-		if state.actors.has("hero"):
-			focus.append(state.actors["hero"]["position"])
+		for member_id: String in PartyRules.living_members(state):
+			focus.append(state.actors[member_id]["position"])
 		if state.actors.has(_followed_actor) and _followed_actor != "hero":
 			focus.append(state.actors[_followed_actor]["position"])
 		if not _capture_room.is_empty():
@@ -147,7 +147,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			if _within_reach(Game.state, hook_id):
 				interact(hook_id)
-			elif CommandBus.submit(MoveCommand.new("hero", _interact_point(hook_id))) == OK:
+			elif CommandBus.submit(MoveCommand.new(controlled_id(), _interact_point(hook_id))) == OK:
 				_pending_interaction = hook_id
 			return
 	super._unhandled_input(event)
@@ -181,16 +181,18 @@ func _check_perception(state: GameState) -> void:
 		return
 	if state.mode == &"exploration" and not state.pending.is_empty() and state.pending.get("type") != "move":
 		return
-	var hero_position: Vector3 = state.actors["hero"]["position"]
+	# Every living party member can be noticed (package K4), not only the hero.
 	var dormant: Dictionary = state.world.get("dormant", {})
 	for encounter_id: String in dormant:
 		for id: String in dormant[encounter_id]:
 			var record: Dictionary = dormant[encounter_id][id]
 			var position: Vector3 = _dormant_position(state, id)
-			if EncounterData.notices(level, encounter_id, record, position, hero_position) and \
-					space.visible(position, hero_position):
-				_trigger(encounter_id)
-				return
+			for member_id: String in PartyRules.living_members(state):
+				var member_position: Vector3 = state.actors[member_id]["position"]
+				if EncounterData.notices(level, encounter_id, record, position, member_position) and \
+						space.visible(position, member_position):
+					_trigger(encounter_id)
+					return
 
 func _check_joiners(state: GameState, fast: bool) -> void:
 	if state.mode != &"combat" or not state.pending.is_empty() or (not fast and hud.rolls_busy()):
@@ -269,7 +271,7 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 			"trap_sprung":
 				if trap_marker != null:
 					trap_marker.visible = true
-			"dialogue_end":
+			"dialogue_end", "party_joined":
 				_hide_finished_hooks.call_deferred()
 			"travel":
 				# The old area's views must not read the new area's state until the scene changes.
@@ -421,7 +423,7 @@ func _interact_point(hook_id: String) -> Vector3:
 
 func _within_reach(state: GameState, hook_id: String) -> bool:
 	var target: Vector3 = _interact_point(hook_id)
-	var hero: Vector3 = state.actors["hero"]["position"]
+	var hero: Vector3 = state.actors[controlled_id()]["position"]
 	return target.is_finite() and Vector2(target.x - hero.x, target.z - hero.z).length() <= INTERACT_RANGE_M + 0.5
 
 ## Package 08 owns resting: the rest point opens its long-rest dialog (LongRestCommand).

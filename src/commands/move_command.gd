@@ -38,10 +38,25 @@ func apply(state: GameState) -> Dictionary:
 		state.actors[actor_id]["move_left"] = maxf(0.0, float(state.actors[actor_id]["move_left"]) - cost)
 		crossings = CombatRules.opportunity_crossings(state, actor_id, path)
 	var length: float = CombatRules.path_length(path)
+	# Party (package K4): out of combat the other members walk along behind the leader.
+	var followers: Array[Dictionary] = []
+	if state.mode == &"exploration" and PartyRules.is_member(state, actor_id):
+		var spots: Dictionary = PartyRules.follow_spots(state, actor_id, path[-1])
+		for id: String in spots:
+			var route: PackedVector3Array = CombatRules.movement_path(state, id, spots[id])
+			if not route.is_empty():
+				followers.append({"actor_id": id, "path": route, "distance": 0.0,
+					"length": CombatRules.path_length(route)})
 	state.pending = {"type": "move", "actor_id": actor_id, "path": path,
 		"elapsed": 0.0, "duration": length / CombatRules.WALK_SPEED_M_S,
 		"distance": 0.0, "length": length, "interruptions": crossings}
-	return {"events": [{"type": "start_move", "actor_id": actor_id, "path": path, "cost": cost}]}
+	var events: Array[Dictionary] = [{"type": "start_move", "actor_id": actor_id, "path": path, "cost": cost}]
+	if not followers.is_empty():
+		state.pending["followers"] = followers
+		for follower: Dictionary in followers:
+			events.append({"type": "start_move", "actor_id": follower["actor_id"], "path": follower["path"],
+				"cost": 0.0, "follows": actor_id})
+	return {"events": events}
 
 func to_dict() -> Dictionary:
 	return {"type": "move", "actor_id": actor_id, "destination": [destination.x, destination.y, destination.z]}

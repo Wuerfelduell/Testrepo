@@ -1,7 +1,8 @@
 class_name AwardVictoryXpCommand
 extends Command
 ## Internal: after an area is cleared, every defeated enemy's SRD experience goes to the
-## hero through CharacterSheet.grant_xp. Each enemy pays out once.
+## hero through CharacterSheet.grant_xp, and the same amount to every living companion
+## (package K4). Each enemy pays out once.
 
 const REASON_KEY: String = "XP_REASON_AREA_CLEARED"
 
@@ -49,7 +50,8 @@ func apply(state: GameState) -> Dictionary:
 	return {"events": [{"type": "xp_awarded", "actor_id": "hero", "amount": amount,
 		"reason_key": REASON_KEY, "defeated": defeated, "total_xp": award.total_xp,
 		"level": award.level, "gained_levels": award.gained_levels,
-		"level_up_available": ProgressionRules.can_level_up(hero)}]}
+		"level_up_available": ProgressionRules.can_level_up(hero),
+		"shared": PartyRules.share_xp(state, amount, REASON_KEY)}]}
 
 func to_dict() -> Dictionary:
 	return {"type": "award_victory_xp", "actor_id": actor_id}

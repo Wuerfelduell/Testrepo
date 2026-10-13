@@ -58,3 +58,4 @@ combat_debug={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4
 combat_dash={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":50)]}
 combat_disengage={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":51)]}
 combat_attack={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":49)]}
+party_next={"deadzone":0.5,"events":[Object(InputEventKey,"physical_keycode":4194306)]}

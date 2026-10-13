@@ -54,12 +54,23 @@ func apply(state: GameState) -> Dictionary:
 			var next_distance: float = float(pending["length"])
 			if not crossings.is_empty():
 				next_distance = float(crossings[0]["distance"])
-			var consumed: float = minf(remaining, maxf(0.0, next_distance - distance) / CombatRules.WALK_SPEED_M_S)
+			# Followers (exploration only, never with interruptions) may need longer than the leader.
+			var followers: Array = pending.get("followers", [])
+			var longest: float = maxf(0.0, next_distance - distance)
+			for follower: Dictionary in followers:
+				longest = maxf(longest, float(follower["length"]) - float(follower["distance"]))
+			var consumed: float = minf(remaining, longest / CombatRules.WALK_SPEED_M_S)
 			pending["elapsed"] = float(pending["elapsed"]) + consumed
 			pending["distance"] = minf(next_distance, distance + consumed * CombatRules.WALK_SPEED_M_S)
 			remaining -= consumed
 			var mover_id: String = pending["actor_id"]
 			state.actors[mover_id]["position"] = CombatRules.position_on_path(pending["path"], float(pending["distance"]))
+			var followers_done: bool = true
+			for follower: Dictionary in followers:
+				follower["distance"] = minf(float(follower["length"]), float(follower["distance"]) + consumed * CombatRules.WALK_SPEED_M_S)
+				if state.actors.has(String(follower["actor_id"])):
+					state.actors[String(follower["actor_id"])]["position"] = CombatRules.position_on_path(follower["path"], float(follower["distance"]))
+				followers_done = followers_done and float(follower["distance"]) + CombatRules.EPSILON >= float(follower["length"])
 			if not crossings.is_empty() and float(pending["distance"]) + CombatRules.EPSILON >= next_distance:
 				var crossing: Dictionary = crossings.pop_front()
 				var enemy_id: String = crossing["actor_id"]
@@ -69,8 +80,10 @@ func apply(state: GameState) -> Dictionary:
 					state.pending = CombatRules.attack_pending(enemy_id, mover_id, true, crossing["weapon"])
 					state.pending["resume"] = pending
 					events.append(CombatRules.attack_start_event(state.pending))
-			elif float(pending["distance"]) + CombatRules.EPSILON >= float(pending["length"]):
+			elif float(pending["distance"]) + CombatRules.EPSILON >= float(pending["length"]) and followers_done:
 				state.pending = {}
 				events.append({"type": "move_end", "actor_id": mover_id})
+				for follower: Dictionary in followers:
+					events.append({"type": "move_end", "actor_id": follower["actor_id"], "follows": mover_id})
 				events.append_array(ActiveEffects.aura_triggers(state, mover_id, Rng.rng))
 	return {"events": events}

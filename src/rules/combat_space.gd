@@ -8,6 +8,11 @@ static var active: CombatSpace = null
 func query_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 	return PackedVector3Array([from, to])
 
+## Nearest walkable point (the party's follow spots, package K4). Without geometry every
+## point is walkable.
+func closest_point(point: Vector3) -> Vector3:
+	return point
+
 func cover(_from: Vector3, _to: Vector3) -> int:
 	return 0
 

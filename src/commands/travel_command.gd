@@ -24,9 +24,13 @@ func validate(state: GameState) -> Error:
 	var target: Dictionary = EncounterData.load_level(String(exit.get("to", "")))
 	if target.is_empty() or not EncounterData.problems(target).is_empty():
 		return ERR_INVALID_DATA
-	var hero: Vector3 = state.actors["hero"]["position"]
+	# Any living party member at the door will do: the commanded one leads (package K4).
 	var door: Vector3 = EncounterData.vector(exit["position"])
-	return OK if Vector2(hero.x - door.x, hero.z - door.z).length() <= REACH_M else ERR_PARAMETER_RANGE_ERROR
+	for member_id: String in PartyRules.living_members(state):
+		var member: Vector3 = state.actors[member_id]["position"]
+		if Vector2(member.x - door.x, member.z - door.z).length() <= REACH_M:
+			return OK
+	return ERR_PARAMETER_RANGE_ERROR
 
 func apply(state: GameState) -> Dictionary:
 	var level: Dictionary = EncounterData.load_level(String(state.world["data_path"]))
