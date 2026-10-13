@@ -1,7 +1,7 @@
 config_version=5
 
 [application]
-config/name="The RPG"
+config/name="Overcity"
 run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 

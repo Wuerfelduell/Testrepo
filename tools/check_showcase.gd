@@ -44,7 +44,7 @@ func _run() -> void:
 	check(gallery.selector.selected != old, "Keyboard next action must change the selected animation")
 	gallery._reset_view()
 	check(is_equal_approx(gallery.distance, 18.0), "Reset must restore the gallery framing")
-	check(tr("GALLERY_TITLE") == "THE RPG", "English translation must be installed")
+	check(tr("GALLERY_TITLE") == "OVERCITY", "English translation must be installed")
 	for filename: String in DirAccess.get_files_at("res://assets/dungeon"):
 		if not filename.ends_with(".glb"):
 			continue

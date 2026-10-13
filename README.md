@@ -1,4 +1,4 @@
-# The RPG
+# Overcity
 
 Godot-4-Projekt für das geplante Fantasy-RPG. Aktuell enthält es die erste
 Asset-Showcase aus Auftrag 01; **noch kein spielbares RPG**.

@@ -70,14 +70,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          godot --headless --export-release "Windows Desktop" build/TheRPG.exe 2>&1 | tee export.log
+          godot --headless --export-release "Windows Desktop" build/Overcity.exe 2>&1 | tee export.log
           if grep -E 'SCRIPT ERROR:|ERROR:|WARNING:' export.log; then exit 1; fi
-          test -s build/TheRPG.exe
-          test ! -f build/TheRPG.pck
+          test -s build/Overcity.exe
+          test ! -f build/Overcity.pck
       - uses: actions/upload-artifact@v4
         with:
-          name: TheRPG-Windows
-          path: build/TheRPG.exe
+          name: Overcity-Windows
+          path: build/Overcity.exe
           if-no-files-found: error
   windows-smoke:
     needs: tests-and-export
@@ -85,13 +85,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: TheRPG-Windows
+          name: Overcity-Windows
           path: build
       - name: Start exported game on Windows
         timeout-minutes: 3
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath ./build/TheRPG.exe -ArgumentList '--headless','--quit-after','60' -Wait -PassThru -RedirectStandardOutput smoke.log -RedirectStandardError smoke-errors.log
+          $process = Start-Process -FilePath ./build/Overcity.exe -ArgumentList '--headless','--quit-after','60' -Wait -PassThru -RedirectStandardOutput smoke.log -RedirectStandardError smoke-errors.log
           Get-Content smoke.log,smoke-errors.log
           if ($process.ExitCode -ne 0) { throw "Export exited with $($process.ExitCode)" }
           if (Select-String -Path smoke.log,smoke-errors.log -Pattern 'SCRIPT ERROR:|ERROR:|WARNING:') { throw 'Export reported errors or warnings' }
