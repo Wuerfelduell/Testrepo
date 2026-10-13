@@ -1,0 +1,177 @@
+{
+  "_comment": "Das Torviertel, the gate district of the Overcity (Rabenfels) and the start of act 1 (campaign package K2). No fights yet. hooks are NPC anchors for the dialogue system (the owner writes the dialogues; without a tree in data/dialogue/ a hook shows its placeholder line). exits: the crypt entrance in the Kellergasse. Geometry lives in src/world/level_town.gd.",
+  "version": 1,
+  "level": "torviertel",
+  "scene": "res://scenes/levels/torviertel/torviertel.tscn",
+  "name_key": "LEVEL_TORVIERTEL",
+  "hero_spawn": [
+    0.0,
+    0.0,
+    13.5
+  ],
+  "notice_m": 12.0,
+  "sleep_notice_m": 4.0,
+  "near_notice_m": 5.0,
+  "join_round": 2,
+  "rooms": [
+    {
+      "id": "torgasse",
+      "name_key": "ROOM_TORGASSE",
+      "center": [
+        0.0,
+        0.0,
+        8.0
+      ],
+      "area": [
+        -4.0,
+        -6.0,
+        4.0,
+        18.0
+      ]
+    },
+    {
+      "id": "torplatz",
+      "name_key": "ROOM_TORPLATZ",
+      "center": [
+        0.0,
+        0.0,
+        -15.0
+      ],
+      "area": [
+        -14.0,
+        -24.0,
+        14.0,
+        -6.0
+      ]
+    },
+    {
+      "id": "kellergasse",
+      "name_key": "ROOM_KELLERGASSE",
+      "center": [
+        -18.0,
+        0.0,
+        -14.0
+      ],
+      "area": [
+        -22.0,
+        -16.0,
+        -14.0,
+        -12.0
+      ]
+    },
+    {
+      "id": "nordstrasse",
+      "name_key": "ROOM_NORDSTRASSE",
+      "center": [
+        0.0,
+        0.0,
+        -26.0
+      ],
+      "area": [
+        -3.0,
+        -29.0,
+        3.0,
+        -24.0
+      ]
+    }
+  ],
+  "encounters": [],
+  "hooks": [
+    {
+      "id": "torviertel_gate_guard",
+      "position": [
+        -2.9,
+        0.0,
+        15.0
+      ],
+      "model": "res://assets/characters/enemy_guard/model.glb",
+      "pose": "Sword_Idle",
+      "facing": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "torviertel_merchant",
+      "position": [
+        -8.0,
+        0.0,
+        -17.5
+      ],
+      "model": "res://assets/characters/female_peasant/model.glb",
+      "pose": "Idle",
+      "facing": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "torviertel_innkeeper",
+      "position": [
+        -7.0,
+        0.0,
+        -23.0
+      ],
+      "model": "res://assets/characters/male_peasant/model.glb",
+      "pose": "Idle",
+      "facing": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "id": "torviertel_beggar",
+      "position": [
+        -13.2,
+        0.0,
+        -20.0
+      ],
+      "model": "res://assets/characters/male_ranger/model.glb",
+      "pose": "Sitting_Idle",
+      "facing": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "interact_at": [
+        -11.8,
+        0.0,
+        -19.0
+      ]
+    },
+    {
+      "id": "torviertel_notice_board",
+      "position": [
+        -3.9,
+        0.0,
+        -22.8
+      ],
+      "model": "",
+      "pose": "",
+      "interact_at": [
+        -3.9,
+        0.0,
+        -21.6
+      ]
+    }
+  ],
+  "exits": [
+    {
+      "id": "torviertel_crypt_entrance",
+      "position": [
+        -20.8,
+        0.0,
+        -14.0
+      ],
+      "to": "res://data/encounters/crypt.json",
+      "arrive": [
+        0.0,
+        0.0,
+        17.0
+      ]
+    }
+  ]
+}
