@@ -14,7 +14,7 @@ file ownership table). Everything else runs strictly one after the other (RULE 6
 | C | 1 | [05 Wizard, spells, class features](05-wizard-spells.md) | see file ownership table in the prompt | done |
 | D | 1 | [06 Menu, character creation, save, death](06-menu-save.md) | see file ownership table in the prompt | done |
 | E | 1 | [07 Enemies, boss, looks, weapons, hit effects](07-enemies-art.md) | see file ownership table in the prompt | done |
-| F | 1 | [08 Level-up and rests](08-levelup-rest.md) | ownership table in the file | done - Q38 open |
+| F | 1 | [08 Level-up and rests](08-levelup-rest.md) | ownership table in the file | done |
 | G | 1 | [09 Loot and carry weight](09-loot-weight.md) | ownership table in the file | ready - parallel (Claude thread) |
 | H | 1 | [10 Crypt level, hero model, portraits](10-crypt-level.md) | ownership table in the file | done (Claude thread, 13-10-2026) |
 | I | 1 | [11 Music and sound](11-music-sound.md) | ownership table in the file | ready - parallel (Claude thread) |
