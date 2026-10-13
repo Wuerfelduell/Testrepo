@@ -108,6 +108,24 @@ entirely.
 This fits the project rules: wrong decisions are punished (RULE 4), and no dialogue answer is
 marked as right or wrong (docs/DESIGN.md, dialogue rules).
 
+## Structure decisions (owner, 13-10-2026)
+
+- **Overcity is Rabenfels**, the city above. The naming detail does not matter much.
+- **District and place names stay German on purpose**, also in the English base game
+  ("Frieren" vibes): Die Ewige Halle, Der Schwarze Markt, Die Pilzgärten, Die Alte Kathedrale,
+  Die Wächterfestung, Das Archiv, Die Verlorenen Bezirke, Das Herzgewölbe. The English names in
+  the table above are only explanations.
+- **The Overcity is the main area.** The descent comes only after a long time of play, when the
+  player feels the city is all there is. Rumours of a city below exist, but the player should
+  slowly have stopped believing in them.
+- **End of act 1:** after the fight against the act-1 end boss, the hero is **teleported into
+  the Underground City**. The descent is involuntary.
+- **The act-1 end boss cannot be killed in act 1**, like Ketheric Thorm in BG3: he is
+  invulnerable until the player later finds out how to take that protection away.
+- **The cultists** (the existing crypt level with the Cult Priest) are a **small side story**
+  that has nothing to do with the Underground City.
+- **All 3 companions are found only in the Overcity.**
+
 ## Open questions for the owner
 
 See handover/13-10-2026.md, questions R1-R6.
