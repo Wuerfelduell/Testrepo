@@ -72,4 +72,5 @@ func apply(state: GameState) -> Dictionary:
 			elif float(pending["distance"]) + CombatRules.EPSILON >= float(pending["length"]):
 				state.pending = {}
 				events.append({"type": "move_end", "actor_id": mover_id})
+				events.append_array(ActiveEffects.aura_triggers(state, mover_id, Rng.rng))
 	return {"events": events}

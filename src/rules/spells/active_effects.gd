@@ -179,3 +179,83 @@ static func on_hit(state: GameState, attacker_id: String, target_id: String, wea
 		add(target, {"kind": String(SAP), "source_id": attacker_id, "turn_of": attacker_id, "until": "start_of_turn"})
 		events.append({"type": "effect", "actor_id": target_id, "source_id": attacker_id, "kind": String(SAP)})
 	return events
+
+## Spirit Guardians: the concentrating caster's aura spell, or null.
+static func aura_spell(caster: Dictionary) -> SpellDefinition:
+	var concentration: Dictionary = caster.get("concentration", {})
+	if concentration.is_empty() or not CombatRules.alive(caster):
+		return null
+	var spell: SpellDefinition = SpellBook.get_spell(String(concentration.get("spell_id", "")))
+	return spell if spell != null and spell.effect == &"spirit_guardians" else null
+
+## The emanation moves with its caster; walls (no line of sight) shield a creature.
+static func in_aura(caster: Dictionary, spell: SpellDefinition, position: Vector3) -> bool:
+	var center: Vector3 = caster["position"]
+	return SpellRules.in_sphere(center, spell.area_size_m, position) and CombatSpace.current().visible(center, position)
+
+## True while an enemy's Spirit Guardians surround this creature (its speed is halved there).
+static func in_hostile_aura(state: GameState, actor_id: String) -> bool:
+	var actor: Dictionary = state.actors.get(actor_id, {})
+	if not actor.get("position") is Vector3:
+		return false
+	for id: String in state.actors:
+		var caster: Dictionary = state.actors[id]
+		var spell: SpellDefinition = aura_spell(caster)
+		if spell != null and caster.get("team") != actor.get("team") and in_aura(caster, spell, actor["position"]):
+			return true
+	return false
+
+## A creature makes the Spirit Guardians save only once per turn.
+static func mark_aura_hit(state: GameState, caster_id: String, target_id: String) -> void:
+	var concentration: Dictionary = state.actors[caster_id].get("concentration", {})
+	if concentration.is_empty():
+		return
+	if not concentration.has("aura_hits"):
+		concentration["aura_hits"] = {}
+	concentration["aura_hits"][target_id] = _turn_key(state)
+
+static func _turn_key(state: GameState) -> String:
+	return "%d:%d" % [state.round_number, state.turn_index]
+
+## Spirit Guardians after `actor_id` moved (moved = true) or ends its turn: the mover entering an enemy
+## aura, or a moving caster bringing its aura onto enemies. Each creature saves once per
+## turn (WIS, half damage on a success).
+static func aura_triggers(state: GameState, actor_id: String, rng: RandomNumberGenerator,
+		moved: bool = true) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if state.mode != &"combat" or not state.actors.has(actor_id):
+		return events
+	var ids: Array = state.actors.keys()
+	ids.sort()
+	for caster_id: String in ids:
+		var caster: Dictionary = state.actors[caster_id]
+		var spell: SpellDefinition = aura_spell(caster)
+		if spell == null:
+			continue
+		# The caster ending its own turn hurts nobody; only its movement carries the aura.
+		if caster_id == actor_id and not moved:
+			continue
+		var targets: Array = ids if caster_id == actor_id else [actor_id]
+		for target_id: String in targets:
+			var target: Dictionary = state.actors[target_id]
+			if target_id == caster_id or target.get("team") == caster.get("team") or not CombatRules.alive(target) \
+					or not in_aura(caster, spell, target["position"]):
+				continue
+			var hits: Dictionary = caster["concentration"].get("aura_hits", {})
+			if String(hits.get(target_id, "")) == _turn_key(state):
+				continue
+			mark_aura_hit(state, caster_id, target_id)
+			var slot_level: int = int(caster["concentration"].get("slot_level", spell.level))
+			var roll: DiceResult = Dice.roll(SpellRules.damage_expression(spell, int(caster.get("level", 1)), slot_level), rng)
+			events.append({"type": "roll", "kind": "damage", "actor_id": caster_id, "target_id": target_id,
+				"spell_id": String(spell.id), "roll": CombatRules.serialize_roll(roll),
+				"damage_type": String(spell.damage_type), "amount": roll.total})
+			var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, int(caster.get("spell_save_dc", 10)), rng)
+			events.append(save_event(caster_id, target_id, String(spell.id), save))
+			var raw: int = floori(roll.total / 2.0) if bool(save["success"]) else roll.total
+			events.append_array(SpellResolver._apply_damage(state, caster_id, target_id, raw, spell.damage_type, rng))
+			if aura_spell(caster) == null:
+				break
+	if not events.is_empty():
+		events.append_array(CombatRules.check_combat_end(state))
+	return events

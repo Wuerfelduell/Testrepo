@@ -81,11 +81,35 @@ func _run() -> void:
 			for actor_id: Variant in event.get("actor_ids", []):
 				cleared = cleared and not CombatRules.alive(state.actors.get(String(actor_id), {"hp": 1}))
 	check(cleared and _count("encounter_triggered") == 4, "All three fights are cleared before the boss")
+	await _boss_fight()
 	print("LEVEL_CHECKS: %d, failed: %s, hero hp at boss %d" % [checks, failed, hero_hp])
 	level.queue_free()
 	await get_tree().process_frame
 	bus.submit(ResetRunCommand.new())
 	get_tree().quit(1 if failed else 0)
+
+## The boss fight itself, auto-played: the Cult Priest has to use his spells.
+func _boss_fight() -> void:
+	var game: Node = get_tree().root.get_node("Game")
+	var steps: int = 0
+	while steps < 9000 and game.state.mode == &"combat":
+		_approach_if_idle()
+		level.simulation_step(0.1, true)
+		steps += 1
+		if steps % 10 == 0:
+			await get_tree().process_frame
+	var casts: Dictionary = {}
+	var weapons: Dictionary = {}
+	for event: Dictionary in events:
+		if event.get("type") == "start_spell" and event.get("actor_id") == "cult_priest":
+			casts[String(event["spell_id"])] = int(casts.get(String(event["spell_id"]), 0)) + 1
+		if event.get("type") == "start_attack" and event.get("actor_id") == "cult_priest":
+			var weapon_id: String = String(event.get("weapon", {}).get("id", ""))
+			weapons[weapon_id] = int(weapons.get(weapon_id, 0)) + 1
+	print("BOSS_FIGHT: mode %s, %d steps, rounds %d, priest casts %s, priest attacks %s, hero hp %d" % [game.state.mode, steps,
+		game.state.round_number, casts, weapons, int(game.state.actors["hero"]["hp"])])
+	check(game.state.mode != &"combat", "The boss fight ends without stalling")
+	check(casts.has("spirit_guardians"), "The Cult Priest casts Spirit Guardians")
 
 func _check_geometry() -> void:
 	var space: ArenaSpace = level.space

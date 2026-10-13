@@ -623,3 +623,9 @@ WEAPON_RADIANT_FLAME,Radiant Flame
 ITEM_GREATSWORD,Greatsword
 ROLL_SOURCE_GRAZE,Graze (Weapon Mastery)
 ITEM_MASTERY_GRAZE,"Graze: a miss still deals your Strength modifier as damage"
+SPELL_SPIRIT_GUARDIANS,Spirit Guardians
+SPELL_HEALING_WORD,Healing Word
+SPELL_REASON_NO_USES,No uses left today
+AI_HEAL_ALLY,Heal a badly hurt ally
+AI_FACTOR_EXPECTED_HEAL,Expected healing
+ROLL_SOURCE_SPELLCASTING,Spellcasting ability

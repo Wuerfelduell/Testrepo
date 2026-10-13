@@ -20,6 +20,13 @@ const SOURCE_URL: String = "https://media.dndbeyond.com/compendium-images/srd/5.
 @export var challenge_rating: String = "1/8"
 @export var experience: int = 25
 @export var attacks: Array[Dictionary] = []
+## Multiattack: attacks per Attack action (any mix of the entries in `attacks`).
+@export_range(1, 4) var multiattack: int = 1
+## Spellcasting: spell id -> uses per day (0 = at will). Uses replace spell slots.
+@export var spells: Dictionary = {}
+@export var spell_save_dc: int = 0
+## Spellcasting ability modifier, added to healing spells.
+@export var spell_modifier: int = 0
 @export_enum("brute", "archer", "coward") var personality: String = "brute"
 @export var model: String = "res://assets/characters/undead_cultist/model.glb"
 @export var model_is_provisional: bool = true
@@ -33,7 +40,7 @@ func is_valid() -> bool:
 func create_actor(actor_id: String, start_position: Vector3) -> Dictionary:
 	if not is_valid() or actor_id.is_empty() or not start_position.is_finite():
 		return {}
-	return {
+	var record: Dictionary = {
 		"id": actor_id, "definition_id": String(id), "team": "enemy",
 		"name_key": String(name_key), "position": start_position,
 		"hp": hit_points, "max_hp": hit_points, "ac": armor_class,
@@ -49,3 +56,19 @@ func create_actor(actor_id: String, start_position: Vector3) -> Dictionary:
 		"creature_type": "humanoid", "challenge_rating": challenge_rating, "experience": experience,
 		"srd_name": srd_name, "srd_page": srd_page, "source_url": SOURCE_URL,
 	}
+	if multiattack > 1:
+		record["features"] = {"extra_attack": {"attacks": multiattack}}
+		# "Two attacks, using Mace or Radiant Flame in any combination."
+		record["chooses_attack"] = true
+	if not spells.is_empty():
+		var uses: Dictionary = {}
+		for spell_id: Variant in spells:
+			if int(spells[spell_id]) > 0:
+				uses[String(spell_id)] = int(spells[spell_id])
+		record["spells"] = spells.keys().map(func(spell_id: Variant) -> String: return String(spell_id))
+		record["spell_uses"] = uses
+		record["spell_uses_max"] = uses.duplicate()
+		record["spell_save_dc"] = spell_save_dc
+		record["spell_modifier"] = spell_modifier
+		record["concentration"] = {}
+	return record

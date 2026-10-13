@@ -2,19 +2,22 @@ class_name SpellVFX
 extends Node3D
 ## Presentation of spells. Every effect follows the authoritative spell timeline
 ## (Game.state.pending elapsed), so a projectile arrives exactly when the rules
-## apply damage. Persistent markers show Shield and Sleep while they last.
+## apply damage. Persistent markers show Shield, Sleep and Spirit Guardians while they last.
 
 const FIRE: Color = Color(1.0, 0.52, 0.16)
 const FROST: Color = Color(0.62, 0.9, 1.0)
 const ARCANE: Color = Color(0.68, 0.55, 1.0)
 const SLEEP: Color = Color(0.78, 0.66, 1.0)
 const SHIELD: Color = Color(0.45, 0.75, 1.0)
+const RADIANT: Color = Color(1.0, 0.86, 0.45)
+const HEAL: Color = Color(0.6, 1.0, 0.62)
 const FADE: float = 0.5
 
 var actors: Dictionary = {}
 var _active: Array[Dictionary] = []
 var _bubbles: Dictionary = {}
 var _sleep_marks: Dictionary = {}
+var _auras: Dictionary = {}
 
 ## The caster plays the cast clip, released at release_time (CombatActor treats it
 ## like a ranged attack with an animation override).
@@ -32,6 +35,12 @@ func on_event(event: Dictionary) -> void:
 	match String(event.get("type", "")):
 		"start_spell":
 			_start(event)
+		"start_attack":
+			# The Cult Priest's Radiant Flame is an attack, not a spell: a golden bolt.
+			if String(event.get("weapon", {}).get("id", "")) == "radiant_flame":
+				_start({"spell_id": "radiant_flame", "actor_id": event["actor_id"], "target_ids": [event["target_id"]],
+					"release_time": float(event["impact_time"]) * 0.45, "impact_time": float(event["impact_time"]),
+					"duration": float(event["duration"]), "point": Vector3.ZERO})
 		"cast_reaction":
 			var actor: Node3D = actors.get(String(event.get("actor_id", ""))) as Node3D
 			if actor != null:
@@ -59,6 +68,10 @@ func _start(event: Dictionary) -> void:
 			effect["nodes"] = [_cone_fire(caster)]
 		"sleep":
 			effect["nodes"] = [_bolt(SLEEP, 0.12, true)]
+		"radiant_flame":
+			effect["nodes"] = [_bolt(RADIANT, 0.15, true)]
+		"healing_word":
+			effect["nodes"] = [_bolt(HEAL, 0.1, true)]
 	for node: Node3D in effect["nodes"]:
 		node.visible = false
 	_active.append(effect)
@@ -95,7 +108,7 @@ func _update(effect: Dictionary, state: GameState) -> void:
 	var hand: Vector3 = caster.global_position + Vector3.UP * 1.35 + caster.global_transform.basis.z.normalized() * 0.35
 	var flying: bool = time >= release and time < impact
 	match effect["spell_id"]:
-		"fire_bolt", "sleep":
+		"fire_bolt", "sleep", "radiant_flame", "healing_word":
 			var node: Node3D = effect["nodes"][0]
 			var destination: Vector3 = _target_point(effect, state, 0)
 			node.visible = flying
@@ -135,6 +148,14 @@ func _impact(effect: Dictionary, state: GameState) -> void:
 				_burst(_target_point(effect, state, index), ARCANE, 30, 0.4, 2.5)
 		"sleep":
 			_sleep_mist(effect["point"] as Vector3)
+		"radiant_flame":
+			_burst(_target_point(effect, state, 0), RADIANT, 60, 0.5, 3.5)
+		"healing_word":
+			_burst(_target_point(effect, state, 0), HEAL, 45, 0.7, 1.8)
+		"spirit_guardians":
+			var caster: Node3D = actors.get(effect["actor_id"]) as Node3D
+			if caster != null:
+				_burst(caster.global_position + Vector3.UP * 1.0, RADIANT, 120, 0.8, 5.5)
 
 func _target_point(effect: Dictionary, state: GameState, index: int) -> Vector3:
 	var ids: Array = effect["target_ids"]
@@ -172,6 +193,17 @@ func _update_markers(state: GameState, delta: float) -> void:
 				var deep: bool = "unconscious" in record.get("conditions", [])
 				mark.text = "Z z z" if deep else "z z"
 				mark.global_position = node.global_position + Vector3.UP * (2.3 + 0.08 * sin(Time.get_ticks_msec() / 400.0))
+		var aura: SpellDefinition = ActiveEffects.aura_spell(record) if not record.is_empty() else null
+		if aura != null and not _auras.has(id):
+			_auras[id] = _guardian_ring(aura.area_size_m)
+		if _auras.has(id):
+			var ring: Node3D = _auras[id]
+			if aura == null:
+				ring.queue_free()
+				_auras.erase(id)
+			else:
+				ring.global_position = node.global_position + Vector3.UP * 0.05
+				ring.rotation.y += delta * 0.6
 
 func _bolt(color: Color, radius: float, trail: bool) -> Node3D:
 	var root: Node3D = Node3D.new()
@@ -327,6 +359,34 @@ func _shield_bubble() -> MeshInstance3D:
 	bubble.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(bubble)
 	return bubble
+
+## Spirit Guardians: a slowly turning ring of golden motes marking the aura's edge.
+func _guardian_ring(radius: float) -> Node3D:
+	var root: Node3D = Node3D.new()
+	add_child(root)
+	var edge: MeshInstance3D = MeshInstance3D.new()
+	var torus: TorusMesh = TorusMesh.new()
+	torus.inner_radius = radius - 0.06
+	torus.outer_radius = radius
+	torus.rings = 48
+	edge.mesh = torus
+	edge.material_override = _glow(RADIANT, 0.35, 2.0)
+	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(edge)
+	var motes: CPUParticles3D = _particles(RADIANT, 70, 2.2, 0.22)
+	motes.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
+	motes.emission_ring_axis = Vector3.UP
+	motes.emission_ring_radius = radius - 0.2
+	motes.emission_ring_inner_radius = radius * 0.55
+	motes.emission_ring_height = 0.2
+	motes.direction = Vector3.UP
+	motes.spread = 15.0
+	motes.initial_velocity_min = 0.4
+	motes.initial_velocity_max = 0.9
+	root.add_child(motes)
+	motes.position = Vector3.UP * 0.3
+	motes.emitting = true
+	return root
 
 func _sleep_label() -> Label3D:
 	var label: Label3D = Label3D.new()

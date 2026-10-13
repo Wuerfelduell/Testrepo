@@ -22,11 +22,13 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 ## Cone length, sphere radius or line length.
 @export var area_size_m: float = 0.0
 @export var line_width_m: float = 1.5
-@export_enum("attack", "save", "auto", "none") var resolution: String = "attack"
+@export_enum("attack", "save", "auto", "heal", "none") var resolution: String = "attack"
 @export var save_ability: StringName = &""
 @export var damage_dice: String = ""
 @export var damage_type: StringName = &""
 @export var half_on_save: bool = false
+## "heal" resolution: dice of hit points restored, plus the caster's spellcasting modifier.
+@export var heal_dice: String = ""
 ## Per dart for "darts" targeting: dice plus flat bonus.
 @export var darts: int = 0
 @export var dart_bonus: int = 0
@@ -36,7 +38,8 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 @export var upcast_darts: int = 0
 @export var concentration: bool = false
 @export var duration_rounds: int = 0
-## Rider effect id interpreted by ActiveEffects: "speed_penalty", "sleep", "shield".
+## Rider effect id interpreted by ActiveEffects: "speed_penalty", "sleep", "shield",
+## "spirit_guardians" (an aura around the concentrating caster).
 @export var effect: StringName = &""
 @export var effect_amount: float = 0.0
 ## Only creatures of the caster's choice (Sleep) instead of everyone inside the area.
@@ -56,6 +59,8 @@ func is_valid() -> bool:
 	if not upcast_dice.is_empty() and Dice.parse(upcast_dice).has("error"):
 		return false
 	if resolution == "save" and not save_ability in Abilities.IDS:
+		return false
+	if resolution == "heal" and (targeting != "creature" or Dice.parse(heal_dice).has("error")):
 		return false
 	if targeting == "darts" and darts <= 0:
 		return false

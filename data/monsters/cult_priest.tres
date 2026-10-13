@@ -18,7 +18,11 @@ passive_perception = 15
 challenge_rating = "2"
 experience = 450
 model = "res://assets/characters/boss_cult_priest/model.glb"
-personality = "archer"
+personality = "brute"
+multiattack = 2
+spells = {"healing_word": 3, "spirit_guardians": 1}
+spell_save_dc = 13
+spell_modifier = 3
 attacks = Array[Dictionary]([
 {"id": "priest_mace", "model": "res://assets/weapons/mace.glb", "name_key": "WEAPON_PRIEST_MACE", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 5, "damage_dice": "1d6", "damage_bonus": 3, "damage_type": "bludgeoning", "attack_modifiers": [{"amount": 3, "source": "str"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 3, "source": "str"}], "extra_damage": [{"amount": 5, "damage_type": "radiant", "source": "priest_mace"}]},
 {"id": "radiant_flame", "model": "res://assets/weapons/staff_priest.glb", "name_key": "WEAPON_RADIANT_FLAME", "ranged": true, "reach": 1.5, "range": 18.0, "long_range": 18.0, "attack_bonus": 5, "damage_dice": "2d10", "damage_bonus": 0, "damage_type": "radiant", "attack_modifiers": [{"amount": 3, "source": "wis"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": []}

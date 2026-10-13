@@ -18,7 +18,7 @@ const STEP_METRES: float = 0.8
 const HIT_TYPES: Array[String] = ["slashing", "piercing", "bludgeoning", "fire", "cold", "force"]
 ## Spells with their own cast/impact sounds; unknown spells fall back to spell_cast/spell_impact.
 const SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "burning_hands", "sleep", "shield",
-	"acid_splash", "poison_spray", "shatter", "fireball"]
+	"acid_splash", "poison_spray", "shatter", "fireball", "healing_word", "spirit_guardians"]
 
 ## cue -> {"files": [paths, one picked at random], "volume_db": float, "bus": String}.
 ## Paths are relative to SFX_DIR unless they start with "res://".
@@ -67,6 +67,11 @@ const CUES: Dictionary = {
 	"spell_impact_shatter": {"files": ["spell_impact_arcane.ogg"], "volume_db": -5.0, "bus": "Effects"},
 	"spell_cast_fireball": {"files": ["spell_cast_fire.ogg"], "volume_db": -8.0, "bus": "Effects"},
 	"spell_impact_fireball": {"files": ["spell_impact_flames.ogg"], "volume_db": -4.0, "bus": "Effects"},
+	# Cult Priest spells (prompt 10 follow-up) reuse existing files until they get their own.
+	"spell_cast_healing_word": {"files": ["heal.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_healing_word": {"files": ["heal.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_spirit_guardians": {"files": ["spell_cast_sleep.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_impact_spirit_guardians": {"files": ["spell_impact_arcane.ogg"], "volume_db": -5.0, "bus": "Effects"},
 	"spell_blocked": {"files": ["spell_shield.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"heal": {"files": ["heal.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"level_up": {"files": ["level_up.ogg"], "volume_db": -4.0, "bus": "UI"},

@@ -41,6 +41,9 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	actor["attacks_left"] = 0
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
 		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
+	if ActiveEffects.in_hostile_aura(state, actor_id):
+		# Spirit Guardians halve the speed of enemies inside (judged at the start of the turn).
+		actor["move_left"] = float(actor["move_left"]) * 0.5
 	return events
 
 static func path_length(path: PackedVector3Array) -> float:

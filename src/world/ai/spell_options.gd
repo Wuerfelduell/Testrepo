@@ -8,6 +8,10 @@ extends RefCounted
 const SLOT_COST: float = 7.0
 const ALLY_HIT_PENALTY: float = 60.0
 const SLEEP_VALUE: float = 9.0
+## A limited-use monster spell (per day) is cheaper to spend than a Wizard's slot.
+const USE_COST: float = 3.0
+## Spirit Guardians keep hurting every enemy that stays near the caster.
+const AURA_VALUE: float = 12.0
 
 static func is_caster(actor: Dictionary) -> bool:
 	return not actor.get("spells", []).is_empty()
@@ -16,14 +20,21 @@ static func consider(state: GameState, actor_id: String, targets: Array[String],
 		personality: AIPersonality) -> Array[Dictionary]:
 	var options: Array[Dictionary] = []
 	var actor: Dictionary = state.actors[actor_id]
-	if not is_caster(actor) or not CombatRules.can_use_action(actor):
+	if not is_caster(actor):
 		return options
 	for spell_id: String in actor.get("spells", []):
 		var spell: SpellDefinition = SpellBook.get_spell(spell_id)
 		if spell == null or spell.casting_time == "reaction" or \
 				not SpellResolver.availability_reason(state, actor_id, spell).is_empty():
 			continue
+		if spell.casting_time == "action" and not CombatRules.can_use_action(actor):
+			continue
 		var cost: float = 0.0 if spell.is_cantrip() else SLOT_COST * spell.level
+		if actor.get("spell_uses", {}).has(spell_id):
+			cost = USE_COST
+		if spell.resolution == "heal":
+			options.append_array(_heal_options(state, actor_id, spell, cost))
+			continue
 		match spell.targeting:
 			"creature":
 				for target_id: String in targets:
@@ -86,6 +97,8 @@ static func consider(state: GameState, actor_id: String, targets: Array[String],
 					value -= ALLY_HIT_PENALTY * allies_hit
 					if spell.concentration and not actor.get("concentration", {}).is_empty():
 						value -= SLEEP_VALUE
+					if spell.effect == &"spirit_guardians":
+						value += AURA_VALUE
 					options.append(_option(spell_id, [], aim, value - cost,
 						&"AI_AREA_ALLIES" if allies_hit > 0 else &"AI_CAST_AREA",
 						{"expected_damage": damage, "allies_hit": float(allies_hit), "slot_cost": cost}))
@@ -108,6 +121,27 @@ static func best_offense(state: GameState, actor_id: String, position: Vector3,
 				best = maxf(best, float(preview["chance"]) * personality.hit_weight \
 					+ float(preview["expected_damage"]) * personality.damage_weight)
 	return best
+
+## Healing Word and the like: worth it once an ally (or the caster) is badly hurt.
+static func _heal_options(state: GameState, actor_id: String, spell: SpellDefinition, cost: float) -> Array[Dictionary]:
+	var options: Array[Dictionary] = []
+	var actor: Dictionary = state.actors[actor_id]
+	var ids: Array = state.actors.keys()
+	ids.sort()
+	for target_id: String in ids:
+		var patient: Dictionary = state.actors[target_id]
+		if patient.get("team") != actor.get("team") or not CombatRules.alive(patient) or \
+				int(patient["hp"]) * 2 > int(patient["max_hp"]):
+			continue
+		var preview: Dictionary = SpellResolver.preview(state, actor_id, String(spell.id), 0, [target_id])
+		if not bool(preview["legal"]):
+			continue
+		var healed: float = float(preview["targets"][0]["expected_heal"])
+		# Keeping the boss standing matters more than a minion.
+		var weight: float = 1.4 if target_id == actor_id else 0.9
+		options.append(_option(String(spell.id), [target_id], Vector3.INF, healed * weight - cost,
+			&"AI_HEAL_ALLY", {"expected_heal": healed, "slot_cost": cost}))
+	return options
 
 static func command_for(option: Dictionary, actor_id: String) -> Command:
 	return CastSpellCommand.new(actor_id, String(option["spell_id"]), option.get("target_ids", []),

@@ -56,6 +56,9 @@ func update(camera: Camera3D, focus_points: Array[Vector3], delta: float) -> voi
 		var entry: Dictionary = occluders[index]
 		var visual: Node3D = entry["visual"] as Node3D
 		visual.scale.y = _base_scale[index] * lerpf(1.0, STUB, next)
+		if entry.get("batcher") is StaticBatcher:
+			# The wall's meshes live in a MultiMesh: move its instances with the wrapper.
+			(entry["batcher"] as StaticBatcher).sync(visual)
 		for child: Node in visual.find_children("*", "GeometryInstance3D", true, false):
 			(child as GeometryInstance3D).transparency = next * 0.4
 		var body: StaticBody3D = entry["body"] as StaticBody3D
