@@ -27,6 +27,10 @@ var _selection_material: StandardMaterial3D
 var _dead: bool = false
 var _active_clip: String = ""
 var _last_roll_critical: bool = false
+## Exploration pose (package 10): an unaware enemy sleeps, guards or prays instead of Idle.
+## Cleared when its encounter starts; patrols walk.
+var pose_clip: String = ""
+var _offhand_signature: String = "?"
 
 
 func setup_actor(record: Dictionary) -> void:
@@ -44,6 +48,7 @@ func setup_actor(record: Dictionary) -> void:
 		# Looks without a combat weapon model still hold their default item (looks.json).
 		equip_look_weapon(String(record["model"]))
 	global_position = _as_position(record.get("position", Vector3.ZERO))
+	_sync_offhand(record)
 	_last_hp = int(record.get("hp", 1))
 	_create_selection_ring()
 	_create_pick_area()
@@ -57,6 +62,7 @@ func update_actor(record: Dictionary, pending: Dictionary, delta: float) -> void
 	if player == null:
 		return
 	_record = record.duplicate(true)
+	_sync_offhand(record)
 	var next_position: Vector3 = _as_position(record.get("position", global_position))
 	var displacement: Vector3 = next_position - global_position
 	global_position = next_position
@@ -91,8 +97,44 @@ func update_actor(record: Dictionary, pending: Dictionary, delta: float) -> void
 			JOG_METRES_PER_SECOND if jogging else WALK_METRES_PER_SECOND)
 		player.advance(delta * speed / authored_speed)
 	else:
-		_set_animation("idle")
+		_set_animation("idle", pose_clip)
 		player.advance(delta)
+
+
+## Unaware enemies of a dormant encounter (not yet in GameState.actors): the level moves
+## patrols and plays the authored pose. Presentation only.
+func update_dormant(next_position: Vector3, delta: float) -> void:
+	if player == null:
+		return
+	var displacement: Vector3 = next_position - global_position
+	global_position = next_position
+	var horizontal: Vector3 = Vector3(displacement.x, 0.0, displacement.z)
+	if horizontal.length_squared() > 0.0000001:
+		aim_at(global_position + horizontal)
+		_set_animation("walk")
+		player.advance(delta * horizontal.length() / maxf(delta, 0.000001) / WALK_METRES_PER_SECOND)
+	else:
+		_set_animation("idle", pose_clip)
+		player.advance(delta)
+
+
+func set_pose(clip_name: String) -> void:
+	pose_clip = clip_name if player != null and player.has_animation(clip_name) else ""
+	if not pose_clip.is_empty():
+		# Exploration poses loop; their imported clips are one-shots.
+		player.get_animation(pose_clip).loop_mode = Animation.LOOP_LINEAR
+
+
+## The look's shield stays only while the equipment really holds an off-hand item
+## (a versatile weapon in two hands drops it). Records without equipment keep the look.
+func _sync_offhand(record: Dictionary) -> void:
+	var equipment: Variant = record.get("equipment", null)
+	var off_hand: String = String((equipment as Dictionary).get("off_hand", "?")) if equipment is Dictionary else "?"
+	if off_hand == _offhand_signature:
+		return
+	_offhand_signature = off_hand
+	if offhand_attachment != null:
+		offhand_attachment.visible = off_hand != ""
 
 
 func aim_at(target: Vector3) -> void:

@@ -23,6 +23,8 @@ func apply(state: GameState) -> Dictionary:
 	state.turn_index = source.turn_index
 	state.round_number = source.round_number
 	state.mode = source.mode
+	state.world = source.world
+	state.loot_piles = source.loot_piles
 	return {"events": [{"type": "save_restored"}]}
 
 func to_dict() -> Dictionary:

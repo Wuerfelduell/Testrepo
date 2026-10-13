@@ -29,7 +29,12 @@ func test_ranged_bandit_draws_scimitar_for_melee() -> void:
 	assert_eq(actor.weapon_attachment.bone_name, "hand_r")
 
 
-func test_cult_priest_is_a_visual_only_entry() -> void:
+func test_cult_priest_uses_the_srd_priest_stat_block() -> void:
+	# Package 10: the boss fights with the SRD 5.2 Priest (CR 2) numbers.
 	var priest: MonsterDefinition = load("res://data/monsters/cult_priest.tres") as MonsterDefinition
 	assert_true(ResourceLoader.exists(priest.model))
-	assert_false(priest.is_valid(), "No stats yet: the boss cannot be spawned into combat by accident")
+	assert_true(priest.is_valid())
+	assert_eq(priest.srd_name, "Priest")
+	assert_eq([priest.hit_points, priest.armor_class, priest.experience], [38, 13, 450])
+	for attack: Dictionary in priest.attacks:
+		assert_true(CombatRules.weapon_valid(attack), String(attack["id"]))

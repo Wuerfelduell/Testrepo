@@ -607,3 +607,17 @@ REST_REASON_HIT_DICE,Not that many Hit Point Dice left
 REST_REASON_ARCANE,Arcane Recovery: those slots do not fit
 REST_REASON_MEMORIZE,That spell swap is not possible
 REST_REASON_PREPARED,Those spells cannot be prepared
+LEVEL_CRYPT,THE CRYPT
+LEVEL_MODE_EXPLORATION,%s · Exploration
+LEVEL_MODE_COMBAT,%s · Combat
+LEVEL_MODE_DEFEAT,%s · Defeat
+ROOM_VESTIBULE,Vestibule
+ROOM_HALL,Hall of Stairs
+ROOM_CORRIDOR,Dart Corridor
+ROOM_SIDE_CHAMBER,Side Chamber
+ROOM_OSSUARY,Ossuary
+ROOM_REST,Rest Alcove
+ROOM_SHRINE,Shrine
+DIALOGUE_PLACEHOLDER,Dialogue: %s
+WEAPON_PRIEST_MACE,Mace
+WEAPON_RADIANT_FLAME,Radiant Flame

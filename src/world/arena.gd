@@ -177,7 +177,10 @@ func simulation_step(delta: float, fast: bool = false) -> void:
 	else:
 		command = director.decide(state, dungeon.tactical_points)
 		hud.set_ai_options(director.last_candidates)
-	if command != null:
+	if command == null:
+		# No candidate at all (e.g. a far-away enemy without a path): pass, never stall.
+		CommandBus.submit(EndTurnCommand.new(active))
+	else:
 		var result: Error = CommandBus.submit(command)
 		if result != OK:
 			# A stale geometry candidate cannot bypass validation or stall the turn.

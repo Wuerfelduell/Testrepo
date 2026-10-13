@@ -16,7 +16,7 @@ file ownership table). Everything else runs strictly one after the other (RULE 6
 | E | 1 | [07 Enemies, boss, looks, weapons, hit effects](07-enemies-art.md) | see file ownership table in the prompt | done |
 | F | 1 | [08 Level-up and rests](08-levelup-rest.md) | ownership table in the file | done - Q38 open |
 | G | 1 | [09 Loot and carry weight](09-loot-weight.md) | ownership table in the file | ready - parallel (Claude thread) |
-| H | 1 | [10 Crypt level, hero model, portraits](10-crypt-level.md) | ownership table in the file | ready - parallel (Claude thread) |
+| H | 1 | [10 Crypt level, hero model, portraits](10-crypt-level.md) | ownership table in the file | done (Claude thread, 13-10-2026) |
 | I | 1 | [11 Music and sound](11-music-sound.md) | ownership table in the file | ready - parallel (Claude thread) |
 | - | next | Dialogue system + crypt dialogues - needs the owner's story answers (S1-S7) | - | not written |
 

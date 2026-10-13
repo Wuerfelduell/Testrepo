@@ -19,47 +19,35 @@ const GREEN: Color = Color("9ed5ac")
 class Portrait extends Control:
 	var actor: Dictionary = {}
 	var active: bool = false
+	## Rendered from the actor's 3D model (PortraitStudio); null until it is ready.
+	var texture: Texture2D
 
 	func _draw() -> void:
 		var dim: bool = int(actor.get("hp", 0)) <= 0
 		var friendly: bool = String(actor.get("team", "enemy")) in ["hero", "player", "party"]
 		var tint: Color = Color("cba660") if friendly else Color("9d595a")
-		var personality: String = String(actor.get("personality", "brute"))
-		if not friendly and personality == "coward":
-			tint = Color("8b709e")
-		elif not friendly and personality == "archer":
-			tint = Color("a07d57")
 		if dim:
 			tint = Color("555966")
 		var center: Vector2 = size * 0.5
 		var radius: float = minf(size.x, size.y) * 0.44
 		draw_circle(center, radius, Color("101624"))
-		draw_arc(center, radius, 0, TAU, 64, Color("f3d38a") if active else tint, 3.0 if active else 1.5, true)
-		var hood: bool = bool(actor.get("weapon", {}).get("ranged", false)) or personality == "coward"
-		var skin: Color = Color("c6a88b") if friendly else Color("89957e")
-		if dim:
-			skin = Color("575d64")
-		var unit: float = radius / 36.0
-		# Hand-drawn, actor-specific busts: armor, hood, face and eyes remain legible at 64 px.
-		var shoulders: PackedVector2Array = [Vector2(-29, 28), Vector2(-24, 15), Vector2(-10, 9), Vector2(10, 9), Vector2(24, 15), Vector2(29, 28)]
-		for index: int in range(shoulders.size()):
-			shoulders[index] = center + shoulders[index] * unit
-		draw_colored_polygon(shoulders, tint.darkened(0.25))
-		draw_circle(center + Vector2(0, -4) * unit, 18 * unit, tint.darkened(0.4) if hood else Color("626e7a"))
-		var face: PackedVector2Array = [Vector2(-12, -15), Vector2(11, -15), Vector2(13, 0), Vector2(8, 12), Vector2(0, 16), Vector2(-8, 12), Vector2(-13, 0)]
-		for index: int in range(face.size()):
-			face[index] = center + face[index] * unit
-		draw_colored_polygon(face, skin)
-		if hood:
-			var hood_top: PackedVector2Array = [center + Vector2(-19,-3)*unit, center + Vector2(-15,-19)*unit, center + Vector2(0,-26)*unit, center + Vector2(15,-19)*unit, center + Vector2(19,-3)*unit, center + Vector2(0,-16)*unit]
-			draw_colored_polygon(hood_top, tint.darkened(0.1))
+		if texture != null:
+			# The head shot clipped to the frame's circle; the fallen are drawn in grey.
+			var points: PackedVector2Array = []
+			var uvs: PackedVector2Array = []
+			for index: int in 48:
+				var direction: Vector2 = Vector2.from_angle(TAU * index / 48.0)
+				points.append(center + direction * (radius - 1.0))
+				uvs.append(Vector2(0.5, 0.5) + direction * 0.5)
+			var shade: Color = Color(0.45, 0.45, 0.5) if dim else Color.WHITE
+			var colors: PackedColorArray = []
+			colors.resize(points.size())
+			colors.fill(shade)
+			draw_polygon(points, colors, uvs, texture)
 		else:
-			draw_rect(Rect2(center + Vector2(-15, -20) * unit, Vector2(30, 8) * unit), Color("83909c"))
-			draw_line(center + Vector2(0, -23)*unit, center + Vector2(0,-11)*unit, tint, 3 * unit)
-		var eyes: Color = Color("342d28") if friendly else Color("da8d56")
-		draw_line(center + Vector2(-9,-3)*unit, center + Vector2(-3,-2)*unit, eyes, 2.5*unit)
-		draw_line(center + Vector2(3,-2)*unit, center + Vector2(9,-3)*unit, eyes, 2.5*unit)
-		draw_line(center + Vector2(-4,8)*unit, center + Vector2(4,8)*unit, skin.darkened(0.4), 1.5*unit)
+			# No renderer (headless): a plain disc, never the old drawn faces.
+			draw_circle(center, radius * 0.82, tint.darkened(0.55))
+		draw_arc(center, radius, 0, TAU, 64, Color("f3d38a") if active else tint, 3.0 if active else 1.5, true)
 
 var dice_popup: DicePopup
 var _root: Control
@@ -132,7 +120,8 @@ func _ready() -> void:
 func update_state(state: GameState) -> void:
 	_state = state.copy()
 	_round_label.text = tr("COMBAT_ROUND") % state.round_number
-	_mode_label.text = tr("COMBAT_MODE_" + String(state.mode).to_upper())
+	_mode_label.text = tr("COMBAT_MODE_" + String(state.mode).to_upper()) if area_key.is_empty() else \
+		tr("LEVEL_MODE_" + String(state.mode).to_upper()) % tr(area_key)
 	(_initiative.get_parent() as Control).visible = state.mode == &"combat" and not state.turn_order.is_empty()
 	var current_id: String = state.current_actor_id()
 	var hero: Dictionary = {}
@@ -143,7 +132,7 @@ func update_state(state: GameState) -> void:
 	var signature_data: Array = [current_id, state.turn_order]
 	for actor_id: String in state.actors:
 		var record: Dictionary = state.actors[actor_id]
-		signature_data.append([actor_id, record.get("name_key"), record.get("hp"), record.get("max_hp"), record.get("conditions"), record.get("team"), record.get("weapon", {}).get("ranged", false)])
+		signature_data.append([actor_id, record.get("name_key"), record.get("hp"), record.get("max_hp"), record.get("conditions"), record.get("team"), record.get("weapon", {}).get("ranged", false), record.get("model")])
 	var signature: int = hash(signature_data)
 	if signature != _portrait_signature:
 		_portrait_signature = signature
@@ -632,10 +621,25 @@ func _refresh_log() -> void:
 	var first: int = 0 if _log_expanded else maxi(0, _lines.size() - 6)
 	_log.text = "\n\n".join(_lines.slice(first))
 
+func _portrait_rendered(_model_path: String) -> void:
+	if _state != null:
+		_portrait_signature = -1
+		update_state(_state)
+
+## Level name shown instead of "COMBAT ARENA" (package 10); empty in the arena.
+var area_key: String = ""
+
 func _portrait(actor: Dictionary, active: bool, dimensions: Vector2) -> Portrait:
 	var portrait: Portrait = Portrait.new()
 	portrait.actor = actor.duplicate(true)
 	portrait.active = active
+	var model: String = String(actor.get("model", ""))
+	portrait.texture = PortraitStudio.texture_for(model)
+	if portrait.texture == null and is_inside_tree():
+		var studio: PortraitStudio = PortraitStudio.shared(get_tree())
+		if not studio.portrait_ready.is_connected(_portrait_rendered):
+			studio.portrait_ready.connect(_portrait_rendered)
+		studio.request(model)
 	portrait.custom_minimum_size = dimensions
 	portrait.tooltip_text = tr("COMBAT_PORTRAIT_HINT") % [_actor_name(actor), int(actor.get("hp", 0)), int(actor.get("max_hp", 0)), _condition_text(actor)]
 	return portrait

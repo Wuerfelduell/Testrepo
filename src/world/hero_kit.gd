@@ -44,8 +44,7 @@ static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), s
 		"speed_m": sheet.speed_m(), "move_left": sheet.speed_m(),
 		"action_available": true, "bonus_available": true, "reaction_available": true,
 		"disengaged": false, "weapon": weapon, "attacks": [weapon.duplicate(true)],
-		"model": "res://assets/characters/superhero_male_fullbody/model.glb",
-		"model_is_provisional": true, "personality": "", "conditions": [], "effects": [],
+		"model": default_model(String(class_id)), "model_is_provisional": true, "personality": "", "conditions": [], "effects": [],
 		"class_id": String(sheet.class_id), "level": sheet.level, "species": String(sheet.species),
 		"ability_scores": sheet.ability_scores(), "proficiency_bonus": proficiency,
 		"save_proficiencies": sheet.saving_throw_proficiencies(),
@@ -54,6 +53,12 @@ static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), s
 		"pending_character_choices": sheet.pending_choices(), "class_features_active": false,
 	}
 	return activate(record)
+
+## The test hero wears the class's first male look from character creation, never the
+## old base body (package 10). Falls back to the base body only if no look exists.
+static func default_model(class_id: String) -> String:
+	var looks: Array[Dictionary] = HeroLooks.for_class(class_id, "male")
+	return String(looks[0]["scene"]) if not looks.is_empty() else "res://assets/characters/superhero_male_fullbody/model.glb"
 
 ## Adds the active level-1 class features to any hero record (the test hero or one
 ## from character creation): Fighter Second Wind and Weapon Mastery, Wizard

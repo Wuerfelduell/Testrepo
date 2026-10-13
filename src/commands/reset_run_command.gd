@@ -15,6 +15,8 @@ func apply(state: GameState) -> Dictionary:
 	state.turn_index = 0
 	state.round_number = 1
 	state.mode = &"exploration"
+	state.world = {}
+	state.loot_piles = {}
 	return {"events": [{"type": "run_reset"}]}
 
 func to_dict() -> Dictionary:

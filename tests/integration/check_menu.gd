@@ -81,9 +81,10 @@ func _run() -> void:
 	var arena: CombatArena = await _wait_for_arena()
 	if arena == null:
 		return _finish()
+	check(arena is DungeonLevel, "NEW GAME starts in the crypt level (package 10)")
 	var hero: Dictionary = Game.state.actors["hero"]
 	check(hero["name_key"] == "Mira" and hero["class_id"] == "wizard" and hero["look_id"] == HeroLooks.for_class("wizard", "female")[1]["id"],
-		"The arena runs with the created hero, not the test Fighter")
+		"The crypt runs with the created hero, not the test Fighter")
 	check(SaveGame.run_active and not SaveGame.exists(), "A new run starts without writing a save")
 	arena.hud.dice_popup.speed = 40.0
 	check(CommandBus.submit(MoveCommand.new("hero", Vector3(0, 0, 2))) == OK, "The hero can move")
@@ -108,6 +109,7 @@ func _run() -> void:
 		return _finish()
 	check(int(Game.state.actors["hero"]["hp"]) == saved_hp and Game.state.round_number == saved_round,
 		"CONTINUE restores the running combat")
+	check(arena is DungeonLevel, "CONTINUE returns to the crypt")
 	check(Game.state.actors["hero"]["name_key"] == "Mira", "CONTINUE restores the created hero")
 	arena.hud.dice_popup.speed = 40.0
 	await _play_until(arena, func() -> bool: return arena.death_screen != null)

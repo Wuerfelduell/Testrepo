@@ -6,7 +6,20 @@
 script = ExtResource("1")
 id = &"cult_priest"
 name_key = &"ACTOR_CULT_PRIEST"
-srd_name = ""
-srd_page = 0
+srd_name = "Priest"
+srd_page = 344
+hit_points = 38
+armor_class = 13
+ability_scores = {&"str": 16, &"dex": 10, &"con": 12, &"int": 13, &"wis": 16, &"cha": 13}
+speed_m = 9.0
+proficiency_bonus = 2
+skills = {&"medicine": 7, &"perception": 5, &"religion": 5}
+passive_perception = 15
+challenge_rating = "2"
+experience = 450
 model = "res://assets/characters/boss_cult_priest/model.glb"
-model_is_provisional = true
+personality = "archer"
+attacks = Array[Dictionary]([
+{"id": "priest_mace", "model": "res://assets/weapons/mace.glb", "name_key": "WEAPON_PRIEST_MACE", "ranged": false, "reach": 1.5, "range": 0.0, "long_range": 0.0, "attack_bonus": 5, "damage_dice": "1d6", "damage_bonus": 3, "damage_type": "bludgeoning", "attack_modifiers": [{"amount": 3, "source": "str"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": [{"amount": 3, "source": "str"}], "extra_damage": [{"amount": 5, "damage_type": "radiant", "source": "priest_mace"}]},
+{"id": "radiant_flame", "model": "res://assets/weapons/staff_priest.glb", "name_key": "WEAPON_RADIANT_FLAME", "ranged": true, "reach": 1.5, "range": 18.0, "long_range": 18.0, "attack_bonus": 5, "damage_dice": "2d10", "damage_bonus": 0, "damage_type": "radiant", "attack_modifiers": [{"amount": 3, "source": "wis"}, {"amount": 2, "source": "proficiency"}], "damage_modifiers": []}
+])

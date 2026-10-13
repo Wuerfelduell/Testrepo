@@ -1,20 +1,29 @@
 class_name RunFlow
 extends RefCounted
-## Scene transitions of a run: menu -> arena, arena -> menu. Game state changes still go
+## Scene transitions of a run: menu -> crypt level (the arena only with --debug-arena), back to menu. Game state changes still go
 ## through CommandBus; this only orders the commands and the ironman save.
 
 const MENU_SCENE: String = "res://scenes/menu/main_menu.tscn"
 const ARENA_SCENE: String = "res://scenes/arena/arena.tscn"
+const CRYPT_SCENE: String = "res://scenes/levels/crypt/crypt.tscn"
+## Command-line switch that keeps the old single-room arena reachable for debugging.
+const DEBUG_ARENA_ARG: String = "--debug-arena"
 
-## New game: the old ironman save is discarded, the created hero enters the arena.
+## New game: the old ironman save is discarded, the created hero enters the crypt.
 static func start_new(tree: SceneTree, hero_record: Dictionary) -> Error:
 	CommandBus.submit(ResetRunCommand.new())
-	var result: Error = CommandBus.submit(SetupArenaCommand.new(hero_record))
+	var debug_arena: bool = DEBUG_ARENA_ARG in OS.get_cmdline_user_args() or DEBUG_ARENA_ARG in OS.get_cmdline_args()
+	var setup: Command = SetupArenaCommand.new(hero_record) if debug_arena else LevelSetupCommand.new(hero_record)
+	var result: Error = CommandBus.submit(setup)
 	if result != OK:
 		return result
 	SaveGame.delete()
 	SaveGame.run_active = true
-	return tree.change_scene_to_file(ARENA_SCENE)
+	return tree.change_scene_to_file(ARENA_SCENE if debug_arena else CRYPT_SCENE)
+
+## The scene a (restored) run belongs to: its level, or the arena for arena runs.
+static func scene_for(state: GameState) -> String:
+	return CRYPT_SCENE if String(state.world.get("level", "")) == "crypt" else ARENA_SCENE
 
 ## CONTINUE: returns the load result so the menu can show a message instead of crashing.
 static func continue_saved(tree: SceneTree) -> SaveGame.LoadResult:
@@ -27,7 +36,7 @@ static func continue_saved(tree: SceneTree) -> SaveGame.LoadResult:
 		return loaded
 	Rng.rng.state = loaded.rng_state
 	SaveGame.run_active = true
-	tree.change_scene_to_file(ARENA_SCENE)
+	tree.change_scene_to_file(scene_for(Game.state))
 	return loaded
 
 ## Ironman: the only moment a living run is written is leaving it (menu or closing).

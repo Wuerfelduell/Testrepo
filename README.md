@@ -180,3 +180,22 @@ bash tests/integration/capture_spells.sh godot          # docs/arena-spell-*.png
 Prompt 07 (10-10-2026) gives Guard, Bandit and Cultist their own models and weapons,
 adds a Cult Priest boss model, Fighter/Wizard hero looks (`assets/characters/hero_looks.json`)
 and blood/spark/dust hit effects. Details and an honest assessment: [assets/README.md](assets/README.md).
+
+## Crypt level, rendered portraits (package 10)
+
+NEW GAME führt jetzt nach der Heldenerstellung in die Gruft (`scenes/levels/crypt/crypt.tscn`),
+nicht mehr in die Arena. Die Arena bleibt zum Debuggen erreichbar: Spiel mit
+`-- --debug-arena` starten oder `scenes/arena/arena.tscn` mit F6 öffnen.
+
+- Räume: Vorraum → Halle (Kampf 1) → Pfeilfallen-Gang → Seitenkammer (Kampf 2, optional;
+  wer sie auslässt, bekommt ihre Gegner in Kampf 3 dazu) → Ossuarium (Kampf 3) →
+  Rast-Nische (lange Rast aus Paket 08) → Schrein (Boss: Kultpriester = SRD 5.2 „Priest“).
+- Begegnungen stehen als Daten in `data/encounters/crypt.json` (Positionen, Posen schlafen /
+  wachen / beten / patrouillieren, Wahrnehmung, Nachzügler). Geometrie in `src/world/level_crypt.gd`;
+  nach Änderungen das Navmesh neu backen: `godot --headless --script res://tools/bake_level.gd`.
+- Dialog-Haken (Inschrift, verwundeter Kultist, Gefangener) zeigen vorerst nur „Dialogue: <id>“.
+- Porträts in Initiative-Leiste und HUD werden aus den echten 3D-Modellen gerendert
+  (`src/ui/portraits/portrait_studio.gd`), Wände zwischen Kamera und Held werden heruntergeschnitten.
+- Prüfen: `godot --headless tests/integration/check_level.tscn` (Start bis Boss, fester Seed),
+  `bash tests/integration/check_level_capture.sh godot` (Bilder aller Räume + Porträt-Check, braucht Xvfb).
+  Bilder: `docs/level-*.png`.

@@ -146,7 +146,9 @@ static func cues_for_event(event: Dictionary, state: GameState) -> Array[Diction
 		"heal":
 			result.append(_cue("heal", actor_at))
 		"xp_awarded":
-			if int(event.get("gained_levels", 0)) > 0:
+			# gained_levels is the list of new levels (AwardVictoryXpCommand), not a count.
+			var gained: Variant = event.get("gained_levels", [])
+			if (gained is Array and not (gained as Array).is_empty()) or ((gained is int or gained is float) and int(gained) > 0):
 				result.append(_cue("level_up", Vector3.INF))
 	return result
 

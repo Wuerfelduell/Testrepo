@@ -1,0 +1,63 @@
+{
+	"_comment": "Package 10 crypt level (story-neutral). Positions in metres (x, y, z); y is the floor height. pose: sleeping | guarding | praying | patrol. personality (optional) overrides how a member fights: brute | archer | coward. Sleeping enemies notice the hero at sleep_notice_m, all others at notice_m, both only with line of sight. joins: dormant encounters that hear this fight and join at the start of round join_round. Geometry lives in src/world/level_crypt.gd.",
+	"version": 1,
+	"level": "crypt",
+	"scene": "res://scenes/levels/crypt/crypt.tscn",
+	"name_key": "LEVEL_CRYPT",
+	"hero_spawn": [0.0, 0.0, 17.5],
+	"notice_m": 12.0,
+	"sleep_notice_m": 4.0,
+	"_comment_perception": "Awake enemies notice the hero inside their own room (area: x_min, z_min, x_max, z_max) or closer than near_notice_m; always with line of sight.",
+	"near_notice_m": 5.0,
+	"join_round": 2,
+	"rooms": [
+		{"id": "vestibule", "name_key": "ROOM_VESTIBULE", "center": [0.0, 0.0, 16.5], "area": [-4.5, 10.5, 4.5, 19.5]},
+		{"id": "hall", "name_key": "ROOM_HALL", "center": [0.0, 0.0, 4.5], "area": [-10.5, -1.5, 10.5, 10.5]},
+		{"id": "corridor", "name_key": "ROOM_CORRIDOR", "center": [0.0, 0.0, -9.0], "area": [-1.5, -16.5, 1.5, -1.5]},
+		{"id": "side_chamber", "name_key": "ROOM_SIDE_CHAMBER", "center": [10.5, 0.0, -9.0], "area": [4.5, -13.5, 16.5, -4.5]},
+		{"id": "ossuary", "name_key": "ROOM_OSSUARY", "center": [0.0, 0.0, -24.0], "area": [-10.5, -31.5, 10.5, -16.5]},
+		{"id": "rest", "name_key": "ROOM_REST", "center": [-1.5, 0.0, -36.0], "area": [-4.5, -40.5, 1.5, -31.5]},
+		{"id": "shrine", "name_key": "ROOM_SHRINE", "center": [0.0, 0.0, -48.0], "area": [-10.5, -55.5, 10.5, -40.5]}
+	],
+	"encounters": [
+		{
+			"id": "hall", "room": "hall", "difficulty": "low", "joins": [],
+			"members": [
+				{"id": "hall_cultist_a", "monster": "cultist", "position": [-9.0, 1.0, 6.5], "facing": [1.0, 0.0, 0.0], "pose": "sleeping"},
+				{"id": "hall_cultist_b", "monster": "cultist", "position": [4.5, 0.0, 1.0], "pose": "patrol", "personality": "brute", "patrol": [[4.5, 0.0, 1.0], [-4.5, 0.0, 1.0]]}
+			]
+		},
+		{
+			"id": "side_chamber", "room": "side_chamber", "difficulty": "moderate", "joins": [],
+			"members": [
+				{"id": "side_guard", "monster": "guard", "position": [7.0, 0.0, -9.0], "facing": [-1.0, 0.0, 0.0], "pose": "guarding"},
+				{"id": "side_bandit", "monster": "bandit", "position": [15.0, 1.0, -12.0], "facing": [-1.0, 0.0, 0.5], "pose": "guarding"},
+				{"id": "side_cultist", "monster": "cultist", "position": [10.0, 0.0, -5.6], "facing": [0.0, 0.0, -1.0], "pose": "sleeping"}
+			]
+		},
+		{
+			"id": "ossuary", "room": "ossuary", "difficulty": "high", "joins": ["side_chamber"],
+			"members": [
+				{"id": "ossuary_guard_a", "monster": "guard", "position": [-4.5, 0.0, -20.0], "pose": "patrol", "patrol": [[-4.5, 0.0, -20.0], [-4.5, 0.0, -28.5]]},
+				{"id": "ossuary_guard_b", "monster": "guard", "position": [0.0, 0.0, -29.5], "facing": [0.0, 0.0, 1.0], "pose": "guarding"},
+				{"id": "ossuary_bandit", "monster": "bandit", "position": [9.0, 2.0, -27.0], "facing": [-1.0, 0.0, 1.0], "pose": "guarding"},
+				{"id": "ossuary_cultist", "monster": "cultist", "position": [-8.5, 0.0, -24.0], "facing": [1.0, 0.0, 0.0], "pose": "praying"}
+			]
+		},
+		{
+			"id": "shrine", "room": "shrine", "difficulty": "boss", "boss": true, "joins": [],
+			"members": [
+				{"id": "cult_priest", "monster": "cult_priest", "position": [0.0, 1.0, -54.0], "facing": [0.0, 0.0, 1.0], "pose": "praying"},
+				{"id": "shrine_cultist_a", "monster": "cultist", "personality": "brute", "position": [-6.0, 0.0, -46.5], "facing": [0.0, 0.0, 1.0], "pose": "guarding"},
+				{"id": "shrine_cultist_b", "monster": "cultist", "personality": "brute", "position": [6.0, 0.0, -46.5], "facing": [0.0, 0.0, 1.0], "pose": "guarding"}
+			]
+		}
+	],
+	"trap": {"id": "corridor_darts", "min": [-1.5, -0.2, -11.0], "max": [0.2, 0.6, -9.0], "save_ability": "dex", "save_dc": 13, "damage_dice": "1d10", "damage_type": "piercing", "notice_dc": 13},
+	"rest": {"id": "rest_alcove", "position": [-3.0, 0.0, -36.0], "radius": 2.5},
+	"hooks": [
+		{"id": "crypt_inscription", "position": [-4.0, 0.0, 16.5], "model": "", "pose": ""},
+		{"id": "crypt_wounded_cultist", "position": [8.5, 0.0, -0.3], "model": "res://assets/characters/enemy_cultist/model.glb", "pose": "Fixing_Kneeling", "facing": [-1.0, 0.0, 0.0]},
+		{"id": "crypt_prisoner", "position": [18.0, 0.0, -9.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Sitting_Idle", "facing": [-1.0, 0.0, 0.0], "interact_at": [15.6, 0.0, -9.0]}
+	]
+}
