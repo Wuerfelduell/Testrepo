@@ -11,6 +11,7 @@ EventBus="*res://src/core/event_bus.gd"
 Rng="*res://src/core/rng.gd"
 CommandBus="*res://src/core/command_bus.gd"
 Settings="*res://src/ui/options_settings.gd"
+Audio="*res://src/audio/audio_director.gd"
 
 [display]
 window/size/viewport_width=1920
