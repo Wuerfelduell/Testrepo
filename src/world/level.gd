@@ -340,7 +340,8 @@ func _build_hooks() -> void:
 				figure.player.get_animation(pose).loop_mode = Animation.LOOP_LINEAR
 				figure.play_clip(pose)
 			var facing: Vector3 = EncounterData.vector(hook.get("facing", [0.0, 0.0, 1.0]))
-			figure.look_at(figure.global_position + facing, Vector3.UP, true)
+			# The imported figures look along -Z: aim that side at the facing direction.
+			figure.look_at(figure.global_position + facing, Vector3.UP, false)
 		elif bool(hook.get("rest", false)):
 			_rest_marker(anchor)
 		# Floating rune above the hook; the click area covers rune and figure.

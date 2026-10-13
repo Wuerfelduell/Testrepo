@@ -6,8 +6,8 @@ small packages. The owner writes every dialogue line; packages only add placehol
 | # | Package | Depends on | Parallel? | Status |
 |---|---|---|---|---|
 | K1 | **Dialogue system**: trees in data/dialogue/, skill checks in the dice popup, flags, XP for choices, crypt hooks wired | - | - | done 13-10-2026 |
-| K2 | **First Overcity district**: walkable start district with NPC hooks (placeholder dialogues), the hero's new start point | K1 for talking only | yes, alongside K1/K3/K4 | open: needs town assets (RULE 11: ask the owner for the source) and a district name from the owner |
-| K3 | **Quests and travel**: quest log, travel between district and crypt, per-area state in the save, the crypt becomes the cultist side quest reached from the district | K1 (flags) | yes, alongside K2 if K2 leaves run_flow.gd to K3 | done 13-10-2026 (crypt exit and game start wait for K2's district) |
+| K2 | **First Overcity district**: walkable start district with NPC hooks (placeholder dialogues), the hero's new start point | K1 for talking only | yes, alongside K1/K3/K4 | done 13-10-2026: Das Torviertel (gate district), Quaternius Medieval Village kit; asset source and name are Claude's recommendations, owner may still change them |
+| K3 | **Quests and travel**: quest log, travel between district and crypt, per-area state in the save, the crypt becomes the cultist side quest reached from the district | K1 (flags) | yes, alongside K2 if K2 leaves run_flow.gd to K3 | done 13-10-2026; K2 added the Torviertel <-> crypt exits and the new game start |
 | K4 | **Companions**: recruit through dialogue, party up to 4, control in combat, approval hooks | K1 | yes, alongside K2/K3 | open |
 
 File ownership for parallel threads: K2 owns new files for its district (src/world/level_<district>.gd,

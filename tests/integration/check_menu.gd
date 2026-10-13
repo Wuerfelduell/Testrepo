@@ -81,11 +81,29 @@ func _run() -> void:
 	var arena: CombatArena = await _wait_for_arena()
 	if arena == null:
 		return _finish()
-	check(arena is DungeonLevel, "NEW GAME starts in the crypt level (package 10)")
+	check(arena is TownLevel and String(Game.state.world.get("level", "")) == "torviertel", "NEW GAME starts in the Torviertel (act 1)")
 	var hero: Dictionary = Game.state.actors["hero"]
 	check(hero["name_key"] == "Mira" and hero["class_id"] == "wizard" and hero["look_id"] == HeroLooks.for_class("wizard", "female")[1]["id"],
-		"The crypt runs with the created hero, not the test Fighter")
+		"The Torviertel runs with the created hero, not the test Fighter")
 	check(SaveGame.run_active and not SaveGame.exists(), "A new run starts without writing a save")
+	# The crypt entrance in the Kellergasse takes the created hero down into the crypt.
+	var town: CombatArena = arena
+	check(CommandBus.submit(MoveCommand.new("hero", Vector3(-20.8, 0, -14.0))) == OK, "The hero walks to the crypt entrance")
+	for frame: int in 3000:
+		await get_tree().physics_frame
+		if Game.state.pending.is_empty():
+			break
+	check((town as DungeonLevel).interact("torviertel_crypt_entrance"), "The crypt entrance answers")
+	for frame: int in 600:
+		await get_tree().physics_frame
+		if get_tree().current_scene != town and get_tree().current_scene is CombatArena and (get_tree().current_scene as CombatArena).ready_for_input:
+			break
+	arena = get_tree().current_scene as CombatArena
+	if arena == null or arena == town:
+		check(false, "The crypt did not load")
+		return _finish()
+	check(arena is DungeonLevel and String(Game.state.world.get("level", "")) == "crypt", "The hero arrives in the crypt level (package 10)")
+	check(Game.state.actors["hero"]["name_key"] == "Mira", "The crypt runs with the created hero, not the test Fighter")
 	arena.hud.dice_popup.speed = 40.0
 	check(CommandBus.submit(MoveCommand.new("hero", Vector3(0, 0, 2))) == OK, "The hero can move")
 	await _play_until(arena, func() -> bool: return Game.state.mode == &"combat" and Game.state.round_number >= 2)
