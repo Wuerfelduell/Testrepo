@@ -76,7 +76,7 @@ func test_volume_options_change_the_buses() -> void:
 
 func test_every_mapped_cue_has_an_existing_sound_file() -> void:
 	if not DirAccess.dir_exists_absolute("res://assets/audio"):
-		pending("Sound set not imported yet (waiting for the owner's answer on music sources)")
+		pending("Sound set not imported yet (run tools/build_audio.py)")
 		return
 	for cue: String in SoundLibrary.all_event_cues():
 		assert_true(SoundLibrary.CUES.has(cue), "cue defined: " + cue)
@@ -87,7 +87,7 @@ func test_every_mapped_cue_has_an_existing_sound_file() -> void:
 
 func test_every_music_state_and_ambience_has_a_file() -> void:
 	if not DirAccess.dir_exists_absolute("res://assets/audio"):
-		pending("Sound set not imported yet (waiting for the owner's answer on music sources)")
+		pending("Sound set not imported yet (run tools/build_audio.py)")
 		return
 	for music_state: StringName in SoundLibrary.MUSIC_STATES:
 		assert_true(ResourceLoader.exists(SoundLibrary.music_path(music_state)), String(music_state))

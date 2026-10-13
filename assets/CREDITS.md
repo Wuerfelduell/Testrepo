@@ -52,3 +52,40 @@ and Omie's CC0 dungeon props via `tools/prepare_m1_textures.py`.
 The new weapons (dagger, scimitar, sickle, mace, spear, staff, priest staff, shortbow,
 light crossbow, two shields) are project geometry from the same generator, not AI-generated.
 Hit effects are procedural Godot particles (project code). No new third-party content.
+
+### Audio (13 October 2026, package 11)
+
+All sounds and music in `audio/` are CC0 (public domain) and were downloaded from the pages below.
+`tools/build_audio.py` downloads the packs, cuts, mixes and loudness-normalises the clips and writes
+OGG Vorbis files; several effects are layers of two CC0 clips (for example the bow shot, critical hit,
+Shield and level-up), the drips are cut from one drip recording and the boss whispers are a ghostly
+drone with whispered syllables and echoes placed over it. Credit is not required by CC0 but given here.
+
+| Source | Author | Licence | Used for |
+|---|---|---|---|
+| https://kenney.nl/assets/rpg-audio | Kenney | CC0 | `sfx/hit_piercing_1`, `sfx/hit_piercing_2`, `sfx/loot_pickup_1`, `sfx/loot_pickup_2` |
+| https://kenney.nl/assets/impact-sounds | Kenney | CC0 | `sfx/bow_shot_1`, `sfx/bow_shot_2`, `sfx/critical`, `sfx/footstep_stone_1`, `sfx/footstep_stone_2`, +9 more |
+| https://kenney.nl/assets/interface-sounds | Kenney | CC0 | `sfx/ui_click_1`, `sfx/ui_click_2` |
+| https://kenney.nl/assets/casino-audio | Kenney | CC0 | `sfx/dice_land_1`, `sfx/dice_land_2`, `sfx/dice_roll_1`, `sfx/dice_roll_2` |
+| https://kenney.nl/assets/music-jingles | Kenney | CC0 | `sfx/dice_crit`, `sfx/dice_fumble`, `sfx/level_up` |
+| https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | `sfx/death_1`, `sfx/hit_fire`, `sfx/hit_slashing_1`, `sfx/hit_slashing_2`, `sfx/spell_cast`, +4 more |
+| https://opengameart.org/content/80-cc0-creature-sfx | rubberduck | CC0 | `sfx/death_2` |
+| https://opengameart.org/content/40-cc0-water-splash-slime-sfx | rubberduck | CC0 | `sfx/footstep_water_1`, `sfx/footstep_water_2`, `sfx/footstep_water_3` |
+| https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | `sfx/hit_force`, `sfx/spell_cast_arcane`, `sfx/swing_1`, `sfx/swing_2`, `sfx/swing_3` |
+| https://opengameart.org/content/swishes-sound-pack | artisticdude | CC0 | `sfx/bow_shot_1`, `sfx/bow_shot_2`, `sfx/miss_1`, `sfx/miss_2` |
+| https://opengameart.org/content/freeze-spell-0 | artisticdude | CC0 | `sfx/spell_cast_frost` |
+| https://opengameart.org/content/ice-spells | bart | CC0 | `sfx/hit_cold`, `sfx/spell_impact_frost` |
+| https://opengameart.org/content/cure-magic | someoneman | CC0 | `sfx/heal`, `sfx/level_up`, `sfx/spell_cast_sleep` |
+| https://opengameart.org/content/3-dark-magic-spells | qubodup | CC0 | `sfx/spell_impact_arcane` |
+| https://opengameart.org/content/ghost-breath | qubodup | CC0 | `sfx/spell_impact_sleep` |
+| https://opengameart.org/content/4-atmospheric-ghostly-loops | qubodup (Independent.nu) | CC0 | `ambience/whispers` |
+| https://opengameart.org/content/dripping-water-loop | qubodup | CC0 | `ambience/drip_1-3` |
+| https://opengameart.org/content/fantozzis-footsteps-grasssand-stone | Fantozzi, uploaded by qubodup | CC0 | `sfx/footstep_dirt_1`, `sfx/footstep_dirt_2`, `sfx/footstep_dirt_3`, `sfx/footstep_dirt_4` |
+| https://opengameart.org/content/loopable-dungeon-ambience | jaggedstone | CC0 | `ambience/room_tone` |
+| https://opengameart.org/content/dialog-vocal-samples | mirceakitsune | CC0 | `ambience/whispers` |
+| https://opengameart.org/content/fantasy-lament-for-a-warriors-soul | randommind | CC0 | `music/menu` |
+| https://opengameart.org/content/dungeon-ambience | yd | CC0 | `music/exploration` |
+| https://opengameart.org/content/battle-theme-a | cynicmusic | CC0 | `music/combat` |
+| https://opengameart.org/content/determined-pursuit-epic-orchestra-loop | emmama | CC0 | `music/boss` |
+| https://opengameart.org/content/medieval-victory-theme | randommind | CC0 | `music/victory` |
+| https://opengameart.org/content/medieval-defeat-theme | randommind | CC0 | `music/death` |

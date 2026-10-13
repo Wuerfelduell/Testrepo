@@ -37,6 +37,10 @@ var _pending_spell: Dictionary = {}
 var _surfaces: Array[Dictionary] = []
 var _dice_popups: Array[Control] = []
 var _dice_landed: Dictionary = {}
+## False with the dummy audio driver (headless CI, machines without sound): nothing would be
+## heard, and streams still held by the AudioServer at quit are reported as leaks, which CI
+## treats as errors. Cues, music states and signals work the same either way.
+var _audible: bool = AudioServer.get_driver_name() != "Dummy"
 
 func _ready() -> void:
 	# Cosmetic randomness only (which variation plays); never the game's Rng.
@@ -296,7 +300,7 @@ func _random_stream(paths: PackedStringArray) -> AudioStream:
 	return available[_random.randi_range(0, available.size() - 1)]
 
 func _load(path: String) -> AudioStream:
-	if path.is_empty():
+	if path.is_empty() or not _audible:
 		return null
 	if not _streams.has(path):
 		_streams[path] = load(path) if ResourceLoader.exists(path) else null
