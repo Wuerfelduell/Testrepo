@@ -187,14 +187,20 @@ func _next() -> void:
 func _reveal() -> void:
 	var roll: Dictionary = _current.get("roll", {})
 	var group_texts: PackedStringArray = []
+	var raised_any: bool = false
 	var groups: Array = roll.get("groups", [])
 	for group_variant: Variant in groups:
 		var group: Dictionary = group_variant as Dictionary
 		var values: Array = group.get("values", [])
 		var kept: Array = group.get("kept_indices", [])
 		var die_texts: PackedStringArray = []
+		var raised: Array = group.get("raised_indices", [])
+		var rolled: Array = group.get("rolled", [])
 		for index: int in range(values.size()):
 			var value_text: String = str(values[index])
+			if raised.has(index) and index < rolled.size():
+				value_text = tr("COMBAT_DIE_RAISED") % [str(rolled[index]), value_text]
+				raised_any = true
 			if not kept.has(index):
 				value_text = tr("COMBAT_DIE_DROPPED") % value_text
 			die_texts.append(value_text)
@@ -205,6 +211,8 @@ func _reveal() -> void:
 	for modifier_variant: Variant in modifiers:
 		var modifier: Dictionary = modifier_variant as Dictionary
 		modifier_texts.append("%+d %s" % [int(modifier.get("amount", 0)), source_name(String(modifier.get("source", "")))])
+	if raised_any:
+		modifier_texts.append(source_name("great_weapon_fighting"))
 	var mode: String = String(roll.get("mode", "normal"))
 	if mode != "normal":
 		modifier_texts.append(tr("COMBAT_" + mode.to_upper()))

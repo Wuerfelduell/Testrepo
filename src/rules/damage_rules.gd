@@ -42,12 +42,12 @@ static func apply(raw_damage: int, damage_type: StringName, defenses: Defenses =
 
 static func roll(expression: String, damage_type: StringName, rng: RandomNumberGenerator,
 		modifiers: Array[RuleModifier] = [], critical: bool = false,
-		defenses: Defenses = null) -> Result:
+		defenses: Defenses = null, minimum_die: int = 0) -> Result:
 	if not damage_type in TYPES:
 		var invalid: Result = Result.new()
 		invalid.error = &"invalid_damage_type"
 		return invalid
-	var dice_result: DiceResult = Dice.roll(expression, rng, modifiers, critical)
+	var dice_result: DiceResult = Dice.roll(expression, rng, modifiers, critical, minimum_die)
 	if not dice_result.is_valid():
 		var invalid: Result = Result.new()
 		invalid.error = dice_result.error

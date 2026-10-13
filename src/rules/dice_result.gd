@@ -8,6 +8,9 @@ class Group extends RefCounted:
 	var kept_indices: Array[int] = []
 	var source: StringName = &"expression"
 	var critical: bool = false
+	## Indices whose rolled value was raised to a minimum (Great Weapon Fighting).
+	var raised_indices: Array[int] = []
+	var rolled: Array[int] = []
 
 var error: StringName = &""
 var expression: String = ""

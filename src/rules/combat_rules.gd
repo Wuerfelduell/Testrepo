@@ -270,12 +270,23 @@ static func attack_start_event(pending: Dictionary) -> Dictionary:
 		"opportunity": pending["opportunity"], "duration": pending["duration"], "impact_time": pending["impact_time"],
 		"weapon": pending.get("weapon", {}).duplicate(true)}
 
+## SRD 5.2 Great Weapon Fighting: with a melee weapon held in two hands (Two-Handed or
+## Versatile), a 1 or 2 on a damage die counts as a 3.
+static func damage_die_minimum(attacker: Dictionary, weapon: Dictionary) -> int:
+	if String(attacker.get("features", {}).get("fighting_style", "")) != "great_weapon_fighting":
+		return 0
+	if bool(weapon.get("ranged", false)) or not weapon.get("spell_id", "") in ["", null]:
+		return 0
+	var two_hands: bool = bool(weapon.get("two_handed_grip", false)) or "two_handed" in weapon.get("properties", [])
+	return 3 if two_hands else 0
+
 static func serialize_roll(roll: DiceResult) -> Dictionary:
 	var groups: Array[Dictionary] = []
 	for group: DiceResult.Group in roll.groups:
 		groups.append({"sides": group.sides, "values": group.values.duplicate(),
 			"kept_indices": group.kept_indices.duplicate(), "source": String(group.source),
-			"critical": group.critical})
+			"critical": group.critical, "raised_indices": group.raised_indices.duplicate(),
+			"rolled": group.rolled.duplicate()})
 	var modifiers: Array[Dictionary] = []
 	for modifier: RuleModifier in roll.modifiers:
 		modifiers.append({"amount": modifier.amount, "source": String(modifier.source)})
@@ -344,7 +355,8 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		return events
 	var defenses: DamageRules.Defenses = defenses_for(target)
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
-		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), bool(outcome["critical"]), defenses)
+		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), bool(outcome["critical"]), defenses,
+		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
 	target["hp"] = maxi(0, int(target["hp"]) - damage.total)

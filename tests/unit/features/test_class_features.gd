@@ -140,3 +140,42 @@ func test_untrained_armour_blocks_spellcasting() -> void:
 	wizard["can_cast_spells"] = false
 	start(wizard)
 	assert_eq(SpellResolver.availability_reason(Game.state, "hero", SpellBook.get_spell("fire_bolt")), "SPELL_REASON_ARMOR")
+
+func test_fighter_has_great_weapon_fighting_and_no_open_style_choice() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter")
+	assert_eq(fighter["features"]["fighting_style"], "great_weapon_fighting")
+	assert_false(&"fighting_style" in fighter["pending_character_choices"])
+	var old_save: Dictionary = fighter.duplicate(true)
+	old_save["features"].erase("fighting_style")
+	old_save["pending_character_choices"].append(&"fighting_style")
+	var upgraded: Dictionary = HeroKit.activate(old_save)
+	assert_eq(upgraded["features"]["fighting_style"], "great_weapon_fighting", "older saves gain the style")
+	assert_false(&"fighting_style" in upgraded["pending_character_choices"])
+
+func test_great_weapon_fighting_needs_two_hands_on_a_melee_weapon() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter")
+	var one_handed: Dictionary = {"ranged": false, "two_handed_grip": false, "properties": ["versatile"]}
+	var versatile_two_hands: Dictionary = {"ranged": false, "two_handed_grip": true, "properties": ["versatile"]}
+	var greatsword: Dictionary = {"ranged": false, "properties": ["heavy", "two_handed"]}
+	var crossbow: Dictionary = {"ranged": true, "properties": ["two_handed"]}
+	assert_eq(CombatRules.damage_die_minimum(fighter, one_handed), 0, "not with a shield in the other hand")
+	assert_eq(CombatRules.damage_die_minimum(fighter, versatile_two_hands), 3)
+	assert_eq(CombatRules.damage_die_minimum(fighter, greatsword), 3)
+	assert_eq(CombatRules.damage_die_minimum(fighter, crossbow), 0, "melee weapons only")
+	assert_eq(CombatRules.damage_die_minimum(HeroKit.create(&"wizard"), greatsword), 0)
+
+func test_damage_dice_below_minimum_count_as_three_and_are_recorded() -> void:
+	Rng.set_seed(5)
+	for attempt: int in 200:
+		var roll: DiceResult = Dice.roll("2d6", Rng.rng, [], true, 3)
+		for group: DiceResult.Group in roll.groups:
+			for index: int in group.values.size():
+				assert_gte(group.values[index], 3)
+				assert_eq(group.raised_indices.has(index), group.rolled[index] < 3)
+		var sum: int = 0
+		for group: DiceResult.Group in roll.groups:
+			for value: int in group.values:
+				sum += value
+		assert_eq(roll.total, sum)
+	var serialized: Dictionary = CombatRules.serialize_roll(Dice.roll("1d4", Rng.rng, [], false, 3))
+	assert_true(serialized["groups"][0].has("raised_indices"))

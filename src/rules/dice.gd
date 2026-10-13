@@ -34,7 +34,7 @@ static func parse(expression: String) -> Dictionary:
 	return {"count": count, "sides": sides, "modifiers": modifiers}
 
 static func roll(expression: String, rng: RandomNumberGenerator,
-		modifiers: Array[RuleModifier] = [], critical: bool = false) -> DiceResult:
+		modifiers: Array[RuleModifier] = [], critical: bool = false, minimum_die: int = 0) -> DiceResult:
 	var result: DiceResult = DiceResult.new()
 	result.expression = expression
 	var parsed: Dictionary = parse(expression)
@@ -53,6 +53,11 @@ static func roll(expression: String, rng: RandomNumberGenerator,
 		group.source = &"critical" if group.critical else &"expression"
 		for index: int in range(count):
 			var value: int = rng.randi_range(1, sides)
+			group.rolled.append(value)
+			if value < minimum_die:
+				# Treat a low die as the minimum (e.g. Great Weapon Fighting: 1 or 2 counts as 3).
+				group.raised_indices.append(index)
+				value = mini(minimum_die, sides)
 			group.values.append(value)
 			group.kept_indices.append(index)
 			result.total += value

@@ -13,6 +13,7 @@ const DEFAULT_SKILLS: Dictionary = {
 	&"fighter": [&"athletics", &"perception"], &"wizard": [&"arcana", &"investigation"],
 }
 const DEFAULT_HUMAN_SKILL: Dictionary = {&"fighter": &"arcana", &"wizard": &"perception"}
+const FIGHTER_STYLE: String = "great_weapon_fighting"
 ## SRD 5.2 Wizard, level 1: cantrips and prepared level-1 spells for the first slice.
 const WIZARD_SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "burning_hands", "shield", "sleep"]
 
@@ -60,7 +61,14 @@ static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), s
 static func activate(source: Dictionary) -> Dictionary:
 	var record: Dictionary = source.duplicate(true)
 	var class_id: String = String(record.get("class_id", ""))
-	if not StringName(class_id) in CLASSES or (bool(record.get("class_features_active", false)) and record.has("features")):
+	if not StringName(class_id) in CLASSES:
+		return record
+	if bool(record.get("class_features_active", false)) and record.has("features"):
+		# Heroes saved before the Fighting Style existed still receive it.
+		if class_id == "fighter" and not record["features"].has("fighting_style"):
+			record["features"]["fighting_style"] = FIGHTER_STYLE
+			record["pending_character_choices"] = record.get("pending_character_choices", []).filter(
+				func(choice: Variant) -> bool: return String(choice) != "fighting_style")
 		return record
 	var level: int = int(record.get("level", 1))
 	var definition: ClassDefinition = load("res://data/classes/%s.tres" % class_id) as ClassDefinition
@@ -72,10 +80,10 @@ static func activate(source: Dictionary) -> Dictionary:
 	var choices: Array = record.get("pending_character_choices", []).duplicate()
 	if class_id == "fighter":
 		var uses: int = SpellRules.second_wind_uses(level)
+		# Fighting Style chosen by the owner (Q34): Great Weapon Fighting.
 		record["features"] = {"second_wind": {"uses": uses, "max": uses},
-			"weapon_mastery": {"weapons": ["longsword"]}}
-		# Fighting Style (a feat) and the other two mastery weapons wait for the owner.
-		choices.append(&"fighting_style")
+			"weapon_mastery": {"weapons": ["longsword"]}, "fighting_style": FIGHTER_STYLE}
+		# The other two mastery weapons still wait for the owner.
 		choices.append(&"weapon_mastery_kinds")
 	else:
 		var intelligence: int = int(SpellRules._lookup(record.get("ability_scores", {}), &"int", 10))
