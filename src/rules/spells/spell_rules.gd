@@ -197,7 +197,9 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 		disadvantages.append(&"restrained")
 	var modifiers: Array[RuleModifier] = save_modifiers(actor, ability)
 	modifiers.append_array(extra)
-	var roll: DiceResult = Dice.d20(rng, modifiers, advantages, disadvantages)
+	var all_advantages: Array[StringName] = advantages.duplicate()
+	all_advantages.append_array(ClassKits.save_advantages(actor, ability))
+	var roll: DiceResult = Dice.d20(rng, modifiers, all_advantages, disadvantages)
 	result["success"] = roll.is_valid() and roll.total >= dc
 	result["roll"] = CombatRules.serialize_roll(roll)
 	return result

@@ -38,6 +38,10 @@ func setup(actor: Dictionary, p_actor_id: String = "hero") -> void:
 	for key: String in ["spellbook", "cantrips"]:
 		if int(plan[_count_key(key)]) > 0:
 			_choices[key] = []
+	if not plan["class_choices"].is_empty():
+		_choices["class_choices"] = {}
+		for choice: Dictionary in plan["class_choices"]:
+			_choices["class_choices"][String(choice["key"])] = []
 	_build()
 	_refresh()
 
@@ -180,6 +184,13 @@ func _build_choices() -> void:
 		_list.add_child(_prepared_box)
 		_choices["prepared"] = ProgressionRules.default_prepared(_actor, _choices.get("spellbook", []))
 		_build_prepared()
+	# Class kit picks (ClassKits.level_choices), e.g. new spells or Weapon Mastery.
+	for choice: Dictionary in plan["class_choices"]:
+		any = true
+		_section(tr(String(choice.get("title_key", "LEVELUP_SECTION_CLASS_CHOICE"))) % int(choice["count"]),
+			tr(String(choice.get("note_key", ""))) if choice.has("note_key") else "")
+		_pick_section("class:" + String(choice["key"]), choice["options"], int(choice["count"]),
+			String(choice.get("option_prefix", "")))
 	if not any:
 		_section(tr("LEVELUP_NO_CHOICES"))
 
@@ -230,7 +241,9 @@ func _on_pick(pressed: bool, key: String, id: String, count: int) -> void:
 			_choices.erase(key)
 		_refresh()
 		return
-	var picks: Array = _choices.get(key, []).duplicate()
+	var class_key: String = key.trim_prefix("class:") if key.begins_with("class:") else ""
+	var picks: Array = (_choices["class_choices"].get(class_key, []) if not class_key.is_empty() \
+		else _choices.get(key, [])).duplicate()
 	if pressed and not id in picks:
 		if picks.size() >= count:
 			(_pick_buttons[key + ":" + id] as Button).set_pressed_no_signal(false)
@@ -238,7 +251,10 @@ func _on_pick(pressed: bool, key: String, id: String, count: int) -> void:
 		picks.append(id)
 	elif not pressed:
 		picks.erase(id)
-	_choices[key] = picks
+	if not class_key.is_empty():
+		_choices["class_choices"][class_key] = picks
+	else:
+		_choices[key] = picks
 	if key == "spellbook":
 		_choices["prepared"] = ProgressionRules.default_prepared(_actor, picks)
 		_build_prepared()

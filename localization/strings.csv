@@ -528,6 +528,7 @@ LEVELUP_SECTION_STYLE,FIGHTING STYLE
 LEVELUP_SECTION_EXPERTISE,SCHOLAR · EXPERTISE
 LEVELUP_SECTION_EXPERTISE_NOTE,Double your proficiency bonus for one of these skills.
 LEVELUP_SECTION_CANTRIPS,NEW CANTRIP (%d)
+LEVELUP_SECTION_CLASS_CHOICE,CLASS CHOICE (%d)
 LEVELUP_SECTION_SPELLBOOK,ADD TO YOUR SPELLBOOK (%d)
 LEVELUP_SPELLBOOK_NONE,There are no new Wizard spells of a level you can cast yet.
 LEVELUP_SPELLBOOK_FEWER,Fewer new spells exist than the two a level allows.
@@ -554,6 +555,7 @@ LEVELUP_REASON_SKILLS,Pick the new skills
 LEVELUP_REASON_STYLE,Choose a Fighting Style
 LEVELUP_REASON_EXPERTISE,Choose a skill for Scholar
 LEVELUP_REASON_SPELLBOOK,Pick the new spellbook spells
+LEVELUP_REASON_CLASS_CHOICE,Make every class choice
 LEVELUP_REASON_CANTRIPS,Pick the new cantrip
 LEVELUP_REASON_PREPARED,Too many prepared spells
 FEAT_ABILITY_SCORE_IMPROVEMENT,Ability Score Improvement

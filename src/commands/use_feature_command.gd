@@ -4,7 +4,8 @@ extends Command
 ## with Tactical Shift at level 5 it also grants half Speed of movement without
 ## opportunity attacks), Fighter Action Surge (level 2: one more action on your turn)
 ## and Wizard Arcane Recovery (in play it runs through ShortRestCommand; this path
-## needs a "short_rest" mode that the instant rest never sets).
+## needs a "short_rest" mode that the instant rest never sets). Any other feature id is
+## handed to the actor's class kit (ClassKits.feature_reason / use_feature).
 
 const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge"]
 
@@ -17,11 +18,13 @@ func _init(p_actor_id: String = "", p_feature_id: String = "", p_slot_levels: Ar
 	slot_levels = p_slot_levels.duplicate()
 
 func validate(state: GameState) -> Error:
-	if not feature_id in FEATURES:
-		return ERR_INVALID_PARAMETER
 	if not state.actors.has(actor_id):
 		return ERR_INVALID_PARAMETER
 	var actor: Dictionary = state.actors[actor_id]
+	if not feature_id in FEATURES:
+		if not feature_id in ClassKits.feature_buttons(actor):
+			return ERR_INVALID_PARAMETER
+		return OK if ClassKits.feature_reason(state, actor_id, feature_id).is_empty() else ERR_UNAVAILABLE
 	var feature: Dictionary = actor.get("features", {}).get(feature_id, {})
 	if feature.is_empty():
 		return ERR_UNAVAILABLE
@@ -50,6 +53,8 @@ func validate(state: GameState) -> Error:
 	return OK
 
 func apply(state: GameState) -> Dictionary:
+	if not feature_id in FEATURES:
+		return {"events": ClassKits.use_feature(state, actor_id, feature_id, Rng.rng)}
 	var actor: Dictionary = state.actors[actor_id]
 	var feature: Dictionary = actor["features"][feature_id]
 	var events: Array[Dictionary] = []
@@ -84,7 +89,7 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> Error:
 	if data.size() != 4 or data.get("type") != "use_feature" or not data.get("actor_id") is String or \
 			String(data["actor_id"]).is_empty() or not data.get("feature_id") is String or \
-			not String(data["feature_id"]) in FEATURES or not data.get("slot_levels") is Array:
+			not (String(data["feature_id"]) in FEATURES or String(data["feature_id"]) in ClassKits.all_feature_ids()) or not data.get("slot_levels") is Array:
 		return ERR_INVALID_DATA
 	var levels: Array = data["slot_levels"]
 	if levels.size() > 9:

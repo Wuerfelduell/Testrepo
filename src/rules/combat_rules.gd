@@ -44,6 +44,7 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	if ActiveEffects.in_hostile_aura(state, actor_id):
 		# Spirit Guardians halve the speed of enemies inside (judged at the start of the turn).
 		actor["move_left"] = float(actor["move_left"]) * 0.5
+	events.append_array(ClassKits.on_turn_start(state, actor_id))
 	return events
 
 static func path_length(path: PackedVector3Array) -> float:
@@ -165,7 +166,9 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 			distance > (long_range if ranged else reach) + EPSILON:
 		return result
 	var advantages: Array[StringName] = conditions_for(target).incoming_advantages(distance)
+	advantages.append_array(ClassKits.attack_advantages(state, attacker_id, target_id, weapon))
 	var disadvantages: Array[StringName] = conditions_for(attacker).attack_disadvantages()
+	disadvantages.append_array(ClassKits.attack_disadvantages(state, attacker_id, target_id, weapon))
 	disadvantages.append_array(ActiveEffects.attack_disadvantages(attacker))
 	disadvantages.append_array(conditions_for(target).incoming_disadvantages(distance))
 	if ranged:
@@ -206,11 +209,14 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 		flat_damage += modifier.amount
 	for modifier: RuleModifier in weapon_modifiers(weapon, "damage"):
 		flat_damage += modifier.amount
+	for modifier: RuleModifier in ClassKits.damage_bonus(state, attacker_id, target_id, weapon):
+		flat_damage += modifier.amount
 	result["chance"] = chance
 	result["critical_chance"] = crit_chance
 	var expected_damage: float = chance * maxf(0.0, average_dice + flat_damage) + crit_chance * average_dice
 	for extra: Dictionary in weapon.get("extra_damage", []):
 		expected_damage += chance * int(extra["amount"])
+	expected_damage += chance * ClassKits.expected_extra_damage(state, attacker_id, target_id, weapon)
 	result["expected_damage"] = expected_damage
 	result["advantage"] = advantage
 	result["advantages"] = advantages
@@ -376,6 +382,9 @@ static func defenses_for(target: Dictionary) -> DamageRules.Defenses:
 	defenses.resistances.assign(target.get("resistances", []))
 	defenses.vulnerabilities.assign(target.get("vulnerabilities", []))
 	defenses.immunities.assign(target.get("immunities", []))
+	for damage_type: Variant in ClassKits.resistances(target):
+		if not StringName(String(damage_type)) in defenses.resistances:
+			defenses.resistances.append(StringName(String(damage_type)))
 	return defenses
 
 static func finish_attack(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
@@ -388,10 +397,13 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		"spell_id": weapon.get("spell_id", "")})
 	if not bool(outcome["hit"]):
 		events.append_array(_graze(state, attacker_id, target_id, weapon, rng))
+		events.append_array(ClassKits.after_attack(state, attacker_id, target_id, weapon, false, rng))
 		return events
 	var defenses: DamageRules.Defenses = defenses_for(target)
+	var damage_modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "damage")
+	damage_modifiers.append_array(ClassKits.damage_bonus(state, attacker_id, target_id, weapon))
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
-		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), bool(outcome["critical"]), defenses,
+		StringName(weapon["damage_type"]), rng, damage_modifiers, bool(outcome["critical"]), defenses,
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
@@ -411,12 +423,27 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 			"roll": serialize_roll(extra_roll), "damage_type": extra["damage_type"], "amount": extra_result.total})
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"amount": extra_result.total, "damage_type": extra["damage_type"], "hp": target["hp"]})
+	# Class dice riders (Sneak Attack, Hunter's Mark, Brutal Strike ...): own rolls, doubled on a crit.
+	for extra: Dictionary in ClassKits.extra_damage_dice(state, attacker_id, target_id, weapon, bool(outcome["critical"])):
+		var extra_type: StringName = StringName(String(extra.get("damage_type", weapon["damage_type"])))
+		var rider: DamageRules.Result = DamageRules.roll(String(extra["dice"]), extra_type, rng, [],
+			bool(outcome["critical"]), defenses)
+		target["hp"] = maxi(0, int(target["hp"]) - rider.total)
+		total_damage += rider.total
+		var rider_roll: Dictionary = serialize_roll(rider.roll)
+		for group: Dictionary in rider_roll["groups"]:
+			group["source"] = String(extra.get("source", group["source"]))
+		events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
+			"roll": rider_roll, "damage_type": String(extra_type), "amount": rider.total})
+		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
+			"amount": rider.total, "damage_type": String(extra_type), "hp": target["hp"]})
 	events.append_array(ActiveEffects.after_damage(state, target_id, total_damage, rng))
 	if int(target["hp"]) <= 0:
 		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
 		events.append_array(check_combat_end(state))
 	else:
 		events.append_array(ActiveEffects.on_hit(state, attacker_id, target_id, weapon))
+	events.append_array(ClassKits.after_attack(state, attacker_id, target_id, weapon, true, rng))
 	return events
 
 ## The run ends when the hero dies (permadeath). A fallen companion stays dead but the fight

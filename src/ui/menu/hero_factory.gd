@@ -6,7 +6,7 @@ extends RefCounted
 
 const CLASS_ORDER: Array[String] = ["fighter", "wizard", "barbarian", "bard", "cleric", "druid",
 	"monk", "paladin", "ranger", "rogue", "sorcerer", "warlock"]
-## The one list of playable classes lives in ClassFeatures.
+## Playable: ClassFeatures.ACTIVE_CLASSES plus every class with a kit (ClassKits).
 const PLAYABLE: Array[String] = ClassFeatures.ACTIVE_CLASSES
 const STANDARD_ARRAY: Array[int] = [15, 14, 13, 12, 10, 8]
 const PRIORITY: Dictionary = {
@@ -21,11 +21,25 @@ const MAX_NAME_LENGTH: int = 24
 const STAFF_MODEL: String = "res://assets/weapons/staff.glb"
 
 static func is_playable(class_id: String) -> bool:
-	return class_id in PLAYABLE
+	return class_id in PLAYABLE or ClassKits.has_kit(class_id)
+
+## Playable classes in creation order.
+static func playable() -> Array[String]:
+	var result: Array[String] = []
+	for class_id: String in CLASS_ORDER:
+		if is_playable(class_id):
+			result.append(class_id)
+	return result
+
+static func priority(class_id: String) -> Array:
+	return PRIORITY[class_id] if PRIORITY.has(class_id) else ClassKits.priority(class_id)
+
+static func default_skills(class_id: String) -> Dictionary:
+	return SKILLS[class_id] if SKILLS.has(class_id) else ClassKits.default_skills(class_id)
 
 static func standard_scores(class_id: String) -> Dictionary:
 	var result: Dictionary = {}
-	var order: Array = PRIORITY.get(class_id, [])
+	var order: Array = priority(class_id)
 	for index: int in order.size():
 		result[order[index]] = STANDARD_ARRAY[index]
 	return result
@@ -40,9 +54,10 @@ static func create_sheet(class_id: String) -> CharacterSheet:
 	var sheet: CharacterSheet = CharacterSheet.create(definition, 1, standard_scores(class_id))
 	if sheet == null:
 		return null
+	var skills: Dictionary = default_skills(class_id)
 	var class_skills: Array[StringName] = []
-	class_skills.assign(SKILLS[class_id]["class"])
-	if not sheet.select_class_skills(class_skills) or not sheet.select_human_skill(SKILLS[class_id]["human"]):
+	class_skills.assign(skills.get("class", []))
+	if not sheet.select_class_skills(class_skills) or not sheet.select_human_skill(StringName(skills.get("human", &""))):
 		return null
 	return sheet if equip_starting_armor(sheet, class_id) else null
 
@@ -59,8 +74,12 @@ static func summary(class_id: String) -> Dictionary:
 	var sheet: CharacterSheet = create_sheet(class_id)
 	if sheet == null:
 		return {}
-	var main: StringName = PRIORITY[class_id][0]
-	return {"hp": sheet.maximum_hp(), "ac": sheet.armor_class(), "main_ability": main,
+	var main: StringName = priority(class_id)[0]
+	var ac: int = sheet.armor_class()
+	if sheet.armor == &"none":
+		var probe: Dictionary = {"class_id": class_id, "ability_scores": sheet.ability_scores(), "level": 1}
+		ac = maxi(ac, ClassKits.unarmored_ac(probe, sheet.shield))
+	return {"hp": sheet.maximum_hp(), "ac": ac, "main_ability": main,
 		"scores": sheet.ability_scores(), "skills": sheet.skill_proficiencies(), "speed_m": sheet.speed_m()}
 
 ## Returns {} when the class, look or name is not valid.
@@ -107,7 +126,8 @@ static func _weapon(class_id: String, sheet: CharacterSheet) -> Dictionary:
 	if class_id != "wizard":
 		# Every other class: the main-hand weapon of its starting kit.
 		var equipped: Dictionary = ItemCatalog.starting_kit(class_id).get("equipped", {})
-		var probe: Dictionary = {"ability_scores": sheet.ability_scores(), "proficiency_bonus": proficiency}
+		var probe: Dictionary = {"class_id": class_id, "level": sheet.level,
+			"ability_scores": sheet.ability_scores(), "proficiency_bonus": proficiency}
 		var training: EquipmentRules.Training = EquipmentRules.Training.new()
 		training.weapons = sheet.weapon_proficiencies()
 		return EquipmentRules.weapon_record(probe, String(equipped.get("main_hand", "dagger")), training,

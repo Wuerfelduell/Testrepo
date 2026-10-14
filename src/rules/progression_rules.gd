@@ -13,7 +13,7 @@ const FEATS: Array[String] = ["ability_score_improvement", "skilled", "great_wea
 const SKILLED_COUNT: int = 3
 const NEW_SPELLS_PER_LEVEL: int = 2
 const CHOICE_KEYS: Array[String] = ["hp", "feat", "ability_increases", "skills", "fighting_style",
-	"expertise", "spellbook", "cantrips", "prepared"]
+	"expertise", "spellbook", "cantrips", "prepared", "class_choices"]
 
 static func xp_level(actor: Dictionary) -> int:
 	return Progression.level_for_xp(maxi(0, int(actor.get("xp", 0))))
@@ -77,14 +77,14 @@ static func plan(actor: Dictionary) -> Dictionary:
 		"skilled_count": 0, "fighting_style": false, "fighting_style_options": [],
 		"expertise": false, "expertise_options": [], "spellbook_count": 0, "spellbook_options": [],
 		"cantrip_count": 0, "cantrip_options": [], "prepared_limit": 0,
-		"slots_before": [], "slots_after": []}
+		"slots_before": [], "slots_after": [], "class_choices": []}
 	var source: ClassDefinition = ClassFeatures.definition(class_id)
 	if source == null or level > MAX_LEVEL:
 		return result
 	for feature: Dictionary in source.features_at_level(level):
 		var id: String = String(feature["id"])
 		result["features"].append({"id": id, "name_key": String(feature["name_key"]),
-			"active": ClassFeatures.implemented(id, level)})
+			"active": ClassFeatures.implemented(id, level, class_id)})
 		if id == "ability_score_improvement":
 			result["asi"] = true
 		elif id == "scholar":
@@ -121,6 +121,12 @@ static func plan(actor: Dictionary) -> Dictionary:
 		result["prepared_limit"] = ClassSpellcasting.prepared_limit(class_id, level)
 		result["slots_before"] = ClassSpellcasting.slots(class_id, level - 1)
 		result["slots_after"] = ClassSpellcasting.slots(class_id, level)
+	# Kit classes (ClassKits): their own picks, e.g. Weapon Mastery or Expertise.
+	for choice: Dictionary in ClassKits.level_choices(actor, level):
+		var entry: Dictionary = choice.duplicate(true)
+		entry["count"] = mini(int(entry.get("count", 0)), entry.get("options", []).size())
+		if int(entry["count"]) > 0:
+			result["class_choices"].append(entry)
 	return result
 
 ## What the next level may prepare from: the spellbook plus this level-up's new
@@ -203,6 +209,12 @@ static func validate(actor: Dictionary, choices: Dictionary) -> String:
 		if not prepared is Array or prepared.size() > int(next["prepared_limit"]) or \
 				not _picks_valid(prepared, book, prepared.size()):
 			return "LEVELUP_REASON_PREPARED"
+	var class_picks: Variant = choices.get("class_choices", {})
+	if not class_picks is Dictionary or class_picks.size() != next["class_choices"].size():
+		return "LEVELUP_REASON_CLASS_CHOICE"
+	for choice: Dictionary in next["class_choices"]:
+		if not _picks_valid(class_picks.get(String(choice["key"])), choice["options"], int(choice["count"])):
+			return "LEVELUP_REASON_CLASS_CHOICE"
 	return ""
 
 static func _picks_valid(picks: Variant, options: Array, count: int) -> bool:
@@ -292,6 +304,9 @@ static func apply(actor: Dictionary, actor_id: String, choices: Dictionary,
 		castable.append_array(_strings(choices.get("cantrips", [])))
 		castable.append_array(prepared)
 		actor["spells"] = castable
+	if not next["class_choices"].is_empty():
+		ClassKits.call_kit(String(actor.get("class_id", "")), "apply_level_choices",
+			[actor, level, choices.get("class_choices", {}).duplicate(true)])
 	actor["level"] = level
 	ClassFeatures.advance(actor, level)
 	refresh_derived(actor)
@@ -329,6 +344,7 @@ static func refresh_derived(actor: Dictionary) -> void:
 		for weapon: Variant in [actor.get("weapon", {})] + actor.get("attacks", []):
 			_refresh_weapon_modifiers(actor, weapon as Dictionary, proficiency)
 	ClassSpellcasting.refresh(actor)
+	ClassKits.call_kit(String(actor.get("class_id", "")), "refresh_derived", [actor])
 
 ## Heroes without an inventory keep their weapon record; only its numbers move.
 static func _refresh_weapon_modifiers(actor: Dictionary, weapon: Dictionary, proficiency: int) -> void:

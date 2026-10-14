@@ -218,7 +218,7 @@ static func weapon_record(actor: Dictionary, item_id: String, training: Training
 	var attack_modifiers: Array[Dictionary] = [{"amount": ability_mod, "source": ability}]
 	if proficient:
 		attack_modifiers.append({"amount": proficiency, "source": "proficiency"})
-	return {
+	var record: Dictionary = {
 		"id": item_id, "item_id": item_id, "name_key": String(item["name_key"]), "ranged": ranged,
 		"reach": 1.5, "range": float(item.get("range", 0.0)), "long_range": float(item.get("long_range", 0.0)),
 		"attack_bonus": ability_mod + proficiency,
@@ -230,6 +230,8 @@ static func weapon_record(actor: Dictionary, item_id: String, training: Training
 		"properties": item.get("properties", []).duplicate(), "proficient": proficient,
 		"two_handed_grip": versatile,
 	}
+	ClassKits.adjust_weapon(actor, record, item)
+	return record
 
 ## Weapons whose model is not built yet are simply not drawn in the hand.
 static func _model(item: Dictionary) -> String:
@@ -253,6 +255,12 @@ static func refresh_armor(actor: Dictionary, training: Training) -> void:
 		_score(actor, "str"), training.armor, shield)
 	if not result.is_valid():
 		return
+	# Class AC formulas without armour (Unarmored Defense) replace the base when better.
+	var unarmored: int = ClassKits.unarmored_ac(actor, shield) if armor_id == &"none" else 0
+	if unarmored > result.armor_class:
+		result.breakdown.clear()
+		result.breakdown.append(RuleModifier.new(unarmored, &"unarmored_defense"))
+		result.armor_class = unarmored
 	actor["ac"] = result.armor_class
 	actor["armor"] = String(armor_id)
 	actor["shield"] = shield
@@ -286,6 +294,7 @@ static func refresh_speed(actor: Dictionary) -> void:
 	var level: int = encumbrance(actor)
 	actor["encumbrance"] = level
 	var previous_speed: float = float(actor.get("speed_m", BASE_SPEED_M))
-	actor["speed_m"] = maxf(0.0, BASE_SPEED_M - armor_penalty - ENCUMBRANCE_PENALTY_M[level])
+	actor["armor"] = String(ItemCatalog.get_item(armor_item).get("armor_id", "none")) if armor_item != "" else "none"
+	actor["speed_m"] = maxf(0.0, BASE_SPEED_M + ClassKits.speed_bonus_m(actor) - armor_penalty - ENCUMBRANCE_PENALTY_M[level])
 	var move_left: float = float(actor.get("move_left", previous_speed))
 	actor["move_left"] = actor["speed_m"] if move_left >= previous_speed else minf(move_left, actor["speed_m"])
