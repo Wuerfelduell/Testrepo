@@ -22,6 +22,64 @@
 		{
 			"if": [
 				{
+					"flag": "kael_duel_fight",
+					"is": "won"
+				},
+				{
+					"flag": "kael_duel_public"
+				},
+				{
+					"flag": "kael_duel_seen",
+					"is": false
+				}
+			],
+			"node": "duel_won_public"
+		},
+		{
+			"if": [
+				{
+					"flag": "kael_duel_fight",
+					"is": "won"
+				},
+				{
+					"flag": "kael_duel_seen",
+					"is": false
+				}
+			],
+			"node": "duel_won"
+		},
+		{
+			"if": [
+				{
+					"flag": "kael_duel_fight",
+					"is": "lost"
+				},
+				{
+					"flag": "kael_duel_public"
+				},
+				{
+					"flag": "kael_duel_seen",
+					"is": false
+				}
+			],
+			"node": "duel_lost_public"
+		},
+		{
+			"if": [
+				{
+					"flag": "kael_duel_fight",
+					"is": "lost"
+				},
+				{
+					"flag": "kael_duel_seen",
+					"is": false
+				}
+			],
+			"node": "duel_lost"
+		},
+		{
+			"if": [
+				{
 					"flag": "kael_met"
 				}
 			],
@@ -605,11 +663,14 @@
 							"is": false
 						}
 					],
-					"check": {
-						"skill": "athletics",
-						"dc": 14,
-						"success": "duel_won",
-						"failure": "duel_lost"
+					"effects": {
+						"fight": {
+							"encounter": "kael_duel",
+							"nonlethal": true
+						},
+						"flags": {
+							"kael_duel_fought": true
+						}
 					}
 				},
 				{
@@ -762,11 +823,14 @@
 							"is": false
 						}
 					],
-					"check": {
-						"skill": "athletics",
-						"dc": 14,
-						"success": "duel_won",
-						"failure": "duel_lost"
+					"effects": {
+						"fight": {
+							"encounter": "kael_duel",
+							"nonlethal": true
+						},
+						"flags": {
+							"kael_duel_fought": true
+						}
 					}
 				},
 				{
@@ -781,20 +845,24 @@
 							"is": false
 						}
 					],
-					"check": {
-						"skill": "athletics",
-						"dc": 14,
-						"success": "duel_won_public",
-						"failure": "duel_lost_public"
+					"effects": {
+						"fight": {
+							"encounter": "kael_duel",
+							"nonlethal": true
+						},
+						"flags": {
+							"kael_duel_fought": true,
+							"kael_duel_public": true
+						}
 					}
 				}
 			]
 		},
 		"duel_won": {
-			"text": "[Placeholder: the duel, until the real non-lethal fight is in.]\n\n\"Not bad. Maybe you won't die right away.\"",
+			"text": "\"Not bad. Maybe you won't die right away.\"",
 			"effects": {
 				"flags": {
-					"kael_duel_fought": true,
+					"kael_duel_seen": true,
 					"kael_duel_won": true,
 					"kael_price": 200
 				},
@@ -925,10 +993,10 @@
 			]
 		},
 		"duel_lost": {
-			"text": "[Placeholder: the duel, until the real non-lethal fight is in.]\n\n\"You fight like a drunk farmer.\"",
+			"text": "\"You fight like a drunk farmer.\"",
 			"effects": {
 				"flags": {
-					"kael_duel_fought": true
+					"kael_duel_seen": true
 				}
 			},
 			"choices": [
@@ -1056,7 +1124,7 @@
 			"text": "[Placeholder: Kael after losing the duel in front of the whole square.]",
 			"effects": {
 				"flags": {
-					"kael_duel_fought": true,
+					"kael_duel_seen": true,
 					"kael_duel_won": true,
 					"kael_price": 200
 				},
@@ -1191,7 +1259,7 @@
 			"text": "[Placeholder: Kael wins the public duel and wants nothing more to do with the hero for now.]",
 			"effects": {
 				"flags": {
-					"kael_duel_fought": true,
+					"kael_duel_seen": true,
 					"kael_refuses": true
 				}
 			}

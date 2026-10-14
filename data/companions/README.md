@@ -57,6 +57,6 @@ Loyalty, reactions and arguments (owner, 14-10-2026, docs/STORY.md "How Rabenfel
 - Camp events A-C are in banter.json (B only in the Torviertel, C once `vaelor_manuscript_found`).
 - Training duels and the magical conflict are skill checks until the dialogue fight exists.
 - Trial job ("Probeauftrag"): the companion joins with flag `<short>_trial`.
-- Kael's duel is an Athletics check (DC 14) until the non-lethal dialogue fight is in.
+- Kael's recruit duel is a non-lethal fight (encounter kael_duel: an encounter member with "companion" fights with that companion's own sheet); flag kael_duel_fight says won or lost.
 - Rumour-only answers need `kael_rumor_heard` / `seren_rumor_heard`, set by a district
   conversation (not written yet).

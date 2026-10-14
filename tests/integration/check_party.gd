@@ -37,6 +37,38 @@ func _run() -> void:
 			events.append(event))
 	for id: String in PartyRules.definitions():
 		check(level.hook_views.has(id), id + " waits on the Torplatz")
+	# Kael's duel: a non-lethal fight against his own fighter sheet. A weak hero loses it.
+	check(bus.submit(MoveCommand.new("hero", Vector3(-9.0, 0, -11.5))) == OK, "Walk up to Kael")
+	await _settle()
+	game.state.actors["hero"]["hp"] = 3
+	check(level.interact("companion_kael"), "Kael answers")
+	for slot: int in [2, 0, 0]:
+		level.dialogue.choice_buttons[slot].pressed.emit()
+		await get_tree().process_frame
+	await get_tree().process_frame
+	check(game.state.mode == &"combat" and game.state.actors.has("kael_duelist"), "The duel starts")
+	var duel_steps: int = 0
+	while duel_steps < 3000 and game.state.mode == &"combat":
+		if game.state.pending.is_empty() and game.state.current_actor_id() == "hero":
+			while level.hud.dice_popup.is_busy():
+				level.hud.dice_popup.skip()
+				await get_tree().process_frame
+			level._action_requested("end_turn")
+		level.simulation_step(0.1, true)
+		duel_steps += 1
+		if duel_steps % 10 == 0:
+			await get_tree().process_frame
+	check(game.state.mode == &"exploration" and String(game.state.world["flags"].get("kael_duel_fight", "")) == "lost", "Kael wins the duel")
+	check(int(game.state.actors["hero"]["hp"]) >= 1 and not game.state.actors.has("kael_duelist"), "Nobody died; Kael is back at his spot")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(level.interact("companion_kael") and game.state.world["conversation"]["node"] == "duel_lost", "Kael talks about the duel")
+	check(bus.submit(DialogueEndCommand.new()) == OK, "Walk away from Kael")
+	await get_tree().process_frame
+	game.state.actors["hero"]["hp"] = 160
+	while level.hud.dice_popup.is_busy():
+		level.hud.dice_popup.skip()
+		await get_tree().process_frame
 	# Recruit through the real dialogue window.
 	check(level.interact("companion_lyra"), "Lyra answers")
 	check(level.dialogue.is_open() and level.dialogue.speaker_label.text == "Lyra Vossen", "Her conversation opens")

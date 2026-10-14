@@ -344,3 +344,31 @@ func test_camp_talk_depends_on_loyalty_and_shows_gear() -> void:
 	_camp(state, "kael", [0, 4])
 	_camp(state, "kael", [0, 4])
 	assert_eq(PartyRules.loyalty(state, "companion_kael"), 2)
+
+func test_kael_duel_is_a_nonlethal_fight_against_his_own_sheet() -> void:
+	var state: GameState = GameState.new()
+	var setup: LevelSetupCommand = LevelSetupCommand.new(HeroKit.create(&"fighter"), TownLevel.TORVIERTEL_PATH)
+	assert_eq(setup.validate(state), OK)
+	setup.apply(state)
+	var duelist: Dictionary = state.world["dormant"]["kael_duel"]["kael_duelist"]
+	assert_eq(String(duelist["team"]), "enemy")
+	assert_eq(String(duelist["class_id"]), "fighter")
+	assert_false(duelist.has("companion_id"), "Not a party member")
+	_run(state, DialogueStartCommand.new("companion_kael"))
+	_run(state, DialogueChooseCommand.new(0))
+	_run(state, DialogueChooseCommand.new(5))
+	var result: Dictionary = _run(state, DialogueChooseCommand.new(0))
+	assert_eq(_events(result, "dialogue_fight").size(), 1, "\"Agreed.\" starts the duel")
+	assert_eq(String(state.world["dialogue_fight"]["encounter"]), "kael_duel")
+	assert_false(state.world.has("conversation"))
+	# After the fight (NonlethalFights sets the flag) Kael talks about the result.
+	state.world.erase("dialogue_fight")
+	state.world["flags"]["kael_duel_fight"] = "won"
+	_run(state, DialogueStartCommand.new("companion_kael"))
+	assert_eq(String(state.world["conversation"]["node"]), "duel_won")
+	var data: Dictionary = DialogueData.load_dialogue("companion_kael")
+	Money.set_copper(state.actors["hero"], 1000)
+	assert_true(3 in DialogueData.available_choices(data, "duel_won", state), "Twenty silver now")
+	_run(state, DialogueEndCommand.new())
+	_run(state, DialogueStartCommand.new("companion_kael"))
+	assert_eq(String(state.world["conversation"]["node"]), "hub", "The result is told once")

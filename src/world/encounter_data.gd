@@ -56,7 +56,10 @@ static func problems(level: Dictionary) -> PackedStringArray:
 				result.append(encounter_id + ": actor id empty or duplicated: " + member_id)
 			ids[member_id] = true
 			var definition: MonsterDefinition = monster(String(member.get("monster", "")))
-			if definition == null or not definition.is_valid():
+			if member.has("companion"):
+				if PartyRules.definition(String(member["companion"])).is_empty():
+					result.append(member_id + ": unknown companion " + String(member["companion"]))
+			elif definition == null or not definition.is_valid():
 				result.append(member_id + ": monster has no valid SRD stat block: " + String(member.get("monster", "")))
 			if not vector(member.get("position")).is_finite():
 				result.append(member_id + ": position missing")
@@ -88,10 +91,19 @@ static func monster(monster_id: String) -> MonsterDefinition:
 
 ## Plain actor record for one member, still unaware (dormant) of the hero.
 static func member_record(member: Dictionary, encounter_id: String) -> Dictionary:
-	var definition: MonsterDefinition = monster(String(member.get("monster", "")))
-	if definition == null:
-		return {}
-	var record: Dictionary = definition.create_actor(String(member["id"]), vector(member["position"]))
+	var record: Dictionary = {}
+	if member.has("companion"):
+		# A companion before they joined (Kael's duel): their own sheet and gear, as an opponent.
+		record = PartyRules.create_record(String(member["companion"]), vector(member["position"]))
+		if not record.is_empty():
+			record["id"] = String(member["id"])
+			record["team"] = "enemy"
+			record.erase("companion_id")
+	else:
+		var definition: MonsterDefinition = monster(String(member.get("monster", "")))
+		if definition == null:
+			return {}
+		record = definition.create_actor(String(member["id"]), vector(member["position"]))
 	if record.is_empty():
 		return record
 	record["encounter_id"] = encounter_id

@@ -223,6 +223,31 @@
           "pose": "guarding"
         }
       ]
+    },
+    {
+      "id": "kael_duel",
+      "room": "torplatz",
+      "difficulty": "low",
+      "on_dialogue": true,
+      "joins": [],
+      "members": [
+        {
+          "id": "kael_duelist",
+          "companion": "companion_kael",
+          "hook": "companion_kael",
+          "position": [
+            -11.0,
+            0.0,
+            -12.5
+          ],
+          "facing": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pose": "guarding"
+        }
+      ]
     }
   ],
   "hooks": [
