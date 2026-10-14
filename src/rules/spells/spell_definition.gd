@@ -39,12 +39,33 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 @export var concentration: bool = false
 @export var duration_rounds: int = 0
 ## Rider effect id interpreted by ActiveEffects: "speed_penalty", "sleep", "shield",
-## "spirit_guardians" (an aura around the concentrating caster).
+## "spirit_guardians" (an aura around the concentrating caster), and the class effects
+## of ClassEffects ("bless", "ac_bonus", "barkskin", "divine_favor", "faerie_fire",
+## "guiding_bolt", "hold", "entangle", "resistance", "aid", "turned", "frightened",
+## "lay_on_hands", "wild_shape", "revert_wild_shape").
 @export var effect: StringName = &""
 @export var effect_amount: float = 0.0
 ## Only creatures of the caster's choice (Sleep) instead of everyone inside the area.
 @export var chosen_creatures: bool = false
 @export var vfx: StringName = &""
+## Class features that use the spell pipeline (targeting, preview, AI, hotbar) but spend
+## a feature resource instead of a slot: "channel_divinity", "lay_on_hands", "wild_shape",
+## or "free" (no cost). They are never cantrips or prepared spells.
+@export var feature_resource: String = ""
+## One damage/heal die more at each of these caster levels (Divine Spark: 7, 13, 18).
+@export var scale_levels: Array[int] = []
+## Adds the caster's spellcasting modifier to damage (Divine Spark).
+@export var add_spell_modifier: bool = false
+## A second damage type rolled with the first (Flame Strike, Ice Storm); halves together.
+@export var extra_damage_dice: String = ""
+@export var extra_damage_type: StringName = &""
+## Area spells for the caster's side (Bless, Aid, Mass Healing Word): allies only, the
+## caster included, at most max_targets (0 = no limit) plus upcast_targets per slot level.
+@export var allies: bool = false
+@export var max_targets: int = 0
+@export var upcast_targets: int = 0
+## Only creatures of these types are affected (Turn Undead: undead). Empty = any.
+@export var creature_types: Array[StringName] = []
 
 func is_valid() -> bool:
 	if id == &"" or name_key == &"" or srd_name.is_empty() or srd_page < 0 or not school in SCHOOLS:
@@ -60,11 +81,17 @@ func is_valid() -> bool:
 		return false
 	if resolution == "save" and not save_ability in Abilities.IDS:
 		return false
-	if resolution == "heal" and (targeting != "creature" or Dice.parse(heal_dice).has("error")):
+	if resolution == "heal" and ((targeting != "creature" and area == "none") or \
+			(not heal_dice.is_empty() and Dice.parse(heal_dice).has("error")) or (heal_dice.is_empty() and effect != &"lay_on_hands")):
+		return false
+	if not extra_damage_dice.is_empty() and (Dice.parse(extra_damage_dice).has("error") or not extra_damage_type in DamageRules.TYPES):
 		return false
 	if targeting == "darts" and darts <= 0:
 		return false
 	return true
 
 func is_cantrip() -> bool:
-	return level == 0
+	return level == 0 and feature_resource.is_empty()
+
+func is_feature() -> bool:
+	return not feature_resource.is_empty()

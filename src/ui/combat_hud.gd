@@ -359,10 +359,9 @@ func rolls_busy() -> bool:
 ## Spell and feature buttons for the hero, rebuilt only when the hero's kit changes.
 func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> void:
 	var entries: Array[String] = []
-	if hero.get("features", {}).has("second_wind"):
-		entries.append("feature:second_wind")
-	if hero.get("features", {}).has("action_surge"):
-		entries.append("feature:action_surge")
+	for feature_id: String in ["second_wind", "action_surge", "divine_smite", "divine_intervention"]:
+		if hero.get("features", {}).has(feature_id):
+			entries.append("feature:" + feature_id)
 	for spell_id: Variant in hero.get("spells", []):
 		entries.append("spell:" + String(spell_id))
 	var signature: int = hash(entries)
@@ -399,6 +398,18 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var reason: String = ""
 		if entry.begins_with("feature:"):
 			var feature: Dictionary = hero["features"][id]
+			if id in ["divine_smite", "divine_intervention"]:
+				# Toggles: armed or not, with the free/remaining uses.
+				var armed: bool = bool(feature.get("armed", false))
+				var count: int = int(feature.get("free_uses", feature.get("uses", 0)))
+				button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("FEATURE_%s_%s" % [id.to_upper(), "ARMED" if armed else "BUTTON"]) % count]
+				button.toggle_mode = true
+				button.set_pressed_no_signal(armed)
+				reason = "COMBAT_WAIT_TURN" if not player_turn else \
+					("FEATURE_NO_USES" if id == "divine_intervention" and count <= 0 and not armed else "")
+				button.disabled = not reason.is_empty()
+				button.tooltip_text = tr(reason) if not reason.is_empty() else tr("FEATURE_%s_HINT" % id.to_upper())
+				continue
 			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("FEATURE_%s_BUTTON" % id.to_upper()) % [int(feature.get("uses", 0)), int(feature.get("max", 0))]]
 			if not player_turn:
 				reason = "COMBAT_WAIT_TURN"
@@ -417,6 +428,8 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 			button.disabled = true
 			continue
 		var cost_line: String = tr("SPELL_CANTRIP") if spell.is_cantrip() else tr("SPELL_LEVEL_SLOTS") % [spell.level, slot_pips(hero, spell.level)]
+		if spell.is_feature():
+			cost_line = feature_cost_line(hero, spell)
 		button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr(String(spell.name_key))] + "\n" + cost_line
 		if spell.casting_time == "reaction":
 			button.disabled = true
@@ -427,6 +440,17 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		button.tooltip_text = tr(reason) if not reason.is_empty() else (tr("COMBAT_COST_ACTION") if spell.is_cantrip() else tr("COMBAT_SPELL_COST_SLOT") % spell.level)
 		button.toggle_mode = true
 		button.set_pressed_no_signal(_spell_mode == id)
+
+## Uses left of a class feature on the spell bar ("Channel Divinity 2/2", "Pool 10").
+static func feature_cost_line(hero: Dictionary, spell: SpellDefinition) -> String:
+	var features: Dictionary = hero.get("features", {})
+	match spell.feature_resource:
+		"free":
+			return TranslationServer.translate("FEATURE_COST_FREE")
+		"lay_on_hands":
+			return TranslationServer.translate("FEATURE_COST_POOL") % int(features.get("lay_on_hands", {}).get("pool", 0))
+	var feature: Dictionary = features.get(spell.feature_resource, {})
+	return TranslationServer.translate("FEATURE_COST_" + spell.feature_resource.to_upper()) % [int(feature.get("uses", 0)), int(feature.get("max", 0))]
 
 ## "●●○" for the hero's slots of one level.
 static func slot_pips(hero: Dictionary, slot_level: int) -> String:

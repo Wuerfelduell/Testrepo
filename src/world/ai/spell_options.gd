@@ -30,8 +30,11 @@ static func consider(state: GameState, actor_id: String, targets: Array[String],
 		if spell.casting_time == "action" and not CombatRules.can_use_action(actor):
 			continue
 		var cost: float = 0.0 if spell.is_cantrip() else SLOT_COST * spell.level
-		if actor.get("spell_uses", {}).has(spell_id):
+		if actor.get("spell_uses", {}).has(spell_id) or spell.is_feature():
 			cost = USE_COST
+		if spell.allies or spell.resolution == "none":
+			# Buffs and area heals for the own side are left to the player for now.
+			continue
 		if spell.resolution == "heal":
 			options.append_array(_heal_options(state, actor_id, spell, cost))
 			continue
@@ -41,7 +44,10 @@ static func consider(state: GameState, actor_id: String, targets: Array[String],
 					var preview: Dictionary = SpellResolver.preview(state, actor_id, spell_id, 0, [target_id])
 					if not bool(preview["legal"]):
 						continue
-					var entry: Dictionary = preview["targets"][0]
+					var entry: Dictionary = preview["targets"][0].duplicate()
+					if not entry.has("chance"):
+						# Single-target saves: the chance that the target fails.
+						entry["chance"] = 1.0 - float(entry.get("save_chance", 1.0))
 					var expression: String = SpellRules.damage_expression(spell, int(actor.get("level", 1)), 0)
 					var kill: float = float(entry["chance"]) * _at_least(expression, 0, int(state.actors[target_id]["hp"]))
 					var score: float = float(entry["chance"]) * personality.hit_weight \

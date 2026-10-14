@@ -68,6 +68,9 @@ static func damage_expression(spell: SpellDefinition, character_level: int, slot
 		count *= cantrip_multiplier(character_level)
 	elif not spell.upcast_dice.is_empty() and slot_level > spell.level:
 		count += int(Dice.parse(spell.upcast_dice)["count"]) * (slot_level - spell.level)
+	for scale_level: int in spell.scale_levels:
+		if character_level >= scale_level:
+			count += 1
 	return "%dd%d" % [count, int(parsed["sides"])]
 
 static func dart_count(spell: SpellDefinition, slot_level: int) -> int:
@@ -190,7 +193,7 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 		"ability": String(ability), "roll": {}}
 	if conditions.automatically_fails_save(ability):
 		result["automatic"] = true
-		result["reason"] = "unconscious" if conditions.has(&"unconscious") else "stunned"
+		result["reason"] = "unconscious" if conditions.has(&"unconscious") else ("paralyzed" if conditions.has(&"paralyzed") else "stunned")
 		return result
 	var disadvantages: Array[StringName] = []
 	if ability == &"dex" and conditions.has(&"restrained"):

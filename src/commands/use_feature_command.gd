@@ -6,7 +6,10 @@ extends Command
 ## and Wizard Arcane Recovery (in play it runs through ShortRestCommand; this path
 ## needs a "short_rest" mode that the instant rest never sets).
 
-const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge"]
+## Paladin Divine Smite and Cleric Divine Intervention are toggles: Smite fires on the
+## next melee weapon hit (ClassEffects.hit_riders), Intervention makes the next Cleric
+## spell free (SpellResolver.free_cast).
+const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge", "divine_smite", "divine_intervention"]
 
 var feature_id: String = ""
 var slot_levels: Array[int] = []
@@ -41,6 +44,12 @@ func validate(state: GameState) -> Error:
 			if bool(actor.get("action_available", false)) or not CombatRules.conditions_for(actor).can_act() \
 					or int(feature.get("uses", 0)) <= 0:
 				return ERR_UNAVAILABLE
+		"divine_smite", "divine_intervention":
+			var reason: Error = CombatRules.valid_actor_turn(state, actor_id)
+			if reason != OK:
+				return reason
+			if feature_id == "divine_intervention" and int(feature.get("uses", 0)) <= 0 and not bool(feature.get("armed", false)):
+				return ERR_UNAVAILABLE
 		"arcane_recovery":
 			if state.mode != &"short_rest" or bool(feature.get("used", false)):
 				return ERR_UNAVAILABLE
@@ -72,6 +81,9 @@ func apply(state: GameState) -> Dictionary:
 			feature["uses"] = int(feature["uses"]) - 1
 			actor["action_available"] = true
 			events.append({"type": "feature", "actor_id": actor_id, "feature_id": feature_id})
+		"divine_smite", "divine_intervention":
+			feature["armed"] = not bool(feature.get("armed", false))
+			events.append({"type": "feature_toggle", "actor_id": actor_id, "feature_id": feature_id, "armed": feature["armed"]})
 		"arcane_recovery":
 			SpellRules.arcane_recovery(actor["spell_slots"], actor["spell_slots_max"], int(actor.get("level", 1)), slot_levels)
 			feature["used"] = true

@@ -34,14 +34,25 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 			if target_ids.size() != 1:
 				result["reason_key"] = "SPELL_REASON_PICK_TARGET"
 				return result
-			if spell.resolution == "heal":
+			if spell.resolution == "heal" or spell.resolution == "none":
 				if not _valid_heal_target(state, caster_id, String(target_ids[0]), spell.range_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
 				var patient: Dictionary = state.actors[String(target_ids[0])]
-				var expected: float = SpellRules.average_damage(heal_expression(spell, int(result["slot_level"])), int(caster.get("spell_modifier", 0)))
+				var expected: float = expected_heal(caster, spell, int(result["slot_level"]))
 				result["targets"] = [{"id": String(target_ids[0]), "ally": true, "chance": 1.0, "expected_damage": 0.0,
 					"expected_heal": minf(expected, float(int(patient["max_hp"]) - int(patient["hp"])))}]
+				result["legal"] = true
+				result["reason_key"] = ""
+				return result
+			if spell.resolution == "save":
+				var victim_id: String = String(target_ids[0])
+				if not _valid_creature_target(state, caster_id, victim_id, spell.range_m) or \
+						not _type_allowed(spell, state.actors[victim_id]):
+					result["reason_key"] = "SPELL_REASON_TARGET"
+					return result
+				result["targets"] = [_save_entry(state, caster, victim_id, spell, int(result["slot_level"]),
+					state.actors[victim_id]["position"])]
 				result["legal"] = true
 				result["reason_key"] = ""
 				return result
@@ -109,7 +120,9 @@ static func availability_reason(state: GameState, caster_id: String, spell: Spel
 		return "SPELL_REASON_NOT_PREPARED"
 	if not CombatRules.conditions_for(caster).can_act():
 		return "SPELL_REASON_INCAPACITATED"
-	if not bool(caster.get("can_cast_spells", true)):
+	if caster.has("wild_shape") and not spell.is_feature():
+		return "SPELL_REASON_WILD_SHAPE"
+	if not bool(caster.get("can_cast_spells", true)) and not spell.is_feature():
 		# Untrained armour (EquipmentRules) forbids spellcasting.
 		return "SPELL_REASON_ARMOR"
 	if not ignore_economy:
@@ -123,6 +136,11 @@ static func availability_reason(state: GameState, caster_id: String, spell: Spel
 			"reaction":
 				if not bool(caster.get("reaction_available", false)):
 					return "COMBAT_NO_REACTION"
+	if spell.is_feature():
+		# Class features on the spell pipeline pay with their own uses.
+		return "" if ClassEffects.resource_available(state, caster, spell) else "FEATURE_NO_USES"
+	if free_cast(caster, spell):
+		return ""
 	if caster.get("spell_uses", {}).has(String(spell.id)):
 		# Monster spellcasting: a number of uses per day instead of spell slots.
 		if int(caster["spell_uses"][String(spell.id)]) <= 0:
@@ -136,9 +154,17 @@ static func availability_reason(state: GameState, caster_id: String, spell: Spel
 			return "SPELL_REASON_NO_SLOT"
 	return ""
 
+## Divine Intervention: the next Cleric spell of level 1-5 needs no slot.
+static func free_cast(caster: Dictionary, spell: SpellDefinition) -> bool:
+	var intervention: Dictionary = caster.get("features", {}).get("divine_intervention", {})
+	return bool(intervention.get("armed", false)) and spell.level >= 1 and spell.level <= 5 and \
+		String(spell.id) in ClassSpellcasting.spell_list("cleric")
+
 static func effective_slot(caster: Dictionary, spell: SpellDefinition, slot_level: int) -> int:
-	if spell.is_cantrip():
+	if spell.is_cantrip() or spell.is_feature():
 		return 0
+	if free_cast(caster, spell):
+		return maxi(spell.level, slot_level)
 	if caster.get("spell_uses", {}).has(String(spell.id)):
 		return spell.level
 	return slot_level if slot_level > 0 else SpellRules.lowest_slot(caster.get("spell_slots", []), spell.level)
@@ -149,12 +175,31 @@ static func attack_weapon(caster: Dictionary, spell: SpellDefinition) -> Diction
 	var on_hit: Array = []
 	if spell.effect == &"speed_penalty":
 		on_hit.append({"kind": "speed_penalty", "amount": spell.effect_amount, "until": "start_of_turn"})
+	elif spell.effect == &"guiding_bolt":
+		on_hit.append({"kind": "guiding_bolt", "until": "rounds", "rounds_left": 1})
+	var damage_modifiers: Array = []
+	var potent: int = ClassEffects.cantrip_damage_bonus(caster, spell)
+	if potent != 0:
+		damage_modifiers.append({"amount": potent, "source": "potent_spellcasting"})
 	return {"id": String(spell.id), "name_key": String(spell.name_key), "spell_id": String(spell.id),
 		"ranged": true, "reach": 1.5, "range": spell.range_m, "long_range": spell.range_m,
 		"attack_modifiers": caster.get("spell_attack_modifiers", []).duplicate(true),
 		"damage_dice": SpellRules.damage_expression(spell, int(caster.get("level", 1)), 0),
-		"damage_modifiers": [], "damage_type": String(spell.damage_type), "on_hit": on_hit,
+		"damage_modifiers": damage_modifiers, "damage_type": String(spell.damage_type), "on_hit": on_hit,
 		"attack_clip": CAST_CLIP}
+
+## Average healing of a heal spell (Lay on Hands: the whole remaining pool).
+static func expected_heal(caster: Dictionary, spell: SpellDefinition, slot_level: int) -> float:
+	if spell.effect == &"lay_on_hands":
+		return float(caster.get("features", {}).get("lay_on_hands", {}).get("pool", 0))
+	if spell.resolution != "heal":
+		return 0.0
+	return SpellRules.average_damage(heal_expression(spell, slot_level, int(caster.get("level", 1))),
+		ClassEffects.spell_modifier(caster))
+
+static func _type_allowed(spell: SpellDefinition, target: Dictionary) -> bool:
+	return spell.creature_types.is_empty() or \
+		StringName(String(target.get("creature_type", "humanoid"))) in spell.creature_types
 
 ## Living creatures inside the area. Burning Hands hits everyone, allies included;
 ## Sleep affects only creatures of the caster's choice (its enemies).
@@ -166,14 +211,22 @@ static func area_targets(state: GameState, caster_id: String, spell: SpellDefini
 	var geometry: CombatSpace = CombatSpace.current()
 	var ids: Array = state.actors.keys()
 	ids.sort()
+	var candidates: Array[String] = []
 	for id: String in ids:
-		if id == caster_id:
+		if id == caster_id and not spell.allies:
 			continue
 		var other: Dictionary = state.actors[id]
 		if not CombatRules.alive(other) or not other.get("position") is Vector3:
 			continue
 		if spell.chosen_creatures and other.get("team") == caster.get("team"):
 			continue
+		if spell.allies and other.get("team") != caster.get("team"):
+			continue
+		if not _type_allowed(spell, other):
+			continue
+		candidates.append(id)
+	for id: String in candidates:
+		var other: Dictionary = state.actors[id]
 		var position: Vector3 = other["position"]
 		var inside: bool = false
 		match spell.area:
@@ -181,9 +234,32 @@ static func area_targets(state: GameState, caster_id: String, spell: SpellDefini
 			"sphere": inside = SpellRules.in_sphere(center, spell.area_size_m, position)
 			"line": inside = SpellRules.in_line(origin, point - origin, spell.area_size_m, spell.line_width_m, position)
 		# Total cover from the area's point of origin blocks the effect.
-		if inside and geometry.visible(center, position):
+		if inside and (id == caster_id or geometry.visible(center, position)):
 			result.append(id)
-	return result
+	return _limit_targets(state, caster_id, spell, result)
+
+## Bless, Aid, Mass Healing Word, Abjure Foes: at most N creatures, the nearest first
+## (the caster counts as nearest of all).
+static func _limit_targets(state: GameState, caster_id: String, spell: SpellDefinition, ids: Array[String]) -> Array[String]:
+	var limit: int = target_limit(state.actors[caster_id], spell, 0)
+	if limit <= 0 or ids.size() <= limit:
+		return ids
+	var origin: Vector3 = state.actors[caster_id]["position"]
+	var sorted: Array[String] = ids.duplicate()
+	sorted.sort_custom(func(a: String, b: String) -> bool:
+		var da: float = origin.distance_to(state.actors[a]["position"])
+		var db: float = origin.distance_to(state.actors[b]["position"])
+		return da < db if not is_equal_approx(da, db) else a < b)
+	return sorted.slice(0, limit)
+
+static func target_limit(caster: Dictionary, spell: SpellDefinition, slot_level: int) -> int:
+	if spell.effect == &"frightened" and spell.is_feature():
+		# Abjure Foes: Charisma modifier creatures, at least one.
+		return maxi(1, Abilities.modifier(ProgressionRules.score(caster, "cha")))
+	if spell.max_targets <= 0:
+		return 0
+	var used: int = effective_slot(caster, spell, slot_level)
+	return spell.max_targets + spell.upcast_targets * maxi(0, used - spell.level)
 
 ## Healing reaches a living creature of the caster's side (the caster too) in range and sight.
 static func _valid_heal_target(state: GameState, caster_id: String, target_id: String, range_m: float) -> bool:
@@ -201,11 +277,14 @@ static func _valid_heal_target(state: GameState, caster_id: String, target_id: S
 		CombatSpace.current().visible(origin, destination)
 
 ## Healing dice including upcasting (Healing Word: 2d4, +2d4 per slot level above 1).
-static func heal_expression(spell: SpellDefinition, slot_level: int) -> String:
+static func heal_expression(spell: SpellDefinition, slot_level: int, caster_level: int = 1) -> String:
 	var parsed: Dictionary = Dice.parse(spell.heal_dice)
 	var count: int = int(parsed["count"])
 	if not spell.upcast_dice.is_empty() and slot_level > spell.level:
 		count += int(Dice.parse(spell.upcast_dice)["count"]) * (slot_level - spell.level)
+	for scale_level: int in spell.scale_levels:
+		if caster_level >= scale_level:
+			count += 1
 	return "%dd%d" % [count, int(parsed["sides"])]
 
 static func _valid_creature_target(state: GameState, caster_id: String, target_id: String, range_m: float) -> bool:
@@ -230,7 +309,10 @@ static func _save_entry(state: GameState, caster: Dictionary, target_id: String,
 		success = 0.0
 	var expected: float = 0.0
 	if not spell.damage_dice.is_empty():
-		var average: float = SpellRules.average_damage(SpellRules.damage_expression(spell, int(caster.get("level", 1)), slot_level))
+		var average: float = SpellRules.average_damage(SpellRules.damage_expression(spell, int(caster.get("level", 1)), slot_level),
+			flat_damage_bonus(caster, spell))
+		if not spell.extra_damage_dice.is_empty():
+			average += SpellRules.average_damage(spell.extra_damage_dice)
 		expected = (1.0 - success) * average + (success * floorf(average / 2.0) if spell.half_on_save else 0.0)
 	return {"id": target_id, "ally": target.get("team") == caster.get("team"), "save_chance": success,
 		"save_bonus": bonus, "expected_damage": expected, "kill_chance": 0.0}
@@ -307,7 +389,34 @@ static func resolve_impact(state: GameState, pending: Dictionary, rng: RandomNum
 			events.append_array(_resolve_heal(state, caster_id, spell, pending, rng))
 		_:
 			pending["impacted"] = true
+			events.append_array(_resolve_effect(state, caster_id, spell, pending))
 	return events
+
+## Spells without a roll: buffs on allies (Bless, Shield of Faith, Barkskin, Aid,
+## Resistance), self effects (Divine Favor, Wild Shape).
+static func _resolve_effect(state: GameState, caster_id: String, spell: SpellDefinition,
+		pending: Dictionary) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if spell.effect == &"" or spell.effect in [&"shield"]:
+		return events
+	var targets: Array[String] = []
+	if spell.targeting == "creature":
+		targets.append(String(pending["target_ids"][0]))
+	elif spell.area != "none":
+		targets = area_targets(state, caster_id, spell, pending["point"])
+	else:
+		targets.append(caster_id)
+	for target_id: String in targets:
+		if state.actors.has(target_id) and CombatRules.alive(state.actors[target_id]):
+			events.append_array(ClassEffects.apply_effect(state, caster_id, target_id, spell, int(pending["slot_level"])))
+	return events
+
+## Flat damage on top of the dice: Divine Spark's Wisdom, Potent Spellcasting.
+static func flat_damage_bonus(caster: Dictionary, spell: SpellDefinition) -> int:
+	var total: int = ClassEffects.cantrip_damage_bonus(caster, spell)
+	if spell.add_spell_modifier:
+		total += ClassEffects.spell_modifier(caster)
+	return total
 
 static func _resolve_darts(state: GameState, caster_id: String, spell: SpellDefinition,
 		pending: Dictionary, rng: RandomNumberGenerator) -> Array[Dictionary]:
@@ -340,54 +449,99 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 	var events: Array[Dictionary] = []
 	var caster: Dictionary = state.actors[caster_id]
 	var point: Vector3 = pending["point"]
-	var targets: Array[String] = area_targets(state, caster_id, spell, point)
+	var targets: Array[String] = []
+	if spell.targeting == "creature":
+		# Single-target saves (Sacred Flame, Inflict Wounds, Hold Person, Divine Spark).
+		for value: Variant in pending["target_ids"]:
+			if state.actors.has(String(value)) and CombatRules.alive(state.actors[String(value)]):
+				targets.append(String(value))
+	else:
+		targets = area_targets(state, caster_id, spell, point)
 	var dc: int = int(caster.get("spell_save_dc", 10))
 	var damage_total: int = 0
+	var extra_total: int = 0
 	if not spell.damage_dice.is_empty() and not targets.is_empty():
 		var expression: String = SpellRules.damage_expression(spell, int(caster.get("level", 1)), int(pending["slot_level"]))
-		var roll: DiceResult = Dice.roll(expression, rng)
-		damage_total = roll.total
+		var flat: int = flat_damage_bonus(caster, spell)
+		var flat_modifiers: Array[RuleModifier] = []
+		if flat != 0:
+			flat_modifiers.append(RuleModifier.new(flat, &"spellcasting"))
+		var roll: DiceResult = Dice.roll(expression, rng, flat_modifiers)
+		damage_total = maxi(0, roll.total)
 		events.append({"type": "roll", "kind": "damage", "actor_id": caster_id, "target_id": "",
 			"spell_id": String(spell.id), "roll": CombatRules.serialize_roll(roll),
 			"damage_type": String(spell.damage_type), "amount": damage_total})
+		if not spell.extra_damage_dice.is_empty():
+			var extra_roll: DiceResult = Dice.roll(spell.extra_damage_dice, rng)
+			extra_total = extra_roll.total
+			events.append({"type": "roll", "kind": "damage", "actor_id": caster_id, "target_id": "",
+				"spell_id": String(spell.id), "roll": CombatRules.serialize_roll(extra_roll),
+				"damage_type": String(spell.extra_damage_type), "amount": extra_total})
+	var sear: int = 0
+	if spell.effect == &"turned" and caster.get("features", {}).has("sear_undead") and not targets.is_empty():
+		# Sear Undead: Wisdom modifier d8 (at least one) radiant to every undead that fails.
+		var sear_roll: DiceResult = Dice.roll("%dd8" % maxi(1, Abilities.modifier(ProgressionRules.score(caster, "wis"))), rng)
+		sear = sear_roll.total
+		events.append({"type": "roll", "kind": "damage", "actor_id": caster_id, "target_id": "",
+			"feature_id": "sear_undead", "roll": CombatRules.serialize_roll(sear_roll), "damage_type": "radiant", "amount": sear})
 	for target_id: String in targets:
 		var target: Dictionary = state.actors[target_id]
-		var extra: Array[RuleModifier] = []
-		var cover: int = save_cover_bonus(caster, spell, point, target)
+		var extra: Array[RuleModifier] = ClassEffects.save_modifiers(state, target_id, rng)
+		var cover: int = save_cover_bonus(caster, spell, point, target) if spell.targeting != "creature" else 0
 		if cover > 0:
 			extra.append(RuleModifier.new(cover, &"cover"))
 		var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, dc, rng, extra)
 		events.append(ActiveEffects.save_event(caster_id, target_id, String(spell.id), save))
+		var failed: bool = not bool(save["success"])
 		if spell.effect == &"spirit_guardians":
 			# The cast counts as this turn's one Spirit Guardians save for the creature.
 			ActiveEffects.mark_aura_hit(state, caster_id, target_id)
 		if not spell.damage_dice.is_empty():
-			var raw: int = damage_total
-			if bool(save["success"]):
-				raw = floori(damage_total / 2.0) if spell.half_on_save else 0
-			if raw > 0 or not bool(save["success"]):
-				events.append_array(_apply_damage(state, caster_id, target_id, raw, spell.damage_type, rng))
-		elif spell.effect == &"sleep" and not bool(save["success"]):
+			for part: Array in [[damage_total, spell.damage_type], [extra_total, spell.extra_damage_type]]:
+				if int(part[0]) <= 0 and part[1] != spell.damage_type:
+					continue
+				var raw: int = int(part[0])
+				if not failed:
+					raw = floori(raw / 2.0) if spell.half_on_save else 0
+				if (raw > 0 or failed) and CombatRules.alive(target):
+					events.append_array(_apply_damage(state, caster_id, target_id, raw, part[1], rng))
+		elif spell.effect == &"sleep" and failed:
 			ActiveEffects.add(target, {"kind": "sleep", "stage": 1, "source_id": caster_id,
 				"spell_id": String(spell.id), "until": "concentration", "save_dc": dc})
 			events.append({"type": "condition", "actor_id": target_id, "condition": "incapacitated", "source_id": caster_id})
+		if failed and sear > 0 and CombatRules.alive(target):
+			events.append_array(_apply_damage(state, caster_id, target_id, sear, &"radiant", rng))
+		if failed and CombatRules.alive(target) and spell.effect in [&"hold", &"entangle", &"faerie_fire", &"turned", &"frightened"]:
+			events.append_array(ClassEffects.apply_effect(state, caster_id, target_id, spell, int(pending["slot_level"])))
 	events.append_array(CombatRules.check_combat_end(state))
 	return events
 
 static func _resolve_heal(state: GameState, caster_id: String, spell: SpellDefinition,
 		pending: Dictionary, rng: RandomNumberGenerator) -> Array[Dictionary]:
-	var target_id: String = String(pending["target_ids"][0])
-	var target: Dictionary = state.actors.get(target_id, {})
-	if not CombatRules.alive(target):
-		return []
-	var modifiers: Array[RuleModifier] = [RuleModifier.new(int(state.actors[caster_id].get("spell_modifier", 0)), &"spellcasting")]
-	var roll: DiceResult = Dice.roll(heal_expression(spell, int(pending["slot_level"])), rng, modifiers)
-	var before: int = int(target["hp"])
-	target["hp"] = mini(int(target["max_hp"]), before + maxi(0, roll.total))
-	return [{"type": "roll", "kind": "healing", "actor_id": caster_id, "target_id": target_id, "spell_id": String(spell.id),
-			"roll": CombatRules.serialize_roll(roll), "amount": roll.total},
-		{"type": "heal", "actor_id": target_id, "target_id": target_id, "source_id": caster_id,
-			"spell_id": String(spell.id), "amount": int(target["hp"]) - before, "hp": target["hp"]}]
+	var targets: Array[String] = []
+	if spell.targeting == "creature":
+		targets.append(String(pending["target_ids"][0]))
+	else:
+		# Mass Healing Word, Mass Cure Wounds: the allies in the area.
+		targets = area_targets(state, caster_id, spell, pending["point"])
+	var events: Array[Dictionary] = []
+	var caster: Dictionary = state.actors[caster_id]
+	for target_id: String in targets:
+		var target: Dictionary = state.actors.get(target_id, {})
+		if not CombatRules.alive(target):
+			continue
+		if spell.effect == &"lay_on_hands":
+			events.append_array(ClassEffects.lay_on_hands(state, caster_id, target_id))
+			continue
+		var modifiers: Array[RuleModifier] = [RuleModifier.new(ClassEffects.spell_modifier(caster), &"spellcasting")]
+		var roll: DiceResult = Dice.roll(heal_expression(spell, int(pending["slot_level"]), int(caster.get("level", 1))), rng, modifiers)
+		var before: int = int(target["hp"])
+		target["hp"] = mini(int(target["max_hp"]), before + maxi(0, roll.total))
+		events.append({"type": "roll", "kind": "healing", "actor_id": caster_id, "target_id": target_id, "spell_id": String(spell.id),
+			"roll": CombatRules.serialize_roll(roll), "amount": roll.total})
+		events.append({"type": "heal", "actor_id": target_id, "target_id": target_id, "source_id": caster_id,
+			"spell_id": String(spell.id), "amount": int(target["hp"]) - before, "hp": target["hp"]})
+	return events
 
 static func _apply_damage_roll(state: GameState, source_id: String, target_id: String, expression: String,
 		damage_type: StringName, modifiers: Array[RuleModifier], rng: RandomNumberGenerator) -> Array[Dictionary]:
@@ -408,10 +562,10 @@ static func _hp_loss(state: GameState, source_id: String, target_id: String, amo
 		damage_type: StringName, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var target: Dictionary = state.actors[target_id]
 	var was_alive: bool = CombatRules.alive(target)
-	target["hp"] = maxi(0, int(target["hp"]) - amount)
+	var lost: int = ClassEffects.lose_hp(state, target_id, amount, rng)
 	var events: Array[Dictionary] = [{"type": "damage", "actor_id": source_id, "target_id": target_id,
-		"amount": amount, "damage_type": String(damage_type), "hp": target["hp"]}]
-	events.append_array(ActiveEffects.after_damage(state, target_id, amount, rng))
+		"amount": lost, "damage_type": String(damage_type), "hp": target["hp"]}]
+	events.append_array(ActiveEffects.after_damage(state, target_id, lost, rng))
 	if was_alive and not CombatRules.alive(target):
 		events.append({"type": "death", "actor_id": target_id, "killer_id": source_id})
 	return events

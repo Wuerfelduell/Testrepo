@@ -27,6 +27,8 @@ const SOURCE_URL: String = "https://media.dndbeyond.com/compendium-images/srd/5.
 @export var spell_save_dc: int = 0
 ## Spellcasting ability modifier, added to healing spells.
 @export var spell_modifier: int = 0
+## SRD creature type (Turn Undead and Divine Smite look at "undead" and "fiend").
+@export var creature_type: String = "humanoid"
 @export_enum("brute", "archer", "coward") var personality: String = "brute"
 @export var model: String = "res://assets/characters/undead_cultist/model.glb"
 @export var model_is_provisional: bool = true
@@ -53,7 +55,7 @@ func create_actor(actor_id: String, start_position: Vector3) -> Dictionary:
 		"ability_scores": ability_scores.duplicate(true), "skills": skills.duplicate(true),
 		"saving_throws": saving_throws.duplicate(true),
 		"passive_perception": passive_perception, "proficiency_bonus": proficiency_bonus,
-		"creature_type": "humanoid", "challenge_rating": challenge_rating, "experience": experience,
+		"creature_type": creature_type, "challenge_rating": challenge_rating, "experience": experience,
 		"srd_name": srd_name, "srd_page": srd_page, "source_url": SOURCE_URL,
 	}
 	if multiattack > 1:

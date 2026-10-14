@@ -107,6 +107,7 @@ static func short_rest(actor: Dictionary, actor_id: String, hit_dice: int, arcan
 		if int(surge["uses"]) < int(surge["max"]):
 			surge["uses"] = int(surge["max"])
 			recharged.append("action_surge")
+	recharged.append_array(ClassEffects.short_rest(actor))
 	if not arcane_slots.is_empty():
 		SpellRules.arcane_recovery(actor["spell_slots"], actor["spell_slots_max"], int(actor.get("level", 1)), arcane_slots)
 		features["arcane_recovery"]["used"] = true
@@ -153,6 +154,7 @@ static func long_rest(actor: Dictionary, actor_id: String, prepared: Array[Strin
 			features[feature_id]["uses"] = int(features[feature_id]["max"])
 	if features.has("arcane_recovery"):
 		features["arcane_recovery"]["used"] = false
+	ClassEffects.long_rest(actor)
 	if not prepared.is_empty():
 		ClassFeatures.set_prepared(actor, prepared)
 	return [{"type": "rest", "rest": "long", "actor_id": actor_id, "healed": healed,

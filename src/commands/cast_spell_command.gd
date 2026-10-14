@@ -38,7 +38,14 @@ func apply(state: GameState) -> Dictionary:
 	match spell.casting_time:
 		"action": caster["action_available"] = false
 		"bonus_action": caster["bonus_available"] = false
-	if caster.get("spell_uses", {}).has(spell_id):
+	if spell.is_feature():
+		ClassEffects.spend_resource(state, caster, spell)
+	elif SpellResolver.free_cast(caster, spell):
+		# Divine Intervention: this one spell needs no slot.
+		var intervention: Dictionary = caster["features"]["divine_intervention"]
+		intervention["armed"] = false
+		intervention["uses"] = maxi(0, int(intervention.get("uses", 0)) - 1)
+	elif caster.get("spell_uses", {}).has(spell_id):
 		caster["spell_uses"][spell_id] = int(caster["spell_uses"][spell_id]) - 1
 	elif used_slot > 0:
 		SpellRules.spend_slot(caster["spell_slots"], used_slot)

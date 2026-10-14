@@ -4,7 +4,7 @@ extends RefCounted
 ## Independent sources prevent ending one effect from removing another.
 
 const IDS: Array[StringName] = [&"blinded", &"frightened", &"poisoned", &"prone",
-	&"restrained", &"stunned", &"unconscious", &"incapacitated"]
+	&"restrained", &"stunned", &"unconscious", &"incapacitated", &"paralyzed"]
 var _sources: Dictionary[StringName, Array] = {}
 
 func add(condition: StringName, source: StringName = &"default") -> bool:
@@ -28,7 +28,7 @@ func remove(condition: StringName, source: StringName = &"default") -> bool:
 
 func has(condition: StringName) -> bool:
 	if condition == &"incapacitated":
-		return _sources.has(condition) or has(&"stunned") or has(&"unconscious")
+		return _sources.has(condition) or has(&"stunned") or has(&"unconscious") or has(&"paralyzed")
 	if condition == &"prone" and has(&"unconscious"):
 		return true
 	return _sources.has(condition)
@@ -42,7 +42,7 @@ func can_act() -> bool:
 	return not has(&"incapacitated")
 
 func speed_is_zero() -> bool:
-	return has(&"restrained") or has(&"unconscious")
+	return has(&"restrained") or has(&"unconscious") or has(&"paralyzed")
 
 func can_speak() -> bool:
 	return not has(&"incapacitated")
@@ -60,7 +60,7 @@ func can_approach_fear() -> bool:
 	return not has(&"frightened")
 
 func automatically_fails_save(ability: StringName) -> bool:
-	return ability in [&"str", &"dex"] and (has(&"stunned") or has(&"unconscious"))
+	return ability in [&"str", &"dex"] and (has(&"stunned") or has(&"unconscious") or has(&"paralyzed"))
 
 func check_disadvantages(fear_visible: bool = false) -> Array[StringName]:
 	var result: Array[StringName] = []
@@ -79,7 +79,7 @@ func attack_disadvantages(fear_visible: bool = false) -> Array[StringName]:
 
 func incoming_advantages(distance_m: float) -> Array[StringName]:
 	var result: Array[StringName] = []
-	for condition: StringName in [&"blinded", &"restrained", &"stunned", &"unconscious"]:
+	for condition: StringName in [&"blinded", &"restrained", &"stunned", &"unconscious", &"paralyzed"]:
 		if has(condition):
 			result.append(condition)
 	if has(&"prone") and distance_m <= 1.5:

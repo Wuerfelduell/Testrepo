@@ -160,11 +160,12 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var cover_value: int = geometry.cover(origin, destination)
 	result["cover"] = cover_value
 	result["distance"] = distance
-	result["armor_class"] = int(target.get("ac", 10)) + cover_value + ActiveEffects.ac_bonus(target)
+	result["armor_class"] = ClassEffects.armor_class(target) + cover_value
 	if cover_value >= 99 or not geometry.visible(origin, destination) or \
 			distance > (long_range if ranged else reach) + EPSILON:
 		return result
 	var advantages: Array[StringName] = conditions_for(target).incoming_advantages(distance)
+	advantages.append_array(ClassEffects.attack_advantages(state, attacker_id, target_id, weapon))
 	var disadvantages: Array[StringName] = conditions_for(attacker).attack_disadvantages()
 	disadvantages.append_array(ActiveEffects.attack_disadvantages(attacker))
 	disadvantages.append_array(conditions_for(target).incoming_disadvantages(distance))
@@ -186,7 +187,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 		advantage = 1
 	elif advantages.is_empty() and not disadvantages.is_empty():
 		advantage = -1
-	var bonus: int = 0
+	var bonus: int = ClassEffects.attack_bonus_estimate(attacker)
 	for modifier: RuleModifier in weapon_modifiers(weapon, "attack"):
 		bonus += modifier.amount
 	var chance: float = clampf(float(21 + bonus - int(result["armor_class"])) / 20.0, 0.05, 0.95)
@@ -197,7 +198,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	elif advantage < 0:
 		chance *= chance
 		crit_chance = 0.0025
-	if conditions_for(target).has(&"unconscious") and distance <= 1.5:
+	if (conditions_for(target).has(&"unconscious") or conditions_for(target).has(&"paralyzed")) and distance <= 1.5:
 		crit_chance = chance
 	var parsed: Dictionary = Dice.parse(String(weapon["damage_dice"]))
 	var average_dice: float = int(parsed["count"]) * (int(parsed["sides"]) + 1) / 2.0
@@ -292,14 +293,14 @@ static func _graze(state: GameState, attacker_id: String, target_id: String, wea
 	if amount <= 0 or not alive(target):
 		return events
 	var result: DamageRules.Result = DamageRules.apply(amount, StringName(weapon["damage_type"]), defenses_for(target))
-	target["hp"] = maxi(0, int(target["hp"]) - result.total)
+	var lost: int = ClassEffects.lose_hp(state, target_id, result.total, rng)
 	var roll: DiceResult = DiceResult.new()
 	roll.add_modifiers([RuleModifier.new(amount, &"graze")])
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"roll": serialize_roll(roll), "damage_type": weapon["damage_type"], "amount": result.total, "graze": true})
+		"roll": serialize_roll(roll), "damage_type": weapon["damage_type"], "amount": lost, "graze": true})
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"amount": result.total, "damage_type": weapon["damage_type"], "hp": target["hp"], "graze": true})
-	events.append_array(ActiveEffects.after_damage(state, target_id, result.total, rng))
+		"amount": lost, "damage_type": weapon["damage_type"], "hp": target["hp"], "graze": true})
+	events.append_array(ActiveEffects.after_damage(state, target_id, lost, rng))
 	if int(target["hp"]) <= 0:
 		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
 		events.append_array(check_combat_end(state))
@@ -354,10 +355,13 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 	# defender again would duplicate source labels. Its unconscious crit is handled below.
 	context.advantages.assign(preview["advantages"])
 	context.disadvantages.assign(preview["disadvantages"])
-	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]),
-		weapon_modifiers(weapon, "attack"), rng, context)
+	var modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "attack")
+	modifiers.append_array(ClassEffects.attack_modifiers(attacker, rng))
+	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]), modifiers, rng, context)
 	ActiveEffects.consume_attack_riders(attacker)
-	if attack.hit and conditions_for(target).has(&"unconscious") and float(preview["distance"]) <= 1.5:
+	ClassEffects.consume_on_attacked(target)
+	if attack.hit and (conditions_for(target).has(&"unconscious") or conditions_for(target).has(&"paralyzed")) \
+			and float(preview["distance"]) <= 1.5:
 		attack.critical = true
 	var outcome: Dictionary = {"roll": serialize_roll(attack.roll), "armor_class": preview["armor_class"],
 		"hit": attack.hit, "critical": attack.critical, "cover": preview["cover"],
@@ -393,24 +397,28 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
 		StringName(weapon["damage_type"]), rng, weapon_modifiers(weapon, "damage"), bool(outcome["critical"]), defenses,
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
+	var lost: int = ClassEffects.lose_hp(state, target_id, damage.total, rng)
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
-	target["hp"] = maxi(0, int(target["hp"]) - damage.total)
+		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": lost})
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"amount": damage.total, "damage_type": weapon["damage_type"], "hp": target["hp"]})
-	var total_damage: int = damage.total
+		"amount": lost, "damage_type": weapon["damage_type"], "hp": target["hp"]})
+	var total_damage: int = lost
 	# A separate typed damage instance: flat riders are never critical dice.
 	for extra: Dictionary in weapon.get("extra_damage", []):
 		var extra_result: DamageRules.Result = DamageRules.apply(int(extra["amount"]),
 			StringName(extra["damage_type"]), defenses)
-		target["hp"] = maxi(0, int(target["hp"]) - extra_result.total)
-		total_damage += extra_result.total
+		var extra_lost: int = ClassEffects.lose_hp(state, target_id, extra_result.total, rng)
+		total_damage += extra_lost
 		var extra_roll: DiceResult = DiceResult.new()
 		extra_roll.add_modifiers([RuleModifier.new(int(extra["amount"]), StringName(extra["source"]))])
 		events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-			"roll": serialize_roll(extra_roll), "damage_type": extra["damage_type"], "amount": extra_result.total})
+			"roll": serialize_roll(extra_roll), "damage_type": extra["damage_type"], "amount": extra_lost})
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
-			"amount": extra_result.total, "damage_type": extra["damage_type"], "hp": target["hp"]})
+			"amount": extra_lost, "damage_type": extra["damage_type"], "hp": target["hp"]})
+	# Class riders on a weapon hit: Divine Smite, Divine Favor, Divine Strike, Wolf bite.
+	var riders: Dictionary = ClassEffects.hit_riders(state, attacker_id, target_id, weapon, bool(outcome["critical"]), rng)
+	events.append_array(riders["events"])
+	total_damage += int(riders["damage"])
 	events.append_array(ActiveEffects.after_damage(state, target_id, total_damage, rng))
 	if int(target["hp"]) <= 0:
 		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
@@ -435,5 +443,6 @@ static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	if state.mode != &"combat":
 		state.pending = {}
+		ClassEffects.revert_all(state)
 		events.append({"type": "combat_end", "mode": String(state.mode)})
 	return events

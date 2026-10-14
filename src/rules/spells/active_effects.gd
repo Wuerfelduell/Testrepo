@@ -14,16 +14,21 @@ static func add(actor: Dictionary, effect: Dictionary) -> void:
 	if not actor.has("effects"):
 		actor["effects"] = []
 	actor["effects"].append(effect.duplicate(true))
-	var condition: String = granted_condition(effect)
-	if not condition.is_empty() and not condition in actor.get("conditions", []):
-		if not actor.has("conditions"):
-			actor["conditions"] = []
-		actor["conditions"].append(condition)
+	for condition: String in granted_conditions(effect):
+		if not condition in actor.get("conditions", []):
+			if not actor.has("conditions"):
+				actor["conditions"] = []
+			actor["conditions"].append(condition)
 
 static func granted_condition(effect: Dictionary) -> String:
+	var conditions: Array[String] = granted_conditions(effect)
+	return conditions[0] if not conditions.is_empty() else ""
+
+## Every condition an effect grants (class effects may grant several: Turn Undead).
+static func granted_conditions(effect: Dictionary) -> Array[String]:
 	if String(effect.get("kind", "")) == "sleep":
-		return "unconscious" if int(effect.get("stage", 1)) >= 2 else "incapacitated"
-	return ""
+		return ["unconscious" if int(effect.get("stage", 1)) >= 2 else "incapacitated"]
+	return ClassEffects.granted_conditions(effect)
 
 static func has_kind(actor: Dictionary, kind: String) -> bool:
 	for effect: Dictionary in effects(actor):
@@ -44,15 +49,13 @@ static func remove_where(actor: Dictionary, predicate: Callable) -> int:
 		return 0
 	actor["effects"] = kept
 	for effect: Dictionary in removed:
-		var condition: String = granted_condition(effect)
-		if condition.is_empty():
-			continue
-		var still_granted: bool = false
-		for other: Dictionary in kept:
-			if granted_condition(other) == condition:
-				still_granted = true
-		if not still_granted:
-			actor.get("conditions", []).erase(condition)
+		for condition: String in granted_conditions(effect):
+			var still_granted: bool = false
+			for other: Dictionary in kept:
+				if condition in granted_conditions(other):
+					still_granted = true
+			if not still_granted:
+				actor.get("conditions", []).erase(condition)
 	return removed.size()
 
 static func ac_bonus(actor: Dictionary) -> int:
@@ -87,6 +90,7 @@ static func on_turn_start(state: GameState, actor_id: String) -> Array[Dictionar
 			return String(effect.get("until", "")) == "start_of_turn" and String(effect.get("turn_of", "")) == actor_id)
 		if removed > 0:
 			events.append({"type": "effects_expired", "actor_id": id})
+	events.append_array(ClassEffects.on_turn_start(state, actor_id))
 	var caster: Dictionary = state.actors.get(actor_id, {})
 	var concentration: Dictionary = caster.get("concentration", {})
 	if not concentration.is_empty():
@@ -101,10 +105,12 @@ static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGen
 	var actor: Dictionary = state.actors.get(actor_id, {})
 	if actor.is_empty() or not CombatRules.alive(actor):
 		return events
+	events.append_array(ClassEffects.on_turn_end(state, actor_id, rng))
 	for effect: Dictionary in effects(actor).duplicate():
 		if String(effect.get("kind", "")) != "sleep" or int(effect.get("stage", 1)) != 1:
 			continue
-		var save: Dictionary = SpellRules.roll_save(actor, &"wis", int(effect.get("save_dc", 10)), rng)
+		var save: Dictionary = SpellRules.roll_save(actor, &"wis", int(effect.get("save_dc", 10)), rng,
+			ClassEffects.save_modifiers(state, actor_id, rng))
 		events.append(save_event(String(effect.get("source_id", "")), actor_id, String(effect.get("spell_id", "sleep")), save))
 		var source_id: String = String(effect.get("source_id", ""))
 		remove_where(actor, func(other: Dictionary) -> bool:
@@ -139,7 +145,8 @@ static func after_damage(state: GameState, target_id: String, amount: int,
 	if not CombatRules.alive(target):
 		events.append_array(end_concentration(state, target_id, "unconscious"))
 		return events
-	var save: Dictionary = SpellRules.roll_save(target, &"con", SpellRules.concentration_dc(amount), rng)
+	var save: Dictionary = SpellRules.roll_save(target, &"con", SpellRules.concentration_dc(amount), rng,
+		ClassEffects.save_modifiers(state, target_id, rng))
 	var event: Dictionary = save_event(target_id, target_id, String(concentration.get("spell_id", "")), save)
 	event["concentration"] = true
 	events.append(event)
@@ -250,7 +257,8 @@ static func aura_triggers(state: GameState, actor_id: String, rng: RandomNumberG
 			events.append({"type": "roll", "kind": "damage", "actor_id": caster_id, "target_id": target_id,
 				"spell_id": String(spell.id), "roll": CombatRules.serialize_roll(roll),
 				"damage_type": String(spell.damage_type), "amount": roll.total})
-			var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, int(caster.get("spell_save_dc", 10)), rng)
+			var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, int(caster.get("spell_save_dc", 10)), rng,
+				ClassEffects.save_modifiers(state, target_id, rng))
 			events.append(save_event(caster_id, target_id, String(spell.id), save))
 			var raw: int = floori(roll.total / 2.0) if bool(save["success"]) else roll.total
 			events.append_array(SpellResolver._apply_damage(state, caster_id, target_id, raw, spell.damage_type, rng))
