@@ -814,6 +814,119 @@ def wizard(gender, headwear):
     }
     return fig.export("hero_wizard_%s_%s" % (gender, headwear), maps)
 
+
+def tabard_and_sigil(fig, tabard, gold, top, bottom, width_top, width_bottom, sigil_z):
+    """Front and back tabard over the armour, with a round gold sun sigil on the chest."""
+    hanging_panel(fig, "Tabard_Front", tabard, top, bottom, width_top, width_bottom, True, gap=.04, weights=torso_weights(fig))
+    hanging_panel(fig, "Tabard_Back", tabard, top, bottom + .02, width_top + .01, width_bottom, False, gap=.04, weights=torso_weights(fig))
+    sun = [ring("Sigil", (0, 0, 0), .028, .045, 0, gold, sides=12, thickness=.005)]
+    for i in range(8):
+        a = 2 * math.pi * i / 8
+        sun.append(tube("Ray", [Vector((math.cos(a) * .045, 0, math.sin(a) * .045)), Vector((math.cos(a) * .07, 0, math.sin(a) * .07))],
+                        [.007, .002], gold, sides=4))
+    sigil = merge("Sun_Sigil", sun)
+    sigil.rotation_euler = (math.pi / 2, 0, 0)
+    sigil.location = (0, surface_y(fig, 0, sigil_z) - .065, sigil_z)
+    bpy.context.view_layer.update()
+    fig.add(sigil, rigid("spine_03"))
+
+
+def cleric(gender):
+    """Knee-long linen vestments under a chain shirt and mail coif, ochre tabard, sun sigil."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Head_Hood", "Legs"}, gender)
+    vest, hands, skin, eyes, mail, tabard, gold = (material(n) for n in (
+        "ClericVestment", "ClericHands", "ClericSkin", "ClericEyes", "ClericMail", "ClericTabard", "ClericGold"))
+    fig.dress(vest, hands)
+    fig.part("Head_Hood").data.materials[0] = mail
+    waist = 1.10 if gender == "male" else 1.08
+    lengthen_tunic(fig, waist, .42, flare=.55, wave=.03, depth=.3)
+    skirt_material(fig, waist, material("ClericSkirt"))
+    fig.add_head(skin, eyes, material("ClericBrows"))
+    top, bottom = (1.45, 1.12) if gender == "male" else (1.39, 1.10)
+    cuirass(fig, mail, top, bottom, inflate=.016)
+    tabard_and_sigil(fig, tabard, gold, top + .02, .55, .12, .15, (top + bottom) / 2 + .04)
+    maps = {
+        "ClericVestment": outfit("cleric_albedo.png"), "ClericSkirt": outfit("cleric_skirt_albedo.png"),
+        "ClericHands": HANDS[gender], "ClericSkin": SKIN[gender], "ClericEyes": EYES,
+        "ClericBrows": {"albedo": "../textures/T_Hair_%d_BaseColor.png" % (1 if gender == "male" else 2), "rough": .8},
+        "ClericMail": tinted(METAL_C, [.4, .4, .43, 1], metal=.6, rough=.6, normal_scale=1.4),
+        "ClericTabard": cloth("cloth_ochre.png"),
+        "ClericGold": tinted(METAL_C, [.95, .72, .3, 1], metal=.6, rough=.35),
+    }
+    return fig.export("hero_cleric_" + gender, maps)
+
+
+def paladin(gender):
+    """The Fighter's plate over a navy gambeson, plus a blood-red tabard and a gold sun."""
+    pauldron = "Acc_Pauldron" if gender == "male" else "Acc_Pauldrons"
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Head_Hood", "Legs", pauldron}, gender)
+    cloth_m, hands, skin, eyes, mail, plate, tabard, gold = (material(n) for n in (
+        "PaladinCloth", "PaladinHands", "PaladinSkin", "PaladinEyes", "PaladinMail", "PaladinPlate", "PaladinTabard", "PaladinGold"))
+    fig.dress(cloth_m, hands)
+    fig.part("Head_Hood").data.materials[0] = mail
+    fig.part(pauldron).data.materials[0] = plate
+    mirror_part(fig, pauldron, "Paladin_Pauldron_R", plate)
+    fig.add_head(skin, eyes, material("PaladinBrows"))
+    top, bottom = (1.45, 1.12) if gender == "male" else (1.39, 1.10)
+    cuirass(fig, plate, top, bottom)
+    tabard_and_sigil(fig, tabard, gold, top - .08, .62, .11, .16, top - .1)
+    # Gilded rims on the shoulders.
+    for side in (-1, 1):
+        shoulder = fig.bone_head("upperarm_l" if side > 0 else "upperarm_r")
+        arc = []
+        for s in range(9):
+            a = math.pi * (.05 + .9 * s / 8)
+            arc.append((shoulder.x + side * .05, shoulder.y + math.cos(a) * .09, shoulder.z + math.sin(a) * .09 - .01))
+        fig.add(tube("Rim", arc, [.01] * 9, gold, sides=4, squash=3), rigid("upperarm_l" if side > 0 else "upperarm_r"))
+    maps = {
+        "PaladinCloth": outfit("fighter_albedo.png"), "PaladinHands": HANDS[gender], "PaladinSkin": SKIN[gender], "PaladinEyes": EYES,
+        "PaladinBrows": {"albedo": "../textures/T_Hair_%d_BaseColor.png" % (1 if gender == "male" else 2), "rough": .8},
+        "PaladinMail": tinted(METAL_C, [.4, .4, .43, 1], metal=.6, rough=.6, normal_scale=1.4),
+        "PaladinPlate": tinted(METAL_C, [.86, .87, .9, 1], metal=.6, rough=.42),
+        "PaladinTabard": cloth("cloth_blood.png"),
+        "PaladinGold": tinted(METAL_C, [.95, .72, .3, 1], metal=.6, rough=.35),
+    }
+    return fig.export("hero_paladin_" + gender, maps)
+
+
+def druid(gender):
+    """Forest-green hooded robe to mid-shin, a moss mantle on the back, an antler circlet."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Legs"}, gender)
+    robe, hands, skin, eyes, mantle, wood = (material(n) for n in ("DruidRobe", "DruidHands", "DruidSkin", "DruidEyes", "DruidMantle", "DruidWood"))
+    fig.dress(robe, hands)
+    waist = 1.10 if gender == "male" else 1.08
+    lengthen_tunic(fig, waist, .25, flare=.75, wave=.05, depth=.4)
+    skirt_material(fig, waist, material("DruidSkirt"))
+    fig.add_head(skin, eyes, material("DruidBrows"))
+    e, hc = fig.eye, fig.head_centre
+    # Antler circlet: a twig band around the head with two branching tines per side.
+    band_z = e.z + .055
+    pieces = [ring("Circlet", (0, hc.y - .005, band_z), .098, .108, 0, wood, sides=18, sy=1.1, thickness=.014)]
+    for side in (-1, 1):
+        root = Vector((side * .085, hc.y - .02, band_z + .01))
+        mid = root + Vector((side * .06, .03, .1))
+        tip = mid + Vector((side * .03, .05, .09))
+        pieces.append(tube("Antler", [root, mid, tip], [.012, .009, .003], wood, sides=5))
+        pieces.append(tube("Tine", [mid, mid + Vector((side * -.01, -.04, .07))], [.008, .002], wood, sides=4))
+        pieces.append(tube("Tine", [root + (mid - root) * .5, root + (mid - root) * .5 + Vector((side * .06, -.01, .03))], [.007, .002], wood, sides=4))
+    fig.add(merge("Antler_Circlet", pieces), rigid("Head"))
+    # Moss mantle over the shoulders and down the back.
+    hanging_panel(fig, "Mantle", mantle, 1.52, .55, .21, .30, False, gap=.03, flare=.1, rows=14, cols=8, weights=cloak_weights(fig))
+    collar = ring("Mantle_Collar", (0, .05, 1.5), .12, .19, -.06, mantle, sides=16, sy=1.15, thickness=.012)
+    delete_verts(collar, lambda co: co.y < -.05)
+    box_uv(collar, 3); fig.add(collar, rigid("spine_03"))
+    maps = {
+        "DruidRobe": outfit("druid_albedo.png"), "DruidSkirt": outfit("druid_skirt_albedo.png"),
+        "DruidHands": HANDS[gender], "DruidSkin": SKIN[gender], "DruidEyes": EYES,
+        "DruidBrows": {"albedo": "../textures/T_Hair_%d_BaseColor.png" % (1 if gender == "male" else 2), "rough": .8},
+        "DruidMantle": cloth("cloth_moss.png"),
+        "DruidWood": tinted(WOOD_C, [.75, .62, .48, 1]),
+    }
+    return fig.export("hero_druid_" + gender, maps)
+
 # ---------------------------------------------------------------- weapons
 
 def weapon_maps():
@@ -942,6 +1055,9 @@ if __name__ == "__main__":
         "hero_fighter_male": lambda: fighter("male"), "hero_fighter_female": lambda: fighter("female"),
         "hero_wizard_male_hood": lambda: wizard("male", "hood"), "hero_wizard_female_hood": lambda: wizard("female", "hood"),
         "hero_wizard_male_hat": lambda: wizard("male", "hat"), "hero_wizard_female_hat": lambda: wizard("female", "hat"),
+        "hero_cleric_male": lambda: cleric("male"), "hero_cleric_female": lambda: cleric("female"),
+        "hero_paladin_male": lambda: paladin("male"), "hero_paladin_female": lambda: paladin("female"),
+        "hero_druid_male": lambda: druid("male"), "hero_druid_female": lambda: druid("female"),
     }
     weapon_kinds = ["dagger", "greatsword", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
                     "light_crossbow", "shield_heater", "shield_round"]

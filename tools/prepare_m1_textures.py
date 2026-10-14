@@ -97,13 +97,21 @@ ranger("wizard_albedo.png", cloth=[.10, .09, .30], leather=[.40, .27, .15], seed
 # Robe skirts: the stretched tunic hem sits in the atlas' leather area, so it gets cloth colour.
 ranger("wizard_skirt_albedo.png", cloth=[.10, .09, .30], leather=[.09, .08, .27], seed=23)
 ranger("priest_skirt_albedo.png", cloth=[.10, .07, .13], leather=[.09, .06, .11], metal=.85, seed=24)
+# Cleric: linen vestments, brown leather. Druid: forest-green robe, brown leather.
+ranger("cleric_albedo.png", cloth=[.85, .80, .68], leather=[.26, .16, .10], seed=25)
+ranger("cleric_skirt_albedo.png", cloth=[.85, .80, .68], leather=[.80, .75, .64], seed=26)
+ranger("druid_albedo.png", cloth=[.20, .49, .26], leather=[.26, .16, .10], seed=27)
+ranger("druid_skirt_albedo.png", cloth=[.20, .49, .26], leather=[.19, .46, .24], seed=28)
 
 # Plain cloth for tabards, bandanas and cloaks: the peasant shirt weave, recoloured.
 weave = load("T_Peasant_BaseColor.png")[300:428, 20:148]
 weave = np.asarray(Image.fromarray(np.uint8(weave * 255)).resize((256, 256), Image.Resampling.BICUBIC), dtype=np.float32) / 255
 weave_lum = weave @ np.array([.2126, .7152, .0722])
 for name, color in [("cloth_red.png", [.36, .06, .05]), ("cloth_black.png", [.13, .11, .12]),
-                    ("cloth_crimson.png", [.24, .025, .04]), ("cloth_blue.png", [.09, .09, .27])]:
+                    ("cloth_crimson.png", [.24, .025, .04]), ("cloth_blue.png", [.09, .09, .27]),
+                    # Hero tabards and mantles: 0.9 x the palette colour, like the wizard hat.
+                    ("cloth_ochre.png", [.81, .57, .18]), ("cloth_blood.png", [.68, .10, .11]),
+                    ("cloth_moss.png", [.41, .44, .18])]:
     rgb = (.45 + .9 * (weave_lum - weave_lum.mean()) + .55)[..., None] * np.array(color)
     Image.fromarray(np.uint8(np.clip(rgb, 0, 1) * 255)).save(OUT / name)
 

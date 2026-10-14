@@ -46,15 +46,32 @@
 		"leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "brown"},
 		"wizard_leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "tan"},
 		"plate": {"name_key": "COLOR_SLOT_PLATE", "palette": "metal", "default": "steel"},
-		"mail": {"name_key": "COLOR_SLOT_MAIL", "palette": "metal", "default": "iron"}
+		"mail": {"name_key": "COLOR_SLOT_MAIL", "palette": "metal", "default": "iron"},
+		"vestment": {"name_key": "COLOR_SLOT_VESTMENT", "palette": "cloth", "default": "linen"},
+		"cleric_tabard": {"name_key": "COLOR_SLOT_TABARD", "palette": "cloth", "default": "ochre"},
+		"paladin_tabard": {"name_key": "COLOR_SLOT_TABARD", "palette": "cloth", "default": "blood"},
+		"druid_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "forest"},
+		"mantle": {"name_key": "COLOR_SLOT_MANTLE", "palette": "cloth", "default": "moss"}
 	},
-	"order": ["tunic", "robe", "hat", "leather", "wizard_leather", "plate", "mail"],
+	"order": ["tunic", "robe", "hat", "leather", "wizard_leather", "plate", "mail", "vestment", "cleric_tabard",
+		"paladin_tabard", "druid_robe", "mantle"],
 	"materials": {
 		"FighterCloth": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "tunic", "leather": "leather"},
 		"FighterPlate": {"tint": "plate"},
 		"FighterMail": {"tint": "mail"},
 		"WizRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "robe", "leather": "wizard_leather"},
 		"WizSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "robe", "leather": "robe"},
-		"WizHat": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "hat"}
+		"WizHat": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "hat"},
+		"ClericVestment": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "vestment", "leather": "leather"},
+		"ClericSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "vestment", "leather": "vestment"},
+		"ClericMail": {"tint": "mail"},
+		"ClericTabard": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "cleric_tabard"},
+		"PaladinCloth": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "tunic", "leather": "leather"},
+		"PaladinPlate": {"tint": "plate"},
+		"PaladinMail": {"tint": "mail"},
+		"PaladinTabard": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "paladin_tabard"},
+		"DruidRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "druid_robe", "leather": "leather"},
+		"DruidSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "druid_robe", "leather": "druid_robe"},
+		"DruidMantle": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "mantle"}
 	}
 }

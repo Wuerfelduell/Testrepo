@@ -10,5 +10,11 @@
 	"res://assets/characters/hero_wizard_female_hood/model.glb": {"main_hand": "staff"},
 	"res://assets/characters/hero_wizard_male_hat/model.glb": {"main_hand": "staff"},
 	"res://assets/characters/hero_wizard_female_hat/model.glb": {"main_hand": "staff"},
-	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"}
+	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"},
+	"res://assets/characters/hero_cleric_male/model.glb": {"main_hand": "mace", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_cleric_female/model.glb": {"main_hand": "mace", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_paladin_male/model.glb": {"main_hand": "sword", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_paladin_female/model.glb": {"main_hand": "sword", "off_hand": "shield_heater"},
+	"res://assets/characters/hero_druid_male/model.glb": {"main_hand": "sickle", "off_hand": "shield_round"},
+	"res://assets/characters/hero_druid_female/model.glb": {"main_hand": "sickle", "off_hand": "shield_round"}
 }

@@ -902,3 +902,9 @@ PARTY_LOG_APPROVES,%s approves
 PARTY_LOG_DISAPPROVES,%s disapproves
 PARTY_APPROVES,approves
 PARTY_DISAPPROVES,disapproves
+LOOK_CLERIC_VESTMENTS,Cleric • vestments and mail
+LOOK_PALADIN_PLATE,Paladin • plate and tabard
+LOOK_DRUID_ANTLERS,Druid • antler circlet
+COLOR_SLOT_VESTMENT,Vestments
+COLOR_SLOT_TABARD,Tabard
+COLOR_SLOT_MANTLE,Mantle
