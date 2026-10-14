@@ -1,0 +1,10 @@
+{
+	"_comment": "Ranger items and starting kit (SRD 5.2 p. 57: Studded Leather Armor, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Druidic Focus, Explorer's Pack, 7 GP; arrows, focus and pack are not modelled). Merged into the catalog by ItemCatalog.",
+	"items": {
+		"longbow": {"type": "weapon", "name_key": "ITEM_LONGBOW", "category": "martial", "kind": "ranged", "damage_dice": "1d8", "damage_type": "piercing", "properties": ["ammunition", "heavy", "two_handed"], "range": 45.0, "long_range": 180.0, "mastery": "slow", "weight_kg": 1.0, "value_gp": 50, "model": "res://assets/weapons/longbow.glb"},
+		"studded_leather": {"type": "armor", "name_key": "ITEM_STUDDED_LEATHER", "armor_id": "studded_leather", "weight_kg": 5.85, "value_gp": 45}
+	},
+	"starting_kits": {
+		"ranger": {"equipped": {"main_hand": "longbow", "armor": "studded_leather"}, "bag": {"scimitar": 1, "shortsword": 1, "potion_of_healing": 1}, "gold": 7}
+	}
+}

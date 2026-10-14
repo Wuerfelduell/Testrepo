@@ -327,10 +327,17 @@ func consume_events(events: Array[Dictionary]) -> void:
 			"effect":
 				if String(event.get("kind", "")) == "sap":
 					_append_log(tr("COMBAT_LOG_SAPPED") % _actor_name(actor))
+				elif TranslationServer.translate("COMBAT_LOG_EFFECT_" + String(event.get("kind", "")).to_upper()) != "COMBAT_LOG_EFFECT_" + String(event.get("kind", "")).to_upper():
+					# Class kit effects (Vex, Slow, Hamstring Blow ...) name their own log line.
+					_append_log(tr("COMBAT_LOG_EFFECT_" + String(event.get("kind", "")).to_upper()) % _actor_name(actor))
 				elif event.has("spell_id"):
 					var source: SpellDefinition = SpellBook.get_spell(String(event["spell_id"]))
 					if source != null:
 						_append_log(tr("COMBAT_LOG_EFFECT") % [_actor_name(actor), tr(String(source.name_key))])
+			"feature":
+				_append_log(tr("COMBAT_LOG_FEATURE") % [_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
+			"feature_end":
+				_append_log(tr("COMBAT_LOG_FEATURE_END") % [_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
 			"feature_toggle":
 				_append_log(tr("COMBAT_LOG_FEATURE_ARMED" if bool(event.get("armed", false)) else "COMBAT_LOG_FEATURE_DISARMED") % \
 					[_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
@@ -342,7 +349,13 @@ func consume_events(events: Array[Dictionary]) -> void:
 				var joined: Dictionary = PartyRules.definition(String(event.get("actor_id", "")))
 				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))
 			"party_left":
-				_append_log(tr("PARTY_LOG_LEFT") % _actor_name(actor))
+				var left_name: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
+				_append_log(tr("PARTY_LOG_LOYALTY_LEFT" if String(event.get("reason", "")) == "loyalty" else "PARTY_LOG_LEFT") % left_name)
+			"companion_reaction":
+				var change: int = int(event.get("loyalty", 0))
+				if change != 0:
+					var reacting: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
+					_append_log(tr("PARTY_LOG_APPROVES" if change > 0 else "PARTY_LOG_DISAPPROVES") % reacting)
 			"party_refused":
 				_append_log(tr(String(event.get("reason_key", "PARTY_REASON_UNKNOWN"))))
 			"start_attack":

@@ -210,6 +210,111 @@ ITEM_MACE,Mace
 ITEM_QUARTERSTAFF,Quarterstaff
 ITEM_SHORTBOW,Shortbow
 ITEM_LEATHER_ARMOR,Leather armour
+CLASS_BARBARIAN,Barbarian
+CLASS_MONK,Monk
+CLASS_RANGER,Ranger
+ACTOR_BARBARIAN,Barbarian
+ACTOR_MONK,Monk
+ACTOR_RANGER,Ranger
+CREATION_DESCRIPTION_BARBARIAN,"A storm of muscle and fury with a greataxe. No armour needed: rage shrugs off blades and every swing hits harder. Reckless attacks open you up to the enemy too."
+CREATION_DESCRIPTION_MONK,"Fast, unarmoured and precise. Spear and fists strike several times a turn, Focus powers a flurry of blows and stunning strikes. Few hit points: speed is your armour."
+CREATION_DESCRIPTION_RANGER,"A hunter of the wilds with a longbow and a few spells. Marks prey with Hunter's Mark for extra damage on every hit and keeps the distance."
+ITEM_GREATAXE,Greataxe
+ITEM_HANDAXE,Handaxe
+ITEM_LONGBOW,Longbow
+ITEM_STUDDED_LEATHER,Studded leather armour
+ITEM_SCIMITAR,Scimitar
+SPELL_HUNTERS_MARK,Hunter's Mark
+FEATURE_ACTION_SURGE,Action Surge
+FEATURE_RAGE,Rage
+FEATURE_RAGE_BUTTON,Rage (%d/%d)
+FEATURE_RAGE_ACTIVE,Raging
+FEATURE_RAGE_HINT,"Bonus action: resistance to bludgeoning, piercing and slashing damage, extra damage with Strength attacks, advantage on Strength saves. Ends at the end of a turn without an attack."
+FEATURE_RAGE_ALREADY,Already raging
+FEATURE_RAGE_HEAVY_ARMOR,No Rage in heavy armour
+FEATURE_UNARMORED_DEFENSE,Unarmored Defense
+FEATURE_DANGER_SENSE,Danger Sense
+FEATURE_RECKLESS_ATTACK,Reckless Attack
+FEATURE_RECKLESS_ATTACK_BUTTON,Reckless Attack
+FEATURE_RECKLESS_ATTACK_ON,Reckless (on)
+FEATURE_RECKLESS_ATTACK_HINT,"Free, before your first attack: advantage on Strength melee attacks this turn, but attacks against you have advantage until your next turn."
+FEATURE_RECKLESS_ATTACK_ALREADY,Already reckless this turn
+FEATURE_RECKLESS_ATTACK_FIRST,Only before your first attack
+FEATURE_PRIMAL_KNOWLEDGE,Primal Knowledge
+FEATURE_FAST_MOVEMENT,Fast Movement
+FEATURE_FERAL_INSTINCT,Feral Instinct
+FEATURE_INSTINCTIVE_POUNCE,Instinctive Pounce
+FEATURE_BRUTAL_STRIKE,Brutal Strike
+FEATURE_BRUTAL_STRIKE_BUTTON,Brutal Strike
+FEATURE_BRUTAL_STRIKE_ON,Brutal Strike (ready)
+FEATURE_BRUTAL_STRIKE_HINT,"Once per turn while reckless: your next Strength attack gives up its advantage; on a hit +1d10 damage and the target's Speed drops by 4.5 m."
+FEATURE_BRUTAL_STRIKE_NEEDS_RECKLESS,Use Reckless Attack first
+FEATURE_BRUTAL_STRIKE_ALREADY,Already used this turn
+FEATURE_MARTIAL_ARTS,Martial Arts
+FEATURE_MARTIAL_ARTS_BUTTON,Martial Arts strike
+FEATURE_MARTIAL_ARTS_HINT,Bonus action: one more attack this turn.
+FEATURE_MONK_S_FOCUS,Monk's Focus
+FEATURE_FOCUS_POINTS,Focus %d/%d
+FEATURE_NO_FOCUS,No Focus Points left
+FEATURE_FLURRY_OF_BLOWS,Flurry of Blows
+FEATURE_FLURRY_OF_BLOWS_BUTTON,Flurry of Blows
+FEATURE_FLURRY_OF_BLOWS_HINT,"Bonus action, 1 Focus: two more attacks this turn (three from level 10)."
+FEATURE_PATIENT_DEFENSE,Patient Defense
+FEATURE_PATIENT_DEFENSE_BUTTON,Patient Defense
+FEATURE_PATIENT_DEFENSE_HINT,"Bonus action, 1 Focus: Disengage and Dodge (attacks against you have disadvantage) until your next turn."
+FEATURE_STEP_OF_THE_WIND,Step of the Wind
+FEATURE_STEP_OF_THE_WIND_BUTTON,Step of the Wind
+FEATURE_STEP_OF_THE_WIND_HINT,"Bonus action, 1 Focus: Dash and Disengage."
+FEATURE_UNARMORED_MOVEMENT,Unarmored Movement
+FEATURE_UNCANNY_METABOLISM,Uncanny Metabolism
+FEATURE_DEFLECT_ATTACKS,Deflect Attacks
+FEATURE_SLOW_FALL,Slow Fall
+FEATURE_STUNNING_STRIKE,Stunning Strike
+FEATURE_STUNNING_STRIKE_BUTTON,Stunning Strike
+FEATURE_STUNNING_STRIKE_ON,Stunning Strike (armed)
+FEATURE_STUNNING_STRIKE_HINT,"Free toggle: your next hit this turn spends 1 Focus. Constitution save or the target is stunned until your next turn; on a success it is slowed and your next attack against it has advantage."
+FEATURE_STUNNING_STRIKE_USED,Once per turn
+FEATURE_EMPOWERED_STRIKES,Empowered Strikes
+FEATURE_EVASION,Evasion
+FEATURE_ACROBATIC_MOVEMENT,Acrobatic Movement
+FEATURE_HEIGHTENED_FOCUS,Heightened Focus
+FEATURE_SELF_RESTORATION,Self-Restoration
+FEATURE_FAVORED_ENEMY,Favored Enemy
+FEATURE_DEFT_EXPLORER,Deft Explorer
+FEATURE_ROVING,Roving
+FEATURE_TIRELESS,Tireless
+FEAT_ARCHERY,Archery (+2 to ranged attack rolls)
+FEAT_DEFENSE,Defense (+1 AC in armour)
+LEVELUP_SECTION_MASTERY,WEAPON MASTERY (%d)
+LEVELUP_SECTION_PRIMAL_KNOWLEDGE,PRIMAL KNOWLEDGE: NEW SKILL (%d)
+LEVELUP_SECTION_DEFT_EXPLORER,DEFT EXPLORER: EXPERTISE (%d)
+LEVELUP_SECTION_RANGER_STYLE,FIGHTING STYLE (%d)
+LEVELUP_SECTION_RANGER_EXPERTISE,EXPERTISE (%d)
+COMBAT_ROLL_DEFLECT,Deflect Attacks
+COMBAT_LOG_CONDITION,%s is %s.
+COMBAT_LOG_FEATURE,%s uses %s.
+COMBAT_LOG_FEATURE_END,%s: %s ends.
+COMBAT_LOG_EFFECT_VEX,%s is vexed: the next attack against it has advantage.
+COMBAT_LOG_EFFECT_SLOW,%s is slowed by 3 m.
+COMBAT_LOG_EFFECT_HAMSTRING_BLOW,%s is hamstrung: 4.5 m slower.
+COMBAT_LOG_EFFECT_STUNNING_STRIKE,%s resists the stun but staggers.
+COMBAT_LOG_EFFECT_HUNTERS_MARK,%s is marked as prey.
+ROLL_SOURCE_RAGE,Rage
+ROLL_SOURCE_RECKLESS_ATTACK,Reckless Attack
+ROLL_SOURCE_BRUTAL_STRIKE,Brutal Strike
+ROLL_SOURCE_DANGER_SENSE,Danger Sense
+ROLL_SOURCE_FERAL_INSTINCT,Feral Instinct
+ROLL_SOURCE_VEX,Vex
+ROLL_SOURCE_DODGE,Dodge
+ROLL_SOURCE_STUNNING_STRIKE,Stunning Strike
+ROLL_SOURCE_MONK_LEVEL,Monk level
+ROLL_SOURCE_HUNTERS_MARK,Hunter's Mark
+ROLL_SOURCE_ARCHERY,Archery
+ROLL_SOURCE_DEFENSE,Defense
+ROLL_SOURCE_UNARMORED_DEFENSE,Unarmored Defense
+ITEM_LONGSWORD,Longsword
+ITEM_SPEAR,Spear
+ITEM_LIGHT_CROSSBOW,Light crossbow
 ITEM_CHAIN_SHIRT,Chain shirt
 ITEM_CHAIN_MAIL,Chain mail
 ITEM_SHIELD,Shield
@@ -779,9 +884,13 @@ INV_REASON_WILD_SHAPE,No gear in beast form
 FORM_WOLF,Wolf
 WEAPON_WOLF_BITE,Bite
 CONDITION_PARALYZED,Paralyzed
-COMBAT_LOG_CONDITION,%s is %s.
 COMBAT_LOG_EFFECT,%s: %s.
 COMBAT_LOG_FEATURE_ARMED,%s readies %s.
 COMBAT_LOG_FEATURE_DISARMED,%s holds back %s.
 COMBAT_LOG_WILD_SHAPE,%s turns into a %s.
 COMBAT_LOG_WILD_SHAPE_END,%s returns to their true form.
+PARTY_LOG_LOYALTY_LEFT,%s has had enough and leaves the party
+PARTY_LOG_APPROVES,%s approves
+PARTY_LOG_DISAPPROVES,%s disapproves
+PARTY_APPROVES,approves
+PARTY_DISAPPROVES,disapproves

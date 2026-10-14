@@ -38,48 +38,50 @@ func _run() -> void:
 	for id: String in PartyRules.definitions():
 		check(level.hook_views.has(id), id + " waits on the Torplatz")
 	# Recruit through the real dialogue window.
-	check(level.interact("companion_a"), "Companion A answers")
-	check(level.dialogue.is_open() and level.dialogue.choice_buttons.size() == 2, "Join and walk away are offered")
-	level.dialogue.choice_buttons[0].pressed.emit()
-	await get_tree().process_frame
-	check(PartyRules.members(game.state) == (["hero", "companion_a"] as Array[String]), "Companion A joins the party")
-	check(level.actors.has("companion_a"), "The companion appears in the world")
+	check(level.interact("companion_lyra"), "Lyra answers")
+	check(level.dialogue.is_open() and level.dialogue.speaker_label.text == "Lyra Vossen", "Her conversation opens")
+	# "I'm looking for someone who knows magic" -> "You can come along" -> accept her condition.
+	for slot: int in [5, 0, 0]:
+		level.dialogue.choice_buttons[slot].pressed.emit()
+		await get_tree().process_frame
+	check(PartyRules.members(game.state) == (["hero", "companion_lyra"] as Array[String]), "Lyra joins the party")
+	check(level.actors.has("companion_lyra"), "The companion appears in the world")
 	check(level.dialogue.is_open() and level.dialogue.choice_buttons.size() == 1, "The joined line ends the conversation")
 	level.dialogue.choice_buttons[0].pressed.emit()
 	await get_tree().process_frame
 	check(not level.dialogue.is_open() and not game.state.world.has("conversation"), "The conversation ends")
 	await get_tree().process_frame
 	await get_tree().process_frame
-	check(not level.hook_views.has("companion_a"), "The hook figure is gone once they joined")
-	var spot: Vector3 = game.state.actors["companion_a"]["position"]
+	check(not level.hook_views.has("companion_lyra"), "The hook figure is gone once they joined")
+	var spot: Vector3 = game.state.actors["companion_lyra"]["position"]
 	check(not level.space.query_path(spot, Vector3(0, 0, 8)).is_empty(), "The companion stands on walkable ground")
 	# Portrait click / Tab hand the commands to the companion.
-	level.hud.actor_selected.emit("companion_a")
-	check(level.controlled_id() == "companion_a", "A portrait click takes command of the companion")
-	check(level.menus.actor_id == "companion_a" and level.spell_targeting.caster_id == "companion_a", "Windows and spells follow the commanded member")
+	level.hud.actor_selected.emit("companion_lyra")
+	check(level.controlled_id() == "companion_lyra", "A portrait click takes command of the companion")
+	check(level.menus.actor_id == "companion_lyra" and level.spell_targeting.caster_id == "companion_lyra", "Windows and spells follow the commanded member")
 	var tab: InputEventAction = InputEventAction.new()
 	tab.action = "party_next"
 	tab.pressed = true
 	level._unhandled_input(tab)
 	check(level.controlled_id() == "hero", "Tab cycles back to the hero")
-	level.select_member("companion_a")
+	level.select_member("companion_lyra")
 	# The companion leads, the hero follows.
 	var lead_to: Vector3 = Vector3(1.0, 0, 6.0)
 	check(bus.submit(MoveCommand.new(level.controlled_id(), lead_to)) == OK, "The companion walks where the player clicks")
 	await _settle()
 	var state: GameState = game.state
-	check((state.actors["companion_a"]["position"] as Vector3).distance_to(lead_to) < 0.2, "The companion arrives")
+	check((state.actors["companion_lyra"]["position"] as Vector3).distance_to(lead_to) < 0.2, "The companion arrives")
 	var gap: float = (state.actors["hero"]["position"] as Vector3).distance_to(lead_to)
 	check(gap > 0.8 and gap < 4.0, "The hero follows the companion (%.2f m behind)" % gap)
 	# The companion leads the party to the crypt entrance; the whole party travels.
-	check(bus.submit(MoveCommand.new("companion_a", Vector3(-19.0, 0, -14.0))) == OK, "Walk to the crypt entrance")
+	check(bus.submit(MoveCommand.new("companion_lyra", Vector3(-19.0, 0, -14.0))) == OK, "Walk to the crypt entrance")
 	await _settle()
 	check(level.interact("torviertel_crypt_entrance"), "The crypt entrance answers")
 	var crypt: DungeonLevel = await _wait_for_level(level)
 	check(crypt != null and String(game.state.world["level"]) == "crypt", "The party entered the crypt")
 	level = crypt
 	level.set_physics_process(false)
-	check(level.actors.has("companion_a") and PartyRules.members(game.state).size() == 2, "The companion came along")
+	check(level.actors.has("companion_lyra") and PartyRules.members(game.state).size() == 2, "The companion came along")
 	check(PartyRegroupCommand.stranded(game.state).is_empty(), "Everyone stands on walkable ground in the crypt")
 	# Walk into the hall until the patrol notices the party.
 	level.select_member("hero")
@@ -89,7 +91,7 @@ func _run() -> void:
 		level.simulation_step(0.1, true)
 		steps += 1
 	state = game.state
-	check(state.mode == &"combat" and "companion_a" in state.turn_order, "The companion rolls initiative")
+	check(state.mode == &"combat" and "companion_lyra" in state.turn_order, "The companion rolls initiative")
 	# Enemies act by AI; the hero passes. On the companion's turn the game waits for the player.
 	var waited: bool = false
 	steps = 0
@@ -107,10 +109,10 @@ func _run() -> void:
 				for index: int in 5:
 					level.simulation_step(0.1, true)
 				waited = JSON.stringify(JSON.from_native(game.state.to_dict())) == before
-				check(level.controlled_id() == "companion_a" and level._can_control(), "The player commands the companion on its turn")
-				check(level.hud.controlled_id == "companion_a", "The HUD shows the companion's bars and actions")
+				check(level.controlled_id() == "companion_lyra" and level._can_control(), "The player commands the companion on its turn")
+				check(level.hud.controlled_id == "companion_lyra", "The HUD shows the companion's bars and actions")
 				level._action_requested("end_turn")
-				check(game.state.current_actor_id() != "companion_a", "End turn passes the companion's turn")
+				check(game.state.current_actor_id() != "companion_lyra", "End turn passes the companion's turn")
 		level.simulation_step(0.1, true)
 		steps += 1
 		if steps % 10 == 0:

@@ -1,0 +1,10 @@
+{
+	"_comment": "Barbarian items and starting kit (SRD 5.2 p. 28: Greataxe, 4 Handaxes, Explorer's Pack, 15 GP; the pack is not modelled). Merged into the catalog by ItemCatalog.",
+	"items": {
+		"greataxe": {"type": "weapon", "name_key": "ITEM_GREATAXE", "category": "martial", "kind": "melee", "damage_dice": "1d12", "damage_type": "slashing", "properties": ["heavy", "two_handed"], "mastery": "cleave", "weight_kg": 3.15, "value_gp": 30, "model": "res://assets/weapons/greataxe.glb"},
+		"handaxe": {"type": "weapon", "name_key": "ITEM_HANDAXE", "category": "simple", "kind": "melee", "damage_dice": "1d6", "damage_type": "slashing", "properties": ["light", "thrown"], "mastery": "vex", "weight_kg": 0.9, "value_gp": 5, "model": "res://assets/weapons/axe.glb"}
+	},
+	"starting_kits": {
+		"barbarian": {"equipped": {"main_hand": "greataxe"}, "bag": {"handaxe": 4, "potion_of_healing": 1}, "gold": 15}
+	}
+}

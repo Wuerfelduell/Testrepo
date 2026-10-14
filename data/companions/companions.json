@@ -1,8 +1,13 @@
 {
-	"version": 1,
+	"version": 2,
 	"companions": [
-		{"id": "companion_a", "name": "Companion A", "class_id": "fighter", "model": "res://assets/characters/hero_fighter_female/model.glb", "colors": {}, "dialogue": "companion_a"},
-		{"id": "companion_b", "name": "Companion B", "class_id": "wizard", "model": "res://assets/characters/hero_wizard_male_hood/model.glb", "colors": {}, "dialogue": "companion_b"},
-		{"id": "companion_c", "name": "Companion C", "class_id": "fighter", "model": "res://assets/characters/male_ranger/model.glb", "colors": {}, "dialogue": "companion_c"}
+		{"id": "companion_kael", "short": "kael", "name": "Kael Dorn", "class_id": "fighter", "species": "human",
+			"model": "res://assets/characters/hero_fighter_male/model.glb", "colors": {}, "dialogue": "companion_kael",
+			"leaves_below": -3},
+		{"id": "companion_lyra", "short": "lyra", "name": "Lyra Vossen", "class_id": "wizard", "species": "half_elf",
+			"model": "res://assets/characters/hero_wizard_female_hood/model.glb", "colors": {}, "dialogue": "companion_lyra"},
+		{"id": "companion_seren", "short": "seren", "name": "Seren Nachtfall", "class_id": "rogue", "fallback_class": "fighter",
+			"species": "dark_elf", "model": "res://assets/characters/female_ranger/model.glb", "colors": {}, "dialogue": "companion_seren",
+			"leaves_below": -3}
 	]
 }

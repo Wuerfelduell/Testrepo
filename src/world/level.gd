@@ -62,6 +62,7 @@ func _ready() -> void:
 	_build_dormant_views()
 	_build_hooks()
 	_build_trap_marker()
+	_start_banter.call_deferred("arrive")
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--level-capture="):
 			_level_capture_path = argument.trim_prefix("--level-capture=")
@@ -273,6 +274,9 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 					trap_marker.visible = true
 			"dialogue_end", "party_joined":
 				_hide_finished_hooks.call_deferred()
+			"rest":
+				if String(event.get("rest", "")) == "long":
+					_start_banter.call_deferred("rest")
 			"travel":
 				# The old area's views must not read the new area's state until the scene changes.
 				ready_for_input = false
@@ -429,6 +433,15 @@ func _within_reach(state: GameState, hook_id: String) -> bool:
 	var target: Vector3 = _interact_point(hook_id)
 	var hero: Vector3 = state.actors[controlled_id()]["position"]
 	return target.is_finite() and Vector2(target.x - hero.x, target.z - hero.z).length() <= INTERACT_RANGE_M + 0.5
+
+## Companions talk among themselves (data/companions/banter.json) after a long rest or on
+## arriving in an area, once per banter, when nothing else is going on.
+func _start_banter(trigger: String) -> void:
+	if not ready_for_input or dialogue.is_open() or interaction.is_open() or Game.state.mode != &"exploration":
+		return
+	var banter_id: String = PartyRules.next_banter(Game.state, trigger)
+	if not banter_id.is_empty():
+		dialogue.open(banter_id)
 
 ## Package 08 owns resting: the rest point opens its long-rest dialog (LongRestCommand).
 ## Returns the line to show when resting is refused, or "" when the dialog opened.

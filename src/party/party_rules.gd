@@ -4,8 +4,9 @@ extends RefCounted
 ## ordinary actors with team "hero", so initiative, rests and spells already treat them as
 ## allies. The order lives in GameState.world["party"] (hero first). A companion who left
 ## waits as a plain record in world["companions"] and comes back exactly as they were.
-## Companion definitions: data/companions/companions.json (placeholders until the owner
-## decides who the three Overcity companions are).
+## Companion definitions: data/companions/companions.json (the owner's Kael, Lyra, Seren).
+## Loyalty is a counter flag "<short>_loyalty"; reactions and banter live in the dialogue
+## data (data/dialogue/README.md, "react" effect and data/companions/banter.json).
 
 const MAX_SIZE: int = 4
 const DATA_PATH: String = "res://data/companions/companions.json"
@@ -17,7 +18,11 @@ const FOLLOW_OFFSETS: Array[Vector2] = [Vector2(-1.1, 1.2), Vector2(1.1, 1.2), V
 ## Living actors closer than this block a follow or join spot.
 const SPOT_CLEARANCE_M: float = 0.85
 
+const BANTER_PATH: String = "res://data/companions/banter.json"
+const BANTER_TRIGGERS: Array[String] = ["rest", "arrive"]
+
 static var _definitions: Dictionary = {}
+static var _banter: Array = []
 
 # Definitions ---------------------------------------------------------------------------
 
@@ -34,6 +39,22 @@ static func definitions() -> Dictionary:
 static func definition(companion_id: String) -> Dictionary:
 	return definitions().get(companion_id, {})
 
+## "kael" -> "companion_kael" ("" when unknown). Dialogue data names companions by short name.
+static func id_for(short: String) -> String:
+	for id: String in definitions():
+		if String(definitions()[id].get("short", "")) == short:
+			return id
+	return ""
+
+static func short_name(companion_id: String) -> String:
+	return String(definition(companion_id).get("short", ""))
+
+## The class the companion plays with: their own, or the stand-in until it is playable
+## (Seren is a Rogue; Fighter rules until the Rogue class exists).
+static func class_for(entry: Dictionary) -> String:
+	var wanted: String = String(entry.get("class_id", ""))
+	return wanted if HeroFactory.is_playable(wanted) else String(entry.get("fallback_class", ""))
+
 ## Everything wrong with the definitions file, as readable lines (empty = valid).
 static func problems() -> PackedStringArray:
 	var found: PackedStringArray = []
@@ -45,8 +66,11 @@ static func problems() -> PackedStringArray:
 			found.append("%s: ids start with %s and are identifiers" % [id, ID_PREFIX])
 		if not entry.get("name") is String or String(entry["name"]).is_empty():
 			found.append(id + ": name is required")
-		if not HeroFactory.is_playable(String(entry.get("class_id", ""))):
-			found.append(id + ": class_id must be a playable class " + str(HeroFactory.playable()))
+		if not HeroFactory.is_playable(class_for(entry)):
+			found.append(id + ": class_id (or fallback_class) must be a playable class " + str(HeroFactory.playable()))
+		var short: String = String(entry.get("short", ""))
+		if not short.is_valid_identifier() or id_for(short) != id:
+			found.append(id + ": short must be a unique identifier")
 		if not ResourceLoader.exists(String(entry.get("model", ""))):
 			found.append(id + ": model does not exist")
 		if create_record(id).is_empty():
@@ -58,12 +82,13 @@ static func create_record(companion_id: String, position: Vector3 = Vector3.ZERO
 	var entry: Dictionary = definition(companion_id)
 	if entry.is_empty():
 		return {}
-	var record: Dictionary = HeroFactory.build_record(String(entry.get("class_id", "")),
+	var record: Dictionary = HeroFactory.build_record(class_for(entry),
 		{"scene": String(entry.get("model", ""))}, String(entry.get("name", "")), entry.get("colors", {}))
 	if record.is_empty():
 		return {}
 	record["id"] = companion_id
 	record["companion_id"] = companion_id
+	record["species"] = String(entry.get("species", record.get("species", "human")))
 	record["position"] = position
 	record = HeroKit.activate(record)
 	EquipmentRules.initialize(record, String(record["class_id"]), InventoryCommand.training_for(record))
@@ -204,3 +229,104 @@ static func share_xp(state: GameState, amount: int, reason_key: String) -> Array
 		actor["xp_history"] = sheet.xp_history()
 		shared.append({"actor_id": id, "total_xp": sheet.xp, "level_up_available": ProgressionRules.can_level_up(actor)})
 	return shared
+
+# Loyalty, reactions, banter -------------------------------------------------------------
+
+static func loyalty(state: GameState, companion_id: String) -> int:
+	return DialogueData.number(DialogueData.flags(state).get(short_name(companion_id) + "_loyalty", 0))
+
+## Companions whose loyalty fell below their "leaves_below" leave the party for good: their
+## record stays in world["companions"], the flag "<short>_left" keeps them away.
+static func loyalty_departures(state: GameState) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	for id: String in members(state):
+		var entry: Dictionary = definition(id)
+		if id == "hero" or not entry.has("leaves_below") or not CombatRules.alive(state.actors[id]):
+			continue
+		if loyalty(state, id) < int(entry["leaves_below"]):
+			var flags: Dictionary = state.world.get("flags", {})
+			flags[short_name(id) + "_left"] = true
+			state.world["flags"] = flags
+			var left: Array[Dictionary] = dismiss(state, id)
+			for event: Dictionary in left:
+				event["reason"] = "loyalty"
+			events.append_array(left)
+	return events
+
+## A "react" effect: every named companion who is in the party and alive says their line,
+## and their loyalty changes once per reward key (repeating an answer never farms it).
+static func react(state: GameState, reactions: Dictionary, reward_key: String) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var rewarded: Dictionary = state.world.get("dialogue_rewards", {})
+	var flags: Dictionary = state.world.get("flags", {})
+	for short: Variant in reactions:
+		var id: String = id_for(String(short))
+		if id.is_empty() or not is_member(state, id) or not CombatRules.alive(state.actors[id]):
+			continue
+		var reaction: Dictionary = reactions[short]
+		var change: int = int(reaction.get("loyalty", 0))
+		var key: String = "react:%s:%s" % [reward_key, short]
+		if change != 0 and not rewarded.has(key):
+			rewarded[key] = change
+			var name: String = String(short) + "_loyalty"
+			flags[name] = DialogueData.number(flags.get(name, 0)) + change
+		else:
+			change = 0
+		events.append({"type": "companion_reaction", "actor_id": id, "text": String(reaction.get("text", "")),
+			"loyalty": change, "total": DialogueData.number(flags.get(String(short) + "_loyalty", 0))})
+	state.world["dialogue_rewards"] = rewarded
+	state.world["flags"] = flags
+	return events
+
+## Companion banter (data/companions/banter.json): conversations between companions that
+## start on their own at a trigger ("rest" after a long rest, "arrive" in an area).
+static func banter() -> Array:
+	if _banter.is_empty() and FileAccess.file_exists(BANTER_PATH):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(BANTER_PATH))
+		if parsed is Dictionary and parsed.get("banter") is Array:
+			_banter = parsed["banter"]
+	return _banter
+
+## The first banter conversation that may start now, or "".
+static func next_banter(state: GameState, trigger: String) -> String:
+	if not DialogueEffects.can_talk(state) or state.world.has("conversation"):
+		return ""
+	for entry: Variant in banter():
+		if not entry is Dictionary or String(entry.get("trigger", "")) != trigger:
+			continue
+		if DialogueData.flags(state).has(banter_flag(entry)):
+			continue
+		var ready: bool = true
+		for short: Variant in entry.get("members", []):
+			var id: String = id_for(String(short))
+			ready = ready and is_member(state, id) and CombatRules.alive(state.actors[id])
+		if ready and DialogueData.conditions_met(entry.get("if", []), state):
+			return String(entry.get("dialogue", ""))
+	return ""
+
+## Set by the banter's own start node; a banter plays once.
+static func banter_flag(entry: Dictionary) -> String:
+	return "banter_" + String(entry.get("id", ""))
+
+static func banter_problems() -> PackedStringArray:
+	var found: PackedStringArray = []
+	for entry: Variant in banter():
+		var id: String = String(entry.get("id", "")) if entry is Dictionary else ""
+		if id.is_empty():
+			found.append("banter entries need an id")
+			continue
+		if not String(entry.get("trigger", "")) in BANTER_TRIGGERS:
+			found.append(id + ": trigger must be one of " + str(BANTER_TRIGGERS))
+		for short: Variant in entry.get("members", []):
+			if id_for(String(short)).is_empty():
+				found.append(id + ": unknown companion " + String(short))
+		var tree: Dictionary = DialogueData.load_dialogue(String(entry.get("dialogue", "")))
+		if tree.is_empty():
+			found.append(id + ": dialogue does not exist")
+			continue
+		found.append_array(DialogueData.condition_problems(entry.get("if", []), id))
+		var first: Dictionary = tree["nodes"].get(String(tree["start"][-1]["node"]), {})
+		if not first.get("effects", {}).get("flags", {}).has(banter_flag(entry)):
+			found.append(id + ": the start node must set flag " + banter_flag(entry))
+	return found
+

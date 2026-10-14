@@ -56,6 +56,10 @@ static func apply(state: GameState, effects: Dictionary, reward_key: String) -> 
 		events.append_array(PartyRules.recruit(state, String(effects["recruit"])))
 	if effects.has("dismiss"):
 		events.append_array(PartyRules.dismiss(state, String(effects["dismiss"])))
+	# Companions in the party comment and their loyalty moves; too little and they leave.
+	if effects.has("react"):
+		events.append_array(PartyRules.react(state, effects["react"], reward_key))
+	events.append_array(PartyRules.loyalty_departures(state))
 	return events
 
 ## A blow or a curse in a conversation: hurts the hero but never below 1 HP, so talking

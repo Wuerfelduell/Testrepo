@@ -1,0 +1,87 @@
+{
+	"version": 1,
+	"id": "banter_kael_lyra",
+	"speaker": "Companions",
+	"start": [
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"speaker": "kael",
+			"text": "[Placeholder: Kael says magic is a coward's weapon]",
+			"effects": {
+				"flags": {
+					"banter_kael_lyra": true
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: listen]",
+					"next": "answer"
+				}
+			]
+		},
+		"answer": {
+			"speaker": "lyra",
+			"text": "[Placeholder: Lyra calls Kael a primitive thug]",
+			"choices": [
+				{
+					"text": "[Placeholder: side with Kael]",
+					"next": "end_a",
+					"effects": {
+						"flags": {
+							"banter_kael_lyra": "kael"
+						},
+						"react": {
+							"kael": {
+								"text": "[Placeholder: kael is pleased]",
+								"loyalty": 1
+							},
+							"lyra": {
+								"text": "[Placeholder: lyra is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: side with Lyra]",
+					"next": "end_b",
+					"effects": {
+						"flags": {
+							"banter_kael_lyra": "lyra"
+						},
+						"react": {
+							"lyra": {
+								"text": "[Placeholder: lyra is pleased]",
+								"loyalty": 1
+							},
+							"kael": {
+								"text": "[Placeholder: kael is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: stay out of it]",
+					"next": "end_none"
+				}
+			]
+		},
+		"end_a": {
+			"speaker": "lyra",
+			"text": "[Placeholder: lyra has the last word]"
+		},
+		"end_b": {
+			"speaker": "kael",
+			"text": "[Placeholder: kael has the last word]"
+		},
+		"end_none": {
+			"speaker": "kael",
+			"text": "[Placeholder: the argument dies down]"
+		}
+	}
+}

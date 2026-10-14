@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"hunters_mark"
+name_key = &"SPELL_HUNTERS_MARK"
+srd_name = "Hunter's Mark"
+level = 1
+school = "divination"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 27.0
+resolution = "none"
+damage_dice = "1d6"
+damage_type = &"force"
+concentration = true
+duration_rounds = 600
+effect = &"hunters_mark"
+vfx = &"hunters_mark"

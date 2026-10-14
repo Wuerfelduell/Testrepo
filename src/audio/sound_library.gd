@@ -24,7 +24,8 @@ const SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "bu
 	"guiding_bolt", "inflict_wounds", "shield_of_faith", "divine_favor", "entangle", "faerie_fire",
 	"aid", "barkskin", "hold_person", "mass_healing_word", "call_lightning", "blight", "ice_storm",
 	"flame_strike", "mass_cure_wounds", "divine_spark", "divine_spark_heal", "turn_undead",
-	"abjure_foes", "lay_on_hands", "wild_shape", "revert_wild_shape"]
+	"abjure_foes", "lay_on_hands", "wild_shape", "revert_wild_shape",
+	"hunters_mark"]
 
 ## cue -> {"files": [paths, one picked at random], "volume_db": float, "bus": String}.
 ## Paths are relative to SFX_DIR unless they start with "res://".
@@ -135,6 +136,9 @@ const CUES: Dictionary = {
 	"spell_impact_wild_shape": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"spell_cast_revert_wild_shape": {"files": ["spell_cast.ogg"], "volume_db": -8.0, "bus": "Effects"},
 	"spell_impact_revert_wild_shape": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	# Ranger (class kits) reuses existing files until it gets its own.
+	"spell_cast_hunters_mark": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_hunters_mark": {"files": ["spell_impact.ogg"], "volume_db": -8.0, "bus": "Effects"},
 	"spell_blocked": {"files": ["spell_shield.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"heal": {"files": ["heal.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"level_up": {"files": ["level_up.ogg"], "volume_db": -4.0, "bus": "UI"},

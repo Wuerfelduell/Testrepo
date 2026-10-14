@@ -1,17 +1,22 @@
 # Companions (campaign package K4)
 
-`companions.json` lists every recruitable companion. All three are **placeholders** until
-the owner decides who the three Overcity companions are (docs/STORY.md); the owner writes
-their dialogues himself. The knight boy from the Underground City joins later as a short
+`companions.json` lists every recruitable companion: the owner's Kael Dorn (fighter),
+Lyra Vossen (wizard, half-elf) and Seren Nachtfall (rogue, dark elf; Fighter rules via
+`fallback_class` until the Rogue class is playable). Their lines come from the owner's
+dialogue document; `[Placeholder: ...]` lines are slots he still writes. The knight boy from the Underground City joins later as a short
 4th companion (story decision R8) and gets an entry here when that part is built.
 
 ```json
-{"id": "companion_a", "name": "Companion A", "class_id": "fighter",
- "model": "res://assets/characters/hero_fighter_female/model.glb", "colors": {}, "dialogue": "companion_a"}
+{"id": "companion_kael", "short": "kael", "name": "Kael Dorn", "class_id": "fighter", "species": "human",
+ "model": "res://assets/characters/hero_fighter_male/model.glb", "colors": {}, "dialogue": "companion_kael",
+ "leaves_below": -3}
 ```
 
 - **id** starts with `companion_` and is also the actor id in the game state.
-- **class_id**: a playable class (`fighter` or `wizard` today). Level 1, standard array,
+- **short**: the name dialogue data uses (`"react": {"kael": ...}`, `"speaker": "kael"`,
+  flags `kael_loyalty`, `kael_recruited`, `kael_left`).
+- **class_id**: a playable class; **fallback_class** is used while class_id is not playable
+  yet. Otherwise a playable class (`fighter` or `wizard` today). Level 1, standard array,
   class skills and starting kit, like a created hero (HeroFactory).
 - **model**: any hero look scene; **colors**: per-piece colours (HeroColors), may be empty.
 - **dialogue**: the conversation in data/dialogue/ that recruits them (effect `"recruit"`).
@@ -30,3 +35,17 @@ How the party works:
 - They wait on the Torplatz in Das Torviertel (hooks in data/encounters/torviertel.json);
   the hook disappears once they joined (`"hide_if": [{"in_party": id}]`). They travel with
   the hero between areas (AreaTravel moves every actor of the hero's team).
+
+Loyalty, reactions and arguments (owner, 14-10-2026, docs/STORY.md "How Rabenfels reacts"):
+- Loyalty is the counter flag `<short>_loyalty`. A dialogue effect `"react"` lets companions
+  in the party comment on an answer and moves their loyalty once per answer; the line shows
+  in the dialogue window, approve/disapprove in the combat log. With `leaves_below` set
+  (Kael, Seren: -3) a companion whose loyalty drops below it leaves for good (`<short>_left`).
+- `banter.json`: companions arguing among themselves. Each entry plays once, when both are
+  in the party and alive, after a long rest (`"trigger": "rest"`) or on entering an area
+  (`"arrive"`). Nodes name who speaks (`"speaker": "lyra"`); taking sides is a choice with
+  `"react"`. The tree's start node must set flag `banter_<id>`.
+- Trial job ("Probeauftrag"): the companion joins with flag `<short>_trial`.
+- Kael's duel is an Athletics check (DC 14) until the non-lethal dialogue fight is in.
+- Rumour-only answers need `kael_rumor_heard` / `seren_rumor_heard`, set by a district
+  conversation (not written yet).

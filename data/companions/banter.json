@@ -1,0 +1,9 @@
+{
+	"version": 1,
+	"_comment": "Companions arguing among themselves (owner, 14-10-2026, docs/STORY.md). Each plays once, when both are in the party and alive: trigger rest = after a long rest, arrive = on entering an area. The dialogue's start node must set flag banter_<id>.",
+	"banter": [
+		{"id": "kael_lyra", "trigger": "rest", "members": ["kael", "lyra"], "dialogue": "banter_kael_lyra"},
+		{"id": "kael_seren", "trigger": "arrive", "members": ["kael", "seren"], "dialogue": "banter_kael_seren"},
+		{"id": "lyra_seren", "trigger": "rest", "members": ["lyra", "seren"], "dialogue": "banter_lyra_seren"}
+	]
+}

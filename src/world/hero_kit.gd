@@ -131,6 +131,13 @@ static func _activate_kit(record: Dictionary, class_id: String) -> Dictionary:
 		ClassSpellcasting.activate(record)
 	ClassFeatures.advance(record, level)
 	ClassKits.call_kit(class_id, "refresh_derived", [record])
+	if not EquipmentRules.has_inventory(record):
+		# Records without an inventory yet: class AC formula and speed bonus right away
+		# (EquipmentRules.refresh_armor/refresh_speed take over once gear is set up).
+		if String(record.get("armor", "none")) in ["", "none"]:
+			record["ac"] = maxi(int(record.get("ac", 10)), ClassKits.unarmored_ac(record, bool(record.get("shield", false))))
+		record["speed_m"] = float(record.get("speed_m", 9.0)) + ClassKits.speed_bonus_m(record)
+		record["move_left"] = record["speed_m"]
 	return record
 
 ## SRD 5.2 Greatsword (martial, two-handed, 2d6 slashing, mastery Graze): the owner's
