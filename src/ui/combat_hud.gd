@@ -175,7 +175,7 @@ func update_state(state: GameState) -> void:
 	_death.visible = state.mode == &"defeat" and not dice_popup.is_busy()
 	if state.mode == &"defeat":
 		var fallen: Dictionary = state.actors.get("hero", hero)
-		_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(fallen), tr("CLASS_FIGHTER"), int(fallen.get("level", 1)), _death_killer if not _death_killer.is_empty() else tr("COMBAT_UNKNOWN_ACTOR"), state.round_number, int(fallen.get("xp", 0))]
+		_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(fallen), tr("CLASS_" + String(fallen.get("class_id", "fighter")).to_upper()), int(fallen.get("level", 1)), _death_killer if not _death_killer.is_empty() else tr("COMBAT_UNKNOWN_ACTOR"), state.round_number, int(fallen.get("xp", 0))]
 
 func _rebuild_portraits(state: GameState, current_id: String) -> void:
 	for child: Node in _initiative.get_children():
@@ -306,7 +306,7 @@ func consume_events(events: Array[Dictionary]) -> void:
 				if _friendly(actor):
 					var killer: Dictionary = _state.actors.get(String(event.get("killer_id", "")), {})
 					_death_killer = _actor_name(killer)
-					_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(actor), tr("CLASS_FIGHTER"), int(actor.get("level", 1)), _death_killer, _state.round_number, int(actor.get("xp", 0))]
+					_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(actor), tr("CLASS_" + String(actor.get("class_id", "fighter")).to_upper()), int(actor.get("level", 1)), _death_killer, _state.round_number, int(actor.get("xp", 0))]
 			"knocked_out":
 				_append_log(tr("COMBAT_LOG_KNOCKED_OUT") % _actor_name(actor))
 			"combat_end":
@@ -329,7 +329,29 @@ func consume_events(events: Array[Dictionary]) -> void:
 				else:
 					_append_log(tr("COMBAT_LOG_CONDITION") % [_actor_name(actor), tr("CONDITION_" + condition.to_upper())])
 			"condition_end":
-				_append_log(tr("COMBAT_LOG_WAKES") % _actor_name(actor))
+				var ended_key: String = {"poisoned": "COMBAT_LOG_POISON_ENDS", "prone": "COMBAT_LOG_STANDS_UP"}.get(
+					String(event.get("condition", "")), "COMBAT_LOG_WAKES")
+				_append_log(tr(ended_key) % _actor_name(actor))
+			"hidden":
+				_append_log(tr("COMBAT_LOG_HIDDEN") % _actor_name(actor))
+			"hide_failed":
+				_append_log(tr("COMBAT_LOG_HIDE_FAILED") % _actor_name(actor))
+			"hidden_end":
+				_append_log(tr("COMBAT_LOG_HIDDEN_END") % _actor_name(actor))
+			"feature":
+				# Rogue features (rogue_kit.gd) have their own lines; the rest share one.
+				match String(event.get("feature_id", "")):
+					"uncanny_dodge":
+						_append_log(tr("COMBAT_LOG_UNCANNY_DODGE") % _actor_name(actor))
+					"cunning_strike":
+						if event.has("target_id"):
+							_append_log(tr("COMBAT_LOG_CUNNING_STRIKE") % [_actor_name(actor),
+								tr("CUNNING_STRIKE_" + String(event.get("strike", "")).to_upper())])
+					_:
+						_append_log(tr("COMBAT_LOG_FEATURE") % [_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
+			"dash", "disengage":
+				if String(event.get("feature_id", "")).begins_with("cunning_"):
+					_append_log(tr("COMBAT_LOG_CUNNING_ACTION") % [_actor_name(actor), tr("COMBAT_" + String(event["type"]).to_upper())])
 			"concentration_end":
 				var ended: SpellDefinition = SpellBook.get_spell(String(event.get("spell_id", "")))
 				_append_log(tr("COMBAT_LOG_CONCENTRATION_END") % [_actor_name(actor), tr(String(ended.name_key)) if ended != null else ""])
@@ -345,8 +367,6 @@ func consume_events(events: Array[Dictionary]) -> void:
 					var source: SpellDefinition = SpellBook.get_spell(String(event["spell_id"]))
 					if source != null:
 						_append_log(tr("COMBAT_LOG_EFFECT") % [_actor_name(actor), tr(String(source.name_key))])
-			"feature":
-				_append_log(tr("COMBAT_LOG_FEATURE") % [_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
 			"feature_end":
 				_append_log(tr("COMBAT_LOG_FEATURE_END") % [_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
 			"feature_toggle":
@@ -792,6 +812,9 @@ func _condition_text(actor: Dictionary) -> String:
 	elif raw is Array:
 		for condition: Variant in raw:
 			conditions.append(tr("CONDITION_" + String(condition).to_upper()))
+	for kind: String in [ActiveEffects.HIDDEN, ActiveEffects.STEADY_AIM]:
+		if ActiveEffects.has_kind(actor, kind):
+			conditions.append(tr("CONDITION_" + kind.to_upper()))
 	return " · ".join(conditions) if not conditions.is_empty() else tr("COMBAT_NO_CONDITIONS")
 
 func _actor_name(actor: Dictionary) -> String:

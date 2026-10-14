@@ -58,8 +58,9 @@ static func _resolve(kind: StringName, ability: StringName, score: int, dc: int,
 		disadvantages.append_array(ctx.conditions.check_disadvantages(ctx.fear_source_visible))
 	if result.automatic_failure:
 		return result
+	var minimum: int = ctx.minimum_d20 if kind != &"saving_throw" and proficient else 0
 	result.roll = Dice.d20(rng, Abilities.modifiers_for(score, ability, level, proficient, expertise),
-		ctx.advantages, disadvantages)
+		ctx.advantages, disadvantages, minimum)
 	result.error = result.roll.error
 	result.success = result.roll.is_valid() and result.roll.total >= dc
 	return result

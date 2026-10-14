@@ -36,6 +36,8 @@ func apply(state: GameState) -> Dictionary:
 	var crossings: Array[Dictionary] = []
 	if state.mode == &"combat":
 		state.actors[actor_id]["move_left"] = maxf(0.0, float(state.actors[actor_id]["move_left"]) - cost)
+		# Steady Aim (Rogue 3) needs a turn without movement.
+		state.actors[actor_id]["moved_this_turn"] = true
 		crossings = CombatRules.opportunity_crossings(state, actor_id, path)
 	var length: float = CombatRules.path_length(path)
 	# Party (package K4): out of combat the other members walk along behind the leader.

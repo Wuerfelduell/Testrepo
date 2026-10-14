@@ -28,5 +28,7 @@
 	"res://assets/characters/hero_sorcerer_female/model.glb": {"main_hand": "spear"},
 	"res://assets/characters/hero_warlock_male/model.glb": {"main_hand": "sickle"},
 	"res://assets/characters/hero_warlock_female/model.glb": {"main_hand": "sickle"},
+	"res://assets/characters/hero_rogue_male/model.glb": {"main_hand": "dagger"},
+	"res://assets/characters/hero_rogue_female/model.glb": {"main_hand": "dagger"},
 	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"}
 }

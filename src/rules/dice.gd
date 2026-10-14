@@ -69,7 +69,7 @@ static func roll(expression: String, rng: RandomNumberGenerator,
 	return result
 
 static func d20(rng: RandomNumberGenerator, modifiers: Array[RuleModifier] = [],
-		advantages: Array[StringName] = [], disadvantages: Array[StringName] = []) -> DiceResult:
+		advantages: Array[StringName] = [], disadvantages: Array[StringName] = [], minimum: int = 0) -> DiceResult:
 	var result: DiceResult = DiceResult.new()
 	result.expression = "1d20"
 	if rng == null or not valid_modifiers(modifiers):
@@ -94,6 +94,12 @@ static func d20(rng: RandomNumberGenerator, modifiers: Array[RuleModifier] = [],
 	result.groups.append(group)
 	result.total = group.values[kept]
 	result.record_natural(result.total)
+	if group.values[kept] < minimum:
+		# Reliable Talent: the kept die counts as the minimum (shown as "7→10").
+		group.rolled = group.values.duplicate()
+		group.raised_indices.append(kept)
+		group.values[kept] = mini(minimum, 20)
+		result.total = group.values[kept]
 	result.add_modifiers(modifiers)
 	return result
 

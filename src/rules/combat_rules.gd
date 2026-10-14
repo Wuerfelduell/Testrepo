@@ -39,12 +39,40 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	actor["disengaged"] = false
 	# Extra Attack: further attacks of an Attack action already taken this turn.
 	actor["attacks_left"] = 0
+	actor["moved_this_turn"] = false
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
 		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
 	if ActiveEffects.in_hostile_aura(state, actor_id):
 		# Spirit Guardians halve the speed of enemies inside (judged at the start of the turn).
 		actor["move_left"] = float(actor["move_left"]) * 0.5
+	events.append_array(reveal_hidden(state))
 	events.append_array(ClassKits.on_turn_start(state, actor_id))
+	return events
+
+## Hiding needs Three-Quarters Cover or no line of sight from every enemy (SRD 5.2 Hide).
+static func hidden_from_enemies(state: GameState, actor_id: String) -> bool:
+	var actor: Dictionary = state.actors[actor_id]
+	var geometry: CombatSpace = CombatSpace.current()
+	for enemy_id: String in state.actors:
+		var enemy: Dictionary = state.actors[enemy_id]
+		if enemy.get("team") == actor.get("team") or not alive(enemy) or not conditions_for(enemy).can_act() or \
+				conditions_for(enemy).has(&"blinded"):
+			continue
+		if geometry.cover(enemy["position"], actor["position"]) < 5:
+			return false
+	return true
+
+## An enemy finds a hidden creature that stands in its open sight: checked at the start of
+## every turn, so stepping out of hiding and striking in the same turn still works.
+static func reveal_hidden(state: GameState) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	for id: String in state.actors:
+		var actor: Dictionary = state.actors[id]
+		if ActiveEffects.has_kind(actor, ActiveEffects.HIDDEN) and \
+				(not alive(actor) or not hidden_from_enemies(state, id)):
+			ActiveEffects.remove_where(actor, func(effect: Dictionary) -> bool:
+				return String(effect.get("kind", "")) == ActiveEffects.HIDDEN)
+			events.append({"type": "hidden_end", "actor_id": id, "reason": "found"})
 	return events
 
 static func path_length(path: PackedVector3Array) -> float:
@@ -168,9 +196,12 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var advantages: Array[StringName] = conditions_for(target).incoming_advantages(distance)
 	advantages.append_array(ClassKits.attack_advantages(state, attacker_id, target_id, weapon))
 	advantages.append_array(ClassEffects.attack_advantages(state, attacker_id, target_id, weapon))
+	# Hidden and Steady Aim (effects on the attacker); attacks against a hidden target.
+	advantages.append_array(ActiveEffects.attack_advantages(attacker))
 	var disadvantages: Array[StringName] = conditions_for(attacker).attack_disadvantages()
 	disadvantages.append_array(ClassKits.attack_disadvantages(state, attacker_id, target_id, weapon))
 	disadvantages.append_array(ActiveEffects.attack_disadvantages(attacker))
+	disadvantages.append_array(ActiveEffects.incoming_disadvantages(target))
 	disadvantages.append_array(conditions_for(target).incoming_disadvantages(distance))
 	if ranged:
 		if origin.y - destination.y >= HEIGHT_ADVANTAGE_M:
@@ -407,17 +438,22 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append_array(ClassKits.after_attack(state, attacker_id, target_id, weapon, false, rng))
 		return events
 	var defenses: DamageRules.Defenses = defenses_for(target)
+	# A target's reaction may halve this attack's damage (Rogue Uncanny Dodge); the kit spends it.
+	var halved_by: String = ClassKits.damage_halved_by(state, attacker_id, target_id, weapon)
+	if not halved_by.is_empty():
+		events.append({"type": "feature", "actor_id": target_id, "feature_id": halved_by, "source_id": attacker_id})
 	var damage_modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "damage")
 	damage_modifiers.append_array(ClassKits.damage_bonus(state, attacker_id, target_id, weapon))
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
 		StringName(weapon["damage_type"]), rng, damage_modifiers, bool(outcome["critical"]), defenses,
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
+	var amount: int = _halve(damage.total, halved_by)
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
+		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": amount})
 	# Class reactions that lower the damage of this hit (Monk Deflect Attacks).
-	var reduction: Dictionary = ClassKits.damage_reduction(state, attacker_id, target_id, weapon, damage.total, rng)
+	var reduction: Dictionary = ClassKits.damage_reduction(state, attacker_id, target_id, weapon, amount, rng)
 	events.append_array(reduction.get("events", []))
-	var lost: int = ClassEffects.lose_hp(state, target_id, maxi(0, damage.total - int(reduction.get("amount", 0))), rng)
+	var lost: int = ClassEffects.lose_hp(state, target_id, maxi(0, amount - int(reduction.get("amount", 0))), rng)
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"amount": lost, "damage_type": weapon["damage_type"], "hp": target["hp"]})
 	var total_damage: int = lost
@@ -425,7 +461,7 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 	for extra: Dictionary in weapon.get("extra_damage", []):
 		var extra_result: DamageRules.Result = DamageRules.apply(int(extra["amount"]),
 			StringName(extra["damage_type"]), defenses)
-		var extra_lost: int = ClassEffects.lose_hp(state, target_id, extra_result.total, rng)
+		var extra_lost: int = ClassEffects.lose_hp(state, target_id, _halve(extra_result.total, halved_by), rng)
 		total_damage += extra_lost
 		var extra_roll: DiceResult = DiceResult.new()
 		extra_roll.add_modifiers([RuleModifier.new(int(extra["amount"]), StringName(extra["source"]))])
@@ -434,17 +470,23 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"amount": extra_lost, "damage_type": extra["damage_type"], "hp": target["hp"]})
 	# Class dice riders (Sneak Attack, Hunter's Mark, Brutal Strike ...): own rolls, doubled on a crit.
-	for extra: Dictionary in ClassKits.extra_damage_dice(state, attacker_id, target_id, weapon, bool(outcome["critical"])):
+	# The weapon copy carries how the attack roll went (Sneak Attack needs Advantage / no Disadvantage).
+	var rider_weapon: Dictionary = weapon.duplicate(true)
+	var roll_data: Dictionary = outcome.get("roll", {})
+	rider_weapon["attack_roll"] = {"advantage": String(roll_data.get("mode", "normal")) == "advantage",
+		"disadvantage": not roll_data.get("disadvantage_sources", []).is_empty()}
+	for extra: Dictionary in ClassKits.extra_damage_dice(state, attacker_id, target_id, rider_weapon, bool(outcome["critical"])):
 		var extra_type: StringName = StringName(String(extra.get("damage_type", weapon["damage_type"])))
 		var rider: DamageRules.Result = DamageRules.roll(String(extra["dice"]), extra_type, rng, [],
 			bool(outcome["critical"]), defenses)
-		var rider_lost: int = ClassEffects.lose_hp(state, target_id, rider.total, rng)
+		var rider_lost: int = ClassEffects.lose_hp(state, target_id, _halve(rider.total, halved_by), rng)
 		total_damage += rider_lost
 		var rider_roll: Dictionary = serialize_roll(rider.roll)
 		for group: Dictionary in rider_roll["groups"]:
 			group["source"] = String(extra.get("source", group["source"]))
 		events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-			"roll": rider_roll, "damage_type": String(extra_type), "amount": rider_lost})
+			"roll": rider_roll, "damage_type": String(extra_type), "amount": rider_lost,
+			"feature_id": String(extra.get("source", ""))})
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"amount": rider_lost, "damage_type": String(extra_type), "hp": target["hp"]})
 	# Spell riders on a weapon hit (Divine Favor) and the Wolf form's Prone bite.
@@ -459,6 +501,9 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append_array(ActiveEffects.on_hit(state, attacker_id, target_id, weapon))
 	events.append_array(ClassKits.after_attack(state, attacker_id, target_id, weapon, true, rng))
 	return events
+
+static func _halve(amount: int, halved_by: String) -> int:
+	return floori(amount / 2.0) if not halved_by.is_empty() else amount
 
 ## The run ends when the hero dies (permadeath). A fallen companion stays dead but the fight
 ## goes on (package K4). Records without a "hero" actor keep the old rule: any fallen ally.

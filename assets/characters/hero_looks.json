@@ -1,5 +1,5 @@
 {
-	"_comment": "Prompt 07 hero looks for character creation (prompt 06). body: male | female. Equipment per scene is in looks.json; weapon grips in assets/weapons/weapons.json. Fighter, Wizard, Barbarian, Monk, Ranger, Cleric, Paladin, Druid, Bard, Sorcerer and Warlock have looks so far.",
+	"_comment": "Prompt 07 hero looks for character creation (prompt 06). body: male | female. Equipment per scene is in looks.json; weapon grips in assets/weapons/weapons.json. Fighter, Wizard, Barbarian, Monk, Ranger, Cleric, Paladin, Druid, Bard, Sorcerer, Warlock and Rogue have looks so far.",
 	"version": 1,
 	"looks": [
 		{"class": "fighter", "body": "male", "look_id": "fighter_plate", "name_key": "LOOK_FIGHTER_PLATE", "scene": "res://assets/characters/hero_fighter_male/model.glb"},
@@ -25,6 +25,8 @@
 		{"class": "sorcerer", "body": "male", "look_id": "sorcerer_robe", "name_key": "LOOK_SORCERER_ROBE", "scene": "res://assets/characters/hero_sorcerer_male/model.glb"},
 		{"class": "sorcerer", "body": "female", "look_id": "sorcerer_robe", "name_key": "LOOK_SORCERER_ROBE", "scene": "res://assets/characters/hero_sorcerer_female/model.glb"},
 		{"class": "warlock", "body": "male", "look_id": "warlock_hood", "name_key": "LOOK_WARLOCK_HOOD", "scene": "res://assets/characters/hero_warlock_male/model.glb"},
-		{"class": "warlock", "body": "female", "look_id": "warlock_hood", "name_key": "LOOK_WARLOCK_HOOD", "scene": "res://assets/characters/hero_warlock_female/model.glb"}
+		{"class": "warlock", "body": "female", "look_id": "warlock_hood", "name_key": "LOOK_WARLOCK_HOOD", "scene": "res://assets/characters/hero_warlock_female/model.glb"},
+		{"class": "rogue", "body": "male", "look_id": "rogue_hood", "name_key": "LOOK_ROGUE_HOOD", "scene": "res://assets/characters/hero_rogue_male/model.glb"},
+		{"class": "rogue", "body": "female", "look_id": "rogue_hood", "name_key": "LOOK_ROGUE_HOOD", "scene": "res://assets/characters/hero_rogue_female/model.glb"}
 	]
 }

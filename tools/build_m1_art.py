@@ -1141,6 +1141,54 @@ def warlock(gender):
     }
     return fig.export("hero_warlock_" + gender, maps)
 
+
+def rogue(gender):
+    """Hooded Rogue in dark leathers: face scarf, short back cape, two dagger sheaths, quiver."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Head_Hood", "Legs"}, gender)
+    names = ("RogueCloth", "RogueHands", "RogueSkin", "RogueEyes", "RogueScarf", "RogueLeather", "RogueSteel")
+    cloth_m, hands, skin, eyes, scarf, leather, steel = (material(n) for n in names)
+    fig.dress(cloth_m, hands)
+    fig.add_head(skin, eyes, material("RogueBrows"))
+    e, hc = fig.eye, fig.head_centre
+    # Face scarf over nose, mouth and chin: only the eyes show under the hood.
+    shell(fig, "Face_Scarf", scarf, fig.head, .009,
+          lambda co: co.y < hc.y - .03 and e.z - .115 < co.z < e.z - .024)
+    # A short cape from the shoulders to the hips, same cloth as the scarf.
+    top = 1.47 if gender == "male" else 1.42
+    hanging_panel(fig, "Cape", scarf, top, .80, .19, .27, False, gap=.03, flare=.07, rows=10, cols=6,
+                  weights=cloak_weights(fig))
+    # Low belt with a dagger sheath on each hip, hilts forward for a quick draw.
+    waist = 1.02 if gender == "male" else 1.0
+    radius = .17 if gender == "male" else .165
+    fig.add(cylinder("Belt", radius, .045, (0, .02, waist), leather, sides=16), lambda co: {"pelvis": 1})
+    for side in (-1, 1):
+        x = side * (radius - .01)
+        tip = Vector((x + side * .03, .05, waist - .24))
+        mouth = Vector((x, -.02, waist - .02))
+        pieces = [cylinder("Sheath", .007, (mouth - tip).length, (mouth + tip) / 2, leather, axis=mouth - tip, sides=6, radius2=.016),
+                  cylinder("Hilt", .009, .09, mouth + (mouth - tip).normalized() * .05, leather, axis=mouth - tip, sides=6),
+                  sphere("Pommel", .014, mouth + (mouth - tip).normalized() * .1, steel, 6, 4)]
+        fig.add(merge("Dagger_Sheath", pieces), lambda co, s=side: {"pelvis": .6, ("thigh_l" if s > 0 else "thigh_r"): .4})
+    # Arrow quiver across the back, under the cape's lower edge.
+    spine = fig.bone_head("spine_03")
+    base = Vector((.10, spine.y + .19, 1.02)); top_q = Vector((-.04, spine.y + .22, 1.50))
+    pieces = [cylinder("Quiver", .04, (top_q - base).length, (base + top_q) / 2, leather, axis=top_q - base, sides=10)]
+    for i in range(5):
+        tip = top_q + Vector(((i - 2) * .014, .0, .06 + .012 * (i % 2)))
+        pieces.append(cylinder("Arrow", .004, .13, tip - Vector((0, 0, .05)), steel, sides=4))
+        pieces.append(prism("Fletch", [(-.01, 0), (.01, 0), (0, .035)], .003, scarf, bevel=0, offset=0))
+        pieces[-1].location = tip + Vector((0, 0, .012)); bpy.context.view_layer.update()
+    fig.add(merge("Rogue_Quiver", pieces), rigid("spine_03"))
+    maps = {
+        "RogueCloth": outfit("rogue_albedo.png"), "RogueHands": HANDS[gender], "RogueSkin": SKIN[gender], "RogueEyes": EYES,
+        "RogueBrows": {"albedo": "../textures/T_Hair_%d_BaseColor.png" % (1 if gender == "male" else 2), "rough": .8},
+        "RogueScarf": cloth("cloth_charcoal.png"),
+        "RogueLeather": tinted(WOOD_C, [.22, .15, .11, 1], rough=.8),
+        "RogueSteel": tinted(METAL_C, [.5, .5, .53, 1], metal=.6, rough=.55),
+    }
+    return fig.export("hero_rogue_" + gender, maps)
+
 # ---------------------------------------------------------------- weapons
 
 def weapon_maps():
@@ -1293,6 +1341,7 @@ if __name__ == "__main__":
         "hero_bard_male": lambda: bard("male"), "hero_bard_female": lambda: bard("female"),
         "hero_sorcerer_male": lambda: sorcerer("male"), "hero_sorcerer_female": lambda: sorcerer("female"),
         "hero_warlock_male": lambda: warlock("male"), "hero_warlock_female": lambda: warlock("female"),
+        "hero_rogue_male": lambda: rogue("male"), "hero_rogue_female": lambda: rogue("female"),
     }
     weapon_kinds = ["dagger", "greatsword", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
                     "light_crossbow", "shield_heater", "shield_round", "greataxe", "longbow"]

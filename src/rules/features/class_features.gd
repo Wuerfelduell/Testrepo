@@ -45,6 +45,29 @@ static func implemented(feature_id: String, level: int, class_id: String = "") -
 		return ClassKits.implemented(class_id, feature_id, level)
 	return level <= IMPLEMENTED_MAX_LEVEL and not DATA_ONLY.has(feature_id)
 
+## A skill check of a hero record: proficiency, Expertise, Reliable Talent (Rogue 7: a
+## d20 below 10 counts as 10 on checks with proficiency) and armour that hinders Stealth.
+static func skill_check(actor: Dictionary, skill: String, dc: int, rng: RandomNumberGenerator) -> CheckResult:
+	var scores: Dictionary = {}
+	var stored: Dictionary = actor.get("ability_scores", {})
+	for ability: StringName in Abilities.IDS:
+		scores[ability] = int(stored.get(ability, stored.get(String(ability), 10)))
+	var proficient: bool = false
+	for owned: Variant in actor.get("skill_proficiencies", []):
+		proficient = proficient or String(owned) == skill
+	var expertise: bool = false
+	for owned: Variant in actor.get("skill_expertise", []):
+		expertise = expertise or String(owned) == skill
+	var context: RollContext = RollContext.new()
+	context.conditions = CombatRules.conditions_for(actor)
+	if actor.get("features", {}).has("reliable_talent"):
+		context.minimum_d20 = 10
+	var armor: StringName = StringName(String(actor.get("armor", "none")))
+	if skill == "stealth" and bool(ArmorRules.ARMOR.get(armor, {}).get("stealth", false)):
+		context.disadvantages.append(&"armor_stealth")
+	return Checks.skill_check(StringName(skill), scores, dc, rng, clampi(int(actor.get("level", 1)), 1, 10),
+		proficient, context, proficient and expertise)
+
 static func action_surge_uses(fighter_level: int) -> int:
 	if fighter_level >= 17:
 		return 2

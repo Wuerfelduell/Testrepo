@@ -29,7 +29,7 @@ func test_fighter_and_wizard_records() -> void:
 
 func test_invalid_choices_build_nothing() -> void:
 	var look: Dictionary = HeroLooks.for_class("fighter", "male")[0]
-	assert_eq(HeroFactory.build_record("rogue", look, "X"), {}, "Not playable in M1")
+	assert_eq(HeroFactory.build_record("no_such_class", look, "X"), {}, "Not a playable class")
 	assert_eq(HeroFactory.build_record("fighter", look, "   "), {}, "A name is required")
 	assert_eq(HeroFactory.build_record("fighter", {"scene": "res://missing.glb"}, "X"), {})
 	assert_eq(HeroFactory.clean_name("x".repeat(60)).length(), HeroFactory.MAX_NAME_LENGTH)

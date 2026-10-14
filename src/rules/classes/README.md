@@ -49,6 +49,9 @@ Combat (state = GameState)
 - `damage_bonus(state, attacker_id, target_id, weapon) -> [{"amount", "source"}]` flat bonus on a hit
 - `extra_damage_dice(state, attacker_id, target_id, weapon, critical) -> [{"dice", "damage_type"?, "source"}]`
   called once per real hit (may spend once-per-turn resources); `expected_extra_damage(...)` for previews, no state change
+- `halve_attack_damage(state, attacker_id, target_id, weapon) -> String` (target's kit) before a weapon
+  hit's damage: return a feature id to halve all of it (Uncanny Dodge; spend the reaction here), "" = no
+- `extra_damage_dice` sees `weapon["attack_roll"] = {"advantage": bool, "disadvantage": bool}` (Sneak Attack)
 - `resistances(actor) -> Array` damage types
 - `damage_reduction(state, attacker_id, target_id, weapon, amount, rng) -> {"amount", "events"}` (target's kit, reactions like Deflect Attacks)
 - `evades(actor, ability) -> bool` Evasion on half-damage area saves
@@ -73,6 +76,11 @@ Shared helpers
 - Spells with `resolution = "none"`, creature targeting and an `effect` put that effect on the
   target (until concentration ends); a kit reads it (Hunter's Mark).
 - Effects with a `"condition"` field grant that condition while they last.
+- `ActiveEffects.HIDDEN` (Hide: advantage on own attacks, disadvantage against, ends on an attack,
+  a spell or when an enemy sees it at the start of a turn; `CombatRules.hidden_from_enemies`) and
+  `ActiveEffects.STEADY_AIM` (advantage on the next attack this turn), used by the Rogue.
+- `ClassFeatures.skill_check(actor, skill, dc, rng)`: proficiency, Expertise, Reliable Talent
+  (`features["reliable_talent"]`), armour that hinders Stealth.
 
 Rests
 - A feature stored as `{"uses", "max", "recharge": "short"|"long", "short_regain"?}` recharges

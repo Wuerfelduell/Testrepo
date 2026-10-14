@@ -115,6 +115,8 @@ ranger("sorcerer_albedo.png", cloth=[.15, .49, .55], leather=[.26, .16, .10], se
 ranger("sorcerer_skirt_albedo.png", cloth=[.15, .49, .55], leather=[.135, .44, .495], seed=31)
 ranger("warlock_albedo.png", cloth=[.08, .08, .10], leather=[.09, .08, .08], seed=32)
 ranger("warlock_skirt_albedo.png", cloth=[.08, .08, .10], leather=[.072, .072, .09], seed=33)
+# Rogue: charcoal tunic and hood, near-black leather, dulled buckles that do not glint.
+ranger("rogue_albedo.png", cloth=[.10, .10, .11], leather=[.14, .09, .06], metal=.6, seed=25)
 
 # Plain cloth for tabards, bandanas and cloaks: the peasant shirt weave, recoloured.
 weave = load("T_Peasant_BaseColor.png")[300:428, 20:148]
@@ -126,7 +128,8 @@ for name, color in [("cloth_red.png", [.36, .06, .05]), ("cloth_black.png", [.13
                     ("cloth_ochre.png", [.81, .57, .18]), ("cloth_blood.png", [.68, .10, .11]),
                     ("cloth_moss.png", [.41, .44, .18]),
                     # Bard hat (black) and Warlock cloak (violet): 0.9 x their palette defaults, as the hat above.
-                    ("cloth_bard_hat.png", [.072, .072, .09]), ("cloth_warlock_cloak.png", [.405, .198, .585])]:
+                    ("cloth_bard_hat.png", [.072, .072, .09]), ("cloth_warlock_cloak.png", [.405, .198, .585]),
+                    ("cloth_charcoal.png", [.10, .10, .11])]:
     rgb = (.45 + .9 * (weave_lum - weave_lum.mean()) + .55)[..., None] * np.array(color)
     Image.fromarray(np.uint8(np.clip(rgb, 0, 1) * 255)).save(OUT / name)
 

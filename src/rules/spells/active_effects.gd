@@ -6,6 +6,10 @@ extends RefCounted
 ## the actor's "conditions" list and removed only when no other effect still grants them.
 
 const SAP: StringName = &"sap"
+## Rogue: Hide (SRD 5.2 Invisible while hidden), Steady Aim, Cunning Strike Poison.
+const HIDDEN: String = "hidden"
+const STEADY_AIM: String = "steady_aim"
+const CUNNING_POISON: String = "cunning_poison"
 
 static func effects(actor: Dictionary) -> Array:
 	return actor.get("effects", [])
@@ -78,9 +82,27 @@ static func attack_disadvantages(actor: Dictionary) -> Array[StringName]:
 			result.append(StringName(kind))
 	return result
 
-## Sap and Vicious Mockery affect only the next attack roll.
+## Advantage sources the attacker carries: hidden and Steady Aim.
+static func attack_advantages(actor: Dictionary) -> Array[StringName]:
+	var result: Array[StringName] = []
+	for kind: String in [HIDDEN, STEADY_AIM]:
+		if has_kind(actor, kind):
+			result.append(StringName(kind))
+	return result
+
+## Attacks against a hidden creature have Disadvantage (SRD 5.2 Invisible).
+static func incoming_disadvantages(target: Dictionary) -> Array[StringName]:
+	var result: Array[StringName] = []
+	if has_kind(target, HIDDEN):
+		result.append(&"target_hidden")
+	return result
+
+## Sap, Vicious Mockery and Steady Aim affect only the next attack roll; making an attack
+## roll ends hiding.
 static func consume_attack_riders(actor: Dictionary) -> void:
-	remove_where(actor, func(effect: Dictionary) -> bool: return String(effect.get("kind", "")) in NEXT_ATTACK_DISADVANTAGE)
+	remove_where(actor, func(effect: Dictionary) -> bool:
+		var kind: String = String(effect.get("kind", ""))
+		return kind in NEXT_ATTACK_DISADVANTAGE or kind in [HIDDEN, STEADY_AIM])
 
 ## Bardic Inspiration: a failed attack roll or saving throw that the die could still
 ## turn into a success rolls it, adds it to the d20 roll and uses the inspiration up.
@@ -142,6 +164,16 @@ static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGen
 	var actor: Dictionary = state.actors.get(actor_id, {})
 	if actor.is_empty() or not CombatRules.alive(actor):
 		return events
+	remove_where(actor, func(effect: Dictionary) -> bool: return String(effect.get("until", "")) == "end_of_turn")
+	# Cunning Strike Poison: the poisoned creature repeats the CON save at the end of each turn.
+	for effect: Dictionary in effects(actor).duplicate():
+		if String(effect.get("kind", "")) != CUNNING_POISON:
+			continue
+		var poison_save: Dictionary = SpellRules.roll_save(actor, &"con", int(effect.get("save_dc", 10)), rng)
+		events.append(save_event(String(effect.get("source_id", "")), actor_id, "cunning_strike_poison", poison_save))
+		if bool(poison_save["success"]):
+			remove_where(actor, func(other: Dictionary) -> bool: return String(other.get("kind", "")) == CUNNING_POISON)
+			events.append({"type": "condition_end", "actor_id": actor_id, "condition": "poisoned"})
 	events.append_array(ClassEffects.on_turn_end(state, actor_id, rng))
 	for effect: Dictionary in effects(actor).duplicate():
 		if String(effect.get("kind", "")) != "sleep" or int(effect.get("stage", 1)) != 1:
@@ -259,6 +291,10 @@ static func mark_aura_hit(state: GameState, caster_id: String, target_id: String
 	concentration["aura_hits"][target_id] = _turn_key(state)
 
 static func _turn_key(state: GameState) -> String:
+	return turn_key(state)
+
+## Identifies the current turn ("round:index"), e.g. for once-per-turn features.
+static func turn_key(state: GameState) -> String:
 	return "%d:%d" % [state.round_number, state.turn_index]
 
 ## Spirit Guardians after `actor_id` moved (moved = true) or ends its turn: the mover entering an enemy

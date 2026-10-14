@@ -46,14 +46,8 @@ func apply(state: GameState) -> Dictionary:
 
 ## The hero's skill check as a roll event for the dice popup.
 static func roll_check(hero: Dictionary, skill: String, dc: int) -> Dictionary:
-	var scores: Dictionary = {}
-	var stored: Dictionary = hero.get("ability_scores", {})
-	for ability: StringName in Abilities.IDS:
-		scores[ability] = int(stored.get(ability, stored.get(String(ability), 10)))
-	var proficient: bool = DialogueData.has_skill(hero, skill)
-	var result: CheckResult = Checks.skill_check(StringName(skill), scores, dc, Rng.rng,
-		clampi(int(hero.get("level", 1)), 1, 10), proficient, null,
-		proficient and DialogueData.has_expertise(hero, skill))
+	# Proficiency, Expertise and Reliable Talent (ClassFeatures.skill_check).
+	var result: CheckResult = ClassFeatures.skill_check(hero, skill, dc, Rng.rng)
 	if result.roll != null and result.roll.is_valid() and "guidance" in hero.get("spells", []):
 		# Guidance (SRD 5.2): a hero who knows it casts it before the check, +1d4.
 		var bonus: int = Dice.roll("1d4", Rng.rng).total

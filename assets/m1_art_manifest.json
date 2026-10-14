@@ -190,6 +190,48 @@
         "Superhero_Female",
         "Wizard_Hat"
       ]
+    },
+    "hero_rogue_male": {
+      "triangles": 23347,
+      "parts": [
+        "Belt",
+        "Cape",
+        "Dagger_Sheath",
+        "Dagger_Sheath.001",
+        "Eyebrows",
+        "Eyes",
+        "Face_Scarf",
+        "Male_Ranger_Arms",
+        "Male_Ranger_Arms_Bracer",
+        "Male_Ranger_Body",
+        "Male_Ranger_Body_Belt_1",
+        "Male_Ranger_Feet_Boots",
+        "Male_Ranger_Head_Hood",
+        "Male_Ranger_Legs",
+        "Rogue_Quiver",
+        "SuperHero_Male"
+      ]
+    },
+    "hero_rogue_female": {
+      "triangles": 23997,
+      "parts": [
+        "Belt",
+        "Cape",
+        "Dagger_Sheath",
+        "Dagger_Sheath.001",
+        "Eyebrows",
+        "Eyes",
+        "Face_Scarf",
+        "Female_Ranger_Arms",
+        "Female_Ranger_Arms_Bracer",
+        "Female_Ranger_Body",
+        "Female_Ranger_Body_Belt_1",
+        "Female_Ranger_Feet",
+        "Female_Ranger_Head_Hood",
+        "Female_Ranger_Legs",
+        "Rogue_Quiver",
+        "Superhero_Female"
+      ]
     }
   },
   "weapons": {

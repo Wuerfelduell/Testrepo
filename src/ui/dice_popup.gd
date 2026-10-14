@@ -212,7 +212,12 @@ func _reveal() -> void:
 		var modifier: Dictionary = modifier_variant as Dictionary
 		modifier_texts.append("%+d %s" % [int(modifier.get("amount", 0)), source_name(String(modifier.get("source", "")))])
 	if raised_any:
-		modifier_texts.append(source_name("great_weapon_fighting"))
+		# A raised d20 is Reliable Talent; raised damage dice are Great Weapon Fighting.
+		var d20_raised: bool = groups.any(func(group: Variant) -> bool:
+			return int((group as Dictionary).get("sides", 0)) == 20 and not (group as Dictionary).get("raised_indices", []).is_empty())
+		modifier_texts.append(source_name("reliable_talent" if d20_raised else "great_weapon_fighting"))
+	if groups.any(func(group: Variant) -> bool: return String((group as Dictionary).get("source", "")) == "sneak_attack"):
+		modifier_texts.append(source_name("sneak_attack"))
 	var mode: String = String(roll.get("mode", "normal"))
 	if mode != "normal":
 		modifier_texts.append(tr("COMBAT_" + mode.to_upper()))

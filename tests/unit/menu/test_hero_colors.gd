@@ -22,6 +22,8 @@ func test_slots_follow_the_look() -> void:
 		["robe", "hat", "wizard_leather"] as Array[String])
 	assert_eq(HeroColors.slots_for(_model("res://assets/characters/hero_wizard_male_hood/model.glb")),
 		["robe", "wizard_leather"] as Array[String])
+	assert_eq(HeroColors.slots_for(_model("res://assets/characters/hero_rogue_female/model.glb")),
+		["rogue_cloth", "scarf", "rogue_leather"] as Array[String])
 
 func test_every_slot_has_its_default_in_the_palette() -> void:
 	for slot: String in HeroColors.data()["slots"]:

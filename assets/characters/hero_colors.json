@@ -18,7 +18,8 @@
 			{"id": "earth", "name_key": "COLOR_EARTH", "rgb": [0.60, 0.38, 0.22]},
 			{"id": "linen", "name_key": "COLOR_LINEN", "rgb": [0.85, 0.80, 0.68]},
 			{"id": "ash", "name_key": "COLOR_ASH", "rgb": [0.55, 0.55, 0.57]},
-			{"id": "black", "name_key": "COLOR_BLACK", "rgb": [0.08, 0.08, 0.10]}
+			{"id": "black", "name_key": "COLOR_BLACK", "rgb": [0.08, 0.08, 0.10]},
+			{"id": "charcoal", "name_key": "COLOR_CHARCOAL", "rgb": [0.10, 0.10, 0.11]}
 		],
 		"leather": [
 			{"id": "brown", "name_key": "COLOR_BROWN", "rgb": [0.26, 0.16, 0.10]},
@@ -62,9 +63,12 @@
 		"sorcerer_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "teal"},
 		"warlock_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "black"},
 		"warlock_cloak": {"name_key": "COLOR_SLOT_CLOAK", "palette": "cloth", "default": "violet"},
-		"warlock_leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "black"}
+		"warlock_leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "black"},
+		"rogue_cloth": {"name_key": "COLOR_SLOT_ROGUE_CLOTH", "palette": "cloth", "default": "charcoal"},
+		"scarf": {"name_key": "COLOR_SLOT_SCARF", "palette": "cloth", "default": "charcoal"},
+		"rogue_leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "dark_brown"}
 	},
-	"order": ["tunic", "robe", "hat", "barbarian_tunic", "monk_robe", "ranger_tunic", "leather", "wizard_leather", "barbarian_leather", "plate", "mail",
+	"order": ["tunic", "robe", "rogue_cloth", "hat", "scarf", "barbarian_tunic", "monk_robe", "ranger_tunic", "leather", "wizard_leather", "barbarian_leather", "rogue_leather", "plate", "mail",
 		"vestment", "cleric_tabard", "paladin_tabard", "druid_robe", "mantle",
 		"bard_tunic", "bard_hat", "sorcerer_robe", "warlock_robe", "warlock_cloak", "warlock_leather"],
 	"materials": {
@@ -95,6 +99,8 @@
 		"SorcSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "sorcerer_robe", "leather": "sorcerer_robe"},
 		"WarlockRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "warlock_robe", "leather": "warlock_leather"},
 		"WarlockSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "warlock_robe", "leather": "warlock_robe"},
-		"WarlockCloak": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "warlock_cloak"}
+		"WarlockCloak": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "warlock_cloak"},
+		"RogueCloth": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "rogue_cloth", "leather": "rogue_leather"},
+		"RogueScarf": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "scarf"}
 	}
 }

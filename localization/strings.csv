@@ -1036,3 +1036,64 @@ LOOK_BARD_PLUME,Bard • plumed cap and lute
 LOOK_SORCERER_ROBE,Sorcerer • robe and crystal
 LOOK_WARLOCK_HOOD,Warlock • hood and cloak
 COLOR_SLOT_CLOAK,Cloak
+CLASS_ROGUE,Rogue
+ACTOR_ROGUE,Rogue
+CREATION_DESCRIPTION_ROGUE,"A killer from the shadows. Leather armour, two daggers and a shortbow. Strikes hard when the enemy is distracted, slips away before it can hit back."
+LOOK_ROGUE_HOOD,Rogue • hood and leathers
+COLOR_SLOT_ROGUE_CLOTH,Tunic
+COLOR_SLOT_SCARF,Hood and scarf
+FEATURE_SNEAK_ATTACK,Sneak Attack
+FEATURE_SNEAK_ATTACK_HINT_LEVELUP,"Once per turn: +1d6 damage for every two Rogue levels with a finesse or ranged weapon, when you have advantage or an ally stands next to the target."
+FEATURE_THIEVES_CANT,Thieves' Cant
+FEATURE_CUNNING_ACTION,Cunning Action
+FEATURE_CUNNING_ACTION_HINT_LEVELUP,"Dash, Disengage or Hide as a bonus action."
+FEATURE_STEADY_AIM,Steady Aim
+FEATURE_STEADY_AIM_HINT_LEVELUP,"Bonus action before you move: advantage on your next attack this turn, but your Speed is 0."
+FEATURE_CUNNING_STRIKE,Cunning Strike
+FEATURE_CUNNING_STRIKE_HINT_LEVELUP,"Trade 1d6 of your Sneak Attack to poison, trip or slip away from the target."
+FEATURE_UNCANNY_DODGE,Uncanny Dodge
+FEATURE_UNCANNY_DODGE_HINT_LEVELUP,"Reaction: halve the damage of an attack that hits you (used automatically)."
+FEATURE_EVASION_HINT_LEVELUP,"Dexterity saves for half damage: no damage on a success, half on a failure."
+FEATURE_RELIABLE_TALENT,Reliable Talent
+FEATURE_RELIABLE_TALENT_HINT_LEVELUP,"Skill checks you are proficient in: a d20 roll of 9 or lower counts as 10."
+FEATURE_HIDE_BUTTON,Hide
+FEATURE_HIDE_HINT,"Action: Stealth check DC 15. Hidden, you attack with advantage and enemies attack you with disadvantage."
+FEATURE_HIDE_UNAVAILABLE,"Needs your action, and three-quarters cover or no line of sight from every enemy"
+FEATURE_CUNNING_DASH_BUTTON,Dash (bonus)
+FEATURE_CUNNING_DASH_HINT,Cunning Action · bonus action: move your Speed again
+FEATURE_CUNNING_DASH_UNAVAILABLE,Needs your bonus action
+FEATURE_CUNNING_DISENGAGE_BUTTON,Disengage (bonus)
+FEATURE_CUNNING_DISENGAGE_HINT,Cunning Action · bonus action: no opportunity attacks this turn
+FEATURE_CUNNING_DISENGAGE_UNAVAILABLE,Needs your bonus action
+FEATURE_CUNNING_HIDE_BUTTON,Hide (bonus)
+FEATURE_CUNNING_HIDE_HINT,"Cunning Action · bonus action: Stealth check DC 15. Hidden, you attack with advantage and enemies attack you with disadvantage."
+FEATURE_CUNNING_HIDE_UNAVAILABLE,"Needs your bonus action, and three-quarters cover or no line of sight from every enemy"
+FEATURE_STEADY_AIM_BUTTON,Steady Aim
+FEATURE_STEADY_AIM_HINT,"Bonus action, only before you move: advantage on your next attack this turn, Speed 0"
+FEATURE_STEADY_AIM_UNAVAILABLE,Needs your bonus action and no movement this turn
+FEATURE_CUNNING_STRIKE_BUTTON,Strike: %s
+FEATURE_CUNNING_STRIKE_HINT,"Free, click to change: what your next Sneak Attack does for 1d6 of its dice (save DC 8 + Dex + proficiency)."
+FEATURE_CUNNING_STRIKE_UNAVAILABLE,Not now
+CUNNING_STRIKE_NONE,full damage
+CUNNING_STRIKE_POISON,Poison
+CUNNING_STRIKE_TRIP,Trip
+CUNNING_STRIKE_WITHDRAW,Withdraw
+CONDITION_HIDDEN,Hidden
+CONDITION_STEADY_AIM,Steady Aim
+COMBAT_LOG_POISON_ENDS,%s shakes off the poison.
+COMBAT_LOG_STANDS_UP,%s stands up.
+COMBAT_LOG_HIDDEN,%s slips into hiding.
+COMBAT_LOG_HIDE_FAILED,%s fails to hide.
+COMBAT_LOG_HIDDEN_END,%s is no longer hidden.
+COMBAT_LOG_UNCANNY_DODGE,%s halves the damage with Uncanny Dodge.
+COMBAT_LOG_CUNNING_STRIKE,%s uses Cunning Strike: %s.
+COMBAT_LOG_CUNNING_ACTION,%s uses Cunning Action: %s.
+ROLL_SOURCE_SNEAK_ATTACK,Sneak Attack
+ROLL_SOURCE_RELIABLE_TALENT,Reliable Talent
+ROLL_SOURCE_HIDDEN,Hidden
+ROLL_SOURCE_STEADY_AIM,Steady Aim
+ROLL_SOURCE_TARGET_HIDDEN,Target is hidden
+ROLL_SOURCE_ARMOR_STEALTH,Armour hinders Stealth
+LEVELUP_SECTION_EXPERTISE_ROGUE,EXPERTISE (%d)
+LEVELUP_SECTION_EXPERTISE_ROGUE_NOTE,Double your proficiency bonus for two of these skills.
+COLOR_CHARCOAL,Charcoal

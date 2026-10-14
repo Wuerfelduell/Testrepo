@@ -37,6 +37,10 @@ func apply(state: GameState) -> Dictionary:
 	# Class free casts (Ranger Favored Enemy: Hunter's Mark) are used before slots.
 	var free_cast: bool = slot_level == 0 and ClassKits.free_cast_available(caster, spell_id)
 	var used_slot: int = SpellResolver.effective_slot(caster, spell, slot_level)
+	# Casting a spell ends hiding (SRD 5.2 Hide).
+	if ActiveEffects.remove_where(caster, func(effect: Dictionary) -> bool:
+			return String(effect.get("kind", "")) == ActiveEffects.HIDDEN) > 0:
+		events.append({"type": "hidden_end", "actor_id": actor_id, "reason": "spell"})
 	match SpellResolver.casting_time(caster, spell):
 		"action": caster["action_available"] = false
 		"bonus_action": caster["bonus_available"] = false
