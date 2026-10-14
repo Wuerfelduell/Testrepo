@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pass_without_trace"
+name_key = &"SPELL_PASS_WITHOUT_TRACE"
+srd_name = "Pass without Trace"
+level = 2
+school = "abjuration"
+targeting = "self"
+resolution = "custom"
+concentration = true
+duration_rounds = 600
+vfx = &"pass_without_trace"

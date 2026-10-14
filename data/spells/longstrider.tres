@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"longstrider"
+name_key = &"SPELL_LONGSTRIDER"
+srd_name = "Longstrider"
+level = 1
+school = "transmutation"
+targeting = "creature"
+range_m = 1.5
+resolution = "custom"
+duration_rounds = 600
+effect_amount = 3.0
+allies = true
+vfx = &"longstrider"

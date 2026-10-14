@@ -596,7 +596,7 @@ func show_spell_preview(preview: Dictionary, spell: SpellDefinition, caster: Dic
 			var darts: int = SpellRules.dart_count(spell, maxi(1, int(preview.get("slot_level", 1))), int(caster.get("level", 1)))
 			_target_detail.text = tr("COMBAT_SPELL_DARTS") % [tr(String(spell.name_key)), mini(darts_chosen + 1, darts), darts,
 				"%s%+d" % [spell.damage_dice, spell.dart_bonus], damage_type]
-		"none":
+		"none", "custom":
 			var hint_key: String = String(spell.name_key) + "_HINT"
 			_target_detail.text = tr("COMBAT_SPELL_EFFECT") % [tr(String(spell.name_key)), tr(hint_key)] \
 				if tr(hint_key) != hint_key else tr(String(spell.name_key))

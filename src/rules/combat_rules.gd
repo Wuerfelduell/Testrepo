@@ -268,6 +268,8 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var bonus: int = ClassEffects.attack_bonus_estimate(attacker, weapon)
 	for modifier: RuleModifier in weapon_modifiers(weapon, "attack"):
 		bonus += modifier.amount
+	for modifier: RuleModifier in ClassKits.attack_bonus(state, attacker_id, target_id, weapon):
+		bonus += modifier.amount
 	var chance: float = clampf(float(21 + bonus - int(result["armor_class"])) / 20.0, 0.05, 0.95)
 	var crit_chance: float = 0.05
 	if advantage > 0:
@@ -440,6 +442,7 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 	context.disadvantages.assign(preview["disadvantages"])
 	var modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "attack")
 	modifiers.append_array(ClassEffects.attack_modifiers(attacker, rng, weapon))
+	modifiers.append_array(ClassKits.attack_bonus(state, attacker_id, target_id, weapon))
 	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]), modifiers, rng, context)
 	ActiveEffects.consume_attack_riders(attacker)
 	ClassEffects.consume_on_attacked(target)

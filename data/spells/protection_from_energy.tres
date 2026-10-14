@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"protection_from_energy"
+name_key = &"SPELL_PROTECTION_FROM_ENERGY"
+srd_name = "Protection from Energy"
+level = 3
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "custom"
+concentration = true
+duration_rounds = 600
+allies = true
+vfx = &"protection_from_energy"

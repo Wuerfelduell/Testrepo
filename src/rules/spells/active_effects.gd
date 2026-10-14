@@ -165,6 +165,9 @@ static func speed_penalty(actor: Dictionary) -> float:
 			"haste":
 				# Haste doubles the Speed: a negative penalty.
 				total -= float(actor.get("speed_m", 0.0))
+			"speed_bonus":
+				# Longstrider, Jump: a negative penalty (begin_turn clamps the result at zero).
+				total -= float(effect.get("amount", 0.0))
 	return total
 
 ## Effects that last "until the start of X's next turn" end now; X's concentration ticks.

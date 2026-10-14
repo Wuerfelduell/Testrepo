@@ -23,7 +23,8 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 @export var area_size_m: float = 0.0
 @export var line_width_m: float = 1.5
 ## "darts" + "attack" are beams: one attack roll per beam (Eldritch Blast, Scorching Ray).
-@export_enum("attack", "save", "auto", "heal", "none") var resolution: String = "attack"
+## "custom": preview and impact come from a spell module (CustomSpells, e.g. Hail of Thorns).
+@export_enum("attack", "save", "auto", "heal", "none", "custom") var resolution: String = "attack"
 @export var save_ability: StringName = &""
 @export var damage_dice: String = ""
 @export var damage_type: StringName = &""

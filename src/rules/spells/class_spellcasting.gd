@@ -125,8 +125,14 @@ const CASTERS: Dictionary = {
 		"ability": "wis", "progression": "half",
 		"cantrips": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		"prepared": [2, 3, 4, 4, 6, 6, 7, 7, 9, 9],
-		"list": ["hunters_mark", "cure_wounds", "entangle", "ensnaring_strike", "goodberry", "fog_cloud",
-			"longstrider", "jump", "aid", "barkskin", "lesser_restoration", "spike_growth", "pass_without_trace"],
+		# SRD 5.2 / 2024 Ranger list, levels 1-3. Ids of spells other class threads build
+		# (Magic Weapon, Silence, Dispel Magic ...) count as soon as their files exist.
+		"list": ["hunters_mark", "cure_wounds", "entangle", "ensnaring_strike", "hail_of_thorns", "goodberry",
+			"fog_cloud", "longstrider", "jump", "alarm", "animal_friendship", "detect_magic", "speak_with_animals",
+			"aid", "barkskin", "lesser_restoration", "spike_growth", "pass_without_trace", "protection_from_poison",
+			"magic_weapon", "silence", "enhance_ability", "gust_of_wind", "summon_beast", "cordon_of_arrows",
+			"conjure_animals", "conjure_barrage", "lightning_arrow", "dispel_magic", "elemental_weapon",
+			"protection_from_energy", "revivify", "daylight", "plant_growth", "summon_fey", "wind_wall"],
 		"start": ["cure_wounds", "entangle"],
 		"always": {"hunters_mark": 1},
 	},

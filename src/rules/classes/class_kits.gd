@@ -10,8 +10,30 @@ const KIT_PATH: String = "res://src/rules/classes/%s_kit.gd"
 ## Built before kits existed; they keep their own code paths.
 const BUILT_IN: Array[String] = ["fighter", "wizard"]
 
+## Spell effect modules whose hooks run for every actor, whatever its class (Longstrider,
+## Spike Growth, Protection from Poison): the same hook names as kits, see README.md.
+const EFFECT_MODULES: Array[String] = ["res://src/rules/spells/ranger_spells.gd"]
+
 static var _kits: Dictionary = {}
 static var _methods: Dictionary = {}
+static var _modules: Array = []
+
+## Calls `method` on every effect module that defines it; returns the non-null results.
+static func call_modules(method: String, args: Array = []) -> Array:
+	if _modules.is_empty():
+		for path: String in EFFECT_MODULES:
+			var script: Script = load(path) as Script
+			var names: Dictionary = {}
+			for entry: Dictionary in script.get_script_method_list():
+				names[String(entry["name"])] = true
+			_modules.append({"script": script, "methods": names})
+	var results: Array = []
+	for module: Dictionary in _modules:
+		if module["methods"].has(method):
+			var value: Variant = (module["script"] as Script).callv(method, args)
+			if value != null:
+				results.append(value)
+	return results
 
 static func kit(class_id: String) -> Script:
 	if class_id.is_empty() or class_id in BUILT_IN:
@@ -111,8 +133,22 @@ static func attack_disadvantages(state: GameState, attacker_id: String, target_i
 ## Flat damage riders on a weapon hit, [{"amount", "source"}] (Rage Damage).
 static func damage_bonus(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> Array[RuleModifier]:
 	var result: Array[RuleModifier] = []
-	for entry: Dictionary in call_kit(class_of(state.actors.get(attacker_id, {})), "damage_bonus",
-			[state, attacker_id, target_id, weapon], []):
+	var entries: Array = call_kit(class_of(state.actors.get(attacker_id, {})), "damage_bonus",
+		[state, attacker_id, target_id, weapon], []).duplicate()
+	for extra: Array in call_modules("damage_bonus", [state, attacker_id, target_id, weapon]):
+		entries.append_array(extra)
+	for entry: Dictionary in entries:
+		result.append(RuleModifier.new(int(entry["amount"]), StringName(String(entry["source"]))))
+	return result
+
+## Flat attack roll bonus [{"amount", "source"}] from effects (Magic Weapon); preview and roll.
+static func attack_bonus(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> Array[RuleModifier]:
+	var result: Array[RuleModifier] = []
+	var entries: Array = call_kit(class_of(state.actors.get(attacker_id, {})), "attack_bonus",
+		[state, attacker_id, target_id, weapon], []).duplicate()
+	for extra: Array in call_modules("attack_bonus", [state, attacker_id, target_id, weapon]):
+		entries.append_array(extra)
+	for entry: Dictionary in entries:
 		result.append(RuleModifier.new(int(entry["amount"]), StringName(String(entry["source"]))))
 	return result
 
@@ -120,13 +156,19 @@ static func damage_bonus(state: GameState, attacker_id: String, target_id: Strin
 ## A kit may spend resources here (once-per-turn riders), so call it only on a real hit.
 static func extra_damage_dice(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
 		critical: bool) -> Array:
-	return call_kit(class_of(state.actors.get(attacker_id, {})), "extra_damage_dice",
-		[state, attacker_id, target_id, weapon, critical], [])
+	var result: Array = call_kit(class_of(state.actors.get(attacker_id, {})), "extra_damage_dice",
+		[state, attacker_id, target_id, weapon, critical], []).duplicate()
+	for extra: Array in call_modules("extra_damage_dice", [state, attacker_id, target_id, weapon, critical]):
+		result.append_array(extra)
+	return result
 
 ## Average of the extra dice for previews; must not change state.
 static func expected_extra_damage(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> float:
-	return float(call_kit(class_of(state.actors.get(attacker_id, {})), "expected_extra_damage",
+	var total: float = float(call_kit(class_of(state.actors.get(attacker_id, {})), "expected_extra_damage",
 		[state, attacker_id, target_id, weapon], 0.0))
+	for extra: Variant in call_modules("expected_extra_damage", [state, attacker_id, target_id, weapon]):
+		total += float(extra)
+	return total
 
 ## The target's kit may lower a weapon hit's damage with a reaction (Deflect Attacks):
 ## returns {"amount", "events"}.
@@ -148,6 +190,7 @@ static func initiative_advantages(actor: Dictionary) -> Array[StringName]:
 static func on_combat_end(state: GameState) -> void:
 	for id: String in state.actors:
 		call_kit(class_of(state.actors[id]), "on_combat_end", [state, id])
+		call_modules("on_combat_end", [state, id])
 
 ## Spells a class may cast without a slot (Ranger Favored Enemy): kit free_casts(actor)
 ## returns {spell_id: feature_id}; that feature's "uses" pay for the cast.
@@ -169,7 +212,27 @@ static func damage_halved_by(state: GameState, attacker_id: String, target_id: S
 		[state, attacker_id, target_id, weapon], ""))
 
 static func resistances(actor: Dictionary) -> Array:
-	return call_kit(class_of(actor), "resistances", [actor], [])
+	var result: Array = call_kit(class_of(actor), "resistances", [actor], []).duplicate()
+	for extra: Array in call_modules("resistances", [actor]):
+		result.append_array(extra)
+	return result
+
+## Flat bonuses on ability checks [{"amount", "source"}] (Pass without Trace on Stealth).
+static func check_modifiers(actor: Dictionary, skill: String) -> Array[RuleModifier]:
+	var result: Array[RuleModifier] = []
+	var entries: Array = call_kit(class_of(actor), "check_modifiers", [actor, skill], []).duplicate()
+	for extra: Array in call_modules("check_modifiers", [actor, skill]):
+		entries.append_array(extra)
+	for entry: Dictionary in entries:
+		result.append(RuleModifier.new(int(entry["amount"]), StringName(String(entry["source"]))))
+	return result
+
+## After a creature finished a move along `path` (zones such as Spike Growth) -> events.
+static func after_move(state: GameState, mover_id: String, path: Variant, rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for extra: Array in call_modules("after_move", [state, mover_id, path, rng]):
+		result.append_array(extra)
+	return result
 
 static func save_advantages(actor: Dictionary, ability: StringName) -> Array[StringName]:
 	var result: Array[StringName] = []
@@ -184,6 +247,8 @@ static func on_turn_start(state: GameState, actor_id: String) -> Array[Dictionar
 static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	result.assign(call_kit(class_of(state.actors.get(actor_id, {})), "on_turn_end", [state, actor_id, rng], []))
+	for extra: Array in call_modules("on_turn_end", [state, actor_id, rng]):
+		result.append_array(extra)
 	return result
 
 ## After a weapon attack roll resolved (hit or miss), for both attacker and target kits.
@@ -194,6 +259,8 @@ static func after_attack(state: GameState, attacker_id: String, target_id: Strin
 		[state, attacker_id, target_id, weapon, hit, rng], []))
 	result.append_array(call_kit(class_of(state.actors.get(target_id, {})), "after_attacked",
 		[state, attacker_id, target_id, weapon, hit, rng], []))
+	for extra: Array in call_modules("after_attack", [state, attacker_id, target_id, weapon, hit, rng]):
+		result.append_array(extra)
 	return result
 
 # --- Features used from the hotbar ------------------------------------------

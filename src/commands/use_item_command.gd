@@ -23,7 +23,9 @@ func apply(state: GameState) -> Dictionary:
 	var bonus: Array[RuleModifier] = [RuleModifier.new(int(item.get("bonus", 0)), StringName(item_id))]
 	var roll: DiceResult = Dice.roll(String(item["dice"]), Rng.rng, bonus)
 	var before: int = int(actor["hp"])
-	actor["hp"] = mini(int(actor["max_hp"]), before + maxi(0, roll.total))
+	# "fixed_heal" items (Goodberry: exactly 1 hit point) ignore the roll's total.
+	var healed: int = int(item["fixed_heal"]) if item.has("fixed_heal") else roll.total
+	actor["hp"] = mini(int(actor["max_hp"]), before + maxi(0, healed))
 	return {"events": [
 		{"type": "roll", "kind": "healing", "actor_id": actor_id,
 			"roll": CombatRules.serialize_roll(roll), "item_id": item_id},

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"conjure_barrage"
+name_key = &"SPELL_CONJURE_BARRAGE"
+srd_name = "Conjure Barrage"
+level = 3
+school = "conjuration"
+targeting = "self"
+area = "cone"
+area_size_m = 18.0
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "5d8"
+damage_type = &"force"
+half_on_save = true
+upcast_dice = "1d8"
+vfx = &"conjure_barrage"

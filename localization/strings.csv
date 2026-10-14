@@ -300,6 +300,47 @@ COMBAT_LOG_EFFECT_SLOW,%s is slowed by 3 m.
 COMBAT_LOG_EFFECT_HAMSTRING_BLOW,%s is hamstrung: 4.5 m slower.
 COMBAT_LOG_EFFECT_STUNNING_STRIKE,%s resists the stun but staggers.
 COMBAT_LOG_EFFECT_HUNTERS_MARK,%s is marked as prey.
+SPELL_ENSNARING_STRIKE,Ensnaring Strike
+SPELL_ENSNARING_STRIKE_HINT,"After a weapon hit this turn: Strength save or the target is restrained, 1d6 piercing each turn"
+SPELL_HAIL_OF_THORNS,Hail of Thorns
+SPELL_HAIL_OF_THORNS_HINT,"After a ranged weapon hit this turn: 1d10 piercing to the target and everyone next to it (Dexterity save halves)"
+SPELL_LIGHTNING_ARROW,Lightning Arrow
+SPELL_LIGHTNING_ARROW_HINT,"After a ranged weapon attack this turn: 4d8 lightning to the target (half on a miss), 2d8 within 3 m (Dexterity save halves)"
+SPELL_CONJURE_BARRAGE,Conjure Barrage
+SPELL_CONJURE_BARRAGE_HINT,"An 18 m cone of conjured weapons: 5d8 force, Dexterity save halves"
+SPELL_LONGSTRIDER,Longstrider
+SPELL_LONGSTRIDER_HINT,+3 m speed until the next long rest
+SPELL_JUMP,Jump
+SPELL_JUMP_HINT,"+6 m movement each turn for 1 minute (long leaps)"
+SPELL_LESSER_RESTORATION,Lesser Restoration
+SPELL_LESSER_RESTORATION_HINT,"Ends paralysed, poisoned, blinded or deafened"
+SPELL_PROTECTION_FROM_POISON,Protection from Poison
+SPELL_PROTECTION_FROM_POISON_HINT,Ends poisoned and grants poison resistance until the next long rest
+SPELL_PROTECTION_FROM_ENERGY,Protection from Energy
+SPELL_PROTECTION_FROM_ENERGY_HINT,"Fire resistance while you concentrate"
+SPELL_GOODBERRY,Goodberry
+SPELL_GOODBERRY_HINT,"Ten berries in your bag, each heals 1 hit point (bonus action)"
+SPELL_SPIKE_GROWTH,Spike Growth
+SPELL_SPIKE_GROWTH_HINT,"A 6 m thorn field: 2d4 piercing for every 1.5 m anyone moves through it"
+SPELL_CONJURE_ANIMALS,Conjure Animals
+SPELL_CONJURE_ANIMALS_HINT,"A spirit pack: enemies that enter its 3 m reach or end their turn there make a Dexterity save or take 3d10 slashing"
+SPELL_FOG_CLOUD,Fog Cloud
+SPELL_FOG_CLOUD_HINT,"A 6 m fog bank: everyone inside is blinded"
+SPELL_PASS_WITHOUT_TRACE,Pass without Trace
+SPELL_PASS_WITHOUT_TRACE_HINT,+10 to Stealth for you and allies within 9 m while you concentrate
+SPELL_REASON_NOT_STRUCK,Only right after your weapon attack on this creature
+ITEM_GOODBERRY,Goodberry
+ROLL_SOURCE_PASS_WITHOUT_TRACE,Pass without Trace
+COMBAT_LOG_EFFECT_ENSNARING_STRIKE,%s is caught in thorny vines.
+COMBAT_LOG_EFFECT_LONGSTRIDER,%s moves with longer strides.
+COMBAT_LOG_EFFECT_JUMP,%s can leap far.
+COMBAT_LOG_EFFECT_PROTECTION_FROM_POISON,%s is protected from poison.
+COMBAT_LOG_EFFECT_PROTECTION_FROM_ENERGY,%s is protected from fire.
+COMBAT_LOG_EFFECT_GOODBERRY,%s conjures ten goodberries.
+COMBAT_LOG_EFFECT_PASS_WITHOUT_TRACE,%s is cloaked in shadow and silence.
+COMBAT_LOG_EFFECT_SPIKE_GROWTH,%s makes thorns burst from the ground.
+COMBAT_LOG_EFFECT_CONJURE_ANIMALS,%s calls a pack of spirit beasts.
+COMBAT_LOG_EFFECT_FOG_CLOUD,%s fills the area with fog.
 ROLL_SOURCE_RAGE,Rage
 ROLL_SOURCE_RECKLESS_ATTACK,Reckless Attack
 ROLL_SOURCE_BRUTAL_STRIKE,Brutal Strike

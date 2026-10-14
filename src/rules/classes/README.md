@@ -82,6 +82,16 @@ Shared helpers
   `ActiveEffects.STEADY_AIM` (advantage on the next attack this turn), used by the Rogue.
 - `ClassFeatures.skill_check(actor, skill, dc, rng)`: proficiency, Expertise, Reliable Talent
   (`features["reliable_talent"]`), armour that hinders Stealth.
+- Kits may also define `attack_bonus(state, attacker_id, target_id, weapon) -> [{"amount", "source"}]`
+  (attack roll and preview) and `check_modifiers(actor, skill) -> [{"amount", "source"}]`.
+
+Spell effect modules (`ClassKits.EFFECT_MODULES`, e.g. src/rules/spells/ranger_spells.gd)
+- Run for every actor, whatever its class: `attack_bonus`, `damage_bonus`, `extra_damage_dice`,
+  `expected_extra_damage`, `resistances`, `check_modifiers`, `on_turn_end`, `after_attack`,
+  `on_combat_end`, and `after_move(state, mover_id, path, rng) -> events` (called at a move's end).
+- Spells with `resolution = "custom"` get their preview and impact from the module that lists
+  their id in `const SPELLS` (`CustomSpells`, src/rules/spells/custom_spells.gd).
+- Effects of kind `"speed_bonus"` with an `"amount"` add metres of movement (Longstrider).
 
 Rests
 - A feature stored as `{"uses", "max", "recharge": "short"|"long", "short_regain"?}` recharges

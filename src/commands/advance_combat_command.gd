@@ -86,4 +86,6 @@ func apply(state: GameState) -> Dictionary:
 				for follower: Dictionary in followers:
 					events.append({"type": "move_end", "actor_id": follower["actor_id"], "follows": mover_id})
 				events.append_array(ActiveEffects.aura_triggers(state, mover_id, Rng.rng))
+				# Zones the move went through (Spike Growth, Conjure Animals, Fog Cloud).
+				events.append_array(ClassKits.after_move(state, mover_id, pending["path"], Rng.rng))
 	return {"events": events}

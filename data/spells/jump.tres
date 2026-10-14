@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"jump"
+name_key = &"SPELL_JUMP"
+srd_name = "Jump"
+level = 1
+school = "transmutation"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 1.5
+resolution = "custom"
+duration_rounds = 10
+effect_amount = 6.0
+allies = true
+vfx = &"jump"

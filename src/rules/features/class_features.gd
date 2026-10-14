@@ -65,6 +65,7 @@ static func skill_check(actor: Dictionary, skill: String, dc: int, rng: RandomNu
 	var armor: StringName = StringName(String(actor.get("armor", "none")))
 	if skill == "stealth" and bool(ArmorRules.ARMOR.get(armor, {}).get("stealth", false)):
 		context.disadvantages.append(&"armor_stealth")
+	context.extra_modifiers.append_array(ClassKits.check_modifiers(actor, skill))
 	return Checks.skill_check(StringName(skill), scores, dc, rng, clampi(int(actor.get("level", 1)), 1, 10),
 		proficient, context, proficient and expertise)
 

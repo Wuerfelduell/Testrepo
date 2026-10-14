@@ -32,7 +32,7 @@ static func consider(state: GameState, actor_id: String, targets: Array[String],
 		var cost: float = 0.0 if spell.is_cantrip() else SLOT_COST * spell.level
 		if actor.get("spell_uses", {}).has(spell_id) or spell.is_feature():
 			cost = USE_COST
-		if spell.allies or spell.resolution == "none":
+		if spell.allies or spell.resolution in ["none", "custom"]:
 			# Buffs and area heals for the own side are left to the player for now.
 			continue
 		if spell.resolution == "heal":

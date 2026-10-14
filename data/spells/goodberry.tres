@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"goodberry"
+name_key = &"SPELL_GOODBERRY"
+srd_name = "Goodberry"
+level = 1
+school = "conjuration"
+targeting = "self"
+resolution = "custom"
+vfx = &"goodberry"

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"conjure_animals"
+name_key = &"SPELL_CONJURE_ANIMALS"
+srd_name = "Conjure Animals"
+level = 3
+school = "conjuration"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "custom"
+save_ability = &"dex"
+damage_dice = "3d10"
+damage_type = &"slashing"
+upcast_dice = "1d10"
+concentration = true
+duration_rounds = 100
+vfx = &"conjure_animals"

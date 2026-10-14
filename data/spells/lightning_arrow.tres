@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lightning_arrow"
+name_key = &"SPELL_LIGHTNING_ARROW"
+srd_name = "Lightning Arrow"
+level = 3
+school = "transmutation"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 45.0
+resolution = "custom"
+save_ability = &"dex"
+damage_dice = "2d8"
+damage_type = &"lightning"
+half_on_save = true
+upcast_dice = "1d8"
+vfx = &"lightning_arrow"

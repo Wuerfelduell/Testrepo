@@ -28,6 +28,9 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 	var reach_m: float = spell_range(caster, spell)
 	result["dc"] = int(caster.get("spell_save_dc", 10))
 	result["save_ability"] = String(spell.save_ability)
+	if spell.resolution == "custom":
+		# Spell modules (CustomSpells) check their own targets and fill "targets".
+		return CustomSpells.preview(state, caster_id, spell, result, target_ids, point)
 	var origin: Vector3 = caster["position"]
 	var geometry: CombatSpace = CombatSpace.current()
 	match spell.targeting:
@@ -462,6 +465,9 @@ static func resolve_impact(state: GameState, pending: Dictionary, rng: RandomNum
 		"heal":
 			pending["impacted"] = true
 			events.append_array(_resolve_heal(state, caster_id, spell, pending, rng))
+		"custom":
+			pending["impacted"] = true
+			events.append_array(CustomSpells.resolve(state, caster_id, spell, pending, rng))
 		_:
 			pending["impacted"] = true
 			events.append_array(_resolve_effect(state, caster_id, spell, pending, rng))

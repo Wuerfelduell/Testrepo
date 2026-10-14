@@ -228,6 +228,9 @@ func _option_hint(id: String) -> String:
 		parts.append(tr("LEVELUP_SPELL_AREA_" + spell.area.to_upper()) % spell.area_size_m)
 	if spell.range_m > 0.0:
 		parts.append(tr("LEVELUP_SPELL_RANGE") % spell.range_m)
+	var hint_key: String = String(spell.name_key) + "_HINT"
+	if tr(hint_key) != hint_key:
+		parts.append(tr(hint_key))
 	return " · ".join(parts)
 
 func _on_pick(pressed: bool, key: String, id: String, count: int) -> void:

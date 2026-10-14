@@ -52,7 +52,15 @@ const STYLES: Dictionary = {
 	"invisibility": ["target", ARCANE], "greater_invisibility": ["target", ARCANE], "haste": ["target", LIGHTNING],
 	"false_life": ["caster", NECROTIC], "blur": ["caster", ARCANE], "misty_step": ["caster", SLEEP],
 	"dimension_door": ["caster", ARCANE],
+	"ensnaring_strike": ["bolt", NATURE], "hail_of_thorns": ["bolt", NATURE], "lightning_arrow": ["bolt", LIGHTNING],
+	"longstrider": ["target", NATURE], "jump": ["target", NATURE], "lesser_restoration": ["target", HEAL],
+	"protection_from_poison": ["target", POISON], "protection_from_energy": ["target", SHIELD],
+	"goodberry": ["caster", HEAL], "pass_without_trace": ["caster", SLEEP],
+	"spike_growth": ["point", NATURE], "conjure_animals": ["point", NATURE], "fog_cloud": ["point", Color(0.85, 0.88, 0.92)],
 }
+## Persistent zones of RangerSpells (in the caster's concentration record): ring colour.
+const ZONE_COLORS: Dictionary = {"spike_growth": NATURE, "conjure_animals": Color(0.7, 0.9, 0.5),
+	"fog_cloud": Color(0.85, 0.88, 0.92)}
 const FADE: float = 0.5
 
 var actors: Dictionary = {}
@@ -62,6 +70,8 @@ var _sleep_marks: Dictionary = {}
 ## Hunter's Mark: a red label over each marked creature.
 var _hunt_marks: Dictionary = {}
 var _auras: Dictionary = {}
+## Zone rings by caster id: {"node", "spell_id"}.
+var _zones: Dictionary = {}
 
 ## The caster plays the cast clip, released at release_time (CombatActor treats it
 ## like a ranged attack with an animation override).
@@ -280,6 +290,7 @@ func _target_point(effect: Dictionary, state: GameState, index: int) -> Vector3:
 	return (effect["point"] as Vector3) + Vector3.UP * 0.5
 
 func _update_markers(state: GameState, delta: float) -> void:
+	_update_zones(state)
 	for id: String in actors:
 		var record: Dictionary = state.actors.get(id, {})
 		var node: Node3D = actors[id] as Node3D
@@ -489,7 +500,26 @@ func _shield_bubble() -> MeshInstance3D:
 	return bubble
 
 ## Spirit Guardians: a slowly turning ring of golden motes marking the aura's edge.
-func _guardian_ring(radius: float) -> Node3D:
+func _update_zones(state: GameState) -> void:
+	var seen: Dictionary = {}
+	for id: String in state.actors:
+		var zone: Dictionary = state.actors[id].get("concentration", {}).get("zone", {})
+		if zone.is_empty() or not ZONE_COLORS.has(String(zone["spell_id"])):
+			continue
+		seen[id] = true
+		if _zones.has(id) and String(_zones[id]["spell_id"]) != String(zone["spell_id"]):
+			(_zones[id]["node"] as Node3D).queue_free()
+			_zones.erase(id)
+		if not _zones.has(id):
+			var ring: Node3D = _guardian_ring(float(zone["radius"]), ZONE_COLORS[String(zone["spell_id"])])
+			_zones[id] = {"node": ring, "spell_id": String(zone["spell_id"])}
+		(_zones[id]["node"] as Node3D).global_position = (zone["center"] as Vector3) + Vector3.UP * 0.05
+	for id: String in _zones.keys():
+		if not seen.has(id):
+			(_zones[id]["node"] as Node3D).queue_free()
+			_zones.erase(id)
+
+func _guardian_ring(radius: float, color: Color = RADIANT) -> Node3D:
 	var root: Node3D = Node3D.new()
 	add_child(root)
 	var edge: MeshInstance3D = MeshInstance3D.new()
@@ -498,10 +528,10 @@ func _guardian_ring(radius: float) -> Node3D:
 	torus.outer_radius = radius
 	torus.rings = 48
 	edge.mesh = torus
-	edge.material_override = _glow(RADIANT, 0.35, 2.0)
+	edge.material_override = _glow(color, 0.35, 2.0)
 	edge.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(edge)
-	var motes: CPUParticles3D = _particles(RADIANT, 70, 2.2, 0.22)
+	var motes: CPUParticles3D = _particles(color, 70, 2.2, 0.22)
 	motes.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
 	motes.emission_ring_axis = Vector3.UP
 	motes.emission_ring_radius = radius - 0.2

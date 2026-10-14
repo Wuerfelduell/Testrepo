@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"hail_of_thorns"
+name_key = &"SPELL_HAIL_OF_THORNS"
+srd_name = "Hail of Thorns"
+level = 1
+school = "conjuration"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 45.0
+resolution = "custom"
+save_ability = &"dex"
+damage_dice = "1d10"
+damage_type = &"piercing"
+half_on_save = true
+upcast_dice = "1d10"
+vfx = &"hail_of_thorns"
