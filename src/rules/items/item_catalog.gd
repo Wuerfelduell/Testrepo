@@ -5,6 +5,9 @@ extends RefCounted
 const PATH: String = "res://data/items/items.json"
 const TYPES: Array[String] = ["weapon", "armor", "shield", "consumable", "valuable", "quest"]
 const LOOT_PATH: String = "res://data/items/loot_tables.json"
+## Per-class additions (one file per class thread): data/items/class_<id>.json with the
+## same "items" and "starting_kits" sections as items.json. Ids must not repeat.
+const CLASS_FILES: String = "res://data/items/class_%s.json"
 const SLOTS: Array[String] = ["main_hand", "off_hand", "armor"]
 
 static var _items: Dictionary = {}
@@ -28,6 +31,24 @@ static func _ensure_loaded() -> void:
 		else:
 			push_error("Invalid item in catalog: " + id)
 	_kits = (parsed as Dictionary).get("starting_kits", {}).duplicate(true)
+	for class_id: String in HeroFactory.CLASS_ORDER:
+		var path: String = CLASS_FILES % class_id
+		if not FileAccess.file_exists(path):
+			continue
+		var extra: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not extra is Dictionary:
+			push_error("Class item file could not be parsed: " + path)
+			continue
+		for id: String in (extra as Dictionary).get("items", {}):
+			var item: Dictionary = extra["items"][id]
+			if _items.has(id) or not valid_item(item):
+				push_error("Invalid or repeated item in %s: %s" % [path, id])
+				continue
+			var copy: Dictionary = item.duplicate(true)
+			copy["id"] = id
+			_items[id] = copy
+		for kit_id: String in (extra as Dictionary).get("starting_kits", {}):
+			_kits[kit_id] = extra["starting_kits"][kit_id].duplicate(true)
 	var tables: Variant = JSON.parse_string(FileAccess.get_file_as_string(LOOT_PATH))
 	if tables is Dictionary:
 		for monster_id: String in tables:

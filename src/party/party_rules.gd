@@ -46,7 +46,7 @@ static func problems() -> PackedStringArray:
 		if not entry.get("name") is String or String(entry["name"]).is_empty():
 			found.append(id + ": name is required")
 		if not HeroFactory.is_playable(String(entry.get("class_id", ""))):
-			found.append(id + ": class_id must be a playable class " + str(HeroFactory.PLAYABLE))
+			found.append(id + ": class_id must be a playable class " + str(HeroFactory.playable()))
 		if not ResourceLoader.exists(String(entry.get("model", ""))):
 			found.append(id + ": model does not exist")
 		if create_record(id).is_empty():

@@ -19,11 +19,15 @@ const DATA_ONLY: Dictionary = {
 }
 
 static func is_active_class(actor: Dictionary) -> bool:
-	return String(actor.get("class_id", "")) in ACTIVE_CLASSES
+	return is_active(String(actor.get("class_id", "")))
+
+## Fighter, Wizard and every class with a kit (ClassKits).
+static func is_active(class_id: String) -> bool:
+	return class_id in ACTIVE_CLASSES or ClassKits.has_kit(class_id)
 
 static func definition(class_id: String) -> ClassDefinition:
 	var path: String = "res://data/classes/%s.tres" % class_id
-	if not class_id in ACTIVE_CLASSES or not ResourceLoader.exists(path):
+	if not is_active(class_id) or not ResourceLoader.exists(path):
 		return null
 	return load(path) as ClassDefinition
 
@@ -36,7 +40,9 @@ static func feature_ids_at(class_id: String, level: int) -> Array[String]:
 			result.append(String(feature["id"]))
 	return result
 
-static func implemented(feature_id: String, level: int) -> bool:
+static func implemented(feature_id: String, level: int, class_id: String = "") -> bool:
+	if ClassKits.has_kit(class_id):
+		return ClassKits.implemented(class_id, feature_id, level)
 	return level <= IMPLEMENTED_MAX_LEVEL and not DATA_ONLY.has(feature_id)
 
 static func action_surge_uses(fighter_level: int) -> int:
@@ -147,3 +153,5 @@ static func advance(actor: Dictionary, level: int) -> void:
 		"wizard":
 			if level >= 5:
 				features["memorize_spell"] = {}
+		var other:
+			ClassKits.call_kit(String(other), "advance", [actor, level])

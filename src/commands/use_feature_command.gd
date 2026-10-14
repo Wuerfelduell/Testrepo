@@ -4,12 +4,10 @@ extends Command
 ## with Tactical Shift at level 5 it also grants half Speed of movement without
 ## opportunity attacks), Fighter Action Surge (level 2: one more action on your turn)
 ## and Wizard Arcane Recovery (in play it runs through ShortRestCommand; this path
-## needs a "short_rest" mode that the instant rest never sets).
+## needs a "short_rest" mode that the instant rest never sets). Any other feature id is
+## handed to the actor's class kit (ClassKits.feature_reason / use_feature).
 
-## Paladin Divine Smite and Cleric Divine Intervention are toggles: Smite fires on the
-## next melee weapon hit (ClassEffects.hit_riders), Intervention makes the next Cleric
-## spell free (SpellResolver.free_cast).
-const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge", "divine_smite", "divine_intervention"]
+const FEATURES: Array[String] = ["second_wind", "arcane_recovery", "action_surge"]
 
 var feature_id: String = ""
 var slot_levels: Array[int] = []
@@ -20,11 +18,13 @@ func _init(p_actor_id: String = "", p_feature_id: String = "", p_slot_levels: Ar
 	slot_levels = p_slot_levels.duplicate()
 
 func validate(state: GameState) -> Error:
-	if not feature_id in FEATURES:
-		return ERR_INVALID_PARAMETER
 	if not state.actors.has(actor_id):
 		return ERR_INVALID_PARAMETER
 	var actor: Dictionary = state.actors[actor_id]
+	if not feature_id in FEATURES:
+		if not feature_id in ClassKits.feature_buttons(actor):
+			return ERR_INVALID_PARAMETER
+		return OK if ClassKits.feature_reason(state, actor_id, feature_id).is_empty() else ERR_UNAVAILABLE
 	var feature: Dictionary = actor.get("features", {}).get(feature_id, {})
 	if feature.is_empty():
 		return ERR_UNAVAILABLE
@@ -44,12 +44,6 @@ func validate(state: GameState) -> Error:
 			if bool(actor.get("action_available", false)) or not CombatRules.conditions_for(actor).can_act() \
 					or int(feature.get("uses", 0)) <= 0:
 				return ERR_UNAVAILABLE
-		"divine_smite", "divine_intervention":
-			var reason: Error = CombatRules.valid_actor_turn(state, actor_id)
-			if reason != OK:
-				return reason
-			if feature_id == "divine_intervention" and int(feature.get("uses", 0)) <= 0 and not bool(feature.get("armed", false)):
-				return ERR_UNAVAILABLE
 		"arcane_recovery":
 			if state.mode != &"short_rest" or bool(feature.get("used", false)):
 				return ERR_UNAVAILABLE
@@ -59,6 +53,8 @@ func validate(state: GameState) -> Error:
 	return OK
 
 func apply(state: GameState) -> Dictionary:
+	if not feature_id in FEATURES:
+		return {"events": ClassKits.use_feature(state, actor_id, feature_id, Rng.rng)}
 	var actor: Dictionary = state.actors[actor_id]
 	var feature: Dictionary = actor["features"][feature_id]
 	var events: Array[Dictionary] = []
@@ -81,9 +77,6 @@ func apply(state: GameState) -> Dictionary:
 			feature["uses"] = int(feature["uses"]) - 1
 			actor["action_available"] = true
 			events.append({"type": "feature", "actor_id": actor_id, "feature_id": feature_id})
-		"divine_smite", "divine_intervention":
-			feature["armed"] = not bool(feature.get("armed", false))
-			events.append({"type": "feature_toggle", "actor_id": actor_id, "feature_id": feature_id, "armed": feature["armed"]})
 		"arcane_recovery":
 			SpellRules.arcane_recovery(actor["spell_slots"], actor["spell_slots_max"], int(actor.get("level", 1)), slot_levels)
 			feature["used"] = true
@@ -96,7 +89,7 @@ func to_dict() -> Dictionary:
 func from_dict(data: Dictionary) -> Error:
 	if data.size() != 4 or data.get("type") != "use_feature" or not data.get("actor_id") is String or \
 			String(data["actor_id"]).is_empty() or not data.get("feature_id") is String or \
-			not String(data["feature_id"]) in FEATURES or not data.get("slot_levels") is Array:
+			not (String(data["feature_id"]) in FEATURES or String(data["feature_id"]) in ClassKits.all_feature_ids()) or not data.get("slot_levels") is Array:
 		return ERR_INVALID_DATA
 	var levels: Array = data["slot_levels"]
 	if levels.size() > 9:

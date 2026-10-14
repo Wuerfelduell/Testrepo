@@ -31,6 +31,19 @@ static func full_caster_slots(level: int) -> Array[int]:
 		result.assign(FULL_CASTER_SLOTS[level - 1])
 	return result
 
+## SRD 5.2 Warlock Pact Magic for levels 1-10: [slot count, slot level]. Slots are
+## stored like other casters' (index = spell level - 1), so only the pact level is filled.
+const PACT_SLOTS: Array = [[1, 1], [2, 1], [2, 2], [2, 2], [2, 3], [2, 3], [2, 4], [2, 4], [2, 5], [2, 5]]
+
+static func pact_slots(level: int) -> Array[int]:
+	var result: Array[int] = []
+	if level >= 1 and level <= PACT_SLOTS.size():
+		var entry: Array = PACT_SLOTS[level - 1]
+		result.resize(int(entry[1]))
+		result.fill(0)
+		result[int(entry[1]) - 1] = int(entry[0])
+	return result
+
 static func half_caster_slots(level: int) -> Array[int]:
 	var result: Array[int] = []
 	if level >= 1 and level <= HALF_CASTER_SLOTS.size():
@@ -200,7 +213,9 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 		disadvantages.append(&"restrained")
 	var modifiers: Array[RuleModifier] = save_modifiers(actor, ability)
 	modifiers.append_array(extra)
-	var roll: DiceResult = Dice.d20(rng, modifiers, advantages, disadvantages)
+	var all_advantages: Array[StringName] = advantages.duplicate()
+	all_advantages.append_array(ClassKits.save_advantages(actor, ability))
+	var roll: DiceResult = Dice.d20(rng, modifiers, all_advantages, disadvantages)
 	result["success"] = roll.is_valid() and roll.total >= dc
 	result["roll"] = CombatRules.serialize_roll(roll)
 	return result

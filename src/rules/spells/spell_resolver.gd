@@ -191,7 +191,7 @@ static func attack_weapon(caster: Dictionary, spell: SpellDefinition) -> Diction
 ## Average healing of a heal spell (Lay on Hands: the whole remaining pool).
 static func expected_heal(caster: Dictionary, spell: SpellDefinition, slot_level: int) -> float:
 	if spell.effect == &"lay_on_hands":
-		return float(caster.get("features", {}).get("lay_on_hands", {}).get("pool", 0))
+		return float(caster.get("features", {}).get("lay_on_hands", {}).get("uses", 0))
 	if spell.resolution != "heal":
 		return 0.0
 	return SpellRules.average_damage(heal_expression(spell, slot_level, int(caster.get("level", 1))),

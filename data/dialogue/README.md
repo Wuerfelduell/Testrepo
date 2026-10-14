@@ -64,5 +64,11 @@ Texts are the English source strings; a German translation can later key on them
   come from data/companions/companions.json.
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
 
+Design rules (owner, 14-10-2026, docs/STORY.md "How Rabenfels reacts"): one successful roll
+never buys loyalty; consequences come from each NPC's personality and interests, not from a
+good/evil scale; a failed check never blocks the main story, the information stays reachable
+elsewhere. Write consequences as flags or counters (e.g. `garrik_threatened`, `player_cruelty`)
+so later conversations can react to them.
+
 Flags live in `Game.state.world["flags"]` and are saved. `tests/unit/dialogue/` checks every
 file in this folder, so a broken link between nodes fails the tests.

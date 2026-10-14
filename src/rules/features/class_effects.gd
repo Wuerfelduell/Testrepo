@@ -3,16 +3,15 @@ extends RefCounted
 ## Spell and class-feature effects of the Cleric, Paladin and Druid (SRD 5.2) on plain
 ## actor records, plus the shared hooks other systems call: hit point loss (temporary
 ## hit points, Resistance), attack and save bonuses (Bless, Aura of Protection), extra
-## damage on weapon hits (Divine Smite, Divine Favor, Divine Strike), advantage against
-## marked creatures (Faerie Fire, Guiding Bolt, Pack Tactics), Wild Shape and rest
-## recharges. Pure: no Nodes, no singletons; dice only through the supplied generator.
+## damage on weapon hits (Divine Favor), advantage against marked creatures (Faerie
+## Fire, Guiding Bolt, Pack Tactics) and Wild Shape. Class riders and feature uses live
+## in the class kits (src/rules/classes). Pure: no Nodes, no singletons; dice only through the supplied generator.
 ##
 ## Effects live in the actor's "effects" list (ActiveEffects) with these extra "until"
 ## values: "rounds" (rounds_left counts down at the start of turn_of's turn), "long_rest",
 ## "damage" (ends when the creature takes damage; also counts rounds when rounds_left > 0).
 
 const AURA_OF_PROTECTION_M: float = 3.0
-const SMITE_TYPES: Array[StringName] = [&"fiend", &"undead"]
 ## SRD 5.2 Wolf (CR 1/4), the default Wild Shape form: AC 12, Speed 40 ft., STR 14,
 ## DEX 15, CON 12, Bite +4, 1d6+2 piercing, Prone on a hit (Medium or smaller),
 ## Pack Tactics.
@@ -25,10 +24,6 @@ const WILD_SHAPE_FORMS: Dictionary = {
 			"damage_modifiers": [{"amount": 2, "source": "wolf"}], "proficient": true,
 			"properties": [], "on_hit_prone": true, "pack_tactics": true, "natural": true}},
 }
-## Feature uses that come back on rests: "one" = one use on a Short Rest and all on a
-## Long Rest; "long" = all on a Long Rest only.
-const RECHARGE: Dictionary = {"channel_divinity": "one", "wild_shape": "one",
-	"divine_intervention": "long", "wild_resurgence": "long"}
 
 static func _turn_key(state: GameState) -> String:
 	return "%d:%d" % [state.round_number, state.turn_index]
@@ -178,9 +173,9 @@ static func cantrip_damage_bonus(caster: Dictionary, spell: SpellDefinition) -> 
 
 # ---------------------------------------------------------------- weapon hit riders
 
-## Extra damage after a weapon hit that did not kill yet: Divine Favor (1d4 radiant),
-## Divine Strike (1d8 radiant once per turn), Divine Smite when armed (bonus action and a
-## slot or the free use), and the Wolf's Prone bite. Returns {"events", "damage"}.
+## Extra damage after a weapon hit that did not kill yet: Divine Favor (1d4 radiant)
+## and the Wolf's Prone bite. Class riders (Divine Smite, Divine Strike) live in the
+## kits (extra_damage_dice). Returns {"events", "damage"}.
 static func hit_riders(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
 		critical: bool, rng: RandomNumberGenerator) -> Dictionary:
 	var events: Array[Dictionary] = []
@@ -190,32 +185,9 @@ static func hit_riders(state: GameState, attacker_id: String, target_id: String,
 	var is_weapon: bool = String(weapon.get("spell_id", "")).is_empty()
 	if attacker.is_empty() or not is_weapon:
 		return {"events": events, "damage": damage}
-	var features: Dictionary = attacker.get("features", {})
 	var riders: Array[Dictionary] = []
 	if not _effects_of(attacker, "divine_favor").is_empty():
 		riders.append({"dice": "1d4", "type": "radiant", "source": "divine_favor"})
-	if String(features.get("blessed_strikes", "")) == "divine_strike":
-		var strike: Dictionary = features.get("divine_strike", {})
-		if String(strike.get("used_turn", "")) != _turn_key(state):
-			strike["used_turn"] = _turn_key(state)
-			features["divine_strike"] = strike
-			riders.append({"dice": "1d8", "type": "radiant", "source": "divine_strike"})
-	var smite: Dictionary = features.get("divine_smite", {})
-	if bool(smite.get("armed", false)) and not bool(weapon.get("ranged", false)) and \
-			bool(attacker.get("bonus_available", false)):
-		var slot_level: int = 0
-		if int(smite.get("free_uses", 0)) > 0:
-			smite["free_uses"] = int(smite["free_uses"]) - 1
-			slot_level = 1
-		else:
-			slot_level = SpellRules.lowest_slot(attacker.get("spell_slots", []), 1)
-			if slot_level > 0:
-				SpellRules.spend_slot(attacker["spell_slots"], slot_level)
-		if slot_level > 0:
-			smite["armed"] = false
-			attacker["bonus_available"] = false
-			var count: int = 2 + (slot_level - 1) + (1 if StringName(String(target.get("creature_type", "humanoid"))) in SMITE_TYPES else 0)
-			riders.append({"dice": "%dd8" % count, "type": "radiant", "source": "divine_smite", "slot_level": slot_level})
 	var defenses: DamageRules.Defenses = CombatRules.defenses_for(target)
 	for rider: Dictionary in riders:
 		if not CombatRules.alive(target):
@@ -229,9 +201,6 @@ static func hit_riders(state: GameState, attacker_id: String, target_id: String,
 			"feature_id": rider["source"]})
 		events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 			"amount": lost, "damage_type": rider["type"], "hp": target["hp"], "feature_id": rider["source"]})
-		if String(rider["source"]) == "divine_smite":
-			events.append({"type": "feature", "actor_id": attacker_id, "feature_id": "divine_smite",
-				"slot_level": int(rider["slot_level"])})
 	if bool(weapon.get("on_hit_prone", false)) and CombatRules.alive(target) and not "prone" in target.get("conditions", []):
 		if not target.has("conditions"):
 			target["conditions"] = []
@@ -407,7 +376,7 @@ static func resource_available(state: GameState, caster: Dictionary, spell: Spel
 		"free":
 			return spell.effect != &"revert_wild_shape" or caster.has("wild_shape")
 		"lay_on_hands":
-			return int(features.get("lay_on_hands", {}).get("pool", 0)) > 0
+			return int(features.get("lay_on_hands", {}).get("uses", 0)) > 0
 		"wild_shape":
 			if int(features.get("wild_shape", {}).get("uses", 0)) > 0:
 				return true
@@ -438,34 +407,15 @@ static func lay_on_hands(state: GameState, caster_id: String, target_id: String)
 	var caster: Dictionary = state.actors[caster_id]
 	var target: Dictionary = state.actors[target_id]
 	var pool: Dictionary = caster["features"]["lay_on_hands"]
-	var amount: int = mini(int(pool.get("pool", 0)), int(target["max_hp"]) - int(target["hp"]))
-	pool["pool"] = int(pool["pool"]) - amount
+	var amount: int = mini(int(pool.get("uses", 0)), int(target["max_hp"]) - int(target["hp"]))
+	pool["uses"] = int(pool["uses"]) - amount
 	target["hp"] = int(target["hp"]) + amount
 	return [{"type": "heal", "actor_id": target_id, "target_id": target_id, "source_id": caster_id,
 		"feature_id": "lay_on_hands", "amount": amount, "hp": target["hp"]}]
 
-## Short Rest: one use back of "one" features. Long Rest: everything, pools, free smite.
-static func short_rest(actor: Dictionary) -> Array[String]:
-	var recharged: Array[String] = []
-	var features: Dictionary = actor.get("features", {})
-	for feature_id: String in RECHARGE:
-		if RECHARGE[feature_id] == "one" and features.has(feature_id):
-			var feature: Dictionary = features[feature_id]
-			if int(feature.get("uses", 0)) < int(feature.get("max", 0)):
-				feature["uses"] = int(feature["uses"]) + 1
-				recharged.append(feature_id)
-	return recharged
-
+## Long Rest: Wild Shape ends, temporary hit points and long-rest effects (Barkskin,
+## Aid) end. Feature uses recharge through ClassKits.recharge.
 static func long_rest(actor: Dictionary) -> void:
-	var features: Dictionary = actor.get("features", {})
-	for feature_id: String in RECHARGE:
-		if features.has(feature_id) and features[feature_id].has("max"):
-			features[feature_id]["uses"] = int(features[feature_id]["max"])
-	if features.has("lay_on_hands"):
-		features["lay_on_hands"]["pool"] = int(features["lay_on_hands"]["max"])
-	if features.has("divine_smite"):
-		features["divine_smite"]["free_uses"] = 1
-		features["divine_smite"]["armed"] = false
 	revert_wild_shape(actor, String(actor.get("id", "")))
 	actor["temp_hp"] = 0
 	ActiveEffects.remove_where(actor, func(effect: Dictionary) -> bool:

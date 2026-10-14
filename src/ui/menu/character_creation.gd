@@ -49,7 +49,7 @@ func _ready() -> void:
 		var text: String = tr("CREATION_CLASS_" + id.to_upper())
 		if not playable:
 			text = tr("CREATION_COMING_LATER") % text
-		var button: Button = MenuTheme.toggle(self, rect, text, 22 if playable else 17)
+		var button: Button = MenuTheme.toggle(self, rect, text, 21 if playable else 16)
 		button.button_group = group
 		button.disabled = not playable
 		button.tooltip_text = tr("CREATION_COMING_LATER_HINT") if not playable else ""

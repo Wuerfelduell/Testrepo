@@ -359,9 +359,12 @@ func rolls_busy() -> bool:
 ## Spell and feature buttons for the hero, rebuilt only when the hero's kit changes.
 func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> void:
 	var entries: Array[String] = []
-	for feature_id: String in ["second_wind", "action_surge", "divine_smite", "divine_intervention"]:
-		if hero.get("features", {}).has(feature_id):
-			entries.append("feature:" + feature_id)
+	if hero.get("features", {}).has("second_wind"):
+		entries.append("feature:second_wind")
+	if hero.get("features", {}).has("action_surge"):
+		entries.append("feature:action_surge")
+	for feature_id: String in ClassKits.feature_buttons(hero):
+		entries.append("feature:" + feature_id)
 	for spell_id: Variant in hero.get("spells", []):
 		entries.append("spell:" + String(spell_id))
 	var signature: int = hash(entries)
@@ -396,6 +399,13 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var id: String = entry.get_slice(":", 1)
 		var hotkey: String = str((index + 4) % 10) if index < 7 else ""
 		var reason: String = ""
+		if entry.begins_with("feature:") and not id in UseFeatureCommand.FEATURES:
+			# Class kit features (ClassKits): label, reason and hint come from the kit.
+			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, ClassKits.feature_label(hero, id)]
+			reason = "COMBAT_WAIT_TURN" if not player_turn else ClassKits.feature_reason(state, hero_id, id)
+			button.disabled = not reason.is_empty()
+			button.tooltip_text = tr(reason) if not reason.is_empty() else tr("FEATURE_%s_HINT" % id.to_upper())
+			continue
 		if entry.begins_with("feature:"):
 			var feature: Dictionary = hero["features"][id]
 			if id in ["divine_smite", "divine_intervention"]:
@@ -448,7 +458,7 @@ static func feature_cost_line(hero: Dictionary, spell: SpellDefinition) -> Strin
 		"free":
 			return TranslationServer.translate("FEATURE_COST_FREE")
 		"lay_on_hands":
-			return TranslationServer.translate("FEATURE_COST_POOL") % int(features.get("lay_on_hands", {}).get("pool", 0))
+			return TranslationServer.translate("FEATURE_COST_POOL") % int(features.get("lay_on_hands", {}).get("uses", 0))
 	var feature: Dictionary = features.get(spell.feature_resource, {})
 	return TranslationServer.translate("FEATURE_COST_" + spell.feature_resource.to_upper()) % [int(feature.get("uses", 0)), int(feature.get("max", 0))]
 

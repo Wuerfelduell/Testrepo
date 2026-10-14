@@ -24,6 +24,7 @@ func apply(state: GameState) -> Dictionary:
 		events.append_array(ActiveEffects.aura_triggers(state, actor_id, Rng.rng, false))
 	if state.mode == &"combat":
 		events.append_array(ActiveEffects.on_turn_end(state, actor_id, Rng.rng))
+		events.append_array(ClassKits.on_turn_end(state, actor_id, Rng.rng))
 	for index: int in range(state.turn_order.size()):
 		state.turn_index = (state.turn_index + 1) % state.turn_order.size()
 		if state.turn_index == 0:

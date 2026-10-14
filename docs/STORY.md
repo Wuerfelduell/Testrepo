@@ -129,6 +129,24 @@ marked as right or wrong (docs/DESIGN.md, dialogue rules).
 - **Act 1 will be long** (a lot of Overcity before the descent), but it is built in small
   slices; the whole story does not need to be in the game yet.
 
+## How Rabenfels reacts (owner, 14-10-2026)
+
+- **No NPC is won over by a single roll.** A successful intimidation is not loyalty: Garrik may
+  let the player pass out of fear and set a trap later; Seren, intimidated, only learns that the
+  player might be dangerous.
+- **Companions argue with each other.** Kael thinks magic is cowardly, Lyra thinks Kael is a
+  primitive thug. Kael and Seren respect each other's fighting but fight over fair duels versus
+  assassination. Lyra and Seren work together surprisingly well and never fully trust each
+  other. These conflicts can force the player to take sides in personal quests.
+- **Violence is not limited to harmless threats.** The player may act like a real villain, and
+  the world reacts believably: murdering a defenceless prisoner can cost a witness, turn
+  companions against the player or bring the victim's relatives after them.
+- **Consequences come from the NPCs' personalities and interests**, not from a moral scale. Not
+  every cruel choice is punished and not every kind one rewarded: a kind player can be exploited,
+  a brutal one can win powerful allies. The player decides what kind of person their hero is.
+- Failed persuasion checks never block the main story for good: important information stays
+  reachable through other hints, people or places.
+
 ## Open questions for the owner
 
 See handover/13-10-2026.md, questions R1-R6.

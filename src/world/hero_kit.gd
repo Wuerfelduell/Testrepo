@@ -35,10 +35,11 @@ static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), s
 	if sheet == null:
 		return {}
 	var skills: Array[StringName] = class_skills.duplicate()
+	var kit_skills: Dictionary = HeroFactory.default_skills(String(class_id))
 	if skills.is_empty():
-		skills.assign(DEFAULT_SKILLS.get(class_id, HeroFactory.SKILLS.get(String(class_id), {}).get("class", [])))
+		skills.assign(DEFAULT_SKILLS.get(class_id, kit_skills.get("class", [])))
 	var extra_skill: StringName = human_skill if human_skill != &"" else \
-		DEFAULT_HUMAN_SKILL.get(class_id, HeroFactory.SKILLS.get(String(class_id), {}).get("human", &""))
+		StringName(DEFAULT_HUMAN_SKILL.get(class_id, kit_skills.get("human", &"")))
 	# These explicit skills do not silently activate feats or other deferred choices.
 	if not sheet.select_class_skills(skills) or not sheet.select_human_skill(extra_skill):
 		return {}
@@ -75,6 +76,8 @@ static func default_model(class_id: String) -> String:
 static func activate(source: Dictionary) -> Dictionary:
 	var record: Dictionary = source.duplicate(true)
 	var class_id: String = String(record.get("class_id", ""))
+	if ClassKits.has_kit(class_id):
+		return _activate_kit(record, class_id)
 	if not HeroFactory.is_playable(class_id):
 		return record
 	if bool(record.get("class_features_active", false)) and record.has("features"):
@@ -107,6 +110,27 @@ static func activate(source: Dictionary) -> Dictionary:
 		# Only used when the arena auto-plays the hero: keep range like a caster should.
 		record["personality"] = AUTO_PERSONALITY[class_id]
 	record["pending_character_choices"] = choices
+	return record
+
+## Kit classes: shared level-1 setup, then the kit's own activate(record); older
+## records already active get the kit's upgrade(record) instead.
+static func _activate_kit(record: Dictionary, class_id: String) -> Dictionary:
+	if bool(record.get("class_features_active", false)) and record.has("features"):
+		ClassKits.call_kit(class_id, "upgrade", [record])
+		return record
+	var level: int = int(record.get("level", 1))
+	var definition: ClassDefinition = load("res://data/classes/%s.tres" % class_id) as ClassDefinition
+	record["save_proficiencies"] = definition.saving_throws.duplicate()
+	record["proficiency_bonus"] = Abilities.proficiency_bonus(level)
+	record["class_features_active"] = true
+	if not record.has("effects"):
+		record["effects"] = []
+	record["features"] = {}
+	ClassKits.call_kit(class_id, "activate", [record])
+	if ClassSpellcasting.is_caster(class_id):
+		ClassSpellcasting.activate(record)
+	ClassFeatures.advance(record, level)
+	ClassKits.call_kit(class_id, "refresh_derived", [record])
 	return record
 
 ## SRD 5.2 Greatsword (martial, two-handed, 2d6 slashing, mastery Graze): the owner's
