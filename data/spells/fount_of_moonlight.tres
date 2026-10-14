@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"fount_of_moonlight"
+name_key = &"SPELL_FOUNT_OF_MOONLIGHT"
+srd_name = "Fount of Moonlight"
+level = 4
+school = "evocation"
+targeting = "self"
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"fount_of_moonlight"
+vfx = &"fount_of_moonlight"

@@ -22,7 +22,9 @@ const NEW_SPELLS: Array[String] = ["toll_the_dead", "word_of_radiance", "thorn_w
 	"compelled_duel", "spiritual_weapon", "prayer_of_healing", "blindness_deafness", "moonbeam", "flame_blade",
 	"heat_metal", "shining_smite", "magic_weapon", "silence", "beacon_of_hope", "bestow_curse", "dispel_magic",
 	"sleet_storm", "blinding_smite", "crusaders_mantle", "aura_of_vitality", "elemental_weapon", "banishment",
-	"death_ward", "stoneskin", "greater_restoration", "insect_plague", "contagion", "wrath_of_nature"]
+	"death_ward", "stoneskin", "greater_restoration", "insect_plague", "contagion", "wrath_of_nature",
+	"sanctuary", "charm_person", "flaming_sphere", "gust_of_wind", "remove_curse", "freedom_of_movement",
+	"aura_of_life", "aura_of_purity", "fire_shield", "fount_of_moonlight"]
 
 func before_each() -> void:
 	CombatSpace.active = null
@@ -76,7 +78,8 @@ func test_every_new_spell_is_valid_and_on_a_class_list() -> void:
 		assert_true(spell.is_valid(), spell_id)
 		assert_true(spell_id in lists, spell_id)
 		assert_ne(tr(String(spell.name_key)), String(spell.name_key), spell_id)
-	for spell_id: String in ["spiritual_weapon_strike", "flame_blade_strike", "heat_metal_repeat", "aura_of_vitality_heal"]:
+	for spell_id: String in ["spiritual_weapon_strike", "flame_blade_strike", "heat_metal_repeat", "aura_of_vitality_heal",
+			"flaming_sphere_move"]:
 		assert_true(SpellBook.get_spell(spell_id).is_feature(), spell_id)
 
 func test_toll_the_dead_rings_louder_for_the_wounded() -> void:
@@ -257,3 +260,70 @@ func test_greater_restoration_lifts_a_curse() -> void:
 	state.actors = {"ally": ally}
 	DivineSpellEffects.greater_restoration(state, "cleric", "ally")
 	assert_false(CombatRules.conditions_for(ally).has(&"poisoned"))
+
+func test_sanctuary_can_cost_an_attacker_its_attack() -> void:
+	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	var foe: Dictionary = dummy(Vector3(0, 0, -1))
+	foe["ability_scores"][&"wis"] = 1
+	ActiveEffects.add(fighter, {"kind": "sanctuary", "source_id": "cleric", "save_dc": 30, "until": "rounds", "rounds_left": 10})
+	var state: GameState = GameState.new()
+	state.mode = &"combat"
+	state.actors = {"fighter": fighter, "foe": foe}
+	var result: Dictionary = DivineSpellEffects.sanctuary(state, "foe", "fighter", Rng.rng)
+	assert_true(bool(result["blocked"]))
+	DivineSpellEffects.sanctuary(state, "fighter", "foe", Rng.rng)
+	assert_false(ActiveEffects.has_kind(fighter, "sanctuary"), "Attacking ends the ward")
+
+func test_charmed_creatures_cannot_attack_the_charmer() -> void:
+	var druid: Dictionary = HeroKit.create(&"druid", Vector3.ZERO)
+	var foe: Dictionary = dummy(Vector3(0, 0, -1))
+	ActiveEffects.add(foe, {"kind": "charm_person", "source_id": "druid", "until": "damage", "rounds_left": 600})
+	var state: GameState = GameState.new()
+	state.actors = {"druid": druid, "foe": foe}
+	assert_false(bool(CombatRules.attack_preview(state, "foe", "druid")["legal"]))
+	ClassEffects.lose_hp(state, "foe", 1, Rng.rng)
+	assert_true(bool(CombatRules.attack_preview(state, "foe", "druid")["legal"]), "Damage breaks the charm")
+
+func test_freedom_of_movement_stops_hold_person() -> void:
+	var cleric: Dictionary = hero(&"cleric", 3, Vector3.ZERO)
+	var ally: Dictionary = HeroKit.create(&"fighter", Vector3(0, 0, -2))
+	ActiveEffects.add(ally, {"kind": "freedom_of_movement", "until": "rounds", "rounds_left": 600})
+	var state: GameState = GameState.new()
+	state.actors = {"cleric": cleric, "ally": ally}
+	assert_eq(ClassEffects.apply_effect(state, "cleric", "ally", SpellBook.get_spell("hold_person"), 2), [])
+	assert_true(CombatRules.conditions_for(ally).can_act())
+
+func test_fire_shield_burns_melee_attackers() -> void:
+	var druid: Dictionary = HeroKit.create(&"druid", Vector3.ZERO)
+	var foe: Dictionary = dummy(Vector3(0, 0, -1))
+	ActiveEffects.add(druid, {"kind": "fire_shield", "until": "rounds", "rounds_left": 100})
+	var state: GameState = GameState.new()
+	state.actors = {"druid": druid, "foe": foe}
+	DivineSpellEffects.retaliation(state, "foe", "druid", foe["weapon"], Rng.rng)
+	assert_lt(int(foe["hp"]), 200)
+	assert_true(&"cold" in CombatRules.defenses_for(druid).resistances)
+
+func test_flaming_sphere_moves_with_its_bonus_action() -> void:
+	var druid: Dictionary = hero(&"druid", 3, Vector3.ZERO, ["flaming_sphere"])
+	start({"druid": druid, "foe": dummy(Vector3(0, 0, -12))}, ["druid", "foe"])
+	assert_eq(cast("druid", "flaming_sphere", [], Vector3(0, 0, -5)), OK)
+	assert_true("flaming_sphere_move" in Game.state.actors["druid"]["spells"])
+	assert_eq(cast("druid", "flaming_sphere_move", [], Vector3(0, 0, -12)), OK)
+	assert_almost_eq((Game.state.actors["druid"]["concentration"]["point"] as Vector3).z, -12.0, 0.01)
+	assert_lt(int(Game.state.actors["foe"]["hp"]), 200, "Rammed")
+
+func test_gust_of_wind_pushes_those_who_fail() -> void:
+	var state: GameState = GameState.new()
+	state.actors = {"druid": HeroKit.create(&"druid", Vector3.ZERO), "foe": dummy(Vector3(0, 0, -3))}
+	DivineSpellEffects.failed_save(state, "druid", "foe", SpellBook.get_spell("gust_of_wind"), 2)
+	assert_almost_eq((state.actors["foe"]["position"] as Vector3).z, -7.5, 0.01)
+
+func test_remove_curse_leaves_contagion() -> void:
+	var ally: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	ActiveEffects.add(ally, {"kind": "bestow_curse", "spell_id": "bestow_curse", "source_id": "foe", "until": "concentration"})
+	ActiveEffects.add(ally, {"kind": "contagion", "spell_id": "contagion", "source_id": "foe", "until": "rounds", "rounds_left": 10})
+	var state: GameState = GameState.new()
+	state.actors = {"ally": ally}
+	DivineSpellEffects.greater_restoration(state, "cleric", "ally", DivineSpellEffects.PURE_CURSES)
+	assert_false(ActiveEffects.has_kind(ally, "bestow_curse"))
+	assert_true(ActiveEffects.has_kind(ally, "contagion"))

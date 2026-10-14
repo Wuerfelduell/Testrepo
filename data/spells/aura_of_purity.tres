@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"aura_of_purity"
+name_key = &"SPELL_AURA_OF_PURITY"
+srd_name = "Aura of Purity"
+level = 4
+school = "abjuration"
+targeting = "self"
+area = "sphere"
+area_size_m = 9.0
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"aura_of_purity"
+allies = true
+vfx = &"aura_of_purity"

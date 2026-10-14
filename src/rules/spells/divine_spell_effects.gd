@@ -9,6 +9,10 @@ extends RefCounted
 ## - Command is always "Grovel": the target falls Prone and loses its next turn.
 ## - Bestow Curse always picks "1d8 Necrotic from the caster's weapon hits".
 ## - Elemental Weapon always deals Fire; Wrath of Nature is one damaging zone for enemies.
+## - Sanctuary only guards against attack rolls; Charm Person only stops attacks on the
+##   charmer and ends when the creature takes any damage.
+## - Aura of Life and Aura of Purity ward the allies inside when cast (they do not follow).
+## - Fire Shield is always the warm shield (Cold resistance, 2d8 Fire back).
 ## - Zones hit a creature once per turn when it enters or ends its turn there (Spirit
 ##   Guardians rule); Sleet Storm and Wrath of Nature halve speed inside.
 
@@ -16,12 +20,23 @@ const SMITE_SPELLS: Array[StringName] = [&"searing_smite", &"thunderous_smite", 
 	&"shining_smite", &"blinding_smite"]
 ## Protection from Evil and Good keeps these creature types at Disadvantage.
 const WARDED_TYPES: Array[String] = ["aberration", "celestial", "elemental", "fey", "fiend", "undead"]
-const STONESKIN_TYPES: Array[String] = ["bludgeoning", "piercing", "slashing"]
 const CRUSADERS_MANTLE_M: float = 9.0
 const THORN_WHIP_PULL_M: float = 3.0
 const THUNDEROUS_PUSH_M: float = 3.0
 ## Effects Greater Restoration lifts (curses and lingering magical illness).
 const CURSES: Array[String] = ["bestow_curse", "contagion", "hex"]
+## Remove Curse lifts curses only.
+const PURE_CURSES: Array[String] = ["bestow_curse", "hex"]
+const FIRE_SHIELD_M: float = 1.5
+const GUST_PUSH_M: float = 4.5
+## Effect kind -> damage types it resists.
+const WARDS: Dictionary = {
+	"stoneskin": ["bludgeoning", "piercing", "slashing"],
+	"aura_of_life": ["necrotic"],
+	"aura_of_purity": ["poison"],
+	"fire_shield": ["cold"],
+	"fount_of_moonlight": ["radiant"],
+}
 ## Kinds that grant a condition and are shaken off with a save at the end of each of the
 ## creature's turns: kind -> [condition, save ability].
 const REPEAT_SAVES: Dictionary = {
@@ -106,11 +121,15 @@ static func attack_disadvantages(state: GameState, attacker_id: String, target_i
 			break
 	return result
 
-## Stoneskin: Resistance to Bludgeoning, Piercing and Slashing damage.
+## Stoneskin, Aura of Life, Aura of Purity, Fire Shield, Fount of Moonlight.
 static func resistances(actor: Dictionary) -> Array[String]:
-	if not _effects_of(actor, "stoneskin").is_empty():
-		return STONESKIN_TYPES.duplicate()
-	return []
+	var result: Array[String] = []
+	for kind: String in WARDS:
+		if not _effects_of(actor, kind).is_empty():
+			for damage_type: String in WARDS[kind]:
+				if not damage_type in result:
+					result.append(damage_type)
+	return result
 
 ## Heroism: immune to Frightened.
 static func fear_immune(actor: Dictionary) -> bool:
@@ -119,6 +138,52 @@ static func fear_immune(actor: Dictionary) -> bool:
 ## Banished creatures are gone until the spell ends: no attack or spell reaches them.
 static func untargetable(actor: Dictionary) -> bool:
 	return not _effects_of(actor, "banishment").is_empty()
+
+## Charm Person: the charmed creature cannot attack its charmer.
+static func charmed_by(attacker: Dictionary, target_id: String) -> bool:
+	for effect: Dictionary in _effects_of(attacker, "charm_person"):
+		if String(effect.get("source_id", "")) == target_id:
+			return true
+	return false
+
+## Freedom of Movement: speed is never reduced and difficult terrain costs nothing.
+static func free_moving(actor: Dictionary) -> bool:
+	return not _effects_of(actor, "freedom_of_movement").is_empty()
+
+## Sanctuary: an attacker must make a Wisdom save against the warder's DC or lose the
+## attack. A warded creature that attacks loses Sanctuary. Returns the events; the
+## attack goes on while "blocked" stays false.
+static func sanctuary(state: GameState, attacker_id: String, target_id: String, rng: RandomNumberGenerator) -> Dictionary:
+	var events: Array[Dictionary] = []
+	var attacker: Dictionary = state.actors[attacker_id]
+	if ActiveEffects.remove_where(attacker, func(effect: Dictionary) -> bool: return String(effect.get("kind", "")) == "sanctuary") > 0:
+		events.append({"type": "effects_expired", "actor_id": attacker_id})
+	for effect: Dictionary in _effects_of(state.actors[target_id], "sanctuary"):
+		var save: Dictionary = SpellRules.roll_save(attacker, &"wis", int(effect.get("save_dc", 10)), rng,
+			ClassEffects.save_modifiers(state, attacker_id, rng))
+		events.append(ActiveEffects.save_event(String(effect.get("source_id", "")), attacker_id, "sanctuary", save))
+		if not bool(save["success"]):
+			events.append({"type": "spell_blocked", "actor_id": attacker_id, "target_id": target_id, "spell_id": "sanctuary"})
+			return {"events": events, "blocked": true}
+		break
+	return {"events": events, "blocked": false}
+
+## Fire Shield: a creature within 1.5 m that hits the shielded one with a melee weapon
+## takes 2d8 Fire.
+static func retaliation(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
+		rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var attacker: Dictionary = state.actors.get(attacker_id, {})
+	var target: Dictionary = state.actors.get(target_id, {})
+	if _effects_of(target, "fire_shield").is_empty() or not is_melee_weapon_attack(weapon) or \
+			not CombatRules.alive(attacker) or not attacker.get("position") is Vector3 or not target.get("position") is Vector3 or \
+			(attacker["position"] as Vector3).distance_to(target["position"]) > FIRE_SHIELD_M + CombatRules.EPSILON:
+		return events
+	var roll: DiceResult = Dice.roll("2d8", rng)
+	events.append({"type": "roll", "kind": "damage", "actor_id": target_id, "target_id": attacker_id,
+		"spell_id": "fire_shield", "roll": CombatRules.serialize_roll(roll), "damage_type": "fire", "amount": roll.total})
+	events.append_array(SpellResolver._apply_damage(state, target_id, attacker_id, roll.total, &"fire", rng))
+	return events
 
 ## Death Ward: the first drop to 0 hit points leaves the creature at 1 instead.
 static func death_ward(target: Dictionary) -> bool:
@@ -160,6 +225,12 @@ static func prepare_effect(state: GameState, caster: Dictionary, target_id: Stri
 				target["conditions"].append("prone")
 		"death_ward":
 			effect["until"] = "long_rest"
+		"charm_person":
+			effect["until"] = "damage"
+		"freedom_of_movement":
+			# Ends magical paralysis and restraint already on the creature.
+			ActiveEffects.remove_where(state.actors[target_id], func(other: Dictionary) -> bool:
+				return String(other.get("kind", "")) in ["hold", "entangle"])
 		"magic_weapon", "heroism", "protection_from_evil_and_good", "stoneskin", "elemental_weapon":
 			effect["amount"] = ClassEffects.spell_modifier(caster) if String(effect["kind"]) == "heroism" else 1
 		"smite":
@@ -181,6 +252,10 @@ static func resolve_effect(state: GameState, caster_id: String, spell: SpellDefi
 			return dispel_magic(state, caster_id, String(pending["target_ids"][0]), int(pending["slot_level"]), rng)
 		"greater_restoration":
 			return greater_restoration(state, caster_id, String(pending["target_ids"][0]))
+		"remove_curse":
+			return greater_restoration(state, caster_id, String(pending["target_ids"][0]), PURE_CURSES)
+		"move_zone":
+			return move_zone(state, caster_id, pending["point"], rng)
 	return null
 
 ## Dispel Magic: every spell of the slot's level or lower on the creature ends; a higher
@@ -225,19 +300,20 @@ static func _end_spell_on(state: GameState, target_id: String, spell_id: String,
 	events.append({"type": "effects_expired", "actor_id": target_id})
 
 ## Greater Restoration: lifts curses (Bestow Curse, Hex) and Contagion.
-static func greater_restoration(state: GameState, caster_id: String, target_id: String) -> Array[Dictionary]:
+static func greater_restoration(state: GameState, caster_id: String, target_id: String,
+		kinds: Array[String] = CURSES) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	var target: Dictionary = state.actors.get(target_id, {})
 	if target.is_empty():
 		return events
 	var spells: Array[String] = []
 	for effect: Dictionary in ActiveEffects.effects(target):
-		if String(effect.get("kind", "")) in CURSES and not String(effect.get("spell_id", "")) in spells:
+		if String(effect.get("kind", "")) in kinds and not String(effect.get("spell_id", "")) in spells:
 			spells.append(String(effect.get("spell_id", "")))
 	for spell_id: String in spells:
 		_end_spell_on(state, target_id, spell_id, events)
-	events.append({"type": "effect", "actor_id": target_id, "source_id": caster_id, "kind": "greater_restoration",
-		"spell_id": "greater_restoration"})
+	var spell_id: String = "remove_curse" if kinds == PURE_CURSES else "greater_restoration"
+	events.append({"type": "effect", "actor_id": target_id, "source_id": caster_id, "kind": spell_id, "spell_id": spell_id})
 	return events
 
 # ---------------------------------------------------------------- saves and riders
@@ -245,7 +321,7 @@ static func greater_restoration(state: GameState, caster_id: String, target_id: 
 ## A creature that failed the save of a spell with a lasting effect (Bane, Command,
 ## Blindness, Bestow Curse, Banishment, Contagion, Compelled Duel; Sleet Storm knocks Prone).
 const SAVE_EFFECTS: Array[StringName] = [&"bane", &"command", &"blinded", &"bestow_curse", &"banishment",
-	&"contagion", &"compelled_duel"]
+	&"contagion", &"compelled_duel", &"charm_person"]
 
 static func failed_save(state: GameState, caster_id: String, target_id: String, spell: SpellDefinition,
 		slot_level: int) -> Array[Dictionary]:
@@ -256,6 +332,8 @@ static func failed_save(state: GameState, caster_id: String, target_id: String, 
 		return ClassEffects.apply_effect(state, caster_id, target_id, spell, slot_level)
 	if spell.id == &"sleet_storm":
 		return knock_prone(target, target_id, caster_id)
+	if spell.id == &"gust_of_wind":
+		return push(state, caster_id, target_id, GUST_PUSH_M)
 	return []
 
 static func knock_prone(target: Dictionary, target_id: String, source_id: String) -> Array[Dictionary]:
@@ -344,6 +422,8 @@ static func weapon_riders(state: GameState, attacker_id: String, target_id: Stri
 			break
 	if not _effects_of(attacker, "elemental_weapon").is_empty():
 		riders.append({"dice": "1d4", "type": "fire", "source": "elemental_weapon"})
+	if is_melee_weapon_attack(weapon) and not _effects_of(attacker, "fount_of_moonlight").is_empty():
+		riders.append({"dice": "2d6", "type": "radiant", "source": "fount_of_moonlight"})
 	if crusaders_mantle(state, attacker_id):
 		riders.append({"dice": "1d4", "type": "radiant", "source": "crusaders_mantle"})
 	for curse: Dictionary in _effects_of(target, "bestow_curse"):
@@ -455,7 +535,7 @@ static func silenced(state: GameState, actor_id: String) -> bool:
 ## Sleet Storm and Wrath of Nature (for the caster's enemies) are difficult terrain.
 static func slowing_zone(state: GameState, actor_id: String) -> bool:
 	var actor: Dictionary = state.actors.get(actor_id, {})
-	if not actor.get("position") is Vector3:
+	if not actor.get("position") is Vector3 or free_moving(actor):
 		return false
 	for id: String in state.actors:
 		var caster: Dictionary = state.actors[id]
@@ -481,3 +561,17 @@ static func add_follow_up(caster: Dictionary, spell: SpellDefinition) -> void:
 		caster["spells"] = []
 	if not String(spell.follow_up) in caster["spells"]:
 		caster["spells"].append(String(spell.follow_up))
+
+## Flaming Sphere's bonus action: the zone moves to the point (on the ground, at most
+## the follow-up's range from the caster) and burns whoever it now covers, once per turn.
+static func move_zone(state: GameState, caster_id: String, point: Vector3, rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var caster: Dictionary = state.actors[caster_id]
+	var concentration: Dictionary = caster.get("concentration", {})
+	if not concentration.get("point") is Vector3 or not point.is_finite():
+		return [] as Array[Dictionary]
+	var from: Vector3 = concentration["point"]
+	concentration["point"] = CombatSpace.current().closest_point(point)
+	var events: Array[Dictionary] = [{"type": "zone_moved", "actor_id": caster_id, "from": from, "to": concentration["point"],
+		"spell_id": String(concentration.get("spell_id", ""))}]
+	events.append_array(ActiveEffects.aura_triggers(state, caster_id, rng, true))
+	return events

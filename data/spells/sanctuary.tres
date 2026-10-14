@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sanctuary"
+name_key = &"SPELL_SANCTUARY"
+srd_name = "Sanctuary"
+level = 1
+school = "abjuration"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 9.0
+resolution = "none"
+duration_rounds = 10
+effect = &"sanctuary"
+allies = true
+vfx = &"sanctuary"

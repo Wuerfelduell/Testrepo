@@ -43,9 +43,12 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	# Dual wielding: an Attack action with a Light weapon this turn, and the off-hand attack.
 	actor["light_attack_made"] = false
 	actor["offhand_used"] = false
+	# Freedom of Movement keeps speed bonuses but ignores every penalty and slowing area.
+	var free: bool = DivineSpellEffects.free_moving(actor)
+	var penalty: float = ActiveEffects.speed_penalty(actor)
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
-		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
-	if ActiveEffects.in_hostile_aura(state, actor_id) or DivineSpellEffects.slowing_zone(state, actor_id):
+		maxf(0.0, float(actor["speed_m"]) - (minf(penalty, 0.0) if free else penalty))
+	if not free and (ActiveEffects.in_hostile_aura(state, actor_id) or DivineSpellEffects.slowing_zone(state, actor_id)):
 		# Spirit Guardians halve the speed of enemies inside (judged at the start of the turn).
 		actor["move_left"] = float(actor["move_left"]) * 0.5
 	events.append_array(reveal_hidden(state))
@@ -212,7 +215,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var attacker: Dictionary = state.actors[attacker_id]
 	var target: Dictionary = state.actors[target_id]
 	if not alive(attacker) or not alive(target) or attacker.get("team") == target.get("team") or \
-			DivineSpellEffects.untargetable(target):
+			DivineSpellEffects.untargetable(target) or DivineSpellEffects.charmed_by(attacker, target_id):
 		return result
 	var weapon: Dictionary = attacker.get("weapon", {}) if attack_weapon.is_empty() else attack_weapon
 	if not attacker.get("position") is Vector3 or not target.get("position") is Vector3:
@@ -435,6 +438,11 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 		return events
 	var attacker: Dictionary = state.actors[attacker_id]
 	var target: Dictionary = state.actors[target_id]
+	# Sanctuary: the attacker may lose this attack.
+	var warded: Dictionary = DivineSpellEffects.sanctuary(state, attacker_id, target_id, rng)
+	events.append_array(warded["events"])
+	if bool(warded["blocked"]):
+		return events
 	var context: RollContext = RollContext.new()
 	# Preview already combines all geometry and condition sources; passing the same
 	# defender again would duplicate source labels. Its unconscious crit is handled below.

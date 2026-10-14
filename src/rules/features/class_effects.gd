@@ -205,6 +205,7 @@ static func hit_riders(state: GameState, attacker_id: String, target_id: String,
 	if not is_weapon:
 		events.append_array(DivineSpellEffects.spell_hit(state, attacker_id, target_id, weapon))
 		return {"events": events, "damage": damage}
+	events.append_array(DivineSpellEffects.retaliation(state, attacker_id, target_id, weapon, rng))
 	var riders: Array[Dictionary] = []
 	if not _effects_of(attacker, "divine_favor").is_empty():
 		riders.append({"dice": "1d4", "type": "radiant", "source": "divine_favor"})
@@ -239,6 +240,8 @@ static func apply_effect(state: GameState, caster_id: String, target_id: String,
 	var caster: Dictionary = state.actors[caster_id]
 	var target: Dictionary = state.actors[target_id]
 	var kind: String = String(spell.effect)
+	if kind in ["hold", "entangle"] and DivineSpellEffects.free_moving(target):
+		return events
 	var effect: Dictionary = {"kind": kind, "source_id": caster_id, "spell_id": String(spell.id), "turn_of": caster_id,
 		"until": "concentration" if spell.concentration else "rounds", "rounds_left": maxi(1, spell.duration_rounds),
 		"save_dc": int(caster.get("spell_save_dc", 10)), "save_ability": String(spell.save_ability)}

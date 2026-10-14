@@ -31,6 +31,9 @@ const STYLES: Dictionary = {
 	"mass_healing_word": ["caster", HEAL], "turn_undead": ["caster", RADIANT], "abjure_foes": ["caster", RADIANT],
 	"wild_shape": ["caster", NATURE], "revert_wild_shape": ["caster", NATURE],
 	# 2024 Cleric, Paladin and Druid spells.
+	"sanctuary": ["target", SHIELD], "charm_person": ["target", SLEEP], "flaming_sphere": ["point", FIRE], "flaming_sphere_move": ["point", FIRE],
+	"gust_of_wind": ["caster", ARCANE], "remove_curse": ["target", HEAL], "freedom_of_movement": ["target", NATURE], "aura_of_life": ["caster", HEAL],
+	"aura_of_purity": ["caster", SHIELD], "fire_shield": ["caster", FIRE], "fount_of_moonlight": ["caster", RADIANT],
 	"toll_the_dead": ["target", NECROTIC], "word_of_radiance": ["caster", RADIANT],
 	"thorn_whip": ["bolt", NATURE], "bane": ["point", NECROTIC], "command": ["target", NECROTIC],
 	"heroism": ["target", SHIELD], "protection_from_evil_and_good": ["target", SHIELD],

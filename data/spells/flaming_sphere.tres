@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"flaming_sphere"
+name_key = &"SPELL_FLAMING_SPHERE"
+srd_name = "Flaming Sphere"
+level = 2
+school = "conjuration"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 1.5
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "2d6"
+damage_type = &"fire"
+half_on_save = true
+upcast_dice = "1d6"
+concentration = true
+duration_rounds = 10
+effect = &"zone"
+follow_up = &"flaming_sphere_move"
+vfx = &"flaming_sphere"

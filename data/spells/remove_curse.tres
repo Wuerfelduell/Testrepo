@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"remove_curse"
+name_key = &"SPELL_REMOVE_CURSE"
+srd_name = "Remove Curse"
+level = 3
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+effect = &"remove_curse"
+allies = true
+vfx = &"remove_curse"
