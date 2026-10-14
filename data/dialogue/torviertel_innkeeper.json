@@ -439,6 +439,26 @@
 					}
 				},
 				{
+					"text": "[Placeholder: ask about the mercenary on the Torplatz]",
+					"if": [
+						{
+							"flag": "kael_rumor_heard",
+							"is": false
+						}
+					],
+					"next": "rumor_kael"
+				},
+				{
+					"text": "[Placeholder: ask about the dark elf on the roofs]",
+					"if": [
+						{
+							"flag": "seren_rumor_heard",
+							"is": false
+						}
+					],
+					"next": "rumor_seren"
+				},
+				{
 					"text": "\"Something else.\"",
 					"next": "hub"
 				}
@@ -618,6 +638,34 @@
 		},
 		"banned_again": {
 			"text": "Borik points at the street without a word."
+		},
+		"rumor_kael": {
+			"text": "[Placeholder: Borik on Kael Dorn: he led twelve men into the old mines and came back alone. People say he left them to die.]",
+			"effects": {
+				"flags": {
+					"kael_rumor_heard": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "rumours"
+				}
+			]
+		},
+		"rumor_seren": {
+			"text": "[Placeholder: Borik on Seren: men in black coats were asking about a dark elf woman. One wore a silver mask.]",
+			"effects": {
+				"flags": {
+					"seren_rumor_heard": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "rumours"
+				}
+			]
 		}
 	}
 }

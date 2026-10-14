@@ -386,6 +386,10 @@
             },
             {
               "flag": "kael_permanently_left"
+            },
+            {
+              "flag": "kael_duel_fight",
+              "is": "running"
             }
           ]
         }

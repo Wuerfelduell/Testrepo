@@ -311,13 +311,39 @@
 					"text": "(Ask something else.)",
 					"next": "interrogation"
 				}
-			]
+			],
+			"effects": {
+				"react": {
+					"kael": {
+						"text": "If you threaten, follow through. Empty words make you weak."
+					},
+					"lyra": {
+						"text": "Impressive. You intimidated a man bleeding to death. An outstanding achievement.",
+						"loyalty": -1
+					},
+					"seren": {
+						"text": "He's afraid of you. Now ask the right question before he collapses."
+					}
+				}
+			}
 		},
 		"let_me_die": {
 			"text": "\"Then let me die.\" He turns his face to the wall and won't answer.",
 			"effects": {
 				"flags": {
 					"malrek_refuses": true
+				},
+				"react": {
+					"kael": {
+						"text": "If you threaten, follow through. Empty words make you weak."
+					},
+					"lyra": {
+						"text": "Impressive. You intimidated a man bleeding to death. An outstanding achievement.",
+						"loyalty": -1
+					},
+					"seren": {
+						"text": "He's afraid of you. Now ask the right question before he collapses."
+					}
 				}
 			},
 			"choices": [
@@ -616,7 +642,20 @@
 					"crypt_wounded_cultist": "spared",
 					"malrek_status": "spared"
 				},
-				"xp": 25
+				"xp": 25,
+				"react": {
+					"kael": {
+						"text": "You'll regret it when he rams a knife into your back later.",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "A living prisoner is a source of information. A dead one is merely a problem for the gravedigger.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "If he kills someone again, I hope you remember this."
+					}
+				}
 			}
 		},
 		"watch": {
@@ -629,7 +668,20 @@
 				"add": {
 					"city_guard_reputation": 1
 				},
-				"xp": 25
+				"xp": 25,
+				"react": {
+					"kael": {
+						"text": "You'll regret it when he rams a knife into your back later.",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "A living prisoner is a source of information. A dead one is merely a problem for the gravedigger.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "If he kills someone again, I hope you remember this."
+					}
+				}
 			}
 		},
 		"freed": {
@@ -639,7 +691,20 @@
 					"crypt_wounded_cultist": "freed",
 					"malrek_status": "freed"
 				},
-				"xp": 25
+				"xp": 25,
+				"react": {
+					"kael": {
+						"text": "You'll regret it when he rams a knife into your back later.",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "A living prisoner is a source of information. A dead one is merely a problem for the gravedigger.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "If he kills someone again, I hope you remember this."
+					}
+				}
 			}
 		},
 		"killed": {

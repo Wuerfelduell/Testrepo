@@ -226,6 +226,19 @@
 				"flags": {
 					"thomas_deal": "debt",
 					"thomas_debt": 2000
+				},
+				"react": {
+					"kael": {
+						"text": "A man behind bars isn't particularly impressive prey."
+					},
+					"lyra": {
+						"text": "You're getting ever more creative at turning people against you.",
+						"loyalty": -1
+					},
+					"seren": {
+						"text": "He'll pay you. And afterwards he'll hate you. Remember that.",
+						"loyalty": 1
+					}
 				}
 			},
 			"choices": [
@@ -259,6 +272,19 @@
 				"add": {
 					"thomas_trust": -3,
 					"player_cruelty": 1
+				},
+				"react": {
+					"kael": {
+						"text": "A man behind bars isn't particularly impressive prey."
+					},
+					"lyra": {
+						"text": "You're getting ever more creative at turning people against you.",
+						"loyalty": -1
+					},
+					"seren": {
+						"text": "He'll pay you. And afterwards he'll hate you. Remember that.",
+						"loyalty": 1
+					}
 				}
 			},
 			"choices": [
@@ -296,7 +322,18 @@
 				"add": {
 					"thomas_trust": 2
 				},
-				"xp": 15
+				"xp": 15,
+				"react": {
+					"kael": {
+						"text": "You can't save everyone. Someday that will kill you."
+					},
+					"lyra": {
+						"text": "At least now we have someone who might give us useful information."
+					},
+					"seren": {
+						"text": "You're strange. Most would have asked for money."
+					}
+				}
 			},
 			"choices": [
 				{
