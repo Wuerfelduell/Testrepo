@@ -152,7 +152,8 @@ static func after_attack(state: GameState, attacker_id: String, target_id: Strin
 		events.append_array(_apply_strike(state, attacker_id, target_id, String(pending["strike"]), rng))
 	return events
 
-## Uncanny Dodge (level 5): the Rogue's reaction halves a hit from an attacker it can see.
+## Uncanny Dodge (level 5): the Rogue's reaction can halve a hit from an attacker it can see.
+## The player is asked (reaction offer); accepting spends the reaction.
 static func halve_attack_damage(state: GameState, attacker_id: String, target_id: String, _weapon: Dictionary) -> String:
 	var target: Dictionary = state.actors.get(target_id, {})
 	var attacker: Dictionary = state.actors.get(attacker_id, {})
@@ -163,7 +164,6 @@ static func halve_attack_damage(state: GameState, attacker_id: String, target_id
 		return ""
 	if not CombatSpace.current().visible(target["position"], attacker["position"]):
 		return ""
-	target["reaction_available"] = false
 	return "uncanny_dodge"
 
 ## Evasion (level 7): Dexterity saves against half-damage effects.

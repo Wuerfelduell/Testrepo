@@ -99,6 +99,8 @@ var _spell_signature: int = -1
 var _spell_mode: String = ""
 var _reaction_panel: Panel
 var _reaction_text: Label
+var _reaction_title: Label
+var _reaction_decline: Button
 var _reaction_accept: Button
 
 func _ready() -> void:
@@ -229,11 +231,11 @@ func set_attack_mode(active: bool) -> void:
 	button.set_pressed_no_signal(active)
 	button.tooltip_text = tr("COMBAT_SELECT_ATTACK") if active else tr("COMBAT_COST_ACTION")
 
-func show_target(preview: Dictionary, enemy: Dictionary) -> void:
+func show_target(preview: Dictionary, enemy: Dictionary, used_weapon: Dictionary = {}) -> void:
 	_target_panel.visible = true
 	_target_title.text = _actor_name(enemy)
 	var attacker: Dictionary = _state.actors.get(_state.current_actor_id(), {}) if _state != null else {}
-	var weapon: Dictionary = attacker.get("weapon", {})
+	var weapon: Dictionary = attacker.get("weapon", {}) if used_weapon.is_empty() else used_weapon
 	var modifier_total: int = 0
 	for item: Variant in weapon.get("damage_modifiers", []):
 		modifier_total += int((item as Dictionary).get("amount", 0))
@@ -247,7 +249,11 @@ func show_target(preview: Dictionary, enemy: Dictionary) -> void:
 	var reasons: PackedStringArray = []
 	if not bool(preview.get("legal", false)):
 		reasons.append(tr("COMBAT_OUT_OF_RANGE"))
-	if not bool(attacker.get("action_available", false)) and int(attacker.get("attacks_left", 0)) <= 0:
+	if bool(weapon.get("offhand", false)):
+		var offhand_reason: String = CombatRules.offhand_reason(_state, _state.current_actor_id()) if _state != null else ""
+		if not offhand_reason.is_empty():
+			reasons.append(tr(offhand_reason))
+	elif not bool(attacker.get("action_available", false)) and int(attacker.get("attacks_left", 0)) <= 0:
 		reasons.append(tr("COMBAT_NO_ACTION"))
 	for source: Variant in preview.get("advantages", []):
 		reasons.append(tr("COMBAT_ADVANTAGE_REASON") % DicePopup.source_name(String(source)))
@@ -423,6 +429,9 @@ func rolls_busy() -> bool:
 ## Spell and feature buttons for the hero, rebuilt only when the hero's kit changes.
 func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> void:
 	var entries: Array[String] = []
+	if not hero.get("off_hand_weapon", {}).is_empty():
+		# Dual wielding: the Light property's extra attack with the off-hand weapon.
+		entries.append("action:offhand")
 	if hero.get("features", {}).has("second_wind"):
 		entries.append("feature:second_wind")
 	if hero.get("features", {}).has("action_surge"):
@@ -451,6 +460,8 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 			var id: String = entry.get_slice(":", 1)
 			if kind == "feature":
 				button.pressed.connect(func() -> void: feature_requested.emit(id))
+			elif kind == "action":
+				button.pressed.connect(func() -> void: action_requested.emit(id))
 			else:
 				button.pressed.connect(func() -> void: spell_requested.emit(id))
 			_spell_buttons[entry] = button
@@ -463,6 +474,13 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var id: String = entry.get_slice(":", 1)
 		var hotkey: String = str((index + 4) % 10) if index < 7 else ""
 		var reason: String = ""
+		if entry == "action:offhand":
+			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr("COMBAT_OFFHAND_BUTTON") % tr(String(hero["off_hand_weapon"].get("name_key", "")))]
+			reason = "COMBAT_WAIT_TURN" if not player_turn else CombatRules.offhand_reason(state, hero_id)
+			button.disabled = not reason.is_empty()
+			button.tooltip_text = tr(reason) if not reason.is_empty() else \
+				tr("COMBAT_OFFHAND_HINT_NICK" if not CombatRules.offhand_needs_bonus(hero) else "COMBAT_OFFHAND_HINT")
+			continue
 		if entry.begins_with("feature:") and not id in UseFeatureCommand.FEATURES:
 			# Class kit features (ClassKits): label, reason and hint come from the kit.
 			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, ClassKits.feature_label(hero, id)]
@@ -615,7 +633,15 @@ func _update_reaction(state: GameState) -> void:
 		return
 	var attacker: Dictionary = state.actors.get(String(pending.get("attacker_id", "")), {})
 	var trigger: Dictionary = pending.get("trigger", {})
-	if trigger.has("attack"):
+	var reaction: String = String(pending.get("reaction", "shield"))
+	# Shield keeps the generic texts; class reactions (Uncanny Dodge) have their own.
+	var prefix: String = "COMBAT_REACTION" if reaction == "shield" else "COMBAT_REACTION_" + reaction.to_upper()
+	_reaction_title.text = tr(prefix + "_TITLE")
+	_reaction_accept.text = tr(prefix + "_ACCEPT")
+	_reaction_decline.text = tr(prefix + "_DECLINE")
+	if reaction != "shield":
+		_reaction_text.text = tr(prefix + "_TEXT") % [_actor_name(attacker), _actor_name(state.actors.get(String(pending.get("actor_id", "")), {}))]
+	elif trigger.has("attack"):
 		var attack: Dictionary = trigger["attack"]
 		_reaction_text.text = tr("COMBAT_REACTION_TEXT") % [_actor_name(attacker), int(attack["roll"].get("total", 0)), int(attack.get("armor_class", 10))]
 	else:
@@ -692,13 +718,13 @@ func _build_spellbar() -> void:
 
 func _build_reaction() -> void:
 	_reaction_panel = _panel(Rect2(610, 600, 700, 200))
-	var title: Label = _label(_reaction_panel, Rect2(20, 14, 660, 34), tr("COMBAT_REACTION_TITLE"), 26)
-	title.add_theme_color_override("font_color", GOLD)
+	_reaction_title = _label(_reaction_panel, Rect2(20, 14, 660, 34), tr("COMBAT_REACTION_TITLE"), 26)
+	_reaction_title.add_theme_color_override("font_color", GOLD)
 	_reaction_text = _label(_reaction_panel, Rect2(20, 52, 660, 70), "", 19)
 	_reaction_accept = _button(_reaction_panel, Rect2(20, 130, 380, 54), tr("COMBAT_REACTION_ACCEPT"))
 	_reaction_accept.pressed.connect(func() -> void: reaction_answered.emit(true))
-	var decline: Button = _button(_reaction_panel, Rect2(416, 130, 264, 54), tr("COMBAT_REACTION_DECLINE"))
-	decline.pressed.connect(func() -> void: reaction_answered.emit(false))
+	_reaction_decline = _button(_reaction_panel, Rect2(416, 130, 264, 54), tr("COMBAT_REACTION_DECLINE"))
+	_reaction_decline.pressed.connect(func() -> void: reaction_answered.emit(false))
 	_reaction_panel.visible = false
 
 func _build_log() -> void:

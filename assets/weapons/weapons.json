@@ -4,7 +4,7 @@
 	"greatsword": {"scene": "res://assets/weapons/greatsword.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"greataxe": {"scene": "res://assets/weapons/greataxe.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"axe": {"scene": "res://assets/weapons/axe.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
-	"dagger": {"scene": "res://assets/weapons/dagger.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
+	"dagger": {"scene": "res://assets/weapons/dagger.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90], "off_hand_rotation_degrees": [0, 0, 90]},
 	"scimitar": {"scene": "res://assets/weapons/scimitar.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"sickle": {"scene": "res://assets/weapons/sickle.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},
 	"mace": {"scene": "res://assets/weapons/mace.glb", "hand": "right", "position": [0.0, 0.065, 0.018], "rotation_degrees": [0, 0, -90]},

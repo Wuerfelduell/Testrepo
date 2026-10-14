@@ -44,7 +44,9 @@ static func initialize(actor: Dictionary, class_id: String, training: Training) 
 	var equipment: Dictionary = {"main_hand": "", "off_hand": "", "armor": ""}
 	for slot: String in kit.get("equipped", {}):
 		var item_id: String = String(kit["equipped"][slot])
-		if not slot in ItemCatalog.SLOTS or ItemCatalog.slot_for(ItemCatalog.get_item(item_id)) != slot:
+		var fits: bool = ItemCatalog.slot_for(ItemCatalog.get_item(item_id)) == slot or \
+			(slot == "off_hand" and off_hand_weapon_item(ItemCatalog.get_item(item_id)))
+		if not slot in ItemCatalog.SLOTS or not fits:
 			return false
 		equipment[slot] = item_id
 	if equipment["main_hand"] == "":
@@ -115,8 +117,20 @@ static func turn_reason(state: GameState, actor_id: String) -> String:
 		return "INV_REASON_WILD_SHAPE"
 	return ""
 
+## SRD 5.2 Light property: a Light weapon can be held in the off hand for the extra
+## attack (CombatRules.offhand_reason). Shields stay the off hand's other use.
+static func off_hand_weapon_item(item: Dictionary) -> bool:
+	return String(item.get("type", "")) == "weapon" and "light" in item.get("properties", [])
+
+## Where an equipped item goes: its catalog slot, or the off hand when asked for a Light weapon.
+static func target_slot(item: Dictionary, wanted_slot: String = "") -> String:
+	if wanted_slot == "off_hand" and off_hand_weapon_item(item):
+		return "off_hand"
+	return ItemCatalog.slot_for(item)
+
 ## Empty string when allowed, otherwise a translation key with the reason.
-static func equip_reason(state: GameState, actor_id: String, item_id: String) -> String:
+## wanted_slot "off_hand" puts a Light weapon into the off hand (dual wielding).
+static func equip_reason(state: GameState, actor_id: String, item_id: String, wanted_slot: String = "") -> String:
 	var reason: String = turn_reason(state, actor_id)
 	if not reason.is_empty():
 		return reason
@@ -124,13 +138,14 @@ static func equip_reason(state: GameState, actor_id: String, item_id: String) ->
 	if count(actor, item_id) <= 0:
 		return "INV_REASON_NOT_OWNED"
 	var item: Dictionary = ItemCatalog.get_item(item_id)
-	var slot: String = ItemCatalog.slot_for(item)
-	if slot.is_empty():
+	var slot: String = target_slot(item, wanted_slot)
+	if slot.is_empty() or (not wanted_slot.is_empty() and slot != wanted_slot):
 		return "INV_REASON_NOT_EQUIPPABLE"
 	var equipment: Dictionary = actor["equipment"]
 	var in_combat: bool = state.mode == &"combat"
+	var weapon_swap: bool = String(item.get("type", "")) == "weapon"
 	# SRD 5.2: donning or doffing armour takes minutes, a shield takes an action. Not mid-fight.
-	if in_combat and slot != "main_hand":
+	if in_combat and not weapon_swap:
 		return "INV_REASON_ARMOR_IN_COMBAT"
 	if slot == "off_hand" and ItemCatalog.two_handed(ItemCatalog.get_item(String(equipment["main_hand"]))):
 		return "INV_REASON_TWO_HANDED"
@@ -148,7 +163,8 @@ static func unequip_reason(state: GameState, actor_id: String, slot: String) -> 
 		return "INV_REASON_SLOT_EMPTY"
 	if slot == "main_hand":
 		return "INV_REASON_KEEP_WEAPON"
-	if state.mode == &"combat":
+	var held: Dictionary = ItemCatalog.get_item(String(state.actors[actor_id]["equipment"][slot]))
+	if state.mode == &"combat" and String(held.get("type", "")) != "weapon":
 		return "INV_REASON_ARMOR_IN_COMBAT"
 	return ""
 
@@ -177,9 +193,9 @@ static func drop_reason(state: GameState, actor_id: String, item_id: String) -> 
 	return "" if count(state.actors[actor_id], item_id) > 0 else "INV_REASON_NOT_OWNED"
 
 ## Moves the item from the bag into its slot; the previous item goes back into the bag.
-static func equip(actor: Dictionary, item_id: String, training: Training) -> void:
+static func equip(actor: Dictionary, item_id: String, training: Training, wanted_slot: String = "") -> void:
 	var item: Dictionary = ItemCatalog.get_item(item_id)
-	var slot: String = ItemCatalog.slot_for(item)
+	var slot: String = target_slot(item, wanted_slot)
 	var equipment: Dictionary = actor["equipment"]
 	remove_item(actor, item_id)
 	if String(equipment[slot]) != "":
@@ -247,6 +263,12 @@ static func refresh_weapon(actor: Dictionary, training: Training) -> void:
 		String(equipment["off_hand"]) == "")
 	actor["weapon"] = record
 	actor["attacks"] = [record.duplicate(true)]
+	# Dual wielding: the off-hand Light weapon's record (CombatRules.offhand_weapon).
+	var off_item: Dictionary = ItemCatalog.get_item(String(equipment["off_hand"])) if String(equipment["off_hand"]) != "" else {}
+	if off_hand_weapon_item(off_item):
+		actor["off_hand_weapon"] = weapon_record(actor, String(equipment["off_hand"]), training, false)
+	else:
+		actor.erase("off_hand_weapon")
 
 static func refresh_armor(actor: Dictionary, training: Training) -> void:
 	var equipment: Dictionary = actor["equipment"]

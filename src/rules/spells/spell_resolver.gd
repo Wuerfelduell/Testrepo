@@ -674,8 +674,10 @@ static func shield_option(state: GameState, reactor_id: String) -> bool:
 		return false
 	return availability_reason(state, reactor_id, spell).is_empty()
 
-static func reaction_pending(reactor_id: String, attacker_id: String, resume: Dictionary, trigger: Dictionary) -> Dictionary:
-	return {"type": "reaction", "reaction": "shield", "actor_id": reactor_id, "attacker_id": attacker_id,
+## reaction: "shield", or a class feature id that halves a hit's damage (Uncanny Dodge).
+static func reaction_pending(reactor_id: String, attacker_id: String, resume: Dictionary, trigger: Dictionary,
+		reaction: String = "shield") -> Dictionary:
+	return {"type": "reaction", "reaction": reaction, "actor_id": reactor_id, "attacker_id": attacker_id,
 		"trigger": trigger.duplicate(true), "resume": resume}
 
 static func reaction_offer_event(pending: Dictionary) -> Dictionary:

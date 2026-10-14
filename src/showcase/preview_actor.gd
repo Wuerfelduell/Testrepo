@@ -145,6 +145,10 @@ func _held_item(scene_path: String, attachment: BoneAttachment3D) -> Node3D:
 	var grip: Dictionary = _grip_for(scene_path)
 	var offset: Array = grip["position"]
 	var turn: Array = grip["rotation_degrees"]
+	if attachment.bone_name == "hand_l" and grip.has("off_hand_rotation_degrees"):
+		# A one-handed weapon in the off hand (dual wielding): its mirrored grip.
+		offset = grip.get("off_hand_position", offset)
+		turn = grip["off_hand_rotation_degrees"]
 	item.position = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	item.rotation_degrees = Vector3(float(turn[0]), float(turn[1]), float(turn[2]))
 	return item

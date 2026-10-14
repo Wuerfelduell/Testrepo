@@ -23,6 +23,8 @@ var _capture_combat: bool = false
 var auto_play: bool = false
 var _critical_focus: float = 0.0
 var _attack_mode: bool = false
+## AttackCommand weapon id of the current attack mode ("" = main weapon, "off_hand").
+var _attack_weapon_id: String = ""
 var death_screen: DeathScreen
 var pause_menu: PauseMenu
 var _death_info: Dictionary = {}
@@ -150,10 +152,10 @@ func simulation_step(delta: float, fast: bool = false) -> void:
 	if state.mode == &"defeat":
 		return
 	if state.pending.get("type") == "reaction":
-		# The hero answers in the HUD; enemies (and an auto-played hero) always take Shield.
+		# The hero answers in the HUD; enemies (and an auto-played hero) always take the reaction.
 		var reactor: String = String(state.pending.get("actor_id", ""))
 		if state.actors.get(reactor, {}).get("team") != "hero" or auto_play:
-			CommandBus.submit(CastReactionCommand.new(reactor, SpellResolver.shield_option(state, reactor)))
+			CommandBus.submit(CastReactionCommand.new(reactor, CastReactionCommand.auto_accept(state, reactor)))
 		return
 	if not state.pending.is_empty():
 		CommandBus.submit(AdvanceCombatCommand.new(minf(delta, 0.1)))
@@ -312,7 +314,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			# A click on a party member takes command of them (out of combat).
 			select_member(hovered_actor)
 		elif not hovered_actor.is_empty():
-			CommandBus.submit(AttackCommand.new(commanded, hovered_actor))
+			CommandBus.submit(AttackCommand.new(commanded, hovered_actor, _attack_weapon_id))
 			_set_attack_mode(false)
 		elif hovered_ground.is_finite() and not _attack_mode:
 			CommandBus.submit(MoveCommand.new(commanded, hovered_ground))
@@ -332,6 +334,9 @@ func _action_requested(kind: String) -> void:
 		"attack":
 			spell_targeting.cancel()
 			_set_attack_mode(true)
+		"offhand":
+			spell_targeting.cancel()
+			_set_attack_mode(true, AttackCommand.OFF_HAND)
 
 func _update_hover() -> void:
 	if not _can_control() or get_viewport().gui_get_hovered_control() != null or (menus != null and menus.is_open()):
@@ -361,7 +366,8 @@ func _update_hover() -> void:
 		if PartyRules.is_member(state, id):
 			hud.clear_target()
 		else:
-			hud.show_target(CombatRules.attack_preview(state, commanded, id), state.actors[id])
+			var used_weapon: Dictionary = AttackCommand.weapon_for(state.actors[commanded], _attack_weapon_id)
+			hud.show_target(CombatRules.attack_preview(state, commanded, id, Vector3.INF, used_weapon), state.actors[id], used_weapon)
 		return
 	hovered_actor = ""
 	hovered_ground = hit["position"]
@@ -374,8 +380,9 @@ func _update_hover() -> void:
 	_draw_path(path, budget)
 	hud.show_path(CombatRules.path_length(path), budget - CombatRules.path_length(path), danger)
 
-func _set_attack_mode(active: bool) -> void:
+func _set_attack_mode(active: bool, weapon_id: String = "") -> void:
 	_attack_mode = active
+	_attack_weapon_id = weapon_id if active else ""
 	hud.set_attack_mode(active)
 
 func _path_danger(state: GameState, path: PackedVector3Array) -> bool:

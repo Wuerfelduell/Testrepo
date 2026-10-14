@@ -161,8 +161,9 @@ static func spend_free_cast(caster: Dictionary, spell_id: String) -> void:
 	if not feature.is_empty():
 		feature["uses"] = maxi(0, int(feature.get("uses", 0)) - 1)
 
-## Before a weapon hit's damage: the target's kit may spend its reaction to halve it (Rogue
-## Uncanny Dodge). Returns the feature id that halved it, "" = full damage.
+## Before a weapon hit's damage: a target's reaction that could halve it (Rogue Uncanny
+## Dodge). Returns that feature id, "" = none. Pure: CombatRules offers it as a reaction and
+## CastReactionCommand spends the reaction when the target accepts.
 static func damage_halved_by(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> String:
 	return String(call_kit(class_of(state.actors.get(target_id, {})), "halve_attack_damage",
 		[state, attacker_id, target_id, weapon], ""))
