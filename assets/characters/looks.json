@@ -22,5 +22,11 @@
 	"res://assets/characters/hero_paladin_female/model.glb": {"main_hand": "sword", "off_hand": "shield_heater"},
 	"res://assets/characters/hero_druid_male/model.glb": {"main_hand": "sickle", "off_hand": "shield_round"},
 	"res://assets/characters/hero_druid_female/model.glb": {"main_hand": "sickle", "off_hand": "shield_round"},
+	"res://assets/characters/hero_bard_male/model.glb": {"main_hand": "dagger"},
+	"res://assets/characters/hero_bard_female/model.glb": {"main_hand": "dagger"},
+	"res://assets/characters/hero_sorcerer_male/model.glb": {"main_hand": "spear"},
+	"res://assets/characters/hero_sorcerer_female/model.glb": {"main_hand": "spear"},
+	"res://assets/characters/hero_warlock_male/model.glb": {"main_hand": "sickle"},
+	"res://assets/characters/hero_warlock_female/model.glb": {"main_hand": "sickle"},
 	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"}
 }

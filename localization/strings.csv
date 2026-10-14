@@ -1032,3 +1032,7 @@ CREATION_DESCRIPTION_PALADIN,"A holy knight in chain mail with longsword and shi
 CREATION_DESCRIPTION_DRUID,"A keeper of the wild with nature magic: fire, lightning, binding roots and healing. From level 2 turns into a wolf."
 SPELL_GUIDANCE,Guidance
 ROLL_SOURCE_GUIDANCE,Guidance
+LOOK_BARD_PLUME,Bard • plumed cap and lute
+LOOK_SORCERER_ROBE,Sorcerer • robe and crystal
+LOOK_WARLOCK_HOOD,Warlock • hood and cloak
+COLOR_SLOT_CLOAK,Cloak

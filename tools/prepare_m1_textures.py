@@ -108,6 +108,13 @@ ranger("cleric_albedo.png", cloth=[.85, .80, .68], leather=[.26, .16, .10], seed
 ranger("cleric_skirt_albedo.png", cloth=[.85, .80, .68], leather=[.80, .75, .64], seed=26)
 ranger("druid_albedo.png", cloth=[.20, .49, .26], leather=[.26, .16, .10], seed=27)
 ranger("druid_skirt_albedo.png", cloth=[.20, .49, .26], leather=[.19, .46, .24], seed=28)
+# Bard: wine doublet, tan leather. Sorcerer: teal robe, brown leather. Warlock: black robe,
+# black leather (palette defaults of their hero_colors.json slots, like above).
+ranger("bard_albedo.png", cloth=[.55, .12, .26], leather=[.40, .27, .15], seed=29)
+ranger("sorcerer_albedo.png", cloth=[.15, .49, .55], leather=[.26, .16, .10], seed=30)
+ranger("sorcerer_skirt_albedo.png", cloth=[.15, .49, .55], leather=[.135, .44, .495], seed=31)
+ranger("warlock_albedo.png", cloth=[.08, .08, .10], leather=[.09, .08, .08], seed=32)
+ranger("warlock_skirt_albedo.png", cloth=[.08, .08, .10], leather=[.072, .072, .09], seed=33)
 
 # Plain cloth for tabards, bandanas and cloaks: the peasant shirt weave, recoloured.
 weave = load("T_Peasant_BaseColor.png")[300:428, 20:148]
@@ -117,7 +124,9 @@ for name, color in [("cloth_red.png", [.36, .06, .05]), ("cloth_black.png", [.13
                     ("cloth_crimson.png", [.24, .025, .04]), ("cloth_blue.png", [.09, .09, .27]),
                     # Hero tabards and mantles: 0.9 x the palette colour, like the wizard hat.
                     ("cloth_ochre.png", [.81, .57, .18]), ("cloth_blood.png", [.68, .10, .11]),
-                    ("cloth_moss.png", [.41, .44, .18])]:
+                    ("cloth_moss.png", [.41, .44, .18]),
+                    # Bard hat (black) and Warlock cloak (violet): 0.9 x their palette defaults, as the hat above.
+                    ("cloth_bard_hat.png", [.072, .072, .09]), ("cloth_warlock_cloak.png", [.405, .198, .585])]:
     rgb = (.45 + .9 * (weave_lum - weave_lum.mean()) + .55)[..., None] * np.array(color)
     Image.fromarray(np.uint8(np.clip(rgb, 0, 1) * 255)).save(OUT / name)
 

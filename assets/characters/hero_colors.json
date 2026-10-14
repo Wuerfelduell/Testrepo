@@ -56,10 +56,17 @@
 		"cleric_tabard": {"name_key": "COLOR_SLOT_TABARD", "palette": "cloth", "default": "ochre"},
 		"paladin_tabard": {"name_key": "COLOR_SLOT_TABARD", "palette": "cloth", "default": "blood"},
 		"druid_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "forest"},
-		"mantle": {"name_key": "COLOR_SLOT_MANTLE", "palette": "cloth", "default": "moss"}
+		"mantle": {"name_key": "COLOR_SLOT_MANTLE", "palette": "cloth", "default": "moss"},
+		"bard_tunic": {"name_key": "COLOR_SLOT_TUNIC", "palette": "cloth", "default": "wine"},
+		"bard_hat": {"name_key": "COLOR_SLOT_HAT", "palette": "cloth", "default": "black"},
+		"sorcerer_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "teal"},
+		"warlock_robe": {"name_key": "COLOR_SLOT_ROBE", "palette": "cloth", "default": "black"},
+		"warlock_cloak": {"name_key": "COLOR_SLOT_CLOAK", "palette": "cloth", "default": "violet"},
+		"warlock_leather": {"name_key": "COLOR_SLOT_LEATHER", "palette": "leather", "default": "black"}
 	},
 	"order": ["tunic", "robe", "hat", "barbarian_tunic", "monk_robe", "ranger_tunic", "leather", "wizard_leather", "barbarian_leather", "plate", "mail",
-		"vestment", "cleric_tabard", "paladin_tabard", "druid_robe", "mantle"],
+		"vestment", "cleric_tabard", "paladin_tabard", "druid_robe", "mantle",
+		"bard_tunic", "bard_hat", "sorcerer_robe", "warlock_robe", "warlock_cloak", "warlock_leather"],
 	"materials": {
 		"FighterCloth": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "tunic", "leather": "leather"},
 		"FighterPlate": {"tint": "plate"},
@@ -81,6 +88,13 @@
 		"PaladinTabard": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "paladin_tabard"},
 		"DruidRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "druid_robe", "leather": "leather"},
 		"DruidSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "druid_robe", "leather": "druid_robe"},
-		"DruidMantle": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "mantle"}
+		"DruidMantle": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "mantle"},
+		"BardCloth": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "bard_tunic", "leather": "wizard_leather"},
+		"BardHat": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "bard_hat"},
+		"SorcRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "sorcerer_robe", "leather": "leather"},
+		"SorcSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "sorcerer_robe", "leather": "sorcerer_robe"},
+		"WarlockRobe": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "warlock_robe", "leather": "warlock_leather"},
+		"WarlockSkirt": {"mask": "res://assets/characters/m1_textures/ranger_recolor_mask.png", "cloth": "warlock_robe", "leather": "warlock_robe"},
+		"WarlockCloak": {"mask": "res://assets/characters/m1_textures/weave_recolor_mask.png", "cloth": "warlock_cloak"}
 	}
 }

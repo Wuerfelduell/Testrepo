@@ -1025,6 +1025,122 @@ def ranger_hero(gender):
     }
     return fig.export("hero_ranger_" + gender, maps)
 
+
+def bard(gender):
+    """Wine-red doublet, a black brimmed cap with a white plume and a lute on the back."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Legs"}, gender)
+    cloth_m, hands, skin, eyes, hat_m, plume, wood, string_m = (material(n) for n in (
+        "BardCloth", "BardHands", "BardSkin", "BardEyes", "BardHat", "BardPlume", "BardWood", "BardString"))
+    fig.dress(cloth_m, hands)
+    fig.add_head(skin, eyes, material("BardBrows"))
+    e, hc = fig.eye, fig.head_centre
+    # Cap: a narrow brim, a low rounded crown and a plume sweeping back over the left side.
+    base_z = e.z + .055
+    brim = ring("Cap_Brim", (0, hc.y - .005, base_z), .1, .2, .015, hat_m, sides=20, sy=1.1, thickness=.01)
+    box_uv(brim, 3)
+    crown_pts = [(0, hc.y, base_z - .01 + .1 * t) for t in (0, .35, .7, 1)]
+    crown = tube("Cap_Crown", crown_pts, [.118, .12, .108, .07], hat_m, sides=14)
+    box_uv(crown, 3)
+    quill = [Vector((.08, hc.y + .02, base_z + .06)), Vector((.13, hc.y + .1, base_z + .16)),
+             Vector((.15, hc.y + .2, base_z + .19)), Vector((.15, hc.y + .3, base_z + .14))]
+    feather = tube("Plume", quill, [.012, .035, .03, .004], plume, sides=6, squash=.25)
+    fig.add(merge("Bard_Cap", [brim, crown, feather]), rigid("Head"))
+    # Lute on the back, neck up over the right shoulder.
+    spine = fig.bone_head("spine_03")
+    body_c = Vector((.05, spine.y + .17, 1.12))
+    pieces = [sphere("Lute_Body", .13, body_c, wood, 14, 8, (1, .38, 1.25))]
+    neck_a, neck_b = body_c + Vector((-.04, -.01, .14)), body_c + Vector((-.15, -.03, .5))
+    pieces.append(cylinder("Lute_Neck", .022, (neck_b - neck_a).length, (neck_a + neck_b) / 2, wood, sides=6, axis=neck_b - neck_a))
+    head_a = neck_b
+    head_b = neck_b + Vector((-.04, .05, .07))
+    pieces.append(cylinder("Lute_Head", .024, (head_b - head_a).length, (head_a + head_b) / 2, wood, sides=4, axis=head_b - head_a))
+    pieces.append(cylinder("Lute_Rose", .04, .006, body_c + Vector((0, -.05, .02)), string_m, sides=10, axis=(0, 1, 0)))
+    fig.add(merge("Bard_Lute", pieces), rigid("spine_03"))
+    maps = {
+        "BardCloth": outfit("bard_albedo.png"), "BardHands": HANDS[gender], "BardSkin": SKIN[gender], "BardEyes": EYES,
+        "BardBrows": brows(gender),
+        "BardHat": cloth("cloth_bard_hat.png"), "BardPlume": {"color": [.92, .9, .84, 1], "rough": 1},
+        "BardWood": tinted(WOOD_C, [.78, .5, .28, 1], rough=.5), "BardString": {"color": [.12, .08, .05, 1], "rough": .9},
+    }
+    return fig.export("hero_bard_" + gender, maps)
+
+
+def sorcerer(gender):
+    """Long teal robe without a hood, a high gold-trimmed collar and a glowing crystal amulet."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Legs"}, gender)
+    robe, hands, skin, eyes, trim, gem = (material(n) for n in ("SorcRobe", "SorcHands", "SorcSkin", "SorcEyes", "SorcTrim", "SorcGem"))
+    fig.dress(robe, hands)
+    waist = 1.10 if gender == "male" else 1.08
+    lengthen_tunic(fig, waist, .06, flare=.75, wave=.03, depth=.38)
+    skirt_material(fig, waist, material("SorcSkirt"))
+    fig.add_head(skin, eyes, material("SorcBrows"))
+    neck = fig.bone_head("neck_01")
+    # Stand-up collar, open at the front.
+    collar = ring("Sorc_Collar", (0, neck.y + .015, neck.z - .03), .1, .13, -.1, robe, sides=18, sy=1.12, thickness=.01)
+    delete_verts(collar, lambda co: co.y < neck.y - .06)
+    box_uv(collar, 3)
+    band = ring("Sorc_Collar_Trim", (0, neck.y + .015, neck.z - .03), .095, .105, 0, trim, sides=18, sy=1.12, thickness=.012)
+    delete_verts(band, lambda co: co.y < neck.y - .06)
+    fig.add(merge("Sorc_Collar", [collar, band]), rigid("spine_03"))
+    # Amulet: a chain around the neck and a crystal on the chest.
+    chain, links = [], 14
+    for i in range(links):
+        a = 2 * math.pi * i / links
+        drop = .09 * max(0, -math.sin(a)) ** 2
+        chain.append(sphere("Link", .006, (math.cos(a) * .095, neck.y + .01 + math.sin(a) * .105, neck.z - .05 - drop), trim, 5, 3))
+    chest_z = neck.z - .15
+    y = (surface_y(fig, 0, chest_z) or -.12) - .03
+    chain.append(sphere("Crystal", .028, (0, y, chest_z), gem, 6, 4, (1, .7, 1.5)))
+    fig.add(merge("Sorc_Amulet", chain), rigid("spine_03"))
+    maps = {
+        "SorcRobe": outfit("sorcerer_albedo.png"), "SorcSkirt": outfit("sorcerer_skirt_albedo.png"), "SorcHands": HANDS[gender],
+        "SorcSkin": SKIN[gender], "SorcEyes": EYES, "SorcBrows": brows(gender),
+        "SorcTrim": tinted(METAL_C, [.9, .68, .3, 1], metal=.6, rough=.4),
+        "SorcGem": {"color": [.55, .35, 1, 1], "rough": .15, "emission": [.5, .3, 1], "emission_strength": 4},
+    }
+    return fig.export("hero_sorcerer_" + gender, maps)
+
+
+def warlock(gender):
+    """Black hooded robe to the knee, a long violet cloak, a pact tome at the hip and a green sigil."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Head_Hood", "Legs"}, gender)
+    robe, hands, skin, eyes, cloak, leather, gem, metal_m = (material(n) for n in (
+        "WarlockRobe", "WarlockHands", "WarlockSkin", "WarlockEyes", "WarlockCloak", "WarlockLeather", "WarlockGem", "WarlockMetal"))
+    fig.dress(robe, hands)
+    waist = 1.10 if gender == "male" else 1.08
+    lengthen_tunic(fig, waist, .42, flare=.5, wave=.03, depth=.3)
+    skirt_material(fig, waist, material("WarlockSkirt"))
+    fig.add_head(skin, eyes, material("WarlockBrows"))
+    hanging_panel(fig, "Cloak", cloak, 1.52, .1, .22, .38, False, gap=.03, flare=.14, rows=14, cols=8,
+                  weights=cloak_weights(fig))
+    # Pact tome hanging at the left hip, with a metal clasp.
+    hip = Vector((.19, -.01, waist - .1))
+    pieces = [prism("Tome", [(-.06, -.075), (.06, -.075), (.06, .075), (-.06, .075)], .045, leather, bevel=.006)]
+    pieces.append(cylinder("Tome_Clasp", .012, .05, (0, 0, 0), metal_m, sides=6, axis=(0, 1, 0)))
+    for piece in pieces:
+        piece.location = hip; piece.rotation_euler = (0, 0, math.pi / 2)
+    bpy.context.view_layer.update()
+    fig.add(merge("Warlock_Tome", pieces), rigid("pelvis"))
+    # Eldritch sigil on the chest: a thin ring around a glowing eye.
+    chest_z = 1.36 if gender == "male" else 1.32
+    y = surface_y(fig, 0, chest_z) - .015
+    sigil = ring("Sigil", (0, 0, 0), .03, .045, 0, gem, sides=12, thickness=.004)
+    sigil.rotation_euler = (math.pi / 2, 0, 0); sigil.location = (0, y, chest_z)
+    eye = sphere("Sigil_Eye", .014, (0, y - .004, chest_z), gem, 8, 4, (1.6, .5, 1))
+    bpy.context.view_layer.update()
+    fig.add(merge("Warlock_Sigil", [sigil, eye]), rigid("spine_03"))
+    maps = {
+        "WarlockRobe": outfit("warlock_albedo.png"), "WarlockSkirt": outfit("warlock_skirt_albedo.png"), "WarlockHands": HANDS[gender],
+        "WarlockSkin": SKIN[gender], "WarlockEyes": EYES, "WarlockBrows": brows(gender),
+        "WarlockCloak": cloth("cloth_warlock_cloak.png"),
+        "WarlockLeather": tinted(WOOD_C, [.3, .12, .14, 1], rough=.8), "WarlockMetal": tinted(METAL_C, [.6, .6, .62, 1], metal=.7, rough=.5),
+        "WarlockGem": {"color": [.4, 1, .45, 1], "rough": .2, "emission": [.35, 1, .4], "emission_strength": 5},
+    }
+    return fig.export("hero_warlock_" + gender, maps)
+
 # ---------------------------------------------------------------- weapons
 
 def weapon_maps():
@@ -1174,6 +1290,9 @@ if __name__ == "__main__":
         "hero_barbarian_male": lambda: barbarian("male"), "hero_barbarian_female": lambda: barbarian("female"),
         "hero_monk_male": lambda: monk("male"), "hero_monk_female": lambda: monk("female"),
         "hero_ranger_male": lambda: ranger_hero("male"), "hero_ranger_female": lambda: ranger_hero("female"),
+        "hero_bard_male": lambda: bard("male"), "hero_bard_female": lambda: bard("female"),
+        "hero_sorcerer_male": lambda: sorcerer("male"), "hero_sorcerer_female": lambda: sorcerer("female"),
+        "hero_warlock_male": lambda: warlock("male"), "hero_warlock_female": lambda: warlock("female"),
     }
     weapon_kinds = ["dagger", "greatsword", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
                     "light_crossbow", "shield_heater", "shield_round", "greataxe", "longbow"]
