@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"misty_step"
+name_key = &"SPELL_MISTY_STEP"
+srd_name = "Misty Step"
+level = 2
+school = "conjuration"
+casting_time = "bonus_action"
+targeting = "point"
+range_m = 9.0
+resolution = "none"
+effect = &"teleport"
+vfx = &"misty_step"

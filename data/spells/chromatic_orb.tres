@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"chromatic_orb"
+name_key = &"SPELL_CHROMATIC_ORB"
+srd_name = "Chromatic Orb"
+level = 1
+school = "evocation"
+targeting = "creature"
+range_m = 27.0
+resolution = "attack"
+damage_dice = "3d8"
+damage_type = &"acid"
+upcast_dice = "1d8"
+damage_types = Array[StringName]([&"acid", &"cold", &"fire", &"lightning", &"poison", &"thunder"])
+vfx = &"chromatic_orb"

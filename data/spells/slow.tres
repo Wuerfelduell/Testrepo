@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"slow"
+name_key = &"SPELL_SLOW"
+srd_name = "Slow"
+level = 3
+school = "transmutation"
+targeting = "point"
+range_m = 36.0
+area = "sphere"
+area_size_m = 6.0
+resolution = "save"
+save_ability = &"wis"
+concentration = true
+duration_rounds = 10
+effect = &"slow"
+chosen_creatures = true
+max_targets = 6
+vfx = &"slow"

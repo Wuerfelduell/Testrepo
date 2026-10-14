@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"web"
+name_key = &"SPELL_WEB"
+srd_name = "Web"
+level = 2
+school = "conjuration"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"dex"
+concentration = true
+duration_rounds = 600
+effect = &"entangle"
+vfx = &"web"

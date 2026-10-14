@@ -30,6 +30,11 @@ const STYLES: Dictionary = {
 	"bless": ["caster", RADIANT], "aid": ["caster", RADIANT], "divine_favor": ["caster", RADIANT],
 	"mass_healing_word": ["caster", HEAL], "turn_undead": ["caster", RADIANT], "abjure_foes": ["caster", RADIANT],
 	"wild_shape": ["caster", NATURE], "revert_wild_shape": ["caster", NATURE],
+	"chromatic_orb": ["bolt", ARCANE], "sorcerous_burst": ["bolt", ARCANE], "ray_of_sickness": ["bolt", POISON],
+	"vampiric_touch": ["target", NECROTIC], "hideous_laughter": ["target", SLEEP], "mage_armor": ["target", SHIELD],
+	"invisibility": ["target", ARCANE], "greater_invisibility": ["target", ARCANE], "haste": ["target", LIGHTNING],
+	"false_life": ["caster", NECROTIC], "blur": ["caster", ARCANE], "misty_step": ["caster", SLEEP],
+	"dimension_door": ["caster", ARCANE],
 }
 const FADE: float = 0.5
 

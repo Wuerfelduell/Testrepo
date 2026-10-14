@@ -68,6 +68,9 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 @export var upcast_targets: int = 0
 ## Only creatures of these types are affected (Turn Undead: undead). Empty = any.
 @export var creature_types: Array[StringName] = []
+## Damage types the caster may choose from (Chromatic Orb, Sorcerous Burst). The game picks
+## the one that hurts the target most (SpellResolver.best_damage_type); damage_type is the first.
+@export var damage_types: Array[StringName] = []
 
 func is_valid() -> bool:
 	if id == &"" or name_key == &"" or srd_name.is_empty() or srd_page < 0 or not school in SCHOOLS:
@@ -90,6 +93,9 @@ func is_valid() -> bool:
 		return false
 	if targeting == "darts" and darts <= 0:
 		return false
+	for choice: StringName in damage_types:
+		if not choice in DamageRules.TYPES:
+			return false
 	return true
 
 func is_cantrip() -> bool:

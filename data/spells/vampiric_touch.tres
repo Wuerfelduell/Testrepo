@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"vampiric_touch"
+name_key = &"SPELL_VAMPIRIC_TOUCH"
+srd_name = "Vampiric Touch"
+level = 3
+school = "necromancy"
+targeting = "creature"
+range_m = 1.5
+resolution = "attack"
+damage_dice = "3d6"
+damage_type = &"necrotic"
+upcast_dice = "1d6"
+effect = &"vampiric_touch"
+vfx = &"vampiric_touch"

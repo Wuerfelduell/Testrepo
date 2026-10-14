@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"hideous_laughter"
+name_key = &"SPELL_HIDEOUS_LAUGHTER"
+srd_name = "Hideous Laughter"
+level = 1
+school = "enchantment"
+targeting = "creature"
+range_m = 9.0
+resolution = "save"
+save_ability = &"wis"
+concentration = true
+duration_rounds = 10
+effect = &"hideous_laughter"
+vfx = &"hideous_laughter"

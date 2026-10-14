@@ -71,6 +71,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 				result["reason_key"] = ""
 				return result
 			var weapon: Dictionary = attack_weapon(caster, spell)
+			weapon["damage_type"] = String(best_damage_type(state, spell, String(target_ids[0])))
 			var attack: Dictionary = CombatRules.attack_preview(state, caster_id, String(target_ids[0]), Vector3.INF, weapon)
 			if not bool(attack["legal"]):
 				result["reason_key"] = "SPELL_REASON_TARGET"
@@ -112,7 +113,13 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 					"expected_damage": SpellRules.average_damage(dice, spell.dart_bonus) * darts})
 			result["targets"] = entries
 		"self", "point":
-			if spell.area == "none":
+			if spell.effect == &"teleport":
+				var reason_key: String = teleport_reason(state, caster_id, point, reach_m)
+				if not reason_key.is_empty():
+					result["reason_key"] = reason_key
+					return result
+				result["targets"] = []
+			elif spell.area == "none":
 				result["targets"] = []
 			else:
 				var aim: Vector3 = point
@@ -205,6 +212,9 @@ static func attack_weapon(caster: Dictionary, spell: SpellDefinition) -> Diction
 	var on_hit: Array = []
 	if spell.effect == &"speed_penalty":
 		on_hit.append({"kind": "speed_penalty", "amount": spell.effect_amount, "until": "start_of_turn"})
+	elif spell.effect == &"ray_of_sickness":
+		# Poisoned until the start of the caster's next turn.
+		on_hit.append({"kind": "ray_of_sickness", "condition": "poisoned", "until": "start_of_turn"})
 	elif spell.effect == &"guiding_bolt":
 		on_hit.append({"kind": "guiding_bolt", "until": "rounds", "rounds_left": 1})
 	var damage_modifiers: Array = []
@@ -400,6 +410,8 @@ static func cast_pending(state: GameState, caster_id: String, spell: SpellDefini
 		"metamagic": String(caster.get("metamagic", ""))}
 	if spell.resolution == "attack":
 		var weapon: Dictionary = attack_weapon(caster, spell)
+		if not target_ids.is_empty():
+			weapon["damage_type"] = String(best_damage_type(state, spell, String(target_ids[0])))
 		pending["weapon"] = weapon
 	return pending
 
@@ -423,7 +435,10 @@ static func resolve_impact(state: GameState, pending: Dictionary, rng: RandomNum
 				return _resolve_beams(state, caster_id, pending, rng)
 			pending["impacted"] = true
 			var weapon: Dictionary = pending["weapon"]
-			events.append_array(CombatRules.resolve_attack(state, caster_id, String(pending["target_ids"][0]), weapon, rng, pending))
+			var attack_events: Array[Dictionary] = CombatRules.resolve_attack(state, caster_id, String(pending["target_ids"][0]), weapon, rng, pending)
+			events.append_array(attack_events)
+			if spell.effect == &"vampiric_touch":
+				events.append_array(_drain(state, caster_id, String(pending["target_ids"][0]), attack_events))
 		"auto":
 			for value: Variant in pending["target_ids"]:
 				var target_id: String = String(value)
@@ -468,6 +483,12 @@ static func _resolve_effect(state: GameState, caster_id: String, spell: SpellDef
 	var events: Array[Dictionary] = []
 	if spell.effect == &"" or spell.effect in [&"shield"]:
 		return events
+	if spell.effect == &"teleport":
+		# Misty Step, Dimension Door: the caster appears at the chosen point.
+		var caster: Dictionary = state.actors[caster_id]
+		var from: Vector3 = caster["position"]
+		caster["position"] = CombatSpace.current().closest_point(pending["point"])
+		return [{"type": "teleport", "actor_id": caster_id, "from": from, "to": caster["position"], "spell_id": String(spell.id)}]
 	if spell.targeting == "creature" and not spell.allies:
 		return _apply_mark(state, caster_id, spell, pending)
 	var targets: Array[String] = []
@@ -589,7 +610,8 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 			events.append({"type": "condition", "actor_id": target_id, "condition": "incapacitated", "source_id": caster_id})
 		if failed and sear > 0 and CombatRules.alive(target):
 			events.append_array(_apply_damage(state, caster_id, target_id, sear, &"radiant", rng))
-		if failed and CombatRules.alive(target) and spell.effect in [&"hold", &"entangle", &"faerie_fire", &"turned", &"frightened"]:
+		if failed and CombatRules.alive(target) and spell.effect in [&"hold", &"entangle", &"faerie_fire", &"turned", &"frightened",
+				&"hideous_laughter", &"hypnotic_pattern", &"slow"]:
 			events.append_array(ClassEffects.apply_effect(state, caster_id, target_id, spell, int(pending["slot_level"])))
 		if failed and CombatRules.alive(target):
 			events.append_array(ActiveEffects.save_rider(state, caster_id, target_id, spell, dc))
@@ -683,3 +705,55 @@ static func reaction_pending(reactor_id: String, attacker_id: String, resume: Di
 static func reaction_offer_event(pending: Dictionary) -> Dictionary:
 	return {"type": "reaction_offer", "actor_id": pending["actor_id"], "attacker_id": pending["attacker_id"],
 		"reaction": pending["reaction"], "trigger": pending["trigger"].duplicate(true)}
+
+## The chosen damage type that hurts the target most: vulnerable, then neither resisted
+## nor immune, else the spell's first type (Chromatic Orb, Sorcerous Burst).
+static func best_damage_type(state: GameState, spell: SpellDefinition, target_id: String) -> StringName:
+	if spell.damage_types.is_empty() or not state.actors.has(target_id):
+		return spell.damage_type
+	var target: Dictionary = state.actors[target_id]
+	var resisted: Array = target.get("resistances", []).duplicate()
+	resisted.append_array(ClassKits.resistances(target))
+	var immune: Array = target.get("immunities", [])
+	var plain: StringName = &""
+	for choice: StringName in spell.damage_types:
+		if String(choice) in target.get("vulnerabilities", []).map(func(value: Variant) -> String: return String(value)):
+			return choice
+		if plain == &"" and not String(choice) in resisted.map(func(value: Variant) -> String: return String(value)) and \
+				not String(choice) in immune.map(func(value: Variant) -> String: return String(value)):
+			plain = choice
+	return plain if plain != &"" else spell.damage_types[0]
+
+## Where a teleport may end: in range, in sight, on walkable ground, not on a creature.
+static func teleport_reason(state: GameState, caster_id: String, point: Vector3, reach_m: float) -> String:
+	if not point.is_finite():
+		return "SPELL_REASON_PICK_POINT"
+	var origin: Vector3 = state.actors[caster_id]["position"]
+	if origin.distance_to(point) > reach_m + CombatRules.EPSILON:
+		return "SPELL_REASON_RANGE"
+	var geometry: CombatSpace = CombatSpace.current()
+	if not geometry.visible(origin, point):
+		return "SPELL_REASON_SIGHT"
+	var landing: Vector3 = geometry.closest_point(point)
+	if Vector2(landing.x - point.x, landing.z - point.z).length() > 0.5:
+		return "SPELL_REASON_TARGET"
+	for id: String in state.actors:
+		var other: Dictionary = state.actors[id]
+		if id != caster_id and CombatRules.alive(other) and other.get("position") is Vector3 and \
+				Vector2((other["position"] as Vector3).x - landing.x, (other["position"] as Vector3).z - landing.z).length() < 0.8:
+			return "SPELL_REASON_TARGET"
+	return ""
+
+## Vampiric Touch: the caster regains half the necrotic damage the touch dealt.
+static func _drain(state: GameState, caster_id: String, target_id: String, attack_events: Array[Dictionary]) -> Array[Dictionary]:
+	var dealt: int = 0
+	for event: Dictionary in attack_events:
+		if String(event.get("type", "")) == "damage" and String(event.get("target_id", "")) == target_id:
+			dealt += int(event.get("amount", 0))
+	var caster: Dictionary = state.actors[caster_id]
+	var amount: int = mini(floori(dealt / 2.0), int(caster["max_hp"]) - int(caster["hp"]))
+	if amount <= 0 or not CombatRules.alive(caster):
+		return []
+	caster["hp"] = int(caster["hp"]) + amount
+	return [{"type": "heal", "actor_id": caster_id, "target_id": caster_id, "source_id": caster_id,
+		"spell_id": "vampiric_touch", "amount": amount, "hp": caster["hp"]}]

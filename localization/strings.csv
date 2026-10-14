@@ -1115,3 +1115,34 @@ COMBAT_REACTION_UNCANNY_DODGE_TITLE,Uncanny Dodge?
 COMBAT_REACTION_UNCANNY_DODGE_TEXT,"%s hits %s. Use your reaction to halve the damage of this hit?"
 COMBAT_REACTION_UNCANNY_DODGE_ACCEPT,Halve the damage (reaction)
 COMBAT_REACTION_UNCANNY_DODGE_DECLINE,Take the full hit
+SPELL_SORCEROUS_BURST,Sorcerous Burst
+SPELL_CHROMATIC_ORB,Chromatic Orb
+SPELL_RAY_OF_SICKNESS,Ray of Sickness
+SPELL_COLOR_SPRAY,Color Spray
+SPELL_GREASE,Grease
+SPELL_HIDEOUS_LAUGHTER,Hideous Laughter
+SPELL_FALSE_LIFE,False Life
+SPELL_FALSE_LIFE_HINT,9 temporary hit points (+5 per higher slot) until a long rest
+SPELL_MAGE_ARMOR,Mage Armor
+SPELL_MAGE_ARMOR_HINT,"Without armour: AC 13 + Dexterity modifier, until a long rest"
+SPELL_BLUR,Blur
+SPELL_BLUR_HINT,Attacks against you have disadvantage while you concentrate
+SPELL_INVISIBILITY,Invisibility
+SPELL_INVISIBILITY_HINT,Invisible until the target makes an attack roll
+SPELL_WEB,Web
+SPELL_MISTY_STEP,Misty Step
+SPELL_MISTY_STEP_HINT,Bonus action: teleport to a free spot you can see
+SPELL_HASTE,Haste
+SPELL_HASTE_HINT,"+2 AC and double Speed while you concentrate"
+SPELL_SLOW,Slow
+SPELL_HYPNOTIC_PATTERN,Hypnotic Pattern
+SPELL_FEAR,Fear
+SPELL_VAMPIRIC_TOUCH,Vampiric Touch
+SPELL_GREATER_INVISIBILITY,Greater Invisibility
+SPELL_GREATER_INVISIBILITY_HINT,"Invisible while you concentrate, even when attacking"
+SPELL_BLACK_TENTACLES,Black Tentacles
+SPELL_DIMENSION_DOOR,Dimension Door
+SPELL_DIMENSION_DOOR_HINT,Teleport up to 150 m to a free spot you can see
+ROLL_SOURCE_BLUR,Blur
+ROLL_SOURCE_INVISIBILITY,Invisible
+ROLL_SOURCE_GREATER_INVISIBILITY,Invisible

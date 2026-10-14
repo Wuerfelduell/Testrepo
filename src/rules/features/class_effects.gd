@@ -43,6 +43,8 @@ static func granted_conditions(effect: Dictionary) -> Array[String]:
 	match String(effect.get("kind", "")):
 		"hold": return ["paralyzed"]
 		"entangle": return ["restrained"]
+		"hideous_laughter": return ["prone", "incapacitated"]
+		"hypnotic_pattern": return ["incapacitated"]
 		"turned": return ["frightened", "incapacitated"]
 		"frightened": return ["frightened"]
 	return []
@@ -81,6 +83,14 @@ static func armor_class(target: Dictionary) -> int:
 				value += int(effect.get("amount", 0))
 			"barkskin":
 				value = maxi(value, 17)
+			"haste":
+				value += 2
+			"slow":
+				value -= 2
+			"mage_armor":
+				# 13 + Dexterity modifier while the creature wears no armour.
+				if String(target.get("armor", "none")) in ["", "none"]:
+					value = maxi(value, 13 + Abilities.modifier(int(target.get("dex", 10))))
 	return value
 
 ## Advantage sources for an attack against target_id: Faerie Fire, Guiding Bolt, Pack Tactics.
@@ -250,6 +260,17 @@ static func apply_effect(state: GameState, caster_id: String, target_id: String,
 				return events
 			effect["until"] = "damage"
 			effect["rounds_left"] = maxi(1, spell.duration_rounds)
+		"hypnotic_pattern":
+			# Ends when the creature takes damage, or with the caster's concentration.
+			effect["until"] = "damage"
+			effect["rounds_left"] = maxi(1, spell.duration_rounds)
+		"mage_armor":
+			effect["until"] = "long_rest"
+		"false_life":
+			# 2d4 + 4 temporary hit points (their average, 9), +5 per slot level above 1st.
+			effect["until"] = "long_rest"
+			target["temp_hp"] = maxi(int(target.get("temp_hp", 0)), 9 + 5 * maxi(0, slot_level - spell.level))
+			events.append({"type": "temp_hp", "actor_id": target_id, "amount": int(target["temp_hp"])})
 		"wild_shape":
 			return wild_shape(state, caster_id, "wolf")
 		"revert_wild_shape":
@@ -298,7 +319,7 @@ static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGen
 		return events
 	for effect: Dictionary in ActiveEffects.effects(actor).duplicate():
 		var kind: String = String(effect.get("kind", ""))
-		if not kind in ["hold", "entangle"]:
+		if not kind in ["hold", "entangle", "hideous_laughter", "slow"]:
 			continue
 		var ability: StringName = StringName(String(effect.get("save_ability", "wis")))
 		var save: Dictionary = SpellRules.roll_save(actor, ability, int(effect.get("save_dc", 10)), rng,
