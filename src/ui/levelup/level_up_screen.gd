@@ -167,13 +167,14 @@ func _build_choices() -> void:
 		any = true
 		_section(tr("LEVELUP_SECTION_CANTRIPS") % int(plan["cantrip_count"]))
 		_pick_section("cantrips", plan["cantrip_options"], int(plan["cantrip_count"]), "")
-	if String(plan["class_id"]) == "wizard":
+	if ClassSpellcasting.is_caster(String(plan["class_id"])):
 		any = true
-		var count: int = int(plan["spellbook_count"])
-		_section(tr("LEVELUP_SECTION_SPELLBOOK") % count,
-			tr("LEVELUP_SPELLBOOK_NONE") if count == 0 else (tr("LEVELUP_SPELLBOOK_FEWER") if count < ProgressionRules.NEW_SPELLS_PER_LEVEL else ""))
-		if count > 0:
-			_pick_section("spellbook", plan["spellbook_options"], count, "")
+		if ClassSpellcasting.uses_spellbook(String(plan["class_id"])):
+			var count: int = int(plan["spellbook_count"])
+			_section(tr("LEVELUP_SECTION_SPELLBOOK") % count,
+				tr("LEVELUP_SPELLBOOK_NONE") if count == 0 else (tr("LEVELUP_SPELLBOOK_FEWER") if count < ClassSpellcasting.new_spells_per_level(String(plan["class_id"])) else ""))
+			if count > 0:
+				_pick_section("spellbook", plan["spellbook_options"], count, "")
 		_section(tr("LEVELUP_SECTION_PREPARED") % int(plan["prepared_limit"]), tr("LEVELUP_SECTION_PREPARED_NOTE"))
 		_prepared_box = VBoxContainer.new()
 		_list.add_child(_prepared_box)
@@ -249,9 +250,7 @@ func _build_prepared() -> void:
 	for child: Node in _prepared_box.get_children():
 		_prepared_box.remove_child(child)
 		child.queue_free()
-	var book: Array[String] = ClassFeatures.spellbook(_actor)
-	for value: Variant in _choices.get("spellbook", []):
-		book.append(String(value))
+	var book: Array[String] = ProgressionRules.preparable_after(_actor, _choices.get("spellbook", []))
 	var grid: GridContainer = _grid(_prepared_box)
 	for spell_id: String in book:
 		var button: Button = _toggle(grid, _option_text(spell_id, ""))

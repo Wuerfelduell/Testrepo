@@ -6,7 +6,8 @@ extends RefCounted
 
 const CLASS_ORDER: Array[String] = ["fighter", "wizard", "barbarian", "bard", "cleric", "druid",
 	"monk", "paladin", "ranger", "rogue", "sorcerer", "warlock"]
-const PLAYABLE: Array[String] = ["fighter", "wizard"]
+## The one list of playable classes lives in ClassFeatures.
+const PLAYABLE: Array[String] = ClassFeatures.ACTIVE_CLASSES
 const STANDARD_ARRAY: Array[int] = [15, 14, 13, 12, 10, 8]
 const PRIORITY: Dictionary = {
 	"fighter": [&"str", &"con", &"dex", &"wis", &"int", &"cha"],
@@ -43,8 +44,15 @@ static func create_sheet(class_id: String) -> CharacterSheet:
 	class_skills.assign(SKILLS[class_id]["class"])
 	if not sheet.select_class_skills(class_skills) or not sheet.select_human_skill(SKILLS[class_id]["human"]):
 		return null
-	var equipped: bool = sheet.equip(&"chain_mail") if class_id == "fighter" else sheet.equip(&"none")
-	return sheet if equipped else null
+	return sheet if equip_starting_armor(sheet, class_id) else null
+
+## Armour and shield of the class starting kit (data/items/items.json) on the sheet.
+static func equip_starting_armor(sheet: CharacterSheet, class_id: String) -> bool:
+	var equipped: Dictionary = ItemCatalog.starting_kit(class_id).get("equipped", {})
+	var armor_id: String = "none"
+	if not String(equipped.get("armor", "")).is_empty():
+		armor_id = String(ItemCatalog.get_item(String(equipped["armor"])).get("armor_id", "none"))
+	return sheet.equip(StringName(armor_id), String(equipped.get("off_hand", "")) == "shield")
 
 ## Summary for the creation screen: hp, ac, main ability, ability scores.
 static func summary(class_id: String) -> Dictionary:
@@ -96,6 +104,14 @@ static func _weapon(class_id: String, sheet: CharacterSheet) -> Dictionary:
 	var strength: int = sheet.ability_modifier(&"str")
 	if class_id == "fighter":
 		return HeroKit.fighter_weapon(sheet)
+	if class_id != "wizard":
+		# Every other class: the main-hand weapon of its starting kit.
+		var equipped: Dictionary = ItemCatalog.starting_kit(class_id).get("equipped", {})
+		var probe: Dictionary = {"ability_scores": sheet.ability_scores(), "proficiency_bonus": proficiency}
+		var training: EquipmentRules.Training = EquipmentRules.Training.new()
+		training.weapons = sheet.weapon_proficiencies()
+		return EquipmentRules.weapon_record(probe, String(equipped.get("main_hand", "dagger")), training,
+			String(equipped.get("off_hand", "")).is_empty())
 	# SRD Quarterstaff (simple melee, 1d6 bludgeoning). The art package adds a staff model;
 	# until it exists the Wizard fights bare-handed visually.
 	var staff: Dictionary = {

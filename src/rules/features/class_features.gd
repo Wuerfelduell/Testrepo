@@ -4,14 +4,9 @@ extends RefCounted
 ## hero records. Pure: no Nodes, no singletons, no randomness. Features above level 5
 ## stay names in data/classes/ only (see DATA_ONLY).
 
+## Playable classes with active features (HeroFactory.PLAYABLE is this list).
 const ACTIVE_CLASSES: Array[String] = ["fighter", "wizard"]
 const IMPLEMENTED_MAX_LEVEL: int = 5
-## SRD 5.2 Wizard table, index 0 = level 1.
-const WIZARD_CANTRIPS: Array[int] = [3, 3, 3, 4, 4, 4, 4, 4, 4, 5]
-const WIZARD_PREPARED: Array[int] = [4, 5, 6, 7, 9, 10, 11, 12, 14, 15]
-## Wizard spells that exist in data/spells/ (SRD 5.2 Wizard spell list).
-const WIZARD_SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "acid_splash", "poison_spray",
-	"magic_missile", "burning_hands", "shield", "sleep", "shatter", "fireball"]
 ## Scholar: expertise in one of these skills the Wizard is proficient in.
 const SCHOLAR_SKILLS: Array[String] = ["arcana", "history", "investigation", "medicine", "nature", "religion"]
 ## Fighting Style feats with rules behind them (CombatRules.damage_die_minimum).
@@ -53,11 +48,12 @@ static func action_surge_uses(fighter_level: int) -> int:
 static func attacks_per_action(actor: Dictionary) -> int:
 	return int(actor.get("features", {}).get("extra_attack", {}).get("attacks", 1))
 
+## Spell counts and lists per class live in ClassSpellcasting; these keep the Wizard names.
 static func wizard_cantrips(level: int) -> int:
-	return WIZARD_CANTRIPS[clampi(level, 1, 10) - 1]
+	return ClassSpellcasting.cantrips_known("wizard", level)
 
 static func wizard_prepared(level: int) -> int:
-	return WIZARD_PREPARED[clampi(level, 1, 10) - 1]
+	return ClassSpellcasting.prepared_limit("wizard", level)
 
 ## The Wizard's spellbook (level 1+ spells). Older records only had the prepared list.
 static func spellbook(actor: Dictionary) -> Array[String]:
@@ -77,40 +73,54 @@ static func known_cantrips(actor: Dictionary) -> Array[String]:
 			result.append(String(value))
 	return result
 
+## Prepared level-1+ spells, without the always-prepared ones (they never count).
 static func prepared_spells(actor: Dictionary) -> Array[String]:
 	var result: Array[String] = []
+	var always: Array[String] = ClassSpellcasting.always_prepared(String(actor.get("class_id", "")), int(actor.get("level", 1)))
 	for value: Variant in actor.get("spells", []):
 		var spell: SpellDefinition = SpellBook.get_spell(String(value))
-		if spell != null and not spell.is_cantrip():
+		if spell != null and not spell.is_cantrip() and not String(value) in always:
 			result.append(String(value))
 	return result
 
-## Writes cantrips + prepared spells back into the castable "spells" list.
+## Writes cantrips + prepared + always-prepared spells back into the castable "spells" list.
 static func set_prepared(actor: Dictionary, prepared: Array) -> void:
 	var castable: Array = []
 	for spell_id: String in known_cantrips(actor):
 		castable.append(spell_id)
 	for value: Variant in prepared:
 		castable.append(String(value))
+	for spell_id: String in ClassSpellcasting.always_prepared(String(actor.get("class_id", "")), int(actor.get("level", 1))):
+		if not spell_id in castable:
+			castable.append(spell_id)
 	actor["spells"] = castable
 
 ## Level-1+ Wizard spells that exist in data and fit the highest slot of this level.
 static func wizard_spell_options(level: int, excluded: Array) -> Array[String]:
-	var result: Array[String] = []
-	var highest: int = SpellRules.full_caster_slots(level).size()
-	for spell_id: String in WIZARD_SPELLS:
-		var spell: SpellDefinition = SpellBook.get_spell(spell_id)
-		if spell != null and not spell.is_cantrip() and spell.level <= highest and not spell_id in excluded:
-			result.append(spell_id)
-	return result
+	return ClassSpellcasting.spell_options("wizard", level, excluded)
 
 static func wizard_cantrip_options(excluded: Array) -> Array[String]:
-	var result: Array[String] = []
-	for spell_id: String in WIZARD_SPELLS:
-		var spell: SpellDefinition = SpellBook.get_spell(spell_id)
-		if spell != null and spell.is_cantrip() and not spell_id in excluded:
-			result.append(spell_id)
-	return result
+	return ClassSpellcasting.cantrip_options("wizard", excluded)
+
+## Feature records of a new hero of this class (HeroKit.activate). Uses scale with the level.
+static func start_features(class_id: String, level: int) -> Dictionary:
+	match class_id:
+		"fighter":
+			var uses: int = SpellRules.second_wind_uses(level)
+			# Fighting Style chosen by the owner (Q34): Great Weapon Fighting.
+			return {"second_wind": {"uses": uses, "max": uses},
+				"weapon_mastery": {"weapons": ["greatsword", "longsword"]}, "fighting_style": HeroKit.FIGHTER_STYLE}
+		"wizard":
+			return {"arcane_recovery": {"used": false}}
+	return {}
+
+## Character choices a new hero of this class still owes (shown as pending).
+static func start_choices(class_id: String) -> Array:
+	match class_id:
+		"fighter":
+			# The third mastery weapon still waits for the owner.
+			return [&"weapon_mastery_kinds"]
+	return []
 
 ## Brings the feature records of an active class up to the given level. Uses gained
 ## by a level are available at once; spent uses stay spent.

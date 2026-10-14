@@ -4,7 +4,8 @@ extends RefCounted
 ## features (Fighter: Second Wind, Weapon Mastery; Wizard: Spellcasting, Arcane
 ## Recovery). Character creation can pass its own ability scores and skills.
 
-const CLASSES: Array[StringName] = [&"fighter", &"wizard"]
+## Playable classes are ClassFeatures.ACTIVE_CLASSES. The tables below only hold the
+## test heroes' own values; other classes use character creation's defaults.
 const DEFAULT_SCORES: Dictionary = {
 	&"fighter": {&"str": 16, &"dex": 14, &"con": 14, &"int": 10, &"wis": 12, &"cha": 8},
 	&"wizard": {&"str": 10, &"dex": 13, &"con": 14, &"int": 15, &"wis": 12, &"cha": 8},
@@ -14,32 +15,37 @@ const DEFAULT_SKILLS: Dictionary = {
 }
 const DEFAULT_HUMAN_SKILL: Dictionary = {&"fighter": &"arcana", &"wizard": &"perception"}
 const FIGHTER_STYLE: String = "great_weapon_fighting"
-## SRD 5.2 Wizard, level 1: three cantrips and the prepared level-1 spells. The third
-## cantrip, Poison Spray (1d12), is the owner's wish for a strong one (13-10-2026).
+## Arena auto-play personality of classes that should keep their distance.
+const AUTO_PERSONALITY: Dictionary = {"wizard": "archer"}
+## SRD 5.2 Wizard, level 1: three cantrips and the prepared level-1 spells (the same list
+## as ClassSpellcasting "start"). The third cantrip, Poison Spray (1d12), is the owner's
+## wish for a strong one (13-10-2026).
 const WIZARD_CANTRIP: String = "poison_spray"
 const WIZARD_SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", WIZARD_CANTRIP, "magic_missile",
 	"burning_hands", "shield", "sleep"]
 
 static func create(class_id: StringName, position: Vector3 = Vector3(0, 0, 7), scores: Dictionary = {},
 		class_skills: Array[StringName] = [], human_skill: StringName = &"") -> Dictionary:
-	if not class_id in CLASSES:
+	if not HeroFactory.is_playable(String(class_id)):
 		return {}
 	var definition: ClassDefinition = load("res://data/classes/%s.tres" % class_id) as ClassDefinition
-	var chosen_scores: Dictionary = scores if not scores.is_empty() else DEFAULT_SCORES[class_id]
+	var chosen_scores: Dictionary = scores if not scores.is_empty() else \
+		DEFAULT_SCORES.get(class_id, HeroFactory.standard_scores(String(class_id)))
 	var sheet: CharacterSheet = CharacterSheet.create(definition, 1, chosen_scores)
 	if sheet == null:
 		return {}
 	var skills: Array[StringName] = class_skills.duplicate()
 	if skills.is_empty():
-		skills.assign(DEFAULT_SKILLS[class_id])
-	var extra_skill: StringName = human_skill if human_skill != &"" else DEFAULT_HUMAN_SKILL[class_id]
+		skills.assign(DEFAULT_SKILLS.get(class_id, HeroFactory.SKILLS.get(String(class_id), {}).get("class", [])))
+	var extra_skill: StringName = human_skill if human_skill != &"" else \
+		DEFAULT_HUMAN_SKILL.get(class_id, HeroFactory.SKILLS.get(String(class_id), {}).get("human", &""))
 	# These explicit skills do not silently activate feats or other deferred choices.
 	if not sheet.select_class_skills(skills) or not sheet.select_human_skill(extra_skill):
 		return {}
-	if class_id == &"fighter" and not sheet.equip(&"chain_mail"):
+	if not HeroFactory.equip_starting_armor(sheet, String(class_id)):
 		return {}
 	var proficiency: int = sheet.proficiency_bonus()
-	var weapon: Dictionary = fighter_weapon(sheet) if class_id == &"fighter" else HeroFactory._weapon("wizard", sheet)
+	var weapon: Dictionary = HeroFactory._weapon(String(class_id), sheet)
 	var record: Dictionary = {
 		"id": "hero", "team": "hero", "name_key": "ACTOR_" + String(class_id).to_upper(),
 		"position": position, "hp": sheet.maximum_hp(), "max_hp": sheet.maximum_hp(),
@@ -69,7 +75,7 @@ static func default_model(class_id: String) -> String:
 static func activate(source: Dictionary) -> Dictionary:
 	var record: Dictionary = source.duplicate(true)
 	var class_id: String = String(record.get("class_id", ""))
-	if not StringName(class_id) in CLASSES:
+	if not HeroFactory.is_playable(class_id):
 		return record
 	if bool(record.get("class_features_active", false)) and record.has("features"):
 		# Heroes saved before the Fighting Style existed still receive it.
@@ -93,28 +99,13 @@ static func activate(source: Dictionary) -> Dictionary:
 	if not record.has("effects"):
 		record["effects"] = []
 	var choices: Array = record.get("pending_character_choices", []).duplicate()
-	if class_id == "fighter":
-		var uses: int = SpellRules.second_wind_uses(level)
-		# Fighting Style chosen by the owner (Q34): Great Weapon Fighting.
-		record["features"] = {"second_wind": {"uses": uses, "max": uses},
-			"weapon_mastery": {"weapons": ["greatsword", "longsword"]}, "fighting_style": FIGHTER_STYLE}
-		# The third mastery weapon still waits for the owner.
-		choices.append(&"weapon_mastery_kinds")
-	else:
-		var intelligence: int = int(SpellRules._lookup(record.get("ability_scores", {}), &"int", 10))
-		var slots: Array[int] = SpellRules.full_caster_slots(level)
-		record["features"] = {"arcane_recovery": {"used": false}}
-		record["spells"] = WIZARD_SPELLS.duplicate()
-		record["spell_ability"] = "int"
-		record["spell_slots"] = slots.duplicate()
-		record["spell_slots_max"] = slots.duplicate()
-		record["spell_attack_modifiers"] = SpellRules.spell_attack_modifiers(&"int", intelligence, level)
-		record["spell_attack_bonus"] = SpellRules.spell_attack_bonus(intelligence, level)
-		record["spell_save_dc"] = SpellRules.spell_save_dc(intelligence, level)
-		record["concentration"] = {}
-		if String(record.get("personality", "")).is_empty():
-			# Only used when the arena auto-plays the hero: keep range like a caster should.
-			record["personality"] = "archer"
+	record["features"] = ClassFeatures.start_features(class_id, level)
+	choices.append_array(ClassFeatures.start_choices(class_id))
+	if ClassSpellcasting.is_caster(class_id):
+		ClassSpellcasting.activate(record)
+	if String(record.get("personality", "")).is_empty() and AUTO_PERSONALITY.has(class_id):
+		# Only used when the arena auto-plays the hero: keep range like a caster should.
+		record["personality"] = AUTO_PERSONALITY[class_id]
 	record["pending_character_choices"] = choices
 	return record
 

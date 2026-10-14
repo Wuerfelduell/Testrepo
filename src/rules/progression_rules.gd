@@ -1,6 +1,7 @@
 class_name ProgressionRules
 extends RefCounted
-## Level-up on plain hero records (SRD 5.2 level advancement, Fighter and Wizard tables).
+## Level-up on plain hero records (SRD 5.2 level advancement; spell numbers per class
+## come from ClassSpellcasting).
 ## Pure: no Nodes or singletons; randomness only through the supplied generator.
 ## One apply() is one level. Every choice is recorded in "level_choices" so a saved
 ## hero keeps them; "hp_gains" keeps the hit die result of every level after the first.
@@ -108,26 +109,46 @@ static func plan(actor: Dictionary) -> Dictionary:
 			if skill in skills and not skill in expertise:
 				result["expertise_options"].append(skill)
 		result["expertise"] = not result["expertise_options"].is_empty()
-	if class_id == "wizard":
-		var book: Array[String] = ClassFeatures.spellbook(actor)
+	if ClassSpellcasting.is_caster(class_id):
 		var cantrips: Array[String] = ClassFeatures.known_cantrips(actor)
-		result["spellbook_options"] = ClassFeatures.wizard_spell_options(level, book)
-		result["spellbook_count"] = mini(NEW_SPELLS_PER_LEVEL, result["spellbook_options"].size())
-		result["cantrip_options"] = ClassFeatures.wizard_cantrip_options(cantrips)
-		var new_cantrips: int = ClassFeatures.wizard_cantrips(level) - ClassFeatures.wizard_cantrips(level - 1)
-		result["cantrip_count"] = mini(new_cantrips, result["cantrip_options"].size())
-		result["prepared_limit"] = ClassFeatures.wizard_prepared(level)
-		result["slots_before"] = SpellRules.full_caster_slots(level - 1)
-		result["slots_after"] = SpellRules.full_caster_slots(level)
+		if ClassSpellcasting.uses_spellbook(class_id):
+			var book: Array[String] = ClassFeatures.spellbook(actor)
+			result["spellbook_options"] = ClassSpellcasting.spell_options(class_id, level, book)
+			result["spellbook_count"] = mini(ClassSpellcasting.new_spells_per_level(class_id), result["spellbook_options"].size())
+		result["cantrip_options"] = ClassSpellcasting.cantrip_options(class_id, cantrips)
+		var new_cantrips: int = ClassSpellcasting.cantrips_for(actor, level) - ClassSpellcasting.cantrips_for(actor, level - 1)
+		result["cantrip_count"] = clampi(new_cantrips, 0, result["cantrip_options"].size())
+		result["prepared_limit"] = ClassSpellcasting.prepared_limit(class_id, level)
+		result["slots_before"] = ClassSpellcasting.slots(class_id, level - 1)
+		result["slots_after"] = ClassSpellcasting.slots(class_id, level)
+	return result
+
+## What the next level may prepare from: the spellbook plus this level-up's new
+## spellbook spells (Wizard), or the class list up to the new highest slot.
+static func preparable_after(actor: Dictionary, new_spells: Array) -> Array[String]:
+	var class_id: String = String(actor.get("class_id", ""))
+	var level: int = int(actor.get("level", 1)) + 1
+	var result: Array[String] = ClassSpellcasting.preparable(actor, level)
+	for value: Variant in new_spells:
+		if not String(value) in result:
+			result.append(String(value))
+	if not ClassSpellcasting.uses_spellbook(class_id):
+		result = ClassSpellcasting.spell_options(class_id, level, [])
 	return result
 
 ## The prepared list a level-up keeps when the player does not choose one: the old
 ## list plus the new spellbook spells, up to the new limit.
+## Classes without a spellbook fill free places from their class list, in list order.
 static func default_prepared(actor: Dictionary, new_spells: Array) -> Array[String]:
+	var class_id: String = String(actor.get("class_id", ""))
 	var level: int = int(actor.get("level", 1)) + 1
+	var limit: int = ClassSpellcasting.prepared_limit(class_id, level)
 	var result: Array[String] = ClassFeatures.prepared_spells(actor)
-	for value: Variant in new_spells:
-		if result.size() < ClassFeatures.wizard_prepared(level) and not String(value) in result:
+	var candidates: Array = new_spells.duplicate()
+	if not ClassSpellcasting.uses_spellbook(class_id):
+		candidates.append_array(ClassSpellcasting.spell_options(class_id, level, []))
+	for value: Variant in candidates:
+		if result.size() < limit and not String(value) in result:
 			result.append(String(value))
 	return result
 
@@ -175,10 +196,9 @@ static func validate(actor: Dictionary, choices: Dictionary) -> String:
 	if not _picks_valid(choices.get("cantrips", []), next["cantrip_options"], int(next["cantrip_count"])):
 		return "LEVELUP_REASON_CANTRIPS"
 	if choices.has("prepared"):
-		if String(actor.get("class_id", "")) != "wizard":
+		if not ClassSpellcasting.is_caster(String(actor.get("class_id", ""))):
 			return "LEVELUP_REASON_INVALID"
-		var book: Array[String] = ClassFeatures.spellbook(actor)
-		book.append_array(_strings(choices.get("spellbook", [])))
+		var book: Array[String] = preparable_after(actor, choices.get("spellbook", []))
 		var prepared: Variant = choices["prepared"]
 		if not prepared is Array or prepared.size() > int(next["prepared_limit"]) or \
 				not _picks_valid(prepared, book, prepared.size()):
@@ -260,13 +280,14 @@ static func apply(actor: Dictionary, actor_id: String, choices: Dictionary,
 		var expertise: Array = actor.get("skill_expertise", []).duplicate()
 		expertise.append(String(choices["expertise"]))
 		actor["skill_expertise"] = expertise
-	if String(actor.get("class_id", "")) == "wizard":
-		var book: Array[String] = ClassFeatures.spellbook(actor)
+	if ClassSpellcasting.is_caster(String(actor.get("class_id", ""))):
 		var new_spells: Array[String] = _strings(choices.get("spellbook", []))
 		var prepared: Array[String] = _strings(choices["prepared"]) if choices.has("prepared") \
 			else default_prepared(actor, new_spells)
-		book.append_array(new_spells)
-		actor["spellbook"] = book
+		if ClassSpellcasting.uses_spellbook(String(actor.get("class_id", ""))):
+			var book: Array[String] = ClassFeatures.spellbook(actor)
+			book.append_array(new_spells)
+			actor["spellbook"] = book
 		var castable: Array = ClassFeatures.known_cantrips(actor)
 		castable.append_array(_strings(choices.get("cantrips", [])))
 		castable.append_array(prepared)
@@ -307,22 +328,7 @@ static func refresh_derived(actor: Dictionary) -> void:
 	else:
 		for weapon: Variant in [actor.get("weapon", {})] + actor.get("attacks", []):
 			_refresh_weapon_modifiers(actor, weapon as Dictionary, proficiency)
-	if String(actor.get("class_id", "")) == "wizard":
-		var intelligence: int = score(actor, "int")
-		var maximum: Array[int] = SpellRules.full_caster_slots(level)
-		var old_maximum: Array = actor.get("spell_slots_max", [])
-		var slots: Array = actor.get("spell_slots", []).duplicate()
-		for index: int in maximum.size():
-			var before: int = int(old_maximum[index]) if index < old_maximum.size() else 0
-			var current: int = int(slots[index]) if index < slots.size() else 0
-			if index >= slots.size():
-				slots.append(0)
-			slots[index] = clampi(current + maximum[index] - before, 0, maximum[index])
-		actor["spell_slots"] = slots
-		actor["spell_slots_max"] = maximum.duplicate()
-		actor["spell_attack_modifiers"] = SpellRules.spell_attack_modifiers(&"int", intelligence, level)
-		actor["spell_attack_bonus"] = SpellRules.spell_attack_bonus(intelligence, level)
-		actor["spell_save_dc"] = SpellRules.spell_save_dc(intelligence, level)
+	ClassSpellcasting.refresh(actor)
 
 ## Heroes without an inventory keep their weapon record; only its numbers move.
 static func _refresh_weapon_modifiers(actor: Dictionary, weapon: Dictionary, proficiency: int) -> void:

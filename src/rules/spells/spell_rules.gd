@@ -10,6 +10,10 @@ const FULL_CASTER_SLOTS: Array = [
 	[2], [3], [4, 2], [4, 3], [4, 3, 2], [4, 3, 3], [4, 3, 3, 1], [4, 3, 3, 2],
 	[4, 3, 3, 3, 1], [4, 3, 3, 3, 2],
 ]
+## Half-caster slot table (Paladin, Ranger in SRD 5.2) for levels 1-10.
+const HALF_CASTER_SLOTS: Array = [
+	[2], [2], [3], [3], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3, 2], [4, 3, 2],
+]
 
 static func spell_attack_bonus(ability_score: int, level: int) -> int:
 	return Abilities.modifier(ability_score) + Abilities.proficiency_bonus(level)
@@ -25,6 +29,12 @@ static func full_caster_slots(level: int) -> Array[int]:
 	var result: Array[int] = []
 	if level >= 1 and level <= FULL_CASTER_SLOTS.size():
 		result.assign(FULL_CASTER_SLOTS[level - 1])
+	return result
+
+static func half_caster_slots(level: int) -> Array[int]:
+	var result: Array[int] = []
+	if level >= 1 and level <= HALF_CASTER_SLOTS.size():
+		result.assign(HALF_CASTER_SLOTS[level - 1])
 	return result
 
 static func has_slot(slots: Array, slot_level: int) -> bool:

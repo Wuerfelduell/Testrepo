@@ -124,10 +124,11 @@ static func long_rest_reason(state: GameState, actor_id: String, prepared: Array
 	if not reason.is_empty() or prepared.is_empty():
 		return reason
 	var actor: Dictionary = state.actors[actor_id]
-	if String(actor.get("class_id", "")) != "wizard" or \
-			prepared.size() > ClassFeatures.wizard_prepared(int(actor.get("level", 1))):
+	var class_id: String = String(actor.get("class_id", ""))
+	if not ClassSpellcasting.is_caster(class_id) or \
+			prepared.size() > ClassSpellcasting.prepared_limit(class_id, int(actor.get("level", 1))):
 		return "REST_REASON_PREPARED"
-	var book: Array[String] = ClassFeatures.spellbook(actor)
+	var book: Array[String] = ClassSpellcasting.preparable(actor)
 	var seen: Array[String] = []
 	for spell_id: String in prepared:
 		if not spell_id in book or spell_id in seen:
@@ -135,8 +136,8 @@ static func long_rest_reason(state: GameState, actor_id: String, prepared: Array
 		seen.append(spell_id)
 	return ""
 
-## Full HP, all spell slots, all Hit Point Dice (SRD 5.2), every feature use. A Wizard
-## may change the prepared list (empty = unchanged).
+## Full HP, all spell slots, all Hit Point Dice (SRD 5.2), every feature use. A
+## prepared caster may change the prepared list (empty = unchanged).
 static func long_rest(actor: Dictionary, actor_id: String, prepared: Array[String] = []) -> Array[Dictionary]:
 	ensure_hit_dice(actor)
 	var dice: Dictionary = actor["hit_dice"]
