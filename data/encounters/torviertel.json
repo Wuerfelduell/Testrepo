@@ -163,11 +163,18 @@
       ]
     },
     {
-      "id": "companion_a",
-      "dialogue": "companion_a",
+      "id": "companion_kael",
+      "dialogue": "companion_kael",
       "hide_if": [
         {
-          "in_party": "companion_a"
+          "any": [
+            {
+              "in_party": "companion_kael"
+            },
+            {
+              "flag": "kael_left"
+            }
+          ]
         }
       ],
       "position": [
@@ -175,7 +182,7 @@
         0.0,
         -12.5
       ],
-      "model": "res://assets/characters/hero_fighter_female/model.glb",
+      "model": "res://assets/characters/hero_fighter_male/model.glb",
       "pose": "Idle",
       "facing": [
         1.0,
@@ -184,11 +191,18 @@
       ]
     },
     {
-      "id": "companion_b",
-      "dialogue": "companion_b",
+      "id": "companion_lyra",
+      "dialogue": "companion_lyra",
       "hide_if": [
         {
-          "in_party": "companion_b"
+          "any": [
+            {
+              "in_party": "companion_lyra"
+            },
+            {
+              "flag": "lyra_left"
+            }
+          ]
         }
       ],
       "position": [
@@ -196,7 +210,7 @@
         0.0,
         -21.0
       ],
-      "model": "res://assets/characters/hero_wizard_male_hood/model.glb",
+      "model": "res://assets/characters/hero_wizard_female_hood/model.glb",
       "pose": "Idle",
       "facing": [
         0.0,
@@ -205,11 +219,18 @@
       ]
     },
     {
-      "id": "companion_c",
-      "dialogue": "companion_c",
+      "id": "companion_seren",
+      "dialogue": "companion_seren",
       "hide_if": [
         {
-          "in_party": "companion_c"
+          "any": [
+            {
+              "in_party": "companion_seren"
+            },
+            {
+              "flag": "seren_left"
+            }
+          ]
         }
       ],
       "position": [
@@ -217,7 +238,7 @@
         0.0,
         -9.5
       ],
-      "model": "res://assets/characters/male_ranger/model.glb",
+      "model": "res://assets/characters/female_ranger/model.glb",
       "pose": "Idle",
       "facing": [
         1.0,

@@ -1,0 +1,87 @@
+{
+	"version": 1,
+	"id": "banter_kael_seren",
+	"speaker": "Companions",
+	"start": [
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"speaker": "kael",
+			"text": "[Placeholder: Kael respects Seren's skill, but wants fair fights, not knives in the dark]",
+			"effects": {
+				"flags": {
+					"banter_kael_seren": true
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: listen]",
+					"next": "answer"
+				}
+			]
+		},
+		"answer": {
+			"speaker": "seren",
+			"text": "[Placeholder: Seren: a fair fight is how idiots die; she kills the target, not the honour]",
+			"choices": [
+				{
+					"text": "[Placeholder: side with Kael: fight fair]",
+					"next": "end_a",
+					"effects": {
+						"flags": {
+							"banter_kael_seren": "kael"
+						},
+						"react": {
+							"kael": {
+								"text": "[Placeholder: kael is pleased]",
+								"loyalty": 1
+							},
+							"seren": {
+								"text": "[Placeholder: seren is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: side with Seren: whatever works]",
+					"next": "end_b",
+					"effects": {
+						"flags": {
+							"banter_kael_seren": "seren"
+						},
+						"react": {
+							"seren": {
+								"text": "[Placeholder: seren is pleased]",
+								"loyalty": 1
+							},
+							"kael": {
+								"text": "[Placeholder: kael is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: stay out of it]",
+					"next": "end_none"
+				}
+			]
+		},
+		"end_a": {
+			"speaker": "seren",
+			"text": "[Placeholder: seren has the last word]"
+		},
+		"end_b": {
+			"speaker": "kael",
+			"text": "[Placeholder: kael has the last word]"
+		},
+		"end_none": {
+			"speaker": "kael",
+			"text": "[Placeholder: the argument dies down]"
+		}
+	}
+}

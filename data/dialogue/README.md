@@ -64,6 +64,10 @@ Texts are the English source strings; a German translation can later key on them
   state and can be recruited again). Conditions `{"in_party": "companion_a"}` (add
   `"is": false` for "not in the party") and `{"party_room": true}` / `false`. Companion ids
   come from data/companions/companions.json.
+- **reactions**: effect `"react": {"kael": {"text": "...", "loyalty": -1}}` makes each
+  named companion who is in the party say their line and changes their loyalty
+  (`kael_loyalty`) once per node or answer. A node with `"speaker": "lyra"` is spoken by
+  that companion (banter, data/companions/banter.json).
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
 
 Design rules (owner, 14-10-2026, docs/STORY.md "How Rabenfels reacts"): one successful roll

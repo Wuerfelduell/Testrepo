@@ -703,3 +703,8 @@ PARTY_REASON_MEMBER,Already in the party.
 PARTY_REASON_FULL,The party is full (4 at most).
 PARTY_REASON_NO_HERO,Only a living hero can lead a party.
 PARTY_REASON_NOT_MEMBER,Not in the party.
+PARTY_LOG_LOYALTY_LEFT,%s has had enough and leaves the party
+PARTY_LOG_APPROVES,%s approves
+PARTY_LOG_DISAPPROVES,%s disapproves
+PARTY_APPROVES,approves
+PARTY_DISAPPROVES,disapproves

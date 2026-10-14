@@ -17,6 +17,8 @@ var text_label: Label
 ## What the last answer changed (copper, items, damage), shown next to the speaker.
 var notice_label: Label
 var _notice: String = ""
+## What party companions said about the last answer ("Kael: ..."), above the next line.
+var _reactions: String = ""
 var choice_buttons: Array[Button] = []
 var _choice_indices: Array[int] = []
 
@@ -44,9 +46,9 @@ func refresh() -> void:
 	var node_id: String = String(conversation["node"])
 	var node: Dictionary = data["nodes"][node_id]
 	_build()
-	speaker_label.text = tr(String(data["speaker"]))
+	speaker_label.text = tr(DialogueData.speaker_name(data, node_id))
 	notice_label.text = _notice
-	text_label.text = tr(String(node["text"]))
+	text_label.text = (_reactions + "\n\n" if not _reactions.is_empty() else "") + tr(String(node["text"]))
 	# Longer lines (the owner's scenes mix narration and speech) grow the panel upwards.
 	var top: float = 66.0 + maxf(100.0, _text_height(text_label.text, 22, 1040.0)) + 10.0
 	text_label.size.y = top - 76.0
@@ -116,6 +118,20 @@ static func notice_for(events: Array) -> String:
 					parts.append(TranslationServer.translate("DIALOGUE_DAMAGE") % int(event["amount"]))
 	return " · ".join(parts)
 
+## "Kael Dorn (approves): line" for each companion who reacted to the last answer.
+static func reactions_for(events: Array) -> String:
+	var lines: PackedStringArray = []
+	for event: Dictionary in events:
+		if String(event.get("type", "")) != "companion_reaction":
+			continue
+		var name: String = TranslationServer.translate(String(PartyRules.definition(String(event["actor_id"])).get("name", "")))
+		var change: int = int(event.get("loyalty", 0))
+		var mood: String = ""
+		if change != 0:
+			mood = " (" + TranslationServer.translate("PARTY_APPROVES" if change > 0 else "PARTY_DISAPPROVES") + ")"
+		lines.append("%s%s: %s" % [name, mood, TranslationServer.translate(String(event["text"]))])
+	return "\n".join(lines)
+
 func _pick(slot: int) -> void:
 	if _waiting():
 		return
@@ -138,6 +154,7 @@ func _process(_delta: float) -> void:
 func _on_command_applied(command: Command, result: Dictionary) -> void:
 	if command is DialogueStartCommand or command is DialogueChooseCommand or command is DialogueEndCommand:
 		_notice = notice_for(result.get("events", []))
+		_reactions = reactions_for(result.get("events", []))
 		refresh()
 
 func _close_view() -> void:

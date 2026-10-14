@@ -1,0 +1,821 @@
+{
+	"version": 1,
+	"id": "companion_seren",
+	"speaker": "Seren Nachtfall",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "seren_refuses"
+				}
+			],
+			"node": "refuses"
+		},
+		{
+			"if": [
+				{
+					"flag": "seren_recruited"
+				}
+			],
+			"node": "rejoin"
+		},
+		{
+			"if": [
+				{
+					"flag": "seren_met"
+				}
+			],
+			"node": "hub"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Seren sits on a low roof ledge, watching the crowd.\n\n\"You've been staring at me long enough.\"\n\nShe jumps down.\n\n\"So? Do you want something, or are you just stupid?\"",
+			"effects": {
+				"flags": {
+					"seren_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"hub": {
+			"text": "[Placeholder: Seren, arms crossed. \"What now?\"]",
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"can_fight": {
+			"text": "\"And you talk like someone who'll soon have a dagger in their gut.\"",
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"rude": {
+			"text": "\"Well spotted.\"",
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"dangerous": {
+			"text": "\"You're either dangerous or an unusually good actor.\"",
+			"effects": {
+				"flags": {
+					"seren_threatened": true,
+					"seren_thinks_dangerous": true
+				},
+				"add": {
+					"seren_respect": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"blade": {
+			"text": "You suddenly feel a cold blade at your throat.\n\n\"Want to try that again?\"",
+			"effects": {
+				"flags": {
+					"seren_threatened": true
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: back off]"
+				}
+			]
+		},
+		"purse": {
+			"text": "\"Common?\"\n\nShe smiles.\n\n\"Your purse is missing, by the way.\"",
+			"effects": {
+				"flags": {
+					"seren_stole": "taken"
+				},
+				"money": -10
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: chase her]",
+					"check": {
+						"skill": "athletics",
+						"dc": 14,
+						"success": "caught",
+						"failure": "gone"
+					}
+				},
+				{
+					"text": "[Placeholder: give that back]",
+					"next": "returned"
+				},
+				{
+					"text": "[Placeholder: let it go]",
+					"next": "hub"
+				}
+			]
+		},
+		"caught": {
+			"text": "[Placeholder: the hero catches Seren and gets the purse back.]",
+			"effects": {
+				"flags": {
+					"seren_stole": "returned"
+				},
+				"money": 10,
+				"add": {
+					"seren_respect": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"gone": {
+			"text": "[Placeholder: Seren is gone over the roofs; the purse with her.]",
+			"effects": {
+				"flags": {
+					"seren_stole": "kept"
+				}
+			}
+		},
+		"returned": {
+			"text": "[Placeholder: Seren tosses the purse back.]",
+			"effects": {
+				"flags": {
+					"seren_stole": "returned"
+				},
+				"money": 10
+			},
+			"choices": [
+				{
+					"text": "You move like someone who can fight.",
+					"next": "can_fight"
+				},
+				{
+					"text": "I'm looking for someone with your skills.",
+					"next": "hire"
+				},
+				{
+					"text": "You're rather rude.",
+					"next": "rude"
+				},
+				{
+					"text": "Watch how you talk to me.",
+					"if": [
+						{
+							"flag": "seren_threatened",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "dangerous",
+						"failure": "blade"
+					}
+				},
+				{
+					"text": "I bet you're just a common thief.",
+					"if": [
+						{
+							"flag": "seren_stole",
+							"is": false
+						}
+					],
+					"next": "purse"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"hire": {
+			"text": "\"Then you should learn to speak more quietly.\"\n\n\"I don't work for strangers.\"",
+			"choices": [
+				{
+					"text": "What do you need to trust me?",
+					"next": "trust"
+				},
+				{
+					"text": "I pay well.",
+					"next": "pay"
+				},
+				{
+					"text": "I need someone who opens doors and removes enemies silently.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "knows_me",
+						"failure": "lockpick"
+					}
+				},
+				{
+					"text": "I know someone is looking for you.",
+					"if": [
+						{
+							"flag": "seren_rumor_heard"
+						}
+					],
+					"next": "pursuer"
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"trust": {
+			"text": "\"Trust?\"\n\nShe laughs.\n\n\"You could start by not stabbing me in the back.\"",
+			"choices": [
+				{
+					"text": "Then let's start with a job together.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "trial"
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hire"
+				}
+			]
+		},
+		"pay": {
+			"text": "\"Gold is useful. But it doesn't protect you from a knife in your sleep.\"",
+			"choices": [
+				{
+					"text": "Forty silver. [Pay 40 silver]",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -400
+					}
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hire"
+				}
+			]
+		},
+		"knows_me": {
+			"text": "\"At least you know what I'm good for.\"",
+			"choices": [
+				{
+					"text": "Then let's start with a job together.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "trial"
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hire"
+				}
+			]
+		},
+		"lockpick": {
+			"text": "\"Then buy yourself a lockpick.\"",
+			"choices": [
+				{
+					"text": "What do you need to trust me?",
+					"next": "trust"
+				},
+				{
+					"text": "I pay well.",
+					"next": "pay"
+				},
+				{
+					"text": "I need someone who opens doors and removes enemies silently.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "knows_me",
+						"failure": "lockpick"
+					}
+				},
+				{
+					"text": "I know someone is looking for you.",
+					"if": [
+						{
+							"flag": "seren_rumor_heard"
+						}
+					],
+					"next": "pursuer"
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"pursuer": {
+			"text": "Seren slowly draws a dagger.\n\n\"Who told you that?\"",
+			"choices": [
+				{
+					"text": "I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "silver_mask",
+						"failure": "first_to_die"
+					}
+				},
+				{
+					"text": "I could also hand you over.",
+					"if": [
+						{
+							"flag": "seren_betrayal_threat",
+							"is": false
+						}
+					],
+					"next": "hand_over"
+				},
+				{
+					"text": "What did you do?",
+					"next": "what_done"
+				},
+				{
+					"text": "Help me, and I'll help you.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "deal"
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				}
+			]
+		},
+		"silver_mask": {
+			"text": "\"Maybe.\"\n\n\"Three men. Black coats. One wears a silver mask.\"",
+			"effects": {
+				"flags": {
+					"seren_personal_quest": "silver_mask"
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Help me, and I'll help you.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "deal"
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hire"
+				}
+			]
+		},
+		"first_to_die": {
+			"text": "\"You'd probably be the first to die.\"",
+			"choices": [
+				{
+					"text": "What do you need to trust me?",
+					"next": "trust"
+				},
+				{
+					"text": "I pay well.",
+					"next": "pay"
+				},
+				{
+					"text": "I need someone who opens doors and removes enemies silently.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "knows_me",
+						"failure": "lockpick"
+					}
+				},
+				{
+					"text": "I know someone is looking for you.",
+					"if": [
+						{
+							"flag": "seren_rumor_heard"
+						}
+					],
+					"next": "pursuer"
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"hand_over": {
+			"text": "\"Then you should kill me now.\"",
+			"effects": {
+				"flags": {
+					"seren_betrayal_threat": true
+				},
+				"add": {
+					"seren_loyalty": -3
+				},
+				"react": {
+					"kael": {
+						"text": "[Placeholder: Kael on selling out a fighter]"
+					},
+					"lyra": {
+						"text": "[Placeholder: Lyra finds the threat useful]"
+					}
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: forget I said that]",
+					"next": "hire"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"what_done": {
+			"text": "\"Killed someone who didn't deserve it.\"\n\nA short pause.\n\n\"Or maybe they did. Depends on who you ask.\"",
+			"choices": [
+				{
+					"text": "Help me, and I'll help you.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"next": "deal"
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hire"
+				}
+			]
+		},
+		"deal": {
+			"text": "\"A deal.\"",
+			"effects": {
+				"flags": {
+					"seren_recruited": true,
+					"seren_personal_quest": "silver_mask",
+					"seren_quest_required": true
+				},
+				"recruit": "companion_seren"
+			}
+		},
+		"trial": {
+			"text": "[Placeholder: Seren agrees to one job together, on trial.]",
+			"effects": {
+				"flags": {
+					"seren_recruited": true,
+					"seren_trial": true
+				},
+				"recruit": "companion_seren",
+				"react": {
+					"kael": {
+						"text": "[Placeholder: Kael doesn't trust an assassin at his back]"
+					},
+					"lyra": {
+						"text": "[Placeholder: Lyra on the dark elf]"
+					}
+				}
+			}
+		},
+		"joined": {
+			"text": "[Placeholder: Seren pockets the silver and joins the party.]",
+			"effects": {
+				"flags": {
+					"seren_recruited": true
+				},
+				"recruit": "companion_seren",
+				"react": {
+					"kael": {
+						"text": "[Placeholder: Kael doesn't trust an assassin at his back]"
+					},
+					"lyra": {
+						"text": "[Placeholder: Lyra on the dark elf]"
+					}
+				}
+			}
+		},
+		"rejoin": {
+			"text": "[Placeholder: Seren, when the hero asks her back into the party.]",
+			"choices": [
+				{
+					"text": "[Placeholder: come back]",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"effects": {
+						"recruit": "companion_seren"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"refuses": {
+			"text": "[Placeholder: Seren is gone.]"
+		}
+	}
+}

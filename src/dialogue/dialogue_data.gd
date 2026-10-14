@@ -9,7 +9,7 @@ extends RefCounted
 const DIRECTORY: String = "res://data/dialogue/"
 const CONDITION_KEYS: Array[String] = ["flag", "is", "min", "max", "class", "proficient", "in_party", "party_room",
 	"money", "item", "any"]
-const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight"]
+const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight", "react"]
 
 static var _cache: Dictionary = {}
 
@@ -63,6 +63,8 @@ static func problems(data: Dictionary) -> PackedStringArray:
 			found.append(where + ": text is required")
 			continue
 		found.append_array(_effect_problems(node.get("effects", {}), where))
+		if node.has("speaker") and PartyRules.id_for(String(node["speaker"])).is_empty():
+			found.append(where + ": speaker must be a companion short name")
 		var choices: Variant = node.get("choices", [])
 		if not choices is Array:
 			found.append(where + ": choices must be a list")
@@ -152,6 +154,17 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 		if not damage is Dictionary or Dice.parse(String(damage.get("dice", ""))).has("error") or \
 				not StringName(String(damage.get("type", ""))) in DamageRules.TYPES:
 			found.append(where + ": damage needs dice and a damage type")
+	if effects.has("react"):
+		if not effects["react"] is Dictionary or (effects["react"] as Dictionary).is_empty():
+			found.append(where + ": react must map companion short names to reactions")
+		else:
+			for short: Variant in effects["react"]:
+				var reaction: Variant = effects["react"][short]
+				if PartyRules.id_for(String(short)).is_empty():
+					found.append(where + ": react names an unknown companion " + String(short))
+				elif not reaction is Dictionary or not reaction.get("text") is String or \
+						(reaction.has("loyalty") and not _is_number(reaction["loyalty"])):
+					found.append(where + ": a reaction needs text and an optional loyalty number")
 	if effects.has("fight"):
 		var fight: Variant = effects["fight"]
 		if not fight is Dictionary or not fight.get("encounter") is String or String(fight["encounter"]).is_empty():
@@ -273,3 +286,10 @@ static func affordable(effects: Dictionary, state: GameState) -> bool:
 		if int(effects["item"][item_id]) < 0 and EquipmentRules.count(hero, String(item_id)) < -int(effects["item"][item_id]):
 			return false
 	return true
+
+## Who says a node's line: the node's companion ("speaker": "kael") or the tree's speaker.
+static func speaker_name(data: Dictionary, node_id: String) -> String:
+	var short: String = String(data.get("nodes", {}).get(node_id, {}).get("speaker", ""))
+	var id: String = PartyRules.id_for(short) if not short.is_empty() else ""
+	return String(PartyRules.definition(id).get("name", data.get("speaker", ""))) if not id.is_empty() else String(data.get("speaker", ""))
+

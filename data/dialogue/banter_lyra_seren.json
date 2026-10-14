@@ -1,0 +1,87 @@
+{
+	"version": 1,
+	"id": "banter_lyra_seren",
+	"speaker": "Companions",
+	"start": [
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"speaker": "lyra",
+			"text": "[Placeholder: Lyra notes how well she and Seren worked together, and asks what Seren is hiding]",
+			"effects": {
+				"flags": {
+					"banter_lyra_seren": true
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: listen]",
+					"next": "answer"
+				}
+			]
+		},
+		"answer": {
+			"speaker": "seren",
+			"text": "[Placeholder: Seren: working together is not trusting each other]",
+			"choices": [
+				{
+					"text": "[Placeholder: side with Lyra]",
+					"next": "end_a",
+					"effects": {
+						"flags": {
+							"banter_lyra_seren": "lyra"
+						},
+						"react": {
+							"lyra": {
+								"text": "[Placeholder: lyra is pleased]",
+								"loyalty": 1
+							},
+							"seren": {
+								"text": "[Placeholder: seren is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: side with Seren]",
+					"next": "end_b",
+					"effects": {
+						"flags": {
+							"banter_lyra_seren": "seren"
+						},
+						"react": {
+							"seren": {
+								"text": "[Placeholder: seren is pleased]",
+								"loyalty": 1
+							},
+							"lyra": {
+								"text": "[Placeholder: lyra is annoyed]",
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "[Placeholder: stay out of it]",
+					"next": "end_none"
+				}
+			]
+		},
+		"end_a": {
+			"speaker": "seren",
+			"text": "[Placeholder: seren has the last word]"
+		},
+		"end_b": {
+			"speaker": "lyra",
+			"text": "[Placeholder: lyra has the last word]"
+		},
+		"end_none": {
+			"speaker": "lyra",
+			"text": "[Placeholder: the argument dies down]"
+		}
+	}
+}

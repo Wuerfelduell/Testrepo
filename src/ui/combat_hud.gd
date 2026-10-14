@@ -327,7 +327,13 @@ func consume_events(events: Array[Dictionary]) -> void:
 				var joined: Dictionary = PartyRules.definition(String(event.get("actor_id", "")))
 				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))
 			"party_left":
-				_append_log(tr("PARTY_LOG_LEFT") % _actor_name(actor))
+				var left_name: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
+				_append_log(tr("PARTY_LOG_LOYALTY_LEFT" if String(event.get("reason", "")) == "loyalty" else "PARTY_LOG_LEFT") % left_name)
+			"companion_reaction":
+				var change: int = int(event.get("loyalty", 0))
+				if change != 0:
+					var reacting: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
+					_append_log(tr("PARTY_LOG_APPROVES" if change > 0 else "PARTY_LOG_DISAPPROVES") % reacting)
 			"party_refused":
 				_append_log(tr(String(event.get("reason_key", "PARTY_REASON_UNKNOWN"))))
 			"start_attack":

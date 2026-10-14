@@ -1,0 +1,1411 @@
+{
+	"version": 1,
+	"id": "companion_kael",
+	"speaker": "Kael Dorn",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "kael_refuses"
+				}
+			],
+			"node": "refuses"
+		},
+		{
+			"if": [
+				{
+					"flag": "kael_recruited"
+				}
+			],
+			"node": "rejoin"
+		},
+		{
+			"if": [
+				{
+					"flag": "kael_met"
+				}
+			],
+			"node": "hub"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Kael sits on a crate, cleaning his greatsword.\n\n\"If you're looking for a fight, come back tomorrow.\"\n\nHe looks you over.\n\n\"If you have work, talk. If you want to beg, piss off.\"",
+			"effects": {
+				"flags": {
+					"kael_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"hub": {
+			"text": "[Placeholder: Kael looks up from his greatsword. \"Well?\"]",
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"deserter": {
+			"text": "\"And you look like someone who badly needs a lesson.\"",
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"killed": {
+			"text": "\"Enough to stop counting.\"\n\n\"And enough to know that most of them die for a few coins.\"",
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"crate": {
+			"text": "\"Then come here and try to knock me off.\"",
+			"choices": [
+				{
+					"text": "Gladly.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "Another time.",
+					"next": "hub"
+				}
+			]
+		},
+		"hire": {
+			"text": "\"Then you're in luck.\"\n\n\"The only question is whether you can pay me. Fifty silver up front. After that, ten silver for every finished job.\"",
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"deal_30": {
+			"text": "\"You're either brave or stupid.\"\n\n\"Thirty. But half of the first loot is mine.\"",
+			"effects": {
+				"flags": {
+					"kael_price": 300,
+					"kael_loot_share": "half_first"
+				}
+			},
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"price_60": {
+			"text": "\"Fifty. Now sixty, because you bore me.\"",
+			"effects": {
+				"flags": {
+					"kael_price": 600
+				}
+			},
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"trial": {
+			"text": "\"You've got guts.\"\n\nHe steps closer.\n\n\"But watch who you give orders to.\"",
+			"effects": {
+				"flags": {
+					"kael_recruited": true,
+					"kael_trial": true
+				},
+				"add": {
+					"kael_loyalty": -2
+				},
+				"recruit": "companion_kael",
+				"react": {
+					"lyra": {
+						"text": "[Placeholder: Lyra on threatening a mercenary into service]"
+					},
+					"seren": {
+						"text": "[Placeholder: Seren notes that the hero bullies people]"
+					}
+				}
+			}
+		},
+		"draw": {
+			"text": "\"Draw your weapon.\"",
+			"effects": {
+				"flags": {
+					"kael_challenged": true
+				}
+			},
+			"choices": [
+				{
+					"text": "Agreed.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "athletics",
+						"dc": 14,
+						"success": "duel_won",
+						"failure": "duel_lost"
+					}
+				},
+				{
+					"text": "[Placeholder: back down]",
+					"next": "no_fun"
+				}
+			]
+		},
+		"no_fun": {
+			"text": "\"Then shut up and pay me.\"",
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"duel": {
+			"text": "\"First blood. No healing potions. No mercy for idiots.\"",
+			"effects": {
+				"react": {
+					"lyra": {
+						"text": "[Placeholder: Lyra mocks two brutes hitting each other]"
+					},
+					"seren": {
+						"text": "[Placeholder: Seren likes a fair fight to first blood]"
+					}
+				}
+			},
+			"choices": [
+				{
+					"text": "Agreed.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "athletics",
+						"dc": 14,
+						"success": "duel_won",
+						"failure": "duel_lost"
+					}
+				},
+				{
+					"text": "I don't fight for fun.",
+					"next": "no_fun"
+				},
+				{
+					"text": "I'll humiliate you in front of everyone.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "athletics",
+						"dc": 14,
+						"success": "duel_won_public",
+						"failure": "duel_lost_public"
+					}
+				}
+			]
+		},
+		"duel_won": {
+			"text": "[Placeholder: the duel, until the real non-lethal fight is in.]\n\n\"Not bad. Maybe you won't die right away.\"",
+			"effects": {
+				"flags": {
+					"kael_duel_fought": true,
+					"kael_duel_won": true,
+					"kael_price": 200
+				},
+				"add": {
+					"kael_respect": 2
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"duel_lost": {
+			"text": "[Placeholder: the duel, until the real non-lethal fight is in.]\n\n\"You fight like a drunk farmer.\"",
+			"effects": {
+				"flags": {
+					"kael_duel_fought": true
+				}
+			},
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"duel_won_public": {
+			"text": "[Placeholder: Kael after losing the duel in front of the whole square.]",
+			"effects": {
+				"flags": {
+					"kael_duel_fought": true,
+					"kael_duel_won": true,
+					"kael_price": 200
+				},
+				"add": {
+					"kael_respect": 1,
+					"kael_loyalty": -1
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Deal. [Pay 50 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -500
+					}
+				},
+				{
+					"text": "Deal. [Pay 60 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 600
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -600
+					}
+				},
+				{
+					"text": "Deal. [Pay 30 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 300
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -300
+					}
+				},
+				{
+					"text": "Deal. [Pay 20 silver]",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": 200
+						}
+					],
+					"next": "joined",
+					"effects": {
+						"money": -200
+					}
+				},
+				{
+					"text": "Thirty silver. You're not worth more.",
+					"if": [
+						{
+							"party_room": true
+						},
+						{
+							"flag": "kael_price",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "deal_30",
+						"failure": "price_60"
+					}
+				},
+				{
+					"text": "Prove first that you can fight.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "You'll fight for me whether you want to or not.",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "trial",
+						"failure": "draw"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "Let me think about it.",
+					"next": "hub"
+				}
+			]
+		},
+		"duel_lost_public": {
+			"text": "[Placeholder: Kael wins the public duel and wants nothing more to do with the hero for now.]",
+			"effects": {
+				"flags": {
+					"kael_duel_fought": true,
+					"kael_refuses": true
+				}
+			}
+		},
+		"past": {
+			"text": "Kael stands up.\n\n\"Say that again.\"\n\n\"My men are dead. I'm not. There's nothing more to tell.\"",
+			"choices": [
+				{
+					"text": "You couldn't save them?",
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "mines",
+						"failure": "drop_it"
+					}
+				},
+				{
+					"text": "You sacrificed them to save yourself.",
+					"next": "warning"
+				},
+				{
+					"text": "Whatever happened, you owe me no explanation.",
+					"if": [
+						{
+							"flag": "kael_past_respected",
+							"is": false
+						}
+					],
+					"next": "respected"
+				},
+				{
+					"text": "Let's talk about something else.",
+					"next": "hub"
+				}
+			]
+		},
+		"mines": {
+			"text": "\"We had a job in the old mines.\"\n\n\"Something was waiting for us down there.\"",
+			"effects": {
+				"flags": {
+					"kael_personal_quest": "last_mercenaries"
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"drop_it": {
+			"text": "\"Drop it.\"",
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"warning": {
+			"text": "\"I'm warning you.\"",
+			"choices": [
+				{
+					"text": "You heard me. You let them die.",
+					"if": [
+						{
+							"flag": "kael_duel_fought",
+							"is": false
+						}
+					],
+					"next": "duel"
+				},
+				{
+					"text": "[Placeholder: let it go]",
+					"next": "hub"
+				}
+			]
+		},
+		"respected": {
+			"text": "\"Good.\"",
+			"effects": {
+				"flags": {
+					"kael_past_respected": true
+				},
+				"add": {
+					"kael_loyalty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "I'm looking for a capable fighter.",
+					"next": "hire"
+				},
+				{
+					"text": "You look like a deserter.",
+					"next": "deserter"
+				},
+				{
+					"text": "I heard you left your men to die.",
+					"if": [
+						{
+							"flag": "kael_rumor_heard"
+						}
+					],
+					"next": "past"
+				},
+				{
+					"text": "You talk big for someone sitting on a crate.",
+					"next": "crate"
+				},
+				{
+					"text": "How many people have you killed?",
+					"next": "killed"
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"joined": {
+			"text": "[Placeholder: Kael takes the money, shoulders his greatsword and joins the party.]",
+			"effects": {
+				"flags": {
+					"kael_recruited": true
+				},
+				"recruit": "companion_kael",
+				"react": {
+					"lyra": {
+						"text": "[Placeholder: Lyra on paying a sellsword]"
+					},
+					"seren": {
+						"text": "[Placeholder: Seren sizes Kael up]"
+					}
+				}
+			}
+		},
+		"rejoin": {
+			"text": "[Placeholder: Kael, when the hero asks him back into the party.]",
+			"choices": [
+				{
+					"text": "[Placeholder: come back]",
+					"if": [
+						{
+							"party_room": true
+						}
+					],
+					"effects": {
+						"recruit": "companion_kael"
+					}
+				},
+				{
+					"text": "My party is full. Another time.",
+					"if": [
+						{
+							"party_room": false
+						}
+					]
+				},
+				{
+					"text": "I'll be going."
+				}
+			]
+		},
+		"refuses": {
+			"text": "[Placeholder: Kael turns away; he won't work for the hero for now.]"
+		}
+	}
+}
