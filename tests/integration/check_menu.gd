@@ -47,10 +47,15 @@ func _run() -> void:
 	var disabled: int = 0
 	for id: String in creation.class_buttons:
 		disabled += 1 if creation.class_buttons[id].disabled else 0
-	check(creation.class_buttons.size() == 12 and disabled == 10, "Twelve classes, ten greyed out for later")
+	var playable: Array[String] = HeroFactory.playable()
+	check(creation.class_buttons.size() == 12 and disabled == 12 - playable.size(),
+		"Twelve classes, the ones without rules greyed out for later")
 	check(creation.begin_button.disabled, "Begin needs a name")
-	creation.select_class("rogue")
-	check(creation.class_id == "fighter", "A greyed-out class cannot be chosen")
+	for id: String in creation.class_buttons:
+		if not id in playable:
+			creation.select_class(id)
+			check(creation.class_id == "fighter", "A greyed-out class cannot be chosen")
+			break
 	creation.select_class("wizard")
 	creation.select_body("female")
 	creation.cycle_look(1)

@@ -1,0 +1,7 @@
+{
+	"_comment": "Monk starting kit (SRD 5.2 p. 49: Spear, 5 Daggers, a tool or instrument, Explorer's Pack, 11 GP; tool and pack are not modelled). Merged into the catalog by ItemCatalog.",
+	"items": {},
+	"starting_kits": {
+		"monk": {"equipped": {"main_hand": "spear"}, "bag": {"dagger": 5, "potion_of_healing": 1}, "gold": 11}
+	}
+}

@@ -12,12 +12,15 @@ const SHIELD: Color = Color(0.45, 0.75, 1.0)
 const RADIANT: Color = Color(1.0, 0.86, 0.45)
 const HEAL: Color = Color(0.6, 1.0, 0.62)
 const POISON: Color = Color(0.55, 0.95, 0.25)
+const HUNT: Color = Color(0.95, 0.35, 0.3)
 const FADE: float = 0.5
 
 var actors: Dictionary = {}
 var _active: Array[Dictionary] = []
 var _bubbles: Dictionary = {}
 var _sleep_marks: Dictionary = {}
+## Hunter's Mark: a red label over each marked creature.
+var _hunt_marks: Dictionary = {}
 var _auras: Dictionary = {}
 
 ## The caster plays the cast clip, released at release_time (CombatActor treats it
@@ -75,6 +78,8 @@ func _start(event: Dictionary) -> void:
 			effect["nodes"] = [_bolt(HEAL, 0.1, true)]
 		"poison_spray":
 			effect["nodes"] = [_bolt(POISON, 0.14, true)]
+		"hunters_mark":
+			effect["nodes"] = [_bolt(HUNT, 0.09, true)]
 	for node: Node3D in effect["nodes"]:
 		node.visible = false
 	_active.append(effect)
@@ -111,7 +116,7 @@ func _update(effect: Dictionary, state: GameState) -> void:
 	var hand: Vector3 = caster.global_position + Vector3.UP * 1.35 + caster.global_transform.basis.z.normalized() * 0.35
 	var flying: bool = time >= release and time < impact
 	match effect["spell_id"]:
-		"fire_bolt", "sleep", "radiant_flame", "healing_word", "poison_spray":
+		"fire_bolt", "sleep", "radiant_flame", "healing_word", "poison_spray", "hunters_mark":
 			var node: Node3D = effect["nodes"][0]
 			var destination: Vector3 = _target_point(effect, state, 0)
 			node.visible = flying
@@ -157,6 +162,8 @@ func _impact(effect: Dictionary, state: GameState) -> void:
 			_burst(_target_point(effect, state, 0), HEAL, 45, 0.7, 1.8)
 		"poison_spray":
 			_burst(_target_point(effect, state, 0), POISON, 65, 0.7, 2.2)
+		"hunters_mark":
+			_burst(_target_point(effect, state, 0), HUNT, 35, 0.5, 1.6)
 		"spirit_guardians":
 			var caster: Node3D = actors.get(effect["actor_id"]) as Node3D
 			if caster != null:
@@ -198,6 +205,18 @@ func _update_markers(state: GameState, delta: float) -> void:
 				var deep: bool = "unconscious" in record.get("conditions", [])
 				mark.text = "Z z z" if deep else "z z"
 				mark.global_position = node.global_position + Vector3.UP * (2.3 + 0.08 * sin(Time.get_ticks_msec() / 400.0))
+		var hunted: bool = CombatRules.alive(record) and ActiveEffects.has_kind(record, "hunters_mark")
+		if hunted and not _hunt_marks.has(id):
+			_hunt_marks[id] = _sleep_label()
+			(_hunt_marks[id] as Label3D).modulate = HUNT
+			(_hunt_marks[id] as Label3D).text = "( + )"
+		if _hunt_marks.has(id):
+			var hunt: Label3D = _hunt_marks[id]
+			if not hunted:
+				hunt.queue_free()
+				_hunt_marks.erase(id)
+			else:
+				hunt.global_position = node.global_position + Vector3.UP * 2.15
 		var aura: SpellDefinition = ActiveEffects.aura_spell(record) if not record.is_empty() else null
 		if aura != null and not _auras.has(id):
 			_auras[id] = _guardian_ring(aura.area_size_m)

@@ -57,6 +57,18 @@ const CASTERS: Dictionary = {
 			"hold_person", "blight", "hold_monster"],
 		"start": ["eldritch_blast", "chill_touch", "hex", "arms_of_hadar"],
 	},
+	# Ranger (thread "Barbar, Mönch, Waldläufer"); features in src/rules/classes/ranger_kit.gd.
+	# Favored Enemy: Hunter's Mark always prepared, free casts in the kit. Other list ids
+	# appear as soon as another class thread adds them to data/spells/.
+	"ranger": {
+		"ability": "wis", "progression": "half",
+		"cantrips": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		"prepared": [2, 3, 4, 4, 6, 6, 7, 7, 9, 9],
+		"list": ["hunters_mark", "cure_wounds", "entangle", "ensnaring_strike", "goodberry", "fog_cloud",
+			"longstrider", "jump", "aid", "barkskin", "lesser_restoration", "spike_growth", "pass_without_trace"],
+		"start": ["cure_wounds", "entangle"],
+		"always": {"hunters_mark": 1},
+	},
 }
 
 static func is_caster(class_id: String) -> bool:
