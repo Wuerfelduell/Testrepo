@@ -39,6 +39,10 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 				if not _valid_heal_target(state, caster_id, String(target_ids[0]), reach_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
+				if spell.effect == &"bardic_inspiration" and String(target_ids[0]) == caster_id:
+					# As in BG3: Bardic Inspiration goes to another creature, never the bard.
+					result["reason_key"] = "SPELL_REASON_TARGET"
+					return result
 				var patient: Dictionary = state.actors[String(target_ids[0])]
 				var expected: float = expected_heal(caster, spell, int(result["slot_level"]))
 				result["targets"] = [{"id": String(target_ids[0]), "ally": true, "chance": 1.0, "expected_damage": 0.0,

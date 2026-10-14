@@ -2,16 +2,16 @@ extends RefCounted
 ## SRD 5.2 Warlock, levels 1-10, no subclass (ClassKits interface, see README.md).
 ## Pact Magic is the "warlock" entry of ClassSpellcasting ("pact" slots: all of one level);
 ## every pact slot comes back on a Short Rest. Eldritch Invocations are picked at
-## level-up; the ones with rules behind them work through the kit hooks below, the
-## others are listed with "(no effect in play yet)" in their hint.
+## level-up from level 2 (as in BG3: none at level 1, owner 14-10-2026); the ones with rules
+## behind them work through the kit hooks below, the others say "(no effect in play yet)".
 
 const PRIORITY: Array[StringName] = [&"cha", &"con", &"dex", &"wis", &"int", &"str"]
 const SKILLS: Dictionary = {"class": [&"arcana", &"intimidation"], "human": &"perception"}
 const DATA_ONLY: Dictionary = {
 	"contact_patron": "no patrons to contact yet",
 }
-## Invocations known per warlock level (SRD 5.2 table, index 0 = level 1).
-const INVOCATIONS_KNOWN: Array[int] = [1, 3, 3, 3, 5, 5, 6, 6, 7, 7]
+## Invocations known per warlock level, as in BG3 (index 0 = level 1).
+const INVOCATIONS_KNOWN: Array[int] = [0, 2, 2, 2, 3, 3, 4, 4, 5, 5]
 ## Invocation -> lowest warlock level, and the invocation it needs first.
 const INVOCATIONS: Dictionary = {
 	"armor_of_shadows": {"level": 1},
@@ -32,8 +32,6 @@ const INVOCATIONS: Dictionary = {
 ## Invocations without rules in play yet (darkness, disguises, climbing, water ...).
 const INVOCATIONS_DATA_ONLY: Array[String] = ["devils_sight", "mask_of_many_faces", "misty_visions",
 	"otherworldly_leap", "eyes_of_the_rune_keeper", "one_with_shadows", "ascendant_step", "gift_of_the_depths"]
-## A level-1 warlock from character creation starts with this one (no pick screen there).
-const DEFAULT_INVOCATION: String = "eldritch_mind"
 const FEATURES: Array[String] = ["magical_cunning"]
 
 static func invocations(actor: Dictionary) -> Array:
@@ -43,7 +41,7 @@ static func has_invocation(actor: Dictionary, invocation: String) -> bool:
 	return invocation in invocations(actor)
 
 static func activate(record: Dictionary) -> void:
-	record["features"]["eldritch_invocations"] = {"known": [DEFAULT_INVOCATION]}
+	record["features"]["eldritch_invocations"] = {"known": []}
 
 static func upgrade(_record: Dictionary) -> void:
 	pass
@@ -51,7 +49,7 @@ static func upgrade(_record: Dictionary) -> void:
 static func advance(actor: Dictionary, level: int) -> void:
 	var features: Dictionary = actor["features"]
 	if not features.has("eldritch_invocations"):
-		features["eldritch_invocations"] = {"known": [DEFAULT_INVOCATION]}
+		features["eldritch_invocations"] = {"known": []}
 	if level >= 2:
 		ClassKits.set_uses(features, "magical_cunning", 1, "long")
 	_apply_invocations(actor)
@@ -170,13 +168,13 @@ static func cunning_slots(actor: Dictionary) -> int:
 	var pact: int = maximum.size() - 1
 	return mini(ceili(int(maximum[pact]) / 2.0), int(maximum[pact]) - int(slots[pact]))
 
-## Magical Cunning (level 2): the 1-minute rite is an action here, so it also works in combat.
+## Magical Cunning (level 2): a 1-minute rite, so only outside combat.
 static func feature_reason(state: GameState, actor_id: String, _feature_id: String) -> String:
 	var actor: Dictionary = state.actors[actor_id]
-	if CombatRules.valid_actor_turn(state, actor_id) != OK:
-		return "COMBAT_WAIT_TURN"
-	if not bool(actor.get("action_available", false)) or not CombatRules.conditions_for(actor).can_act():
-		return "COMBAT_NO_ACTION"
+	if state.mode == &"combat":
+		return "FEATURE_NOT_IN_COMBAT"
+	if not CombatRules.conditions_for(actor).can_act():
+		return "SPELL_REASON_INCAPACITATED"
 	if int(actor["features"]["magical_cunning"].get("uses", 0)) <= 0:
 		return "FEATURE_NO_USES"
 	if cunning_slots(actor) <= 0:
@@ -188,7 +186,6 @@ static func use_feature(state: GameState, actor_id: String, feature_id: String, 
 	var regained: int = cunning_slots(actor)
 	var pact: int = actor["spell_slots_max"].size() - 1
 	actor["spell_slots"][pact] = int(actor["spell_slots"][pact]) + regained
-	actor["action_available"] = false
 	actor["features"]["magical_cunning"]["uses"] = int(actor["features"]["magical_cunning"]["uses"]) - 1
 	return [{"type": "feature", "actor_id": actor_id, "feature_id": feature_id, "slots": regained}]
 

@@ -118,6 +118,7 @@ func test_every_new_class_is_playable_with_its_starting_spells() -> void:
 	assert_eq(HeroKit.create(&"sorcerer")["spell_slots"], [2])
 	assert_eq(HeroKit.create(&"warlock")["spell_slots"], [1])
 	assert_true("eldritch_blast" in HeroKit.create(&"warlock")["spells"])
+	assert_eq(WARLOCK_KIT.invocations(HeroKit.create(&"warlock")), [], "BG3: no invocation at level 1")
 
 func test_pact_slots_are_all_of_one_level() -> void:
 	assert_eq(SpellRules.pact_slots(1), [1])
@@ -147,7 +148,7 @@ func test_warlock_levels_to_ten() -> void:
 	level_to_ten(&"warlock")
 	var warlock: Dictionary = current()
 	assert_eq(warlock["spell_slots_max"], [0, 0, 0, 0, 2])
-	assert_eq(WARLOCK_KIT.invocations(warlock).size(), 7)
+	assert_eq(WARLOCK_KIT.invocations(warlock).size(), 5, "BG3: 2 at level 2 up to 5 at level 9")
 	assert_true(warlock["features"].has("magical_cunning"))
 
 func test_warlock_pact_slots_come_back_on_a_short_rest() -> void:
@@ -163,6 +164,8 @@ func test_bardic_inspiration_is_a_bonus_action_on_an_ally_and_spends_a_use() -> 
 	start({"hero": hero(&"bard"), "ally": ally, "a": enemy(Vector3(0, 0, -20))})
 	assert_eq(CommandBus.submit(CastSpellCommand.new("hero", "bardic_inspiration", ["a"])), ERR_INVALID_PARAMETER,
 		"never on an enemy")
+	assert_eq(CommandBus.submit(CastSpellCommand.new("hero", "bardic_inspiration", ["hero"])), ERR_INVALID_PARAMETER,
+		"never on the bard itself (BG3)")
 	assert_eq(CommandBus.submit(CastSpellCommand.new("hero", "bardic_inspiration", ["ally"])), OK)
 	finish()
 	assert_false(bool(current()["bonus_available"]))
@@ -233,3 +236,15 @@ func test_quickened_spell_makes_an_action_spell_a_bonus_action() -> void:
 	assert_false(bool(current()["bonus_available"]))
 	assert_true(bool(current()["action_available"]), "the action is still free")
 	assert_false(current().has("metamagic"), "used up")
+
+func test_magical_cunning_only_outside_combat() -> void:
+	var warlock: Dictionary = hero(&"warlock")
+	warlock["level"] = 5
+	warlock["spell_slots"] = [0, 0, 0]
+	warlock["spell_slots_max"] = [0, 0, 2]
+	warlock["features"]["magical_cunning"] = {"uses": 1, "max": 1, "recharge": "long"}
+	start({"hero": warlock, "a": enemy(Vector3(0, 0, -10))})
+	assert_eq(ClassKits.feature_reason(Game.state, "hero", "magical_cunning"), "FEATURE_NOT_IN_COMBAT")
+	start({"hero": warlock}, &"exploration")
+	assert_eq(CommandBus.submit(UseFeatureCommand.new("hero", "magical_cunning")), OK)
+	assert_eq(current()["spell_slots"], [0, 0, 1], "half of two, rounded up")
