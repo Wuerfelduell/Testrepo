@@ -10,5 +10,11 @@
 	"res://assets/characters/hero_wizard_female_hood/model.glb": {"main_hand": "staff"},
 	"res://assets/characters/hero_wizard_male_hat/model.glb": {"main_hand": "staff"},
 	"res://assets/characters/hero_wizard_female_hat/model.glb": {"main_hand": "staff"},
+	"res://assets/characters/hero_barbarian_male/model.glb": {"main_hand": "greataxe"},
+	"res://assets/characters/hero_barbarian_female/model.glb": {"main_hand": "greataxe"},
+	"res://assets/characters/hero_monk_male/model.glb": {"main_hand": "spear"},
+	"res://assets/characters/hero_monk_female/model.glb": {"main_hand": "spear"},
+	"res://assets/characters/hero_ranger_male/model.glb": {"main_hand": "longbow"},
+	"res://assets/characters/hero_ranger_female/model.glb": {"main_hand": "longbow"},
 	"res://assets/characters/undead_cultist/model.glb": {"main_hand": "axe"}
 }

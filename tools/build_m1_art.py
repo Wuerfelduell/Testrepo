@@ -814,6 +814,105 @@ def wizard(gender, headwear):
     }
     return fig.export("hero_wizard_%s_%s" % (gender, headwear), maps)
 
+def brows(gender):
+    return {"albedo": "../textures/T_Hair_%d_BaseColor.png" % (1 if gender == "male" else 2), "rough": .8}
+
+
+def barbarian(gender):
+    """Earth-brown jerkin, bare head, a fur mantle over both shoulders and a bone necklace."""
+    pauldron = "Acc_Pauldron" if gender == "male" else "Acc_Pauldrons"
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Legs", pauldron}, gender)
+    cloth_m, hands, skin, eyes, fur, bone = (material(n) for n in ("BarbCloth", "BarbHands", "BarbSkin", "BarbEyes", "BarbFur", "BarbBone"))
+    fig.dress(cloth_m, hands)
+    mirror_part(fig, pauldron, "Barbarian_Pauldron_R", cloth_m)
+    fig.add_head(skin, eyes, material("BarbBrows"))
+    neck = fig.bone_head("neck_01")
+    # Fur mantle: a thick, drooping collar ring with ragged tufts along its edge.
+    mantle = [ring("Fur_Mantle", (0, neck.y + .01, neck.z - .02), .085, .25, .09, fur, sides=20, sy=1.12, thickness=.045)]
+    for i in range(14):
+        a = 2 * math.pi * i / 14
+        edge = Vector((math.cos(a) * .25, neck.y + .01 + math.sin(a) * .25 * 1.12, neck.z - .115))
+        mantle.append(tube("Tuft", [edge, edge + Vector((math.cos(a) * .02, math.sin(a) * .02, -.06 - .02 * (i % 3)))], [.03, .004], fur, sides=4))
+    box_uv(mantle[0], 3)
+    fig.add(merge("Fur_Mantle", mantle), cloak_weights(fig))
+    # Bone-tooth necklace on the chest.
+    teeth = []
+    for i in range(7):
+        x = (i - 3) * .028
+        z = neck.z - .11 - .025 * (1 - abs(i - 3) / 3)
+        y = (surface_y(fig, x, z) or -.12) - .025
+        teeth.append(tube("Tooth", [(x, y, z), (x * 1.05, y - .004, z - .035)], [.008, .001], bone, sides=4))
+    fig.add(merge("Tooth_Necklace", teeth), rigid("spine_03"))
+    maps = {
+        "BarbCloth": outfit("barbarian_albedo.png"), "BarbHands": HANDS[gender], "BarbSkin": SKIN[gender], "BarbEyes": EYES,
+        "BarbBrows": brows(gender),
+        "BarbFur": tinted(WOOD_C, [.34, .27, .21, 1], rough=1, normal_scale=1.6),
+        "BarbBone": {"albedo": "../m1_textures/bone_albedo.png", "normal": "../../weapons/textures/surface_normal.png", "rough": .7},
+    }
+    return fig.export("hero_barbarian_" + gender, maps)
+
+
+def monk(gender):
+    """Knee-length ochre robe, a red sash with hanging ends and a wooden prayer-bead string."""
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Body", feet, "Legs"}, gender)
+    robe, hands, skin, eyes, sash, beads = (material(n) for n in ("MonkRobe", "MonkHands", "MonkSkin", "MonkEyes", "MonkSash", "MonkBeads"))
+    fig.dress(robe, hands)
+    waist = 1.10 if gender == "male" else 1.08
+    lengthen_tunic(fig, waist, .52, flare=.45, wave=.02, depth=.25)
+    skirt_material(fig, waist, material("MonkSkirt"))
+    fig.add_head(skin, eyes, material("MonkBrows"))
+    # Sash: a wide band at the waist, knotted on the left hip with two tails.
+    pieces = [cylinder("Sash", .175 if gender == "male" else .165, .07, (0, .02, waist - .01), sash, sides=16)]
+    knot = Vector((.12, -.1, waist - .02))
+    for i, drop in enumerate((.30, .24)):
+        pieces.append(tube("Sash_Tail", [knot, knot + Vector((.01 + .015 * i, -.01, -drop * .5)), knot + Vector((.02 + .02 * i, -.005, -drop))],
+                           [.03, .028, .024], sash, sides=4, squash=.25))
+    fig.add(merge("Monk_Sash", pieces), lambda co: {"pelvis": 1})
+    # Prayer beads around the neck.
+    neck = fig.bone_head("neck_01")
+    string = []
+    for i in range(16):
+        a = 2 * math.pi * i / 16
+        drop = .06 * max(0, -math.sin(a)) ** 2
+        string.append(sphere("Bead", .012, (math.cos(a) * .1, neck.y + .01 + math.sin(a) * .11, neck.z - .045 - drop), beads, 6, 4))
+    fig.add(merge("Prayer_Beads", string), rigid("spine_03"))
+    maps = {
+        "MonkRobe": outfit("monk_albedo.png"), "MonkSkirt": outfit("monk_skirt_albedo.png"), "MonkHands": HANDS[gender], "MonkSkin": SKIN[gender],
+        "MonkEyes": EYES, "MonkBrows": brows(gender),
+        "MonkSash": cloth("cloth_red.png"), "MonkBeads": tinted(WOOD_C, [.55, .36, .22, 1], rough=.6),
+    }
+    return fig.export("hero_monk_" + gender, maps)
+
+
+def ranger_hero(gender):
+    """Forest-green hooded ranger with both pauldrons and an arrow quiver on the back."""
+    pauldron = "Acc_Pauldron" if gender == "male" else "Acc_Pauldrons"
+    feet = "Feet_Boots" if gender == "male" else "Feet"
+    fig = Figure(gender + "_ranger", {"Arms", "Arms_Bracer", "Body", "Body_Belt_1", feet, "Head_Hood", "Legs", pauldron}, gender)
+    cloth_m, hands, skin, eyes, leather, wood, fletch = (material(n) for n in (
+        "RangerCloth", "RangerHands", "RangerSkin", "RangerEyes", "RangerLeather", "RangerWood", "RangerFletch"))
+    fig.dress(cloth_m, hands)
+    mirror_part(fig, pauldron, "Ranger_Pauldron_R", cloth_m)
+    fig.add_head(skin, eyes, material("RangerBrows"))
+    spine = fig.bone_head("spine_03")
+    base = Vector((.10, spine.y + .17, 1.08)); top = Vector((.02, spine.y + .2, 1.52))
+    pieces = [cylinder("Quiver", .05, (top - base).length, (base + top) / 2, leather, axis=top - base, sides=10)]
+    for i in range(5):
+        tip = top + Vector(((i - 2) * .016, .0, .06 + .012 * (i % 2)))
+        pieces.append(cylinder("Arrow", .004, .14, tip - Vector((0, 0, .05)), wood, sides=4))
+        pieces.append(prism("Fletch", [(-.011, 0), (.011, 0), (0, .045)], .003, fletch, bevel=0, offset=0))
+        pieces[-1].location = tip + Vector((0, 0, .01)); bpy.context.view_layer.update()
+    fig.add(merge("Ranger_Quiver", pieces), rigid("spine_03"))
+    maps = {
+        "RangerCloth": outfit("ranger_albedo.png"), "RangerHands": HANDS[gender], "RangerSkin": SKIN[gender], "RangerEyes": EYES,
+        "RangerBrows": brows(gender),
+        "RangerLeather": tinted(WOOD_C, [.45, .28, .18, 1]), "RangerWood": WOOD_C,
+        "RangerFletch": {"color": [.85, .82, .74, 1], "rough": 1},
+    }
+    return fig.export("hero_ranger_" + gender, maps)
+
 # ---------------------------------------------------------------- weapons
 
 def weapon_maps():
@@ -912,6 +1011,21 @@ def build_weapon(kind):
         cylinder("Bolt", .006, .3, (0, -.026, .22), material("PaleWood"), sides=5)
         stirrup = ring("Stirrup", (0, 0, 0), .03, .045, 0, iron, sides=10)
         stirrup.rotation_euler = (math.pi / 2, 0, 0); stirrup.location = (0, 0, .42)
+    elif kind == "greataxe":
+        # Two-handed: long haft, grip centred on the origin, a broad bearded blade and a back spike.
+        cylinder("Haft", .021, 1.02, (0, 0, .27), wood, sides=8)
+        grip(.24, 0, .023)
+        prism("Blade", [(.02, .58), (.16, .50), (.25, .56), (.27, .70), (.24, .84), (.15, .86), (.02, .80)], .016, steel)
+        prism("Edge", [(.24, .56), (.27, .70), (.24, .84), (.255, .70)], .018, iron, bevel=.001)
+        prism("Back spike", [(-.02, .63), (-.13, .69), (-.02, .75)], .018, iron)
+        cylinder("Socket", .03, .3, (0, 0, .69), iron, sides=8)
+        cylinder("Butt cap", .024, .04, (0, 0, -.24), iron, sides=8)
+    elif kind == "longbow":
+        limb = [(-.035 * (1 - (abs(t) ** 1.6)), 0, .78 * t) for t in [i / 8 - 1 for i in range(17)]]
+        limb = [(x + .09 * abs(z / .78) ** 2, y, z) for x, y, z in limb]
+        tube("Limbs", limb, [.012 + .01 * (1 - abs(z / .78)) for _, _, z in limb], wood, sides=6)
+        tube("String", [limb[0], limb[-1]], [.0025, .0025], string, sides=4)
+        grip(.12, 0, .021)
     elif kind in ("shield_heater", "shield_round"):
         paint = material("PaintBlue" if kind == "shield_heater" else "PaintRed")
         if kind == "shield_heater":
@@ -942,9 +1056,12 @@ if __name__ == "__main__":
         "hero_fighter_male": lambda: fighter("male"), "hero_fighter_female": lambda: fighter("female"),
         "hero_wizard_male_hood": lambda: wizard("male", "hood"), "hero_wizard_female_hood": lambda: wizard("female", "hood"),
         "hero_wizard_male_hat": lambda: wizard("male", "hat"), "hero_wizard_female_hat": lambda: wizard("female", "hat"),
+        "hero_barbarian_male": lambda: barbarian("male"), "hero_barbarian_female": lambda: barbarian("female"),
+        "hero_monk_male": lambda: monk("male"), "hero_monk_female": lambda: monk("female"),
+        "hero_ranger_male": lambda: ranger_hero("male"), "hero_ranger_female": lambda: ranger_hero("female"),
     }
     weapon_kinds = ["dagger", "greatsword", "scimitar", "sickle", "mace", "spear", "staff", "staff_priest", "shortbow",
-                    "light_crossbow", "shield_heater", "shield_round"]
+                    "light_crossbow", "shield_heater", "shield_round", "greataxe", "longbow"]
     for name, build in builders.items():
         if not only or name in only:
             info["characters"][name] = build()

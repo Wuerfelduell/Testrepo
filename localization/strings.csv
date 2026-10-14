@@ -557,6 +557,9 @@ ACTOR_CULT_PRIEST,Cult Priest
 LOOK_FIGHTER_PLATE,Fighter • plate and shield
 LOOK_WIZARD_HOOD,Wizard • hooded robe
 LOOK_WIZARD_HAT,Wizard • pointed hat
+LOOK_BARBARIAN_FUR,Barbarian • fur mantle
+LOOK_MONK_ROBE,Monk • robe and sash
+LOOK_RANGER_HOOD,Ranger • hood and quiver
 GALLERY_M1_ENEMIES,Enemies
 GALLERY_M1_HEROES,Hero looks
 GALLERY_M1_WEAPONS,Weapons
@@ -753,6 +756,7 @@ COLOR_BLOOD,Blood red
 COLOR_WINE,Wine
 COLOR_VIOLET,Violet
 COLOR_TEAL,Teal
+COLOR_PINE,Pine
 COLOR_FOREST,Forest green
 COLOR_MOSS,Moss
 COLOR_OCHRE,Ochre
