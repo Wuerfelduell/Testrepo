@@ -7,7 +7,7 @@ extends RefCounted
 ## Entry keys:
 ##   ability      spellcasting ability ("int", "wis", "cha")
 ##   progression  slot table: "full" (Wizard, Cleric, Druid ...), "half" (Paladin, Ranger),
-##                "pact" (Warlock; table still to be filled by the Warlock work)
+##                "pact" (Warlock Pact Magic: all slots of one level, back on a Short Rest)
 ##   cantrips     cantrips known per class level (index 0 = level 1)
 ##   prepared     prepared spells per class level
 ##   spellbook    true: prepares from a spellbook that grows by new_spells per level
@@ -27,6 +27,35 @@ const CASTERS: Dictionary = {
 			"magic_missile", "burning_hands", "shield", "sleep", "shatter", "fireball"],
 		# The third cantrip, Poison Spray (1d12), is the owner's wish for a strong one (13-10-2026).
 		"start": ["fire_bolt", "ray_of_frost", "poison_spray", "magic_missile", "burning_hands", "shield", "sleep"],
+	},
+	# Bard, Sorcerer, Warlock (thread "Barde, Zauberer, Hexenmeister"); class features in
+	# src/rules/classes/<id>_kit.gd. "bardic_inspiration" is a class action cast through
+	# the spell pipeline (its kit adds it), never a pick.
+	"bard": {
+		"ability": "cha", "progression": "full",
+		"cantrips": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4],
+		"prepared": [4, 5, 6, 7, 9, 10, 11, 12, 14, 15],
+		"list": ["vicious_mockery", "starry_wisp", "healing_word", "dissonant_whispers", "thunderwave",
+			"sleep", "cure_wounds", "shatter", "hold_person", "phantasmal_killer", "hold_monster"],
+		"start": ["vicious_mockery", "starry_wisp", "healing_word", "dissonant_whispers", "thunderwave", "sleep"],
+	},
+	"sorcerer": {
+		"ability": "cha", "progression": "full",
+		"cantrips": [4, 4, 4, 5, 5, 5, 5, 5, 5, 6],
+		"prepared": [2, 4, 6, 7, 9, 10, 11, 12, 14, 15],
+		"list": ["fire_bolt", "ray_of_frost", "shocking_grasp", "poison_spray", "acid_splash",
+			"magic_missile", "burning_hands", "shield", "sleep", "thunderwave",
+			"scorching_ray", "shatter", "hold_person", "fireball", "lightning_bolt",
+			"blight", "cone_of_cold", "hold_monster"],
+		"start": ["fire_bolt", "ray_of_frost", "shocking_grasp", "poison_spray", "magic_missile", "burning_hands"],
+	},
+	"warlock": {
+		"ability": "cha", "progression": "pact",
+		"cantrips": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4],
+		"prepared": [2, 3, 4, 5, 6, 7, 8, 9, 10, 10],
+		"list": ["eldritch_blast", "poison_spray", "chill_touch", "hex", "arms_of_hadar",
+			"hold_person", "blight", "hold_monster"],
+		"start": ["eldritch_blast", "chill_touch", "hex", "arms_of_hadar"],
 	},
 }
 
@@ -69,6 +98,8 @@ static func slots(class_id: String, level: int) -> Array[int]:
 			return SpellRules.full_caster_slots(level)
 		"half":
 			return SpellRules.half_caster_slots(level)
+		"pact":
+			return SpellRules.pact_slots(level)
 	return [] as Array[int]
 
 static func highest_slot(class_id: String, level: int) -> int:
