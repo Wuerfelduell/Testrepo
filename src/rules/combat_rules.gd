@@ -409,9 +409,12 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
 		StringName(weapon["damage_type"]), rng, damage_modifiers, bool(outcome["critical"]), defenses,
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
-	var lost: int = ClassEffects.lose_hp(state, target_id, damage.total, rng)
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": lost})
+		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
+	# Class reactions that lower the damage of this hit (Monk Deflect Attacks).
+	var reduction: Dictionary = ClassKits.damage_reduction(state, attacker_id, target_id, weapon, damage.total, rng)
+	events.append_array(reduction.get("events", []))
+	var lost: int = ClassEffects.lose_hp(state, target_id, maxi(0, damage.total - int(reduction.get("amount", 0))), rng)
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"amount": lost, "damage_type": weapon["damage_type"], "hp": target["hp"]})
 	var total_damage: int = lost
@@ -471,5 +474,6 @@ static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	if state.mode != &"combat":
 		state.pending = {}
 		ClassEffects.revert_all(state)
+		ClassKits.on_combat_end(state)
 		events.append({"type": "combat_end", "mode": String(state.mode)})
 	return events

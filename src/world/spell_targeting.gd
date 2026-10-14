@@ -76,7 +76,7 @@ func hover(actor_id: String, point: Vector3) -> void:
 	match spell.targeting:
 		"creature":
 			# Healing and buffs may target the caster itself.
-			var self_ok: bool = spell.resolution in ["heal", "none"]
+			var self_ok: bool = spell.resolution == "heal" or (spell.resolution == "none" and spell.allies)
 			if actor_id.is_empty() or (actor_id == caster_id and not self_ok):
 				_template.mesh = null
 				_clear_highlights()

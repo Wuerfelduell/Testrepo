@@ -34,6 +34,8 @@ func apply(state: GameState) -> Dictionary:
 	var spell: SpellDefinition = SpellBook.get_spell(spell_id)
 	var caster: Dictionary = state.actors[actor_id]
 	var events: Array[Dictionary] = []
+	# Class free casts (Ranger Favored Enemy: Hunter's Mark) are used before slots.
+	var free_cast: bool = slot_level == 0 and ClassKits.free_cast_available(caster, spell_id)
 	var used_slot: int = SpellResolver.effective_slot(caster, spell, slot_level)
 	match spell.casting_time:
 		"action": caster["action_available"] = false
@@ -47,6 +49,8 @@ func apply(state: GameState) -> Dictionary:
 		intervention["uses"] = maxi(0, int(intervention.get("uses", 0)) - 1)
 	elif caster.get("spell_uses", {}).has(spell_id):
 		caster["spell_uses"][spell_id] = int(caster["spell_uses"][spell_id]) - 1
+	elif free_cast:
+		ClassKits.spend_free_cast(caster, spell_id)
 	elif used_slot > 0:
 		SpellRules.spend_slot(caster["spell_slots"], used_slot)
 	if spell.concentration:

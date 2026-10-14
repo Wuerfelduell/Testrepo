@@ -261,6 +261,9 @@ static func refresh_armor(actor: Dictionary, training: Training) -> void:
 		result.breakdown.clear()
 		result.breakdown.append(RuleModifier.new(unarmored, &"unarmored_defense"))
 		result.armor_class = unarmored
+	for bonus: Dictionary in ClassKits.ac_bonus(actor, armor_id):
+		result.breakdown.append(RuleModifier.new(int(bonus["amount"]), StringName(String(bonus["source"]))))
+		result.armor_class += int(bonus["amount"])
 	actor["ac"] = result.armor_class
 	actor["armor"] = String(armor_id)
 	actor["shield"] = shield

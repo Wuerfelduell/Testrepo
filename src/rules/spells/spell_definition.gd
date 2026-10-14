@@ -59,8 +59,9 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 ## A second damage type rolled with the first (Flame Strike, Ice Storm); halves together.
 @export var extra_damage_dice: String = ""
 @export var extra_damage_type: StringName = &""
-## Area spells for the caster's side (Bless, Aid, Mass Healing Word): allies only, the
-## caster included, at most max_targets (0 = no limit) plus upcast_targets per slot level.
+## Spells for the caster's side (Bless, Aid, Shield of Faith, Mass Healing Word): allies
+## only, the caster included. Areas take at most max_targets (0 = no limit) plus
+## upcast_targets per slot level. A "none" creature spell without it is a mark on a foe.
 @export var allies: bool = false
 @export var max_targets: int = 0
 @export var upcast_targets: int = 0

@@ -59,6 +59,7 @@ func apply(state: GameState) -> Dictionary:
 		for id: String in ids:
 			var participant: Initiative.Participant = Initiative.Participant.new(StringName(id), int(state.actors[id]["dex"]))
 			participant.context.conditions = CombatRules.conditions_for(state.actors[id])
+			participant.context.advantages.append_array(ClassKits.initiative_advantages(state.actors[id]))
 			participants.append(participant)
 		var initiative: Initiative.Result = Initiative.roll(participants, Rng.rng)
 		for entry: Initiative.Entry in initiative.ordered:

@@ -34,7 +34,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 			if target_ids.size() != 1:
 				result["reason_key"] = "SPELL_REASON_PICK_TARGET"
 				return result
-			if spell.resolution == "heal" or spell.resolution == "none":
+			if spell.resolution == "heal" or (spell.resolution == "none" and spell.allies):
 				if not _valid_heal_target(state, caster_id, String(target_ids[0]), spell.range_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
@@ -53,6 +53,15 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 					return result
 				result["targets"] = [_save_entry(state, caster, victim_id, spell, int(result["slot_level"]),
 					state.actors[victim_id]["position"])]
+				result["legal"] = true
+				result["reason_key"] = ""
+				return result
+			if spell.resolution == "none":
+				# A mark on an enemy without attack or save (Hunter's Mark): see _apply_mark.
+				if not _valid_creature_target(state, caster_id, String(target_ids[0]), spell.range_m):
+					result["reason_key"] = "SPELL_REASON_TARGET"
+					return result
+				result["targets"] = [{"id": String(target_ids[0]), "ally": false, "chance": 1.0, "expected_damage": 0.0}]
 				result["legal"] = true
 				result["reason_key"] = ""
 				return result
@@ -145,7 +154,7 @@ static func availability_reason(state: GameState, caster_id: String, spell: Spel
 		# Monster spellcasting: a number of uses per day instead of spell slots.
 		if int(caster["spell_uses"][String(spell.id)]) <= 0:
 			return "SPELL_REASON_NO_USES"
-	elif not spell.is_cantrip():
+	elif not spell.is_cantrip() and not (slot_level == 0 and ClassKits.free_cast_available(caster, String(spell.id))):
 		var slots: Array = caster.get("spell_slots", [])
 		if slot_level == 0:
 			if SpellRules.lowest_slot(slots, spell.level) == 0:
@@ -166,6 +175,8 @@ static func effective_slot(caster: Dictionary, spell: SpellDefinition, slot_leve
 	if free_cast(caster, spell):
 		return maxi(spell.level, slot_level)
 	if caster.get("spell_uses", {}).has(String(spell.id)):
+		return spell.level
+	if slot_level == 0 and ClassKits.free_cast_available(caster, String(spell.id)):
 		return spell.level
 	return slot_level if slot_level > 0 else SpellRules.lowest_slot(caster.get("spell_slots", []), spell.level)
 
@@ -392,6 +403,22 @@ static func resolve_impact(state: GameState, pending: Dictionary, rng: RandomNum
 			events.append_array(_resolve_effect(state, caster_id, spell, pending))
 	return events
 
+## "none" resolution with an effect id: the effect sits on each target until the
+## caster's concentration ends (or the start of the caster's next turn otherwise).
+## Class kits read it, e.g. Hunter's Mark adds 1d6 Force to the Ranger's weapon hits.
+static func _apply_mark(state: GameState, caster_id: String, spell: SpellDefinition, pending: Dictionary) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if spell.effect == &"":
+		return events
+	for value: Variant in pending.get("target_ids", []):
+		var target: Dictionary = state.actors.get(String(value), {})
+		if target.is_empty() or not CombatRules.alive(target):
+			continue
+		ActiveEffects.add(target, {"kind": String(spell.effect), "source_id": caster_id, "spell_id": String(spell.id),
+			"turn_of": caster_id, "until": "concentration" if spell.concentration else "start_of_turn"})
+		events.append({"type": "effect", "actor_id": String(value), "source_id": caster_id, "kind": String(spell.effect)})
+	return events
+
 ## Spells without a roll: buffs on allies (Bless, Shield of Faith, Barkskin, Aid,
 ## Resistance), self effects (Divine Favor, Wild Shape).
 static func _resolve_effect(state: GameState, caster_id: String, spell: SpellDefinition,
@@ -399,6 +426,8 @@ static func _resolve_effect(state: GameState, caster_id: String, spell: SpellDef
 	var events: Array[Dictionary] = []
 	if spell.effect == &"" or spell.effect in [&"shield"]:
 		return events
+	if spell.targeting == "creature" and not spell.allies:
+		return _apply_mark(state, caster_id, spell, pending)
 	var targets: Array[String] = []
 	if spell.targeting == "creature":
 		targets.append(String(pending["target_ids"][0]))
@@ -503,6 +532,9 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 				var raw: int = int(part[0])
 				if not failed:
 					raw = floori(raw / 2.0) if spell.half_on_save else 0
+				if spell.half_on_save and ClassKits.evades(target, spell.save_ability):
+					# Evasion (Monk, Rogue): no damage on a success, half on a failure.
+					raw = 0 if not failed else floori(int(part[0]) / 2.0)
 				if (raw > 0 or failed) and CombatRules.alive(target):
 					events.append_array(_apply_damage(state, caster_id, target_id, raw, part[1], rng))
 		elif spell.effect == &"sleep" and failed:
