@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "ashen_man",
+	"title": "The Ashen Man",
+	"start_if": [
+		{
+			"flag": "hint_ashen_man"
+		}
+	],
+	"stages": [
+		{
+			"text": "Wanted for murder, arson and grave desecration: a man with a burned face. 100 silver."
+		}
+	]
+}

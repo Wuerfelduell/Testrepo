@@ -339,8 +339,12 @@ func _build_hooks() -> void:
 				(label as Label3D).visible = false
 			var pose: String = String(hook.get("pose", ""))
 			if figure.player.has_animation(pose):
-				figure.player.get_animation(pose).loop_mode = Animation.LOOP_LINEAR
+				# A body (pose "Death01") plays its fall once and stays down; every other pose loops.
+				var lying: bool = pose.begins_with("Death")
+				figure.player.get_animation(pose).loop_mode = Animation.LOOP_NONE if lying else Animation.LOOP_LINEAR
 				figure.play_clip(pose)
+				if lying:
+					figure.player.seek(figure.player.get_animation(pose).length, true)
 			var facing: Vector3 = EncounterData.vector(hook.get("facing", [0.0, 0.0, 1.0]))
 			# The imported figures look along -Z: aim that side at the facing direction.
 			figure.look_at(figure.global_position + facing, Vector3.UP, false)

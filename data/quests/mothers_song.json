@@ -1,0 +1,30 @@
+{
+	"version": 1,
+	"id": "mothers_song",
+	"title": "The mother's song",
+	"start_if": [
+		{
+			"any": [
+				{
+					"flag": "edrin_song_known"
+				},
+				{
+					"flag": "edrin_heard_woman"
+				}
+			]
+		}
+	],
+	"stages": [
+		{
+			"text": "Edrin hears a woman singing in the walls. Always the same song."
+		},
+		{
+			"if": [
+				{
+					"flag": "edrin_song_known"
+				}
+			],
+			"text": "\"When the last candle dies and the last warden falls, the mother holds her children far from that stranger world.\""
+		}
+	]
+}

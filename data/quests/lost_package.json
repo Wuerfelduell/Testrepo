@@ -1,0 +1,44 @@
+{
+	"version": 1,
+	"id": "lost_package",
+	"title": "The lost package",
+	"start_if": [
+		{
+			"flag": "mara_package_status"
+		}
+	],
+	"stages": [
+		{
+			"text": "Mara Veldrin's package never arrived. The courier was last seen at the old crypt."
+		},
+		{
+			"if": [
+				{
+					"flag": "mara_package_found"
+				}
+			],
+			"text": "I found the dead courier in the crypt, with the sealed package."
+		},
+		{
+			"if": [
+				{
+					"flag": "mara_package_opened"
+				}
+			],
+			"text": "Inside the package: a sealed black relic."
+		}
+	],
+	"done_if": [
+		{
+			"flag": "mara_package_handed"
+		}
+	],
+	"done_text": "The package is out of my hands.",
+	"failed_if": [
+		{
+			"flag": "mara_package_status",
+			"is": "refused"
+		}
+	],
+	"failed_text": "Mara broke off the conversation."
+}

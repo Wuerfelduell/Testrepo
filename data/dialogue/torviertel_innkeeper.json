@@ -1,0 +1,623 @@
+{
+	"version": 1,
+	"id": "torviertel_innkeeper",
+	"speaker": "Borik Hagen",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "borik_banned_player"
+				}
+			],
+			"node": "banned_again"
+		},
+		{
+			"if": [
+				{
+					"flag": "borik_met"
+				}
+			],
+			"node": "hub"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Borik stands in front of his inn, Zum Letzten Licht, and throws a drunk out onto the street. \"And if I catch you stealing again, I'll cut your fingers off!\" He turns to you. \"What are you gawking at? Want to get thrown out before you're even inside?\"",
+			"effects": {
+				"flags": {
+					"borik_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"I need a room.\"",
+					"if": [
+						{
+							"flag": "inn_room",
+							"is": false
+						}
+					],
+					"next": "room"
+				},
+				{
+					"text": "\"Is that how you treat your guests?\"",
+					"next": "guests"
+				},
+				{
+					"id": "careful",
+					"text": "\"You should be more careful who you insult.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "cowed",
+						"failure": "unimpressed"
+					}
+				},
+				{
+					"text": "\"What does it take to get information around here?\"",
+					"next": "rumours"
+				},
+				{
+					"text": "\"What happened to your daughter?\"",
+					"if": [
+						{
+							"flag": "borik_daughter_hint"
+						},
+						{
+							"flag": "borik_daughter_quest",
+							"is": false
+						}
+					],
+					"next": "daughter"
+				},
+				{
+					"text": "\"The barrels are down in the cellar.\"",
+					"if": [
+						{
+							"flag": "quest_barrels",
+							"is": "accepted"
+						}
+					],
+					"next": "barrels_done"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"hub": {
+			"text": "Borik wipes his hands on his apron and waits.",
+			"choices": [
+				{
+					"text": "\"I need a room.\"",
+					"if": [
+						{
+							"flag": "inn_room",
+							"is": false
+						}
+					],
+					"next": "room"
+				},
+				{
+					"text": "\"Is that how you treat your guests?\"",
+					"next": "guests"
+				},
+				{
+					"id": "careful",
+					"text": "\"You should be more careful who you insult.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "cowed",
+						"failure": "unimpressed"
+					}
+				},
+				{
+					"text": "\"What does it take to get information around here?\"",
+					"next": "rumours"
+				},
+				{
+					"text": "\"What happened to your daughter?\"",
+					"if": [
+						{
+							"flag": "borik_daughter_hint"
+						},
+						{
+							"flag": "borik_daughter_quest",
+							"is": false
+						}
+					],
+					"next": "daughter"
+				},
+				{
+					"text": "\"The barrels are down in the cellar.\"",
+					"if": [
+						{
+							"flag": "quest_barrels",
+							"is": "accepted"
+						}
+					],
+					"next": "barrels_done"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"guests": {
+			"text": "\"Only the ones who survive it.\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"cowed": {
+			"text": "\"Fine. You want respect? Then behave like someone who deserves it.\"",
+			"effects": {
+				"flags": {
+					"borik_cheap_room": true,
+					"borik_wary": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"unimpressed": {
+			"text": "\"I've seen more dangerous fellows taking a shit.\"",
+			"effects": {
+				"add": {
+					"borik_relationship": -1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"room": {
+			"text": "\"Ten copper a night. Fifteen with food. Twenty if you want a bath. And if you puke in the bed, you pay for the bed.\"",
+			"choices": [
+				{
+					"text": "\"Here's ten copper.\"",
+					"effects": {
+						"money": -10,
+						"flags": {
+							"inn_room": "rented"
+						}
+					},
+					"next": "rented"
+				},
+				{
+					"text": "\"Eight copper, as you said.\"",
+					"if": [
+						{
+							"flag": "borik_cheap_room"
+						}
+					],
+					"effects": {
+						"money": -8,
+						"flags": {
+							"inn_room": "rented"
+						}
+					},
+					"next": "rented_cheap"
+				},
+				{
+					"id": "haggle",
+					"text": "\"Eight copper. The hole isn't worth more.\"",
+					"if": [
+						{
+							"money": 8
+						},
+						{
+							"flag": "borik_cheap_room",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 13,
+						"success": "privy_room",
+						"failure": "privy"
+					}
+				},
+				{
+					"text": "\"I have no money. Can I work?\"",
+					"if": [
+						{
+							"flag": "quest_barrels",
+							"is": false
+						}
+					],
+					"next": "barrels"
+				},
+				{
+					"text": "\"I'll just take a room.\"",
+					"next": "club"
+				},
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"rented": {
+			"text": "Borik takes the coins and hands you a key."
+		},
+		"rented_cheap": {
+			"text": "Borik takes the coins and hands you a key."
+		},
+		"privy_room": {
+			"text": "\"For eight copper you get the room next to the privy.\"",
+			"choices": [
+				{
+					"text": "\"Deal.\"",
+					"effects": {
+						"money": -8,
+						"flags": {
+							"inn_room": "rented"
+						}
+					},
+					"next": "rented_cheap"
+				},
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"privy": {
+			"text": "\"Then sleep in the privy. Costs nothing at all.\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"barrels": {
+			"text": "\"There are three barrels out back. Take them down to the cellar. Touch one before I tell you to and I'll break your arm.\"",
+			"effects": {
+				"flags": {
+					"quest_barrels": "accepted"
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"barrels_done": {
+			"text": "You haul the three barrels down into the cellar.",
+			"choices": [
+				{
+					"id": "cellar",
+					"text": "(Look around the cellar.)",
+					"check": {
+						"skill": "perception",
+						"dc": 12,
+						"success": "cellar_door",
+						"failure": "cellar_nothing"
+					}
+				},
+				{
+					"text": "(Go back up.)",
+					"next": "barrels_paid"
+				}
+			]
+		},
+		"cellar_door": {
+			"text": "Behind the shelves at the back of the cellar there is a locked door.",
+			"effects": {
+				"flags": {
+					"inn_cellar_discovered": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Go back up.)",
+					"next": "barrels_paid"
+				}
+			]
+		},
+		"cellar_nothing": {
+			"text": "Barrels, shelves, rats.",
+			"choices": [
+				{
+					"text": "(Go back up.)",
+					"next": "barrels_paid"
+				}
+			]
+		},
+		"barrels_paid": {
+			"text": "[Placeholder: Borik grudgingly gives the hero a free night.]",
+			"effects": {
+				"flags": {
+					"quest_barrels": "done",
+					"inn_room": "free_night"
+				},
+				"xp": 25
+			}
+		},
+		"club": {
+			"text": "\"Try it.\" Borik reaches for a club.",
+			"choices": [
+				{
+					"text": "(Back off.)",
+					"effects": {
+						"add": {
+							"borik_relationship": -1
+						}
+					}
+				},
+				{
+					"text": "(Fight.)",
+					"next": "brawl"
+				}
+			]
+		},
+		"brawl": {
+			"text": "Borik swings the club.",
+			"effects": {
+				"fight": {
+					"encounter": "inn_brawl",
+					"nonlethal": true
+				},
+				"flags": {
+					"borik_banned_player": true
+				},
+				"add": {
+					"city_guard_reputation": -1
+				}
+			}
+		},
+		"rumours": {
+			"text": "\"Pay. Or be useful.\" He leans on the door frame. \"What kind of trouble are you looking for?\"",
+			"choices": [
+				{
+					"text": "\"Who's in charge here?\"",
+					"if": [
+						{
+							"flag": "hint_council",
+							"is": false
+						}
+					],
+					"next": "council"
+				},
+				{
+					"text": "\"Where can I find well-paid work?\"",
+					"if": [
+						{
+							"flag": "hint_gravedigger",
+							"is": false
+						}
+					],
+					"next": "gravedigger"
+				},
+				{
+					"text": "\"Is there anything strange in this town?\"",
+					"if": [
+						{
+							"flag": "hint_cellar_noises",
+							"is": false
+						}
+					],
+					"next": "noises"
+				},
+				{
+					"id": "hiding",
+					"text": "\"What are you hiding?\"",
+					"check": {
+						"skill": "insight",
+						"dc": 14,
+						"success": "hiding",
+						"failure": "takings"
+					}
+				},
+				{
+					"id": "burn",
+					"text": "\"Talk. Or your inn burns.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "burns",
+						"failure": "regulars"
+					}
+				},
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"council": {
+			"text": "\"Officially, the city council. In truth, whoever has enough gold to buy it.\"",
+			"effects": {
+				"flags": {
+					"hint_council": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "rumours"
+				}
+			]
+		},
+		"gravedigger": {
+			"text": "\"At the notice board. Or with the gravedigger. He's always looking for replacements.\"",
+			"effects": {
+				"flags": {
+					"hint_gravedigger": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "rumours"
+				}
+			]
+		},
+		"noises": {
+			"text": "\"Every night I hear noises from the cellar. Scratching. Knocking. Sometimes voices.\" He laughs. \"But that's probably the rats. Damned vermin.\"",
+			"effects": {
+				"flags": {
+					"hint_cellar_noises": true
+				},
+				"xp": 10
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "rumours"
+				}
+			]
+		},
+		"hiding": {
+			"text": "Borik's fingers tighten around his tankard. \"Everyone hides something.\"",
+			"effects": {
+				"flags": {
+					"borik_daughter_hint": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"takings": {
+			"text": "\"My takings, from the tax collector. Happy?\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"burns": {
+			"text": "\"You damned swine.\" He spits the words out. \"Twelve years ago my daughter disappeared. Happy?\"",
+			"effects": {
+				"flags": {
+					"borik_daughter_hint": true,
+					"borik_threatened": true
+				},
+				"add": {
+					"borik_relationship": -2,
+					"player_cruelty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"regulars": {
+			"text": "Borik whistles. Two armed regulars push their way out of the inn.",
+			"effects": {
+				"fight": {
+					"encounter": "inn_brawl",
+					"nonlethal": true
+				}
+			}
+		},
+		"daughter": {
+			"text": "Borik freezes. \"Out.\" His voice drops. \"Don't you speak her name.\"",
+			"choices": [
+				{
+					"id": "find_her",
+					"text": "\"I can try to find her.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "elina",
+						"failure": "silent"
+					}
+				},
+				{
+					"text": "\"Twelve years? She's probably long dead.\"",
+					"next": "banned"
+				},
+				{
+					"id": "lie",
+					"text": "\"Why do you lie about how she disappeared?\"",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "records",
+						"failure": "silent"
+					}
+				},
+				{
+					"text": "\"What will you pay me?\"",
+					"next": "reward"
+				}
+			]
+		},
+		"elina": {
+			"text": "\"Her name was Elina. She was sixteen.\" He glances at the cellar door. \"The last time I saw her, she was with a man in a grey robe.\"",
+			"effects": {
+				"flags": {
+					"borik_daughter_quest": "accepted",
+					"hint_grey_robe": true
+				},
+				"add": {
+					"borik_relationship": 1
+				},
+				"xp": 25
+			}
+		},
+		"silent": {
+			"text": "Borik turns away and says nothing more."
+		},
+		"banned": {
+			"text": "Borik slams both hands down on the table. \"OUT!\"",
+			"effects": {
+				"flags": {
+					"borik_banned_player": true
+				},
+				"add": {
+					"player_cruelty": 1
+				}
+			}
+		},
+		"records": {
+			"text": "\"Because back then the watch claimed there had never been a girl by that name.\"",
+			"effects": {
+				"flags": {
+					"hint_altered_records": true
+				},
+				"xp": 25
+			}
+		},
+		"reward": {
+			"text": "\"Bring her back and you get everything I have.\" His jaw works. \"Bring me only her body, and I'll give you a hundred gold.\"",
+			"effects": {
+				"flags": {
+					"borik_daughter_quest": "accepted"
+				}
+			}
+		},
+		"banned_again": {
+			"text": "Borik points at the street without a word."
+		}
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "eyeless",
+	"title": "The Eyeless",
+	"start_if": [
+		{
+			"flag": "hint_eyeless"
+		}
+	],
+	"stages": [
+		{
+			"text": "Captain Garrik: three bodies this week, all without eyes. He wants to know if I find any that still have theirs."
+		}
+	]
+}

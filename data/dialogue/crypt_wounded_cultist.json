@@ -1,62 +1,690 @@
 {
 	"version": 1,
 	"id": "crypt_wounded_cultist",
-	"speaker": "Wounded cultist",
+	"speaker": "Malrek",
 	"start": [
-		{"if": [{"flag": "crypt_wounded_cultist", "is": "spared"}], "node": "spared_again"},
-		{"node": "first"}
+		{
+			"if": [
+				{
+					"flag": "malrek_status"
+				}
+			],
+			"node": "spared_again"
+		},
+		{
+			"if": [
+				{
+					"flag": "malrek_met"
+				}
+			],
+			"node": "wary"
+		},
+		{
+			"node": "first"
+		}
 	],
 	"nodes": {
 		"first": {
-			"text": "[Placeholder: a wounded cultist kneels in the hall and presses a hand on his wound.]",
+			"text": "Malrek lies against a stone wall. Blood seeps between his fingers. \"Stay back!\" He tries to raise his dagger. \"I'm warning you... they hear everything.\"",
+			"effects": {
+				"flags": {
+					"malrek_met": true
+				}
+			},
 			"choices": [
-				{"text": "[Placeholder: ask who leads the cult down here]", "next": "who"},
-				{"text": "[Placeholder: threaten him for answers]", "check": {"skill": "intimidation", "dc": 13, "success": "talks", "failure": "spits"}},
-				{"text": "[Placeholder: patch up his wound]", "if": [{"proficient": "medicine"}], "next": "healed"},
-				{"text": "[Placeholder: let him go]", "next": "spared"},
-				{"text": "[Placeholder: kill him]", "next": "killed"}
+				{
+					"id": "calm",
+					"text": "\"Calm down. I only want to talk.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 13,
+						"success": "ask_away",
+						"failure": "liar"
+					}
+				},
+				{
+					"id": "others",
+					"text": "\"Who are the others?\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 14,
+						"success": "priest_below",
+						"failure": "nothing_worse"
+					}
+				},
+				{
+					"text": "\"I can treat your wound.\"",
+					"next": "healing"
+				},
+				{
+					"text": "\"You sacrificed people. I should let you rot here.\"",
+					"next": "necessary"
+				},
+				{
+					"id": "disarm",
+					"text": "(Take his dagger.)",
+					"if": [
+						{
+							"flag": "malrek_disarmed",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "sleight_of_hand",
+						"dc": 12,
+						"success": "disarmed",
+						"failure": "lunges"
+					}
+				},
+				{
+					"text": "(Kill him at once.)",
+					"next": "killed_silent"
+				}
 			]
 		},
-		"who": {
-			"text": "[Placeholder: he refuses to name his master.]",
+		"wary": {
+			"text": "Malrek clutches his wound and watches you.",
 			"choices": [
-				{"text": "[Placeholder: threaten him for answers]", "check": {"skill": "intimidation", "dc": 13, "success": "talks", "failure": "spits"}},
-				{"text": "[Placeholder: let him go]", "next": "spared"},
-				{"text": "[Placeholder: kill him]", "next": "killed"}
+				{
+					"id": "calm",
+					"text": "\"Calm down. I only want to talk.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 13,
+						"success": "ask_away",
+						"failure": "liar"
+					}
+				},
+				{
+					"id": "others",
+					"text": "\"Who are the others?\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 14,
+						"success": "priest_below",
+						"failure": "nothing_worse"
+					}
+				},
+				{
+					"text": "\"I can treat your wound.\"",
+					"next": "healing"
+				},
+				{
+					"text": "\"You sacrificed people. I should let you rot here.\"",
+					"next": "necessary"
+				},
+				{
+					"id": "disarm",
+					"text": "(Take his dagger.)",
+					"if": [
+						{
+							"flag": "malrek_disarmed",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "sleight_of_hand",
+						"dc": 12,
+						"success": "disarmed",
+						"failure": "lunges"
+					}
+				},
+				{
+					"text": "(Kill him at once.)",
+					"next": "killed_silent"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"ask_away": {
+			"text": "\"Then ask your questions.\"",
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				}
+			]
+		},
+		"liar": {
+			"text": "\"Liar! You're all liars!\" He tries to stab you.",
+			"effects": {
+				"damage": {
+					"dice": "1d4",
+					"type": "piercing"
+				}
+			},
+			"choices": [
+				{
+					"text": "(Step back.)",
+					"next": "wary"
+				},
+				{
+					"text": "(Kill him.)",
+					"next": "killed_silent"
+				}
+			]
+		},
+		"priest_below": {
+			"text": "\"The priest... the priest is further down.\"",
+			"effects": {
+				"flags": {
+					"crypt_knows_priest": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				}
+			]
+		},
+		"nothing_worse": {
+			"text": "\"You can't do anything to me that they haven't already done.\"",
+			"choices": [
+				{
+					"text": "(Try something else.)",
+					"next": "wary"
+				}
+			]
+		},
+		"necessary": {
+			"text": "\"They were necessary!\" he screams. \"You don't understand anything!\"",
+			"effects": {
+				"add": {
+					"malrek_aggression": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Try something else.)",
+					"next": "wary"
+				}
+			]
+		},
+		"disarmed": {
+			"text": "You twist the dagger out of his weak hand.",
+			"effects": {
+				"flags": {
+					"malrek_disarmed": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "wary"
+				}
+			]
+		},
+		"lunges": {
+			"text": "Malrek lashes out with the dagger.",
+			"effects": {
+				"damage": {
+					"dice": "1d4",
+					"type": "piercing"
+				}
+			},
+			"choices": [
+				{
+					"text": "(Step back.)",
+					"next": "wary"
+				},
+				{
+					"text": "(Kill him.)",
+					"next": "killed_silent"
+				}
+			]
+		},
+		"healing": {
+			"text": "\"Why would you?\"",
+			"choices": [
+				{
+					"text": "\"I'll help you if you talk.\"",
+					"next": "swear"
+				},
+				{
+					"text": "\"I'll help you, no strings attached.\"",
+					"next": "why"
+				},
+				{
+					"id": "talk_first",
+					"text": "\"Talk first. Then maybe.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "talks",
+						"failure": "let_me_die"
+					}
+				}
+			]
+		},
+		"swear": {
+			"text": "\"Swear it.\"",
+			"choices": [
+				{
+					"text": "\"I swear it.\" (Mean it.)",
+					"effects": {
+						"flags": {
+							"malrek_promised": true,
+							"malrek_healed": true
+						}
+					},
+					"next": "interrogation"
+				},
+				{
+					"text": "\"I swear it.\" (Lie.)",
+					"effects": {
+						"flags": {
+							"malrek_promised": true,
+							"malrek_lied": true
+						}
+					},
+					"next": "interrogation"
+				}
+			]
+		},
+		"why": {
+			"text": "Malrek looks utterly bewildered. \"Why?\"",
+			"effects": {
+				"flags": {
+					"malrek_healed": true
+				},
+				"add": {
+					"malrek_trust": 2
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				}
 			]
 		},
 		"talks": {
-			"text": "[Placeholder: he tells the hero about the priest in the shrine and his guards.]",
-			"effects": {"flags": {"crypt_knows_priest": true}, "xp": 25},
+			"text": "\"All right! All right, I'll talk!\"",
 			"choices": [
-				{"text": "[Placeholder: let him go]", "next": "spared"},
-				{"text": "[Placeholder: kill him]", "next": "killed"}
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				}
 			]
 		},
-		"spits": {
-			"text": "[Placeholder: he spits at the hero and says nothing more.]",
+		"let_me_die": {
+			"text": "\"Then let me die.\" He turns his face to the wall and won't answer.",
+			"effects": {
+				"flags": {
+					"malrek_refuses": true
+				}
+			},
 			"choices": [
-				{"text": "[Placeholder: let him go]", "next": "spared"},
-				{"text": "[Placeholder: kill him]", "next": "killed"}
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
 			]
 		},
-		"healed": {
-			"text": "[Placeholder: grateful, he warns the hero about the trap in the corridor.]",
-			"effects": {"flags": {"crypt_knows_trap": true}, "xp": 25},
+		"interrogation": {
+			"text": "\"What do you want to know?\"",
+			"effects": {
+				"flags": {
+					"malrek_information": true
+				}
+			},
 			"choices": [
-				{"text": "[Placeholder: let him go]", "next": "spared"}
+				{
+					"text": "\"What are you doing in this crypt?\"",
+					"next": "voice"
+				},
+				{
+					"id": "leader",
+					"text": "\"Who leads your cult?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "vaelor",
+						"failure": "wont_understand"
+					}
+				},
+				{
+					"id": "prisoners",
+					"text": "\"Where are the prisoners?\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 14,
+						"success": "prisoners",
+						"failure": "silent"
+					}
+				},
+				{
+					"text": "\"How many people have you killed?\"",
+					"next": "seven"
+				},
+				{
+					"text": "\"Why should I let you live?\"",
+					"next": "inner_door"
+				},
+				{
+					"id": "fingers",
+					"text": "\"I'll break every one of your fingers until you talk.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "key",
+						"failure": "screams"
+					}
+				},
+				{
+					"text": "(Let him speak.)",
+					"if": [
+						{
+							"flag": "malrek_trust",
+							"min": 2
+						},
+						{
+							"flag": "crypt_knows_trap",
+							"is": false
+						}
+					],
+					"next": "volunteers"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"voice": {
+			"text": "\"We wanted to hear the voice. The voice beneath the stone.\"",
+			"effects": {
+				"flags": {
+					"malrek_voice": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"vaelor": {
+			"text": "\"Priest Vaelor. He claims the dead will return to us.\"",
+			"effects": {
+				"flags": {
+					"boss_name_known": true,
+					"crypt_knows_priest": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"wont_understand": {
+			"text": "\"You wouldn't understand his name anyway.\"",
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"prisoners": {
+			"text": "\"Left of the sacrificial chamber. Behind the iron gate.\"",
+			"effects": {
+				"flags": {
+					"crypt_prisoner_location": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"silent": {
+			"text": "Malrek stays silent.",
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"seven": {
+			"text": "\"Seven.\" He looks at the floor. \"Eight, if the boy is still alive.\"",
+			"effects": {
+				"flags": {
+					"hint_eighth_prisoner": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"inner_door": {
+			"text": "\"Because I know how to open the inner door.\"",
+			"effects": {
+				"flags": {
+					"hint_inner_door": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"key": {
+			"text": "\"PLEASE! The key! Vaelor has the key!\"",
+			"effects": {
+				"flags": {
+					"malrek_tortured": true,
+					"crypt_key_vaelor": true
+				},
+				"add": {
+					"player_cruelty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"screams": {
+			"text": "Malrek screams for his master. Footsteps answer from the dark.",
+			"effects": {
+				"flags": {
+					"malrek_tortured": true,
+					"malrek_refuses": true,
+					"crypt_alarm_triggered": true
+				},
+				"add": {
+					"player_cruelty": 1
+				},
+				"fight": {
+					"encounter": "side_chamber"
+				}
+			}
+		},
+		"volunteers": {
+			"text": "[Placeholder: grateful, Malrek tells the hero more on his own, e.g. about the trap in the corridor.]",
+			"effects": {
+				"flags": {
+					"crypt_knows_trap": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "(Ask something else.)",
+					"next": "interrogation"
+				},
+				{
+					"text": "(Decide what happens to him.)",
+					"next": "final"
+				}
+			]
+		},
+		"final": {
+			"text": "Malrek watches you, breathing hard.",
+			"choices": [
+				{
+					"text": "(Spare him and bind his wound.)",
+					"next": "spared"
+				},
+				{
+					"text": "(Hand him over to the city watch.)",
+					"next": "watch"
+				},
+				{
+					"text": "(Let him go.)",
+					"next": "freed"
+				},
+				{
+					"text": "(Kill him.)",
+					"if": [
+						{
+							"flag": "malrek_promised",
+							"is": false
+						}
+					],
+					"next": "killed"
+				},
+				{
+					"text": "(Break your promise and kill him.)",
+					"if": [
+						{
+							"flag": "malrek_promised"
+						}
+					],
+					"next": "broken_promise"
+				}
 			]
 		},
 		"spared": {
-			"text": "[Placeholder: he stays kneeling, too weak to leave.]",
-			"effects": {"flags": {"crypt_wounded_cultist": "spared"}, "xp": 25}
+			"text": "[Placeholder: Malrek, bandaged, stays where he is. He may come back later as an informant.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "spared",
+					"malrek_status": "spared"
+				},
+				"xp": 25
+			}
+		},
+		"watch": {
+			"text": "[Placeholder: the hero ties Malrek up for the city watch. He may testify in court later.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "spared",
+					"malrek_status": "watch"
+				},
+				"add": {
+					"city_guard_reputation": 1
+				},
+				"xp": 25
+			}
+		},
+		"freed": {
+			"text": "[Placeholder: Malrek limps off into the dark.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "freed",
+					"malrek_status": "freed"
+				},
+				"xp": 25
+			}
 		},
 		"killed": {
-			"text": "[Placeholder: the hero kills him. Short, hard line.]",
-			"effects": {"flags": {"crypt_wounded_cultist": "killed"}, "xp": 25}
+			"text": "[Placeholder: the hero kills Malrek after the interrogation.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "killed",
+					"malrek_status": "killed"
+				},
+				"add": {
+					"player_cruelty": 1
+				},
+				"xp": 25
+			}
+		},
+		"broken_promise": {
+			"text": "[Placeholder: Malrek realises the oath was worth nothing.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "killed",
+					"malrek_status": "killed",
+					"malrek_promise_broken": true
+				},
+				"add": {
+					"player_cruelty": 1,
+					"player_broken_promises": 1
+				},
+				"xp": 25
+			}
+		},
+		"killed_silent": {
+			"text": "[Placeholder: the hero kills Malrek before he can say anything.]",
+			"effects": {
+				"flags": {
+					"crypt_wounded_cultist": "killed",
+					"malrek_status": "killed"
+				},
+				"add": {
+					"player_cruelty": 1
+				},
+				"xp": 25
+			}
 		},
 		"spared_again": {
-			"text": "[Placeholder: he looks up and says nothing.]"
+			"text": "Malrek looks up and says nothing."
 		}
 	}
 }

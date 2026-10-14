@@ -105,7 +105,7 @@ func test_quests_follow_flags() -> void:
 	var prisoner: Dictionary = QuestLog.load_quest("crypt_prisoner")
 	state.world["flags"]["crypt_prisoner_key_hint"] = true
 	state.world["flags"]["crypt_prisoner_freed"] = true
-	state.world["flags"]["crypt_prisoner_refused"] = true
+	state.world["flags"]["thomas_status"] = "dead"
 	assert_eq(QuestLog.status(prisoner, state)["state"], "failed", "Failing wins")
 	assert_true(JournalPanel.text(state).contains(TranslationServer.translate(String(cult["title"]))))
 
@@ -135,7 +135,7 @@ func test_notice_board_starts_the_cult_quest() -> void:
 	var start: DialogueStartCommand = DialogueStartCommand.new("torviertel_notice_board")
 	assert_eq(start.validate(state), OK)
 	start.apply(state)
-	DialogueChooseCommand.new(0).apply(state)
+	DialogueChooseCommand.new(2).apply(state)
 	assert_eq(QuestLog.status(cult, state), {"state": "active", "text": String(cult["stages"][0]["text"])},
 		"Any of its start conditions starts the quest")
 	var board: Dictionary = {}

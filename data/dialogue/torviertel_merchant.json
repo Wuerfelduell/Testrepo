@@ -1,0 +1,671 @@
+{
+	"version": 1,
+	"id": "torviertel_merchant",
+	"speaker": "Mara Veldrin",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "mara_hostile"
+				}
+			],
+			"node": "hostile"
+		},
+		{
+			"if": [
+				{
+					"flag": "mara_met"
+				}
+			],
+			"node": "hub"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Mara stands beside an overloaded cart. \"If you're not buying, get lost.\" She glances at your gear. \"Then again... you look like I could sell you your own boot.\"",
+			"effects": {
+				"flags": {
+					"mara_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Show me your wares.\"",
+					"next": "wares"
+				},
+				{
+					"text": "\"You should be friendlier to your customers.\"",
+					"next": "friendlier"
+				},
+				{
+					"id": "stolen",
+					"text": "\"Your goods look stolen.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 13,
+						"success": "quality",
+						"failure": "donkey"
+					}
+				},
+				{
+					"id": "cheat",
+					"text": "\"You cheat your customers.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "discount",
+						"failure": "guards"
+					}
+				},
+				{
+					"text": "\"Maybe I'll buy you, cart and all.\"",
+					"next": "dagger"
+				},
+				{
+					"text": "\"Any work for a paying customer?\"",
+					"if": [
+						{
+							"flag": "mara_bought"
+						},
+						{
+							"flag": "mara_package_status",
+							"is": false
+						}
+					],
+					"next": "package"
+				},
+				{
+					"id": "work",
+					"text": "\"Do you have any work?\"",
+					"if": [
+						{
+							"flag": "mara_bought",
+							"is": false
+						},
+						{
+							"flag": "mara_package_status",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "package",
+						"failure": "no_work"
+					}
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 2000
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_2000"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 3500
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_3500"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 5000
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_5000"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "black_relic"
+						},
+						{
+							"flag": "mara_package_status",
+							"is": "accepted"
+						}
+					],
+					"effects": {
+						"item": {
+							"black_relic": -1
+						}
+					},
+					"next": "opened"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"hub": {
+			"text": "Mara drums her fingers on the cart.",
+			"choices": [
+				{
+					"text": "\"Show me your wares.\"",
+					"next": "wares"
+				},
+				{
+					"text": "\"You should be friendlier to your customers.\"",
+					"next": "friendlier"
+				},
+				{
+					"id": "stolen",
+					"text": "\"Your goods look stolen.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 13,
+						"success": "quality",
+						"failure": "donkey"
+					}
+				},
+				{
+					"id": "cheat",
+					"text": "\"You cheat your customers.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "discount",
+						"failure": "guards"
+					}
+				},
+				{
+					"text": "\"Maybe I'll buy you, cart and all.\"",
+					"next": "dagger"
+				},
+				{
+					"text": "\"Any work for a paying customer?\"",
+					"if": [
+						{
+							"flag": "mara_bought"
+						},
+						{
+							"flag": "mara_package_status",
+							"is": false
+						}
+					],
+					"next": "package"
+				},
+				{
+					"id": "work",
+					"text": "\"Do you have any work?\"",
+					"if": [
+						{
+							"flag": "mara_bought",
+							"is": false
+						},
+						{
+							"flag": "mara_package_status",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "package",
+						"failure": "no_work"
+					}
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 2000
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_2000"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 3500
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_3500"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_reward",
+							"is": 5000
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1
+						}
+					},
+					"next": "delivered_5000"
+				},
+				{
+					"text": "\"Here is your package.\"",
+					"if": [
+						{
+							"item": "black_relic"
+						},
+						{
+							"flag": "mara_package_status",
+							"is": "accepted"
+						}
+					],
+					"effects": {
+						"item": {
+							"black_relic": -1
+						}
+					},
+					"next": "opened"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"wares": {
+			"text": "\"Finally, a sentence that isn't completely useless.\" [The full trade menu comes later.]",
+			"choices": [
+				{
+					"text": "(Buy a dagger for 2 gp.)",
+					"if": [
+						{
+							"flag": "mara_discount",
+							"is": false
+						}
+					],
+					"effects": {
+						"money": -200,
+						"item": {
+							"dagger": 1
+						},
+						"flags": {
+							"mara_bought": true
+						}
+					},
+					"next": "bought"
+				},
+				{
+					"text": "(Buy a dagger for 1 gp 8 sp.)",
+					"if": [
+						{
+							"flag": "mara_discount"
+						}
+					],
+					"effects": {
+						"money": -180,
+						"item": {
+							"dagger": 1
+						},
+						"flags": {
+							"mara_bought": true,
+							"mara_discount": false
+						}
+					},
+					"next": "bought"
+				},
+				{
+					"text": "(Buy a healing potion for 50 gp.)",
+					"if": [
+						{
+							"flag": "mara_discount",
+							"is": false
+						}
+					],
+					"effects": {
+						"money": -5000,
+						"item": {
+							"potion_of_healing": 1
+						},
+						"flags": {
+							"mara_bought": true
+						}
+					},
+					"next": "bought"
+				},
+				{
+					"text": "(Buy a healing potion for 45 gp.)",
+					"if": [
+						{
+							"flag": "mara_discount"
+						}
+					],
+					"effects": {
+						"money": -4500,
+						"item": {
+							"potion_of_healing": 1
+						},
+						"flags": {
+							"mara_bought": true,
+							"mara_discount": false
+						}
+					},
+					"next": "bought"
+				},
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"bought": {
+			"text": "Mara counts the coins twice before she hands it over.",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"friendlier": {
+			"text": "\"And you should talk less. I guess neither of us gets everything.\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"quality": {
+			"text": "\"Interesting. So you recognise quality.\" She leans closer. \"Maybe I have things that aren't on the cart.\"",
+			"effects": {
+				"flags": {
+					"mara_blackmarket_unlocked": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"donkey": {
+			"text": "\"And you look like your mother ran off with a donkey.\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"discount": {
+			"text": "\"You want a discount? Fine. But call me a cheat once more and we have a problem.\"",
+			"effects": {
+				"flags": {
+					"mara_discount": true
+				},
+				"add": {
+					"mara_relationship": -1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"guards": {
+			"text": "\"Guards! Someone here is trying to extort me!\"",
+			"effects": {
+				"flags": {
+					"mara_called_guards": true
+				},
+				"add": {
+					"city_guard_reputation": -1,
+					"mara_relationship": -1
+				}
+			}
+		},
+		"dagger": {
+			"text": "\"Try it. My last owner only paid one-handed after that.\" Mara draws a dagger.",
+			"choices": [
+				{
+					"text": "\"Easy. I'm going.\""
+				},
+				{
+					"text": "\"Put the knife away before you hurt yourself.\"",
+					"effects": {
+						"flags": {
+							"mara_attacked": true
+						}
+					},
+					"next": "fight"
+				}
+			]
+		},
+		"fight": {
+			"text": "Mara's eyes narrow. She does not put the knife away.",
+			"effects": {
+				"fight": {
+					"encounter": "mara_fight"
+				}
+			}
+		},
+		"no_work": {
+			"text": "Mara shakes her head and looks past you.",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"package": {
+			"text": "\"You want to earn something? A package never arrived. The courier was last seen at the old crypt.\"",
+			"choices": [
+				{
+					"text": "\"What's inside?\"",
+					"next": "inside"
+				},
+				{
+					"id": "pay",
+					"text": "\"Then pay me properly.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "pay_35",
+						"failure": "pay_20"
+					}
+				},
+				{
+					"id": "report",
+					"text": "\"You're smuggling something. I could report you.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "pay_50",
+						"failure": "broken_off"
+					}
+				},
+				{
+					"text": "\"I'll find it. But I'm opening the package.\"",
+					"next": "open_warning"
+				},
+				{
+					"text": "\"All right. I'll look for it.\"",
+					"next": "pay_20"
+				}
+			]
+		},
+		"inside": {
+			"text": "\"Something that's none of your business.\"",
+			"choices": [
+				{
+					"text": "\"Fine.\"",
+					"next": "package"
+				}
+			]
+		},
+		"pay_35": {
+			"text": "[Placeholder: Mara agrees to 35 silver.]",
+			"effects": {
+				"flags": {
+					"mara_package_status": "accepted",
+					"mara_reward": 3500
+				}
+			}
+		},
+		"pay_20": {
+			"text": "[Placeholder: Mara offers 20 silver.]",
+			"effects": {
+				"flags": {
+					"mara_package_status": "accepted",
+					"mara_reward": 2000
+				}
+			}
+		},
+		"pay_50": {
+			"text": "\"Fifty silver. And you keep your mouth shut.\"",
+			"effects": {
+				"flags": {
+					"mara_package_status": "accepted",
+					"mara_reward": 5000
+				},
+				"add": {
+					"mara_relationship": -2
+				}
+			}
+		},
+		"broken_off": {
+			"text": "Mara turns her back on you. The conversation is over.",
+			"effects": {
+				"flags": {
+					"mara_package_status": "refused"
+				},
+				"add": {
+					"mara_relationship": -1
+				}
+			}
+		},
+		"open_warning": {
+			"text": "\"Then don't bother showing your face again.\"",
+			"effects": {
+				"flags": {
+					"mara_package_status": "accepted",
+					"mara_reward": 2000,
+					"mara_warned_open": true
+				}
+			}
+		},
+		"opened": {
+			"text": "[Placeholder: Mara sees the broken seal. She is furious.]",
+			"effects": {
+				"flags": {
+					"mara_package_status": "opened",
+					"mara_hostile": true,
+					"mara_package_handed": "mara"
+				},
+				"add": {
+					"mara_relationship": -3
+				}
+			}
+		},
+		"hostile": {
+			"text": "Mara does not even look at you."
+		},
+		"delivered_2000": {
+			"text": "[Placeholder: Mara takes the package and pays.]",
+			"effects": {
+				"money": 2000,
+				"flags": {
+					"mara_package_status": "delivered",
+					"mara_package_handed": "mara"
+				},
+				"add": {
+					"mara_relationship": 1,
+					"merchant_reputation": 1
+				},
+				"xp": 50
+			}
+		},
+		"delivered_3500": {
+			"text": "[Placeholder: Mara takes the package and pays.]",
+			"effects": {
+				"money": 3500,
+				"flags": {
+					"mara_package_status": "delivered",
+					"mara_package_handed": "mara"
+				},
+				"add": {
+					"mara_relationship": 1,
+					"merchant_reputation": 1
+				},
+				"xp": 50
+			}
+		},
+		"delivered_5000": {
+			"text": "[Placeholder: Mara takes the package and pays.]",
+			"effects": {
+				"money": 5000,
+				"flags": {
+					"mara_package_status": "delivered",
+					"mara_package_handed": "mara"
+				},
+				"add": {
+					"mara_relationship": 1,
+					"merchant_reputation": 1
+				},
+				"xp": 50
+			}
+		}
+	}
+}

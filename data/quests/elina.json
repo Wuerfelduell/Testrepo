@@ -1,0 +1,38 @@
+{
+	"version": 1,
+	"id": "elina",
+	"title": "Elina's disappearance",
+	"start_if": [
+		{
+			"any": [
+				{
+					"flag": "borik_daughter_quest"
+				},
+				{
+					"flag": "hint_altered_records"
+				}
+			]
+		}
+	],
+	"stages": [
+		{
+			"text": "Twelve years ago Borik's daughter disappeared. He claims she ran away."
+		},
+		{
+			"if": [
+				{
+					"flag": "hint_grey_robe"
+				}
+			],
+			"text": "Her name was Elina, she was sixteen. Borik last saw her with a man in a grey robe."
+		},
+		{
+			"if": [
+				{
+					"flag": "hint_altered_records"
+				}
+			],
+			"text": "Back then the watch claimed there had never been a girl by that name."
+		}
+	]
+}

@@ -50,15 +50,18 @@ func _run() -> void:
 	# Hooks open their conversation (campaign package 1).
 	check(level.interact("crypt_inscription"), "Inscription hook exists")
 	check(level.dialogue.is_open(), "The inscription opens the dialogue window")
-	check(level.dialogue.choice_buttons.size() == 3, "Three answers at the inscription")
-	check(level.dialogue.choice_buttons[0].text.contains(tr("SHEET_SKILL_RELIGION")), "Check answers name their skill")
+	check(level.dialogue.choice_buttons.size() == 5, "Five answers at the inscription")
+	check(level.dialogue.choice_buttons[0].text.contains(tr("SHEET_SKILL_INVESTIGATION")), "Check answers name their skill")
 	level.dialogue.choice_buttons[0].pressed.emit()
-	check(_count("roll") == 1 and game.state.world["conversation"]["node"] != "first", "The Religion check is rolled once")
+	check(_count("roll") == 1 and game.state.world["conversation"]["node"] != "door", "The Investigation check is rolled once")
 	while level.hud.dice_popup.is_busy():
 		level.hud.dice_popup.skip()
 		await get_tree().process_frame
 	level.dialogue.refresh()
 	level.dialogue.choice_buttons[0].pressed.emit()
+	check(game.state.world["conversation"]["node"] == "door", "Back at the inscription")
+	check(level.dialogue.choice_buttons.size() == 4, "The rolled check is gone")
+	level.dialogue.choice_buttons[-1].pressed.emit()
 	await get_tree().process_frame
 	check(not level.dialogue.is_open() and not game.state.world.has("conversation"), "The conversation ends")
 	await _walk(Vector3(0, 0, 6.0), "hall")
