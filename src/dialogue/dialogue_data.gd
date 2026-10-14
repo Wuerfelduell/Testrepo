@@ -9,7 +9,8 @@ extends RefCounted
 const DIRECTORY: String = "res://data/dialogue/"
 const CONDITION_KEYS: Array[String] = ["flag", "is", "min", "max", "class", "proficient", "in_party", "party_room",
 	"money", "item", "any"]
-const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight", "react"]
+const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight", "react",
+	"leave", "inventory"]
 
 static var _cache: Dictionary = {}
 
@@ -162,9 +163,19 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 				var reaction: Variant = effects["react"][short]
 				if PartyRules.id_for(String(short)).is_empty():
 					found.append(where + ": react names an unknown companion " + String(short))
-				elif not reaction is Dictionary or not reaction.get("text") is String or \
+				elif not reaction is Dictionary or not (reaction.has("text") or reaction.has("loyalty")) or \
+						(reaction.has("text") and not reaction["text"] is String) or \
 						(reaction.has("loyalty") and not _is_number(reaction["loyalty"])):
-					found.append(where + ": a reaction needs text and an optional loyalty number")
+					found.append(where + ": a reaction needs a text line and/or a loyalty number")
+	if effects.has("leave"):
+		if not effects["leave"] is Dictionary or (effects["leave"] as Dictionary).is_empty():
+			found.append(where + ": leave must map companion short names to camp, parted or hostile")
+		else:
+			for short: Variant in effects["leave"]:
+				if PartyRules.id_for(String(short)).is_empty() or not String(effects["leave"][short]) in PartyRules.LEAVE_MODES:
+					found.append(where + ": leave needs a companion short name and one of " + str(PartyRules.LEAVE_MODES))
+	if effects.has("inventory") and PartyRules.id_for(String(effects["inventory"])).is_empty():
+		found.append(where + ": inventory names an unknown companion")
 	if effects.has("fight"):
 		var fight: Variant = effects["fight"]
 		if not fight is Dictionary or not fight.get("encounter") is String or String(fight["encounter"]).is_empty():

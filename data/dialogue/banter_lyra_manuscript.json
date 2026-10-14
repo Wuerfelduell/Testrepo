@@ -1,0 +1,102 @@
+{
+	"version": 1,
+	"id": "banter_lyra_manuscript",
+	"speaker": "Lyra Vossen",
+	"start": [
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Lyra studies an old piece of parchment.\n\n\"Interesting.\"\n\n\"This priest was less mad than I thought.\"",
+			"effects": {
+				"flags": {
+					"banter_lyra_manuscript": true
+				}
+			},
+			"choices": [
+				{
+					"text": "What did you find?",
+					"next": "voice"
+				},
+				{
+					"text": "Is it dangerous?",
+					"next": "dangerous"
+				},
+				{
+					"text": "We should destroy the writing.",
+					"next": "destroy"
+				},
+				{
+					"text": "Maybe we should find out where the voice comes from.",
+					"next": "find_out"
+				}
+			]
+		},
+		"voice": {
+			"text": "\"The writings mention a voice deep beneath Rabenfels.\"\n\n\"No summoning. No known deity.\"\n\n\"Something far older.\"",
+			"effects": {
+				"flags": {
+					"lyra_knows_voice": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "What did you find?",
+					"next": "voice"
+				},
+				{
+					"text": "Is it dangerous?",
+					"next": "dangerous"
+				},
+				{
+					"text": "We should destroy the writing.",
+					"next": "destroy"
+				},
+				{
+					"text": "Maybe we should find out where the voice comes from.",
+					"next": "find_out"
+				}
+			]
+		},
+		"dangerous": {
+			"text": "\"Certainly.\"\n\n\"That's what makes it interesting.\"",
+			"choices": [
+				{
+					"text": "What did you find?",
+					"next": "voice"
+				},
+				{
+					"text": "Is it dangerous?",
+					"next": "dangerous"
+				},
+				{
+					"text": "We should destroy the writing.",
+					"next": "destroy"
+				},
+				{
+					"text": "Maybe we should find out where the voice comes from.",
+					"next": "find_out"
+				}
+			]
+		},
+		"destroy": {
+			"text": "\"Touch it and we have a serious problem.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -1
+				}
+			}
+		},
+		"find_out": {
+			"text": "\"Finally you say something sensible.\"",
+			"effects": {
+				"flags": {
+					"lyra_research_voice": true
+				}
+			}
+		}
+	}
+}

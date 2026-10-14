@@ -902,3 +902,6 @@ PARTY_LOG_APPROVES,%s approves
 PARTY_LOG_DISAPPROVES,%s disapproves
 PARTY_APPROVES,approves
 PARTY_DISAPPROVES,disapproves
+PARTY_TALK_HINT,"Left-click: command. Right-click: talk."
+PARTY_REASON_GONE,They want nothing more to do with you.
+PARTY_LOG_CAMP,%s waits in the camp

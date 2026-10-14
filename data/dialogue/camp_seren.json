@@ -1,0 +1,1221 @@
+{
+	"version": 1,
+	"id": "camp_seren",
+	"speaker": "Seren Nachtfall",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "seren_camp_met"
+				}
+			],
+			"node": "again"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Seren sits in the shade of a tree, cleaning her daggers.\n\nShe speaks without looking up.\n\n\"You're loud.\"\n\n\"I heard you before you even entered the camp.\"",
+			"effects": {
+				"flags": {
+					"seren_camp_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our group?",
+					"next": "opinion"
+				},
+				{
+					"text": "I'd like to know something about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "seren"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "Have you stolen something again?",
+					"next": "conflict_pockets"
+				},
+				{
+					"text": "I'll leave you alone.",
+					"next": "bye"
+				}
+			]
+		},
+		"again": {
+			"text": "[Placeholder: Seren in the shadows, any later talk.]",
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our group?",
+					"next": "opinion"
+				},
+				{
+					"text": "I'd like to know something about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "seren"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "Have you stolen something again?",
+					"next": "conflict_pockets"
+				},
+				{
+					"text": "I'll leave you alone.",
+					"next": "bye"
+				}
+			]
+		},
+		"bye": {
+			"text": "\"Finally.\""
+		},
+		"leave": {
+			"text": "You: \"Seren, I want you to leave the party.\"\n\nShe looks at you in silence.\n\n\"Why?\"",
+			"choices": [
+				{
+					"text": "I don't need you right now. Wait in the camp.",
+					"next": "l_camp"
+				},
+				{
+					"text": "We should go separate ways.",
+					"next": "l_parted"
+				},
+				{
+					"text": "I don't trust you. Get lost.",
+					"next": "l_fool"
+				},
+				{
+					"text": "Get lost, you damned murderer.",
+					"next": "conflict_murderer"
+				},
+				{
+					"text": "Leave before I make you.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "l_threat",
+						"failure": "l_dagger"
+					}
+				},
+				{
+					"text": "Forget it. Stay.",
+					"next": "l_stay"
+				}
+			]
+		},
+		"l_camp": {
+			"text": "\"Fine.\"\n\n\"Call me when you need someone again who can actually walk quietly.\"",
+			"effects": {
+				"leave": {
+					"seren": "camp"
+				}
+			}
+		},
+		"l_parted": {
+			"text": "\"Maybe that's better.\"",
+			"effects": {
+				"leave": {
+					"seren": "parted"
+				}
+			}
+		},
+		"l_fool": {
+			"text": "\"Then you were a fool to recruit me in the first place.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -2
+				}
+			}
+		},
+		"l_threat": {
+			"text": "\"You won't see me again.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -4
+				},
+				"leave": {
+					"seren": "hostile"
+				},
+				"flags": {
+					"seren_revenge_possible": true
+				}
+			}
+		},
+		"l_dagger": {
+			"text": "A dagger appears in her hand.\n\n\"Then go ahead and try.\"",
+			"effects": {
+				"flags": {
+					"seren_conflict": true
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: back down]",
+					"next": "again"
+				}
+			]
+		},
+		"l_stay": {
+			"text": "\"Make up your mind at some point.\"",
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our group?",
+					"next": "opinion"
+				},
+				{
+					"text": "I'd like to know something about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "seren"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "Have you stolen something again?",
+					"next": "conflict_pockets"
+				},
+				{
+					"text": "I'll leave you alone.",
+					"next": "bye"
+				}
+			]
+		},
+		"conflict_pockets": {
+			"text": "\"Want to check your pockets?\"\n\n\"I hope you know what you're doing.\"",
+			"choices": [
+				{
+					"text": "You're a cowardly murderer who only strikes from ambush.",
+					"next": "c_tournament"
+				},
+				{
+					"text": "You think you're untouchable.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_survive",
+						"failure": "c_dagger"
+					}
+				},
+				{
+					"text": "We should calm down.",
+					"next": "c_calm"
+				},
+				{
+					"text": "You and me. A training fight.",
+					"next": "duel"
+				}
+			]
+		},
+		"conflict_innocent": {
+			"text": "\"Yes.\"\n\nShe looks you straight in the eye.\n\n\"Now what?\"\n\n\"I hope you know what you're doing.\"",
+			"choices": [
+				{
+					"text": "You're a cowardly murderer who only strikes from ambush.",
+					"next": "c_tournament"
+				},
+				{
+					"text": "You think you're untouchable.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_survive",
+						"failure": "c_dagger"
+					}
+				},
+				{
+					"text": "We should calm down.",
+					"next": "c_calm"
+				},
+				{
+					"text": "You and me. A training fight.",
+					"next": "duel"
+				}
+			]
+		},
+		"conflict_murderer": {
+			"text": "Seren slowly stands up.\n\n\"Say that again.\"\n\n\"I hope you know what you're doing.\"",
+			"choices": [
+				{
+					"text": "You're a cowardly murderer who only strikes from ambush.",
+					"next": "c_tournament"
+				},
+				{
+					"text": "You think you're untouchable.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_survive",
+						"failure": "c_dagger"
+					}
+				},
+				{
+					"text": "We should calm down.",
+					"next": "c_calm"
+				},
+				{
+					"text": "You and me. A training fight.",
+					"next": "duel"
+				}
+			]
+		},
+		"c_tournament": {
+			"text": "\"A fight isn't a damn tournament.\"\n\n\"If you want to die fair, that's your problem.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -2
+				}
+			}
+		},
+		"c_survive": {
+			"text": "\"No.\"\n\n\"I just know how to survive.\"",
+			"effects": {
+				"add": {
+					"seren_respect": 1
+				}
+			}
+		},
+		"c_dagger": {
+			"text": "\"You don't even know where my second dagger is.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -1
+				}
+			}
+		},
+		"c_calm": {
+			"text": "\"A surprisingly reasonable decision.\""
+		},
+		"duel": {
+			"text": "\"If you really want to lose.\"",
+			"choices": [
+				{
+					"text": "[Placeholder: start the training duel]",
+					"check": {
+						"skill": "acrobatics",
+						"dc": 14,
+						"success": "duel_won",
+						"failure": "duel_lost"
+					}
+				}
+			]
+		},
+		"duel_won": {
+			"text": "[Placeholder: Seren after losing the training duel; the real non-lethal fight replaces this check.]",
+			"effects": {
+				"add": {
+					"seren_respect": 1
+				},
+				"xp": 25
+			}
+		},
+		"duel_lost": {
+			"text": "[Placeholder: Seren after winning the training duel.]"
+		},
+		"personal": {
+			"text": "\"Well enough not to kill you.\"",
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_from": {
+			"text": "\"Far away.\"",
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_family": {
+			"text": "\"Not anymore.\"",
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_why": {
+			"text": "\"Because some people will pay a lot of gold to make other people disappear.\"",
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_regret": {
+			"text": "\"One thing.\"\n\nShe looks at her dagger.\n\n\"Only one.\"",
+			"effects": {
+				"flags": {
+					"seren_quest_hint_regret": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_no": {
+			"text": "\"No.\"",
+			"choices": [
+				{
+					"text": "Where are you from?",
+					"next": "p_from"
+				},
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become an assassin?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret your past?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "p_regret",
+						"failure": "p_no"
+					}
+				},
+				{
+					"text": "You've surely murdered innocent people.",
+					"next": "conflict_innocent"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"opinion": {
+			"text": "\"Too many people. Too many secrets.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_kael": {
+			"text": "\"A good fighter.\"\n\n\"Too bad you can probably hear him three streets away.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_lyra": {
+			"text": "\"I don't trust her.\"\n\n\"Which means she's probably smarter than most.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_city": {
+			"text": "\"Lots of rich people. Lots of dark alleys.\"\n\n\"A paradise for people like me.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_high": {
+			"text": "\"You're one of the few people around whom I don't constantly have to reach for a knife.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_neutral": {
+			"text": "\"You're useful.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_low": {
+			"text": "\"You should keep your eyes open at night.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "seren_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"past": {
+			"text": "\"And I'd like you to stop asking.\"\n\n\"My past is not your problem.\"",
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_help": {
+			"text": "\"Maybe.\"\n\n\"But if you help me, there's no going back.\"",
+			"effects": {
+				"flags": {
+					"seren_personal_quest_stage": 2
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_understand": {
+			"text": "\"You wouldn't understand.\"",
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_right": {
+			"text": "\"No.\"\n\n\"You have the right to send me away.\"",
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_trust": {
+			"text": "\"Trust puts people in the grave.\"",
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_try": {
+			"text": "\"Try it.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -2
+				}
+			},
+			"choices": [
+				{
+					"text": "Maybe I can help you.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "x_help",
+						"failure": "x_understand"
+					}
+				},
+				{
+					"text": "I have a right to know who I'm travelling with.",
+					"next": "x_right"
+				},
+				{
+					"text": "You don't trust anyone, do you?",
+					"next": "x_trust"
+				},
+				{
+					"text": "Then I'll find out your secrets myself.",
+					"next": "x_try"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		}
+	}
+}

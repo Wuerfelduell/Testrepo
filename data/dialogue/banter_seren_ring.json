@@ -1,0 +1,106 @@
+{
+	"version": 1,
+	"id": "banter_seren_ring",
+	"speaker": "Seren Nachtfall",
+	"start": [
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "You notice Seren quietly pulling a ring out of a stranger's bag.\n\nYou: \"Seren. What's this?\"\n\n\"What's what?\"",
+			"effects": {
+				"flags": {
+					"banter_seren_ring": true
+				}
+			},
+			"choices": [
+				{
+					"text": "Give the ring back.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 13,
+						"success": "returned",
+						"failure": "butt_out"
+					}
+				},
+				{
+					"text": "Keep it. But share the loot.",
+					"next": "shared"
+				},
+				{
+					"text": "You stole from me?",
+					"next": "from_me"
+				},
+				{
+					"text": "Once more and you leave the party.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 16,
+						"success": "understood",
+						"failure": "no_threats"
+					}
+				}
+			]
+		},
+		"returned": {
+			"text": "\"Fine.\"",
+			"effects": {
+				"flags": {
+					"seren_ring": "returned"
+				},
+				"add": {
+					"seren_loyalty": -1
+				}
+			}
+		},
+		"butt_out": {
+			"text": "\"Stay out of it.\"",
+			"effects": {
+				"flags": {
+					"seren_ring": "kept"
+				}
+			}
+		},
+		"shared": {
+			"text": "\"Fifty-fifty.\"",
+			"effects": {
+				"flags": {
+					"seren_ring": "shared"
+				},
+				"money": 50,
+				"add": {
+					"player_criminal_reputation": 1
+				}
+			}
+		},
+		"from_me": {
+			"text": "\"If I were stealing from you, you wouldn't have noticed.\"",
+			"effects": {
+				"add": {
+					"seren_loyalty": -1
+				}
+			}
+		},
+		"understood": {
+			"text": "\"Understood.\"",
+			"effects": {
+				"flags": {
+					"seren_theft_warned": true
+				},
+				"add": {
+					"seren_loyalty": -2
+				}
+			}
+		},
+		"no_threats": {
+			"text": "\"Don't threaten me.\"\n\n[Placeholder: the conflict that follows.]",
+			"effects": {
+				"flags": {
+					"seren_conflict": true
+				}
+			}
+		}
+	}
+}

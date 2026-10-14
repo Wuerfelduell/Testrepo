@@ -1,0 +1,1351 @@
+{
+	"version": 1,
+	"id": "camp_lyra",
+	"speaker": "Lyra Vossen",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "lyra_camp_met"
+				}
+			],
+			"node": "again"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Lyra sits a little away from the campfire. Several books float in front of her.\n\n\"If you're about to interrupt me to ask what I'm reading: no.\"\n\nShe turns a page.\n\n\"You wouldn't understand it anyway.\"",
+			"effects": {
+				"flags": {
+					"lyra_camp_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "How are you getting along with the group?",
+					"next": "opinion"
+				},
+				{
+					"text": "What are you researching?",
+					"next": "research"
+				},
+				{
+					"text": "I'd like to learn something about you.",
+					"next": "personal"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "lyra"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're rather arrogant for an outcast mage.",
+					"next": "conflict"
+				},
+				{
+					"text": "I'll let you get back to work.",
+					"next": "bye"
+				}
+			]
+		},
+		"again": {
+			"text": "[Placeholder: Lyra among her floating books, any later talk.]",
+			"choices": [
+				{
+					"text": "How are you getting along with the group?",
+					"next": "opinion"
+				},
+				{
+					"text": "What are you researching?",
+					"next": "research"
+				},
+				{
+					"text": "I'd like to learn something about you.",
+					"next": "personal"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "lyra"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're rather arrogant for an outcast mage.",
+					"next": "conflict"
+				},
+				{
+					"text": "I'll let you get back to work.",
+					"next": "bye"
+				}
+			]
+		},
+		"bye": {
+			"text": "\"An excellent decision.\""
+		},
+		"leave": {
+			"text": "You: \"Lyra, we need to talk about the party.\"\n\n\"That already sounds unpleasant.\"",
+			"choices": [
+				{
+					"text": "Stay in the camp for now.",
+					"next": "l_camp"
+				},
+				{
+					"text": "I think we should go separate ways.",
+					"next": "l_parted"
+				},
+				{
+					"text": "You're a danger to us. Get lost.",
+					"next": "l_danger"
+				},
+				{
+					"text": "Get lost before I make you.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 19,
+						"success": "l_threat",
+						"failure": "l_icy"
+					}
+				},
+				{
+					"text": "Forget it. I still need you.",
+					"next": "l_stay"
+				}
+			]
+		},
+		"l_camp": {
+			"text": "\"Good. Then I can finally work without constant interruptions.\"",
+			"effects": {
+				"leave": {
+					"lyra": "camp"
+				}
+			}
+		},
+		"l_parted": {
+			"text": "\"An unexpected decision.\"\n\n\"But I won't stop you.\"",
+			"effects": {
+				"leave": {
+					"lyra": "parted"
+				}
+			}
+		},
+		"l_danger": {
+			"text": "\"A danger?\"\n\nShe smiles coldly.\n\n\"You recruited me of your own free will.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -3
+				}
+			}
+		},
+		"l_threat": {
+			"text": "\"How disappointing.\"\n\n\"I thought you were smarter.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -4
+				},
+				"leave": {
+					"lyra": "hostile"
+				}
+			}
+		},
+		"l_icy": {
+			"text": "The air suddenly turns icy.\n\n\"Try it.\"",
+			"choices": [
+				{
+					"text": "[Placeholder: back down]",
+					"next": "again"
+				},
+				{
+					"text": "[Placeholder: go for her]",
+					"next": "l_magic"
+				}
+			]
+		},
+		"l_magic": {
+			"text": "[Placeholder: magical conflict; frost bites into the hero. The real fight comes with the dialogue fight effect.]",
+			"effects": {
+				"damage": {
+					"dice": "1d4",
+					"type": "cold"
+				},
+				"add": {
+					"lyra_loyalty": -2
+				}
+			}
+		},
+		"l_stay": {
+			"text": "\"How surprising.\"",
+			"choices": [
+				{
+					"text": "How are you getting along with the group?",
+					"next": "opinion"
+				},
+				{
+					"text": "What are you researching?",
+					"next": "research"
+				},
+				{
+					"text": "I'd like to learn something about you.",
+					"next": "personal"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "lyra"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're rather arrogant for an outcast mage.",
+					"next": "conflict"
+				},
+				{
+					"text": "I'll let you get back to work.",
+					"next": "bye"
+				}
+			]
+		},
+		"conflict": {
+			"text": "The book snaps shut.\n\n\"Choose your next words carefully.\"",
+			"choices": [
+				{
+					"text": "Maybe I should burn your books.",
+					"next": "c_burn"
+				},
+				{
+					"text": "You're not as irreplaceable as you think.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_prove",
+						"failure": "c_replace"
+					}
+				},
+				{
+					"text": "I didn't mean it like that.",
+					"next": "c_sorry"
+				},
+				{
+					"text": "Prove that your magic works.",
+					"next": "duel"
+				}
+			]
+		},
+		"c_burn": {
+			"text": "\"Maybe I should show you how long a person can survive without skin.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -3
+				}
+			}
+		},
+		"c_prove": {
+			"text": "\"Then you should prove you can manage without me.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -1
+				}
+			}
+		},
+		"c_replace": {
+			"text": "\"And you're not as hard to replace as you hope.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -2
+				}
+			}
+		},
+		"c_sorry": {
+			"text": "\"Of course not.\""
+		},
+		"duel": {
+			"text": "\"You want a demonstration?\"",
+			"choices": [
+				{
+					"text": "[Placeholder: start the training duel]",
+					"check": {
+						"skill": "arcana",
+						"dc": 14,
+						"success": "duel_won",
+						"failure": "duel_lost"
+					}
+				}
+			]
+		},
+		"duel_won": {
+			"text": "[Placeholder: Lyra after losing the training duel; the real non-lethal fight replaces this check.]",
+			"effects": {
+				"add": {
+					"lyra_respect": 1
+				},
+				"xp": 25
+			}
+		},
+		"duel_lost": {
+			"text": "[Placeholder: Lyra after winning the training duel.]"
+		},
+		"opinion": {
+			"text": "\"I've had worse company.\"\n\n\"Not often, though.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_kael": {
+			"text": "\"A walking mountain of muscle and bad decisions.\"\n\n\"At least he's useful when something needs bludgeoning.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_seren": {
+			"text": "\"A clever woman.\"\n\n\"Dangerous, secretive, and probably a better liar than both of us.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_city": {
+			"text": "\"A city built on its own ruins.\"\n\n\"I'm surprised people here can sleep at all.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_high": {
+			"text": "\"You have a remarkable ability to surprise me.\"\n\n\"That's meant as a compliment.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_neutral": {
+			"text": "\"You're useful.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_low": {
+			"text": "\"A walking example of why intelligence should not be overrated.\"",
+			"choices": [
+				{
+					"text": "What do you think of Kael?",
+					"if": [
+						{
+							"flag": "kael_recruited"
+						}
+					],
+					"next": "o_kael"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"research": {
+			"text": "\"Something exceptionally interesting.\"",
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_book": {
+			"text": "\"A collection of historical records about unusual deaths.\"\n\n\"Obviously more exciting than our conversation.\"",
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_why": {
+			"text": "\"Because death is one of the few borders we don't fully understand yet.\"",
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_raise": {
+			"text": "\"Do you want to prove with your next question that you understand even less than I thought?\"",
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_show": {
+			"text": "\"Fine.\"\n\nShe opens a manuscript.\n\n\"But don't touch anything.\"",
+			"effects": {
+				"flags": {
+					"lyra_symbols_known": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_no": {
+			"text": "\"No.\"",
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"r_vaelor": {
+			"text": "\"Compare me to that fanatical butcher one more time.\"",
+			"effects": {
+				"add": {
+					"lyra_loyalty": -2
+				}
+			},
+			"choices": [
+				{
+					"text": "What kind of book is that?",
+					"next": "r_book"
+				},
+				{
+					"text": "Why are you interested in necromancy?",
+					"next": "r_why"
+				},
+				{
+					"text": "Do you want to raise the dead?",
+					"next": "r_raise"
+				},
+				{
+					"text": "Show me your research.",
+					"if": [
+						{
+							"flag": "lyra_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 15,
+						"success": "r_show",
+						"failure": "r_no"
+					}
+				},
+				{
+					"text": "You're not one bit better than Vaelor.",
+					"if": [
+						{
+							"flag": "vaelor_encounter_started"
+						}
+					],
+					"next": "r_vaelor"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"personal": {
+			"text": "\"How unfortunate.\"",
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_academy": {
+			"text": "\"Politics.\"\n\n\"Cowardice.\"\n\n\"And a small misunderstanding involving three corpses.\"",
+			"effects": {
+				"flags": {
+					"lyra_academy_asked": true
+				}
+			},
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_corpses": {
+			"text": "\"They were already dead when I found them.\"\n\nA short pause.\n\n\"At least two of them were.\"",
+			"effects": {
+				"flags": {
+					"lyra_quest_hint_corpses": true
+				}
+			},
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_matters": {
+			"text": "\"My books.\"",
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_trust": {
+			"text": "\"Trust is an exceptionally bad habit.\"",
+			"effects": {
+				"flags": {
+					"lyra_personal_quest_stage": 2
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_primitive": {
+			"text": "\"A fascinatingly primitive interpretation of my personality.\"",
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_dangerous": {
+			"text": "\"Of course I'm dangerous.\"\n\n\"The academy was just too cowardly to accept it.\"",
+			"choices": [
+				{
+					"text": "Why were you expelled from the academy?",
+					"next": "p_academy"
+				},
+				{
+					"text": "Three corpses?",
+					"if": [
+						{
+							"flag": "lyra_academy_asked"
+						}
+					],
+					"next": "p_corpses"
+				},
+				{
+					"text": "Is there anyone who matters to you?",
+					"next": "p_matters"
+				},
+				{
+					"text": "You're afraid to trust anyone.",
+					"check": {
+						"skill": "insight",
+						"dc": 16,
+						"success": "p_trust",
+						"failure": "p_primitive"
+					}
+				},
+				{
+					"text": "Maybe you were expelled because you really are dangerous.",
+					"next": "p_dangerous"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		}
+	}
+}

@@ -67,7 +67,12 @@ static func apply(state: GameState, effects: Dictionary, reward_key: String) -> 
 	if effects.has("recruit"):
 		events.append_array(PartyRules.recruit(state, String(effects["recruit"])))
 	if effects.has("dismiss"):
-		events.append_array(PartyRules.dismiss(state, String(effects["dismiss"])))
+		events.append_array(PartyRules.leave(state, String(effects["dismiss"]), "parted"))
+	for short: Variant in effects.get("leave", {}):
+		events.append_array(PartyRules.leave(state, PartyRules.id_for(String(short)), String(effects["leave"][short])))
+	# "Show me your gear": the level opens that companion's inventory when the talk ends.
+	if effects.has("inventory"):
+		events.append({"type": "open_inventory", "actor_id": PartyRules.id_for(String(effects["inventory"]))})
 	# Companions in the party comment and their loyalty moves; too little and they leave.
 	if effects.has("react"):
 		events.append_array(PartyRules.react(state, effects["react"], reward_key))

@@ -627,7 +627,7 @@
 			"text": "\"Maybe.\"\n\n\"Three men. Black coats. One wears a silver mask.\"",
 			"effects": {
 				"flags": {
-					"seren_personal_quest": "silver_mask"
+					"seren_personal_quest_stage": 1
 				},
 				"xp": 25
 			},
@@ -746,7 +746,7 @@
 			"effects": {
 				"flags": {
 					"seren_recruited": true,
-					"seren_personal_quest": "silver_mask",
+					"seren_personal_quest_stage": 1,
 					"seren_quest_required": true
 				},
 				"recruit": "companion_seren"

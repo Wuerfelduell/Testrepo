@@ -4,6 +4,8 @@ extends CanvasLayer
 
 signal action_requested(kind: String)
 signal actor_selected(actor_id: String)
+## Right-click on a companion's portrait: talk to them (camp dialogue).
+signal actor_talk(actor_id: String)
 signal skip_roll()
 signal rolls_finished()
 signal spell_requested(spell_id: String)
@@ -215,6 +217,8 @@ func _rebuild_portraits(state: GameState, current_id: String) -> void:
 		portrait.name = "Party_" + actor_id
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.gui_input.connect(_party_clicked.bind(actor_id))
+		if actor_id != "hero":
+			portrait.tooltip_text = tr("PARTY_TALK_HINT")
 		_party_column.add_child(portrait)
 
 func set_attack_mode(active: bool) -> void:
@@ -355,7 +359,12 @@ func consume_events(events: Array[Dictionary]) -> void:
 				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))
 			"party_left":
 				var left_name: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
-				_append_log(tr("PARTY_LOG_LOYALTY_LEFT" if String(event.get("reason", "")) == "loyalty" else "PARTY_LOG_LEFT") % left_name)
+				var left_key: String = "PARTY_LOG_LEFT"
+				if String(event.get("reason", "")) == "loyalty":
+					left_key = "PARTY_LOG_LOYALTY_LEFT"
+				elif String(event.get("mode", "")) == "camp":
+					left_key = "PARTY_LOG_CAMP"
+				_append_log(tr(left_key) % left_name)
 			"companion_reaction":
 				var change: int = int(event.get("loyalty", 0))
 				if change != 0:
@@ -760,6 +769,8 @@ func _portrait(actor: Dictionary, active: bool, dimensions: Vector2) -> Portrait
 func _party_clicked(event: InputEvent, actor_id: String) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		actor_selected.emit(actor_id)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		actor_talk.emit(actor_id)
 
 func _condition_text(actor: Dictionary) -> String:
 	var conditions: PackedStringArray = []

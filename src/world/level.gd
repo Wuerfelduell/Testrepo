@@ -52,6 +52,7 @@ func _ready() -> void:
 	if not ready_for_input:
 		return
 	CommandBus.command_applied.connect(_level_command_applied)
+	hud.actor_talk.connect(talk_to_member)
 	hud.area_key = String(level.get("name_key", ""))
 	dialogue.dice_popup = hud.dice_popup
 	hud.update_state(Game.state)
@@ -293,6 +294,8 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 						actors.erase(String(id))
 				_build_dormant_views()
 				_hide_finished_hooks.call_deferred()
+			"open_inventory":
+				_open_member_inventory.call_deferred(String(event.get("actor_id", "")))
 			"rest":
 				if String(event.get("rest", "")) == "long":
 					_start_banter.call_deferred("rest")
@@ -458,6 +461,22 @@ func _within_reach(state: GameState, hook_id: String) -> bool:
 	var target: Vector3 = _interact_point(hook_id)
 	var hero: Vector3 = state.actors[controlled_id()]["position"]
 	return target.is_finite() and Vector2(target.x - hero.x, target.z - hero.z).length() <= INTERACT_RANGE_M + 0.5
+
+## Talking to a companion in the party (owner's camp dialogues): out of combat only.
+func talk_to_member(actor_id: String) -> bool:
+	var camp_id: String = String(PartyRules.definition(actor_id).get("camp_dialogue", ""))
+	if camp_id.is_empty() or not PartyRules.is_member(Game.state, actor_id) or not ready_for_input or \
+			dialogue.is_open() or interaction.is_open() or Game.state.mode != &"exploration":
+		return false
+	return dialogue.open(camp_id)
+
+## "Show me your gear" in a companion's dialogue: their inventory opens once the talk ended.
+func _open_member_inventory(actor_id: String) -> void:
+	if not PartyRules.is_member(Game.state, actor_id) or dialogue.is_open():
+		return
+	select_member(actor_id)
+	if not menus.inventory.visible:
+		menus.toggle_inventory()
 
 ## Companions talk among themselves (data/companions/banter.json) after a long rest or on
 ## arriving in an area, once per banter, when nothing else is going on.

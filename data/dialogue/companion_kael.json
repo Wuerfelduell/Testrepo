@@ -1232,7 +1232,7 @@
 			"text": "\"We had a job in the old mines.\"\n\n\"Something was waiting for us down there.\"",
 			"effects": {
 				"flags": {
-					"kael_personal_quest": "last_mercenaries"
+					"kael_personal_quest_stage": 1
 				},
 				"xp": 25
 			},

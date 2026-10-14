@@ -68,6 +68,9 @@ Texts are the English source strings; a German translation can later key on them
   named companion who is in the party say their line and changes their loyalty
   (`kael_loyalty`) once per node or answer. A node with `"speaker": "lyra"` is spoken by
   that companion (banter, data/companions/banter.json).
+- **companions leaving**: `"leave": {"kael": "camp"}` (camp, parted or hostile, see
+  data/companions/README.md); `"inventory": "kael"` opens that companion's inventory after the
+  talk. A reaction may leave out its text and only change loyalty.
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
 
 **Fights from conversations.** The `fight` effect names an encounter of the current level
