@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"toll_the_dead"
+name_key = &"SPELL_TOLL_THE_DEAD"
+srd_name = "Toll the Dead"
+level = 0
+school = "necromancy"
+targeting = "creature"
+range_m = 18.0
+resolution = "save"
+save_ability = &"wis"
+damage_dice = "1d8"
+damage_type = &"necrotic"
+effect = &"toll_the_dead"
+vfx = &"toll_the_dead"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"thorn_whip"
+name_key = &"SPELL_THORN_WHIP"
+srd_name = "Thorn Whip"
+level = 0
+school = "transmutation"
+targeting = "creature"
+range_m = 9.0
+resolution = "attack"
+damage_dice = "1d6"
+damage_type = &"piercing"
+vfx = &"thorn_whip"

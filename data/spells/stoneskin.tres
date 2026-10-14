@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"stoneskin"
+name_key = &"SPELL_STONESKIN"
+srd_name = "Stoneskin"
+level = 4
+school = "transmutation"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"stoneskin"
+allies = true
+vfx = &"stoneskin"

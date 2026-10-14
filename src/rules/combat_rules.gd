@@ -42,7 +42,7 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	actor["moved_this_turn"] = false
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
 		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
-	if ActiveEffects.in_hostile_aura(state, actor_id):
+	if ActiveEffects.in_hostile_aura(state, actor_id) or DivineSpellEffects.slowing_zone(state, actor_id):
 		# Spirit Guardians halve the speed of enemies inside (judged at the start of the turn).
 		actor["move_left"] = float(actor["move_left"]) * 0.5
 	events.append_array(reveal_hidden(state))
@@ -169,7 +169,8 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 		return result
 	var attacker: Dictionary = state.actors[attacker_id]
 	var target: Dictionary = state.actors[target_id]
-	if not alive(attacker) or not alive(target) or attacker.get("team") == target.get("team"):
+	if not alive(attacker) or not alive(target) or attacker.get("team") == target.get("team") or \
+			DivineSpellEffects.untargetable(target):
 		return result
 	var weapon: Dictionary = attacker.get("weapon", {}) if attack_weapon.is_empty() else attack_weapon
 	if not attacker.get("position") is Vector3 or not target.get("position") is Vector3:
@@ -202,6 +203,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	disadvantages.append_array(ClassKits.attack_disadvantages(state, attacker_id, target_id, weapon))
 	disadvantages.append_array(ActiveEffects.attack_disadvantages(attacker))
 	disadvantages.append_array(ActiveEffects.incoming_disadvantages(target))
+	disadvantages.append_array(DivineSpellEffects.attack_disadvantages(state, attacker_id, target_id))
 	disadvantages.append_array(conditions_for(target).incoming_disadvantages(distance))
 	if ranged:
 		if origin.y - destination.y >= HEIGHT_ADVANTAGE_M:
@@ -221,7 +223,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 		advantage = 1
 	elif advantages.is_empty() and not disadvantages.is_empty():
 		advantage = -1
-	var bonus: int = ClassEffects.attack_bonus_estimate(attacker)
+	var bonus: int = ClassEffects.attack_bonus_estimate(attacker, weapon)
 	for modifier: RuleModifier in weapon_modifiers(weapon, "attack"):
 		bonus += modifier.amount
 	var chance: float = clampf(float(21 + bonus - int(result["armor_class"])) / 20.0, 0.05, 0.95)
@@ -242,6 +244,8 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	for modifier: RuleModifier in weapon_modifiers(weapon, "damage"):
 		flat_damage += modifier.amount
 	for modifier: RuleModifier in ClassKits.damage_bonus(state, attacker_id, target_id, weapon):
+		flat_damage += modifier.amount
+	for modifier: RuleModifier in DivineSpellEffects.damage_modifiers(attacker, weapon):
 		flat_damage += modifier.amount
 	result["chance"] = chance
 	result["critical_chance"] = crit_chance
@@ -393,7 +397,7 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 	context.advantages.assign(preview["advantages"])
 	context.disadvantages.assign(preview["disadvantages"])
 	var modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "attack")
-	modifiers.append_array(ClassEffects.attack_modifiers(attacker, rng))
+	modifiers.append_array(ClassEffects.attack_modifiers(attacker, rng, weapon))
 	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]), modifiers, rng, context)
 	ActiveEffects.consume_attack_riders(attacker)
 	ClassEffects.consume_on_attacked(target)
@@ -420,7 +424,9 @@ static func defenses_for(target: Dictionary) -> DamageRules.Defenses:
 	defenses.resistances.assign(target.get("resistances", []))
 	defenses.vulnerabilities.assign(target.get("vulnerabilities", []))
 	defenses.immunities.assign(target.get("immunities", []))
-	for damage_type: Variant in ClassKits.resistances(target):
+	var granted: Array = ClassKits.resistances(target)
+	granted.append_array(DivineSpellEffects.resistances(target))
+	for damage_type: Variant in granted:
 		if not StringName(String(damage_type)) in defenses.resistances:
 			defenses.resistances.append(StringName(String(damage_type)))
 	return defenses
@@ -444,6 +450,7 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append({"type": "feature", "actor_id": target_id, "feature_id": halved_by, "source_id": attacker_id})
 	var damage_modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "damage")
 	damage_modifiers.append_array(ClassKits.damage_bonus(state, attacker_id, target_id, weapon))
+	damage_modifiers.append_array(DivineSpellEffects.damage_modifiers(state.actors.get(attacker_id, {}), weapon))
 	var damage: DamageRules.Result = DamageRules.roll(String(weapon["damage_dice"]),
 		StringName(weapon["damage_type"]), rng, damage_modifiers, bool(outcome["critical"]), defenses,
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))

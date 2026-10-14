@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"thunderous_smite"
+name_key = &"SPELL_THUNDEROUS_SMITE"
+srd_name = "Thunderous Smite"
+level = 1
+school = "evocation"
+casting_time = "bonus_action"
+targeting = "self"
+resolution = "none"
+damage_dice = "2d6"
+damage_type = &"thunder"
+upcast_dice = "1d6"
+duration_rounds = 1
+effect = &"smite"
+vfx = &"thunderous_smite"

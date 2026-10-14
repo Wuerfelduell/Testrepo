@@ -45,7 +45,7 @@ static func granted_conditions(effect: Dictionary) -> Array[String]:
 		"entangle": return ["restrained"]
 		"turned": return ["frightened", "incapacitated"]
 		"frightened": return ["frightened"]
-	return []
+	return DivineSpellEffects.granted_conditions(effect)
 
 # ---------------------------------------------------------------- damage and defence
 
@@ -67,6 +67,8 @@ static func lose_hp(state: GameState, target_id: String, amount: int, rng: Rando
 		target["temp_hp"] = temporary - absorbed
 		left -= absorbed
 	target["hp"] = maxi(0, int(target["hp"]) - left)
+	if int(target["hp"]) <= 0:
+		DivineSpellEffects.death_ward(target)
 	if left > 0:
 		ActiveEffects.remove_where(target, func(effect: Dictionary) -> bool:
 			return String(effect.get("until", "")) == "damage")
@@ -91,6 +93,7 @@ static func attack_advantages(state: GameState, attacker_id: String, target_id: 
 		result.append(&"faerie_fire")
 	if not _effects_of(target, "guiding_bolt").is_empty():
 		result.append(&"guiding_bolt")
+	result.append_array(DivineSpellEffects.attack_advantages(target))
 	if bool(weapon.get("pack_tactics", false)):
 		var attacker: Dictionary = state.actors[attacker_id]
 		for id: String in state.actors:
@@ -108,14 +111,15 @@ static func consume_on_attacked(target: Dictionary) -> void:
 		return String(effect.get("kind", "")) == "guiding_bolt")
 
 ## Expected flat bonus for previews (Bless averages 2.5).
-static func attack_bonus_estimate(actor: Dictionary) -> int:
-	return 2 if not _effects_of(actor, "bless").is_empty() else 0
+static func attack_bonus_estimate(actor: Dictionary, weapon: Dictionary = {}) -> int:
+	return (2 if not _effects_of(actor, "bless").is_empty() else 0) + DivineSpellEffects.attack_bonus_estimate(actor, weapon)
 
 ## Bless: +1d4 to attack rolls, rolled now.
-static func attack_modifiers(actor: Dictionary, rng: RandomNumberGenerator) -> Array[RuleModifier]:
+static func attack_modifiers(actor: Dictionary, rng: RandomNumberGenerator, weapon: Dictionary = {}) -> Array[RuleModifier]:
 	var result: Array[RuleModifier] = []
 	if not _effects_of(actor, "bless").is_empty():
 		result.append(RuleModifier.new(Dice.roll("1d4", rng).total, &"bless"))
+	result.append_array(DivineSpellEffects.attack_modifiers(actor, weapon, rng))
 	return result
 
 ## Bless (+1d4) and Aura of Protection (+Charisma modifier, at least +1) on a saving throw.
@@ -129,6 +133,7 @@ static func save_modifiers(state: GameState, actor_id: String, rng: RandomNumber
 	var aura: int = aura_of_protection(state, actor_id)
 	if aura > 0:
 		result.append(RuleModifier.new(aura, &"aura_of_protection"))
+	result.append_array(DivineSpellEffects.save_modifiers(actor, rng))
 	return result
 
 ## The best Aura of Protection bonus reaching this creature (0 if none).
@@ -150,6 +155,8 @@ static func aura_of_protection(state: GameState, actor_id: String) -> int:
 ## Aura of Courage: immune to Frightened inside a level-10 Paladin's aura.
 static func fear_immune(state: GameState, actor_id: String) -> bool:
 	var actor: Dictionary = state.actors.get(actor_id, {})
+	if DivineSpellEffects.fear_immune(actor):
+		return true
 	if not actor.get("position") is Vector3:
 		return false
 	for id: String in state.actors:
@@ -183,11 +190,15 @@ static func hit_riders(state: GameState, attacker_id: String, target_id: String,
 	var attacker: Dictionary = state.actors.get(attacker_id, {})
 	var target: Dictionary = state.actors[target_id]
 	var is_weapon: bool = String(weapon.get("spell_id", "")).is_empty()
-	if attacker.is_empty() or not is_weapon:
+	if attacker.is_empty():
+		return {"events": events, "damage": damage}
+	if not is_weapon:
+		events.append_array(DivineSpellEffects.spell_hit(state, attacker_id, target_id, weapon))
 		return {"events": events, "damage": damage}
 	var riders: Array[Dictionary] = []
 	if not _effects_of(attacker, "divine_favor").is_empty():
 		riders.append({"dice": "1d4", "type": "radiant", "source": "divine_favor"})
+	riders.append_array(DivineSpellEffects.weapon_riders(state, attacker_id, target_id, weapon, rng, events))
 	var defenses: DamageRules.Defenses = CombatRules.defenses_for(target)
 	for rider: Dictionary in riders:
 		if not CombatRules.alive(target):
@@ -252,6 +263,8 @@ static func apply_effect(state: GameState, caster_id: String, target_id: String,
 			effect["rounds_left"] = maxi(1, spell.duration_rounds)
 		"wild_shape":
 			return wild_shape(state, caster_id, "wolf")
+		_:
+			DivineSpellEffects.prepare_effect(state, caster, target_id, spell, slot_level, effect)
 		"revert_wild_shape":
 			return revert_wild_shape(caster, caster_id)
 	# Recasting refreshes instead of stacking (Bless twice is one Bless).
@@ -287,6 +300,7 @@ static func on_turn_start(state: GameState, actor_id: String) -> Array[Dictionar
 				return String(effect.get("turn_of", "")) == actor_id and \
 					String(effect.get("until", "")) in ["rounds", "damage"] and int(effect.get("rounds_left", 1)) <= 0)
 			events.append({"type": "effects_expired", "actor_id": id})
+	events.append_array(DivineSpellEffects.on_turn_start(state, actor_id))
 	return events
 
 ## End of a held or entangled creature's turn: it repeats the save (Hold Person RAW;
@@ -310,6 +324,7 @@ static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGen
 				return String(other.get("kind", "")) == kind and String(other.get("source_id", "")) == source_id)
 			for condition: String in granted_conditions(effect):
 				events.append({"type": "condition_end", "actor_id": actor_id, "condition": condition})
+	events.append_array(DivineSpellEffects.on_turn_end(state, actor_id, rng))
 	return events
 
 # ---------------------------------------------------------------- Wild Shape
@@ -374,6 +389,8 @@ static func resource_available(state: GameState, caster: Dictionary, spell: Spel
 	match spell.feature_resource:
 		"free":
 			return spell.effect != &"revert_wild_shape" or caster.has("wild_shape")
+		"concentration":
+			return DivineSpellEffects.follow_up_available(caster, spell)
 		"lay_on_hands":
 			return int(features.get("lay_on_hands", {}).get("uses", 0)) > 0
 		"wild_shape":
@@ -387,7 +404,7 @@ static func resource_available(state: GameState, caster: Dictionary, spell: Spel
 static func spend_resource(state: GameState, caster: Dictionary, spell: SpellDefinition) -> void:
 	var features: Dictionary = caster.get("features", {})
 	match spell.feature_resource:
-		"free", "lay_on_hands":
+		"free", "lay_on_hands", "concentration":
 			return
 		"wild_shape":
 			var shape: Dictionary = features.get("wild_shape", {})

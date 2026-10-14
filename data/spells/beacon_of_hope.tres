@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"beacon_of_hope"
+name_key = &"SPELL_BEACON_OF_HOPE"
+srd_name = "Beacon of Hope"
+level = 3
+school = "abjuration"
+targeting = "self"
+area = "sphere"
+area_size_m = 9.0
+resolution = "none"
+concentration = true
+duration_rounds = 10
+effect = &"beacon_of_hope"
+allies = true
+vfx = &"beacon_of_hope"

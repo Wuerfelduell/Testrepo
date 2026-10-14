@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"silence"
+name_key = &"SPELL_SILENCE"
+srd_name = "Silence"
+level = 2
+school = "illusion"
+targeting = "point"
+range_m = 36.0
+area = "sphere"
+area_size_m = 6.0
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"zone"
+vfx = &"silence"

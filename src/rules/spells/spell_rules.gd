@@ -221,6 +221,7 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 	modifiers.append_array(extra)
 	var all_advantages: Array[StringName] = advantages.duplicate()
 	all_advantages.append_array(ClassKits.save_advantages(actor, ability))
+	all_advantages.append_array(DivineSpellEffects.save_advantages(actor, ability))
 	var roll: DiceResult = Dice.d20(rng, modifiers, all_advantages, disadvantages)
 	ActiveEffects.inspire_roll(actor, roll, dc, rng)
 	result["success"] = roll.is_valid() and roll.total >= dc

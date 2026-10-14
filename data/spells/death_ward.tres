@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"death_ward"
+name_key = &"SPELL_DEATH_WARD"
+srd_name = "Death Ward"
+level = 4
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+effect = &"death_ward"
+allies = true
+vfx = &"death_ward"

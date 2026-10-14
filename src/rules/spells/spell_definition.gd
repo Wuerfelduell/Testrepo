@@ -68,6 +68,15 @@ const SCHOOLS: Array[String] = ["abjuration", "conjuration", "divination", "ench
 @export var upcast_targets: int = 0
 ## Only creatures of these types are affected (Turn Undead: undead). Empty = any.
 @export var creature_types: Array[StringName] = []
+## Save spells whose damage lands either way; the save only decides the rider (Heat Metal).
+@export var damage_on_save: bool = false
+## "heal" resolution: false leaves the spellcasting modifier out (Aura of Vitality).
+@export var add_heal_modifier: bool = true
+## A spell that keeps working after the cast (Spiritual Weapon): casting it adds this
+## follow-up spell to the caster's list. The follow-up names its parent_spell and uses
+## feature_resource "concentration": castable while the caster concentrates on the parent.
+@export var follow_up: StringName = &""
+@export var parent_spell: StringName = &""
 
 func is_valid() -> bool:
 	if id == &"" or name_key == &"" or srd_name.is_empty() or srd_page < 0 or not school in SCHOOLS:

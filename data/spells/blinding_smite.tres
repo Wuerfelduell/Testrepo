@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"blinding_smite"
+name_key = &"SPELL_BLINDING_SMITE"
+srd_name = "Blinding Smite"
+level = 3
+school = "evocation"
+casting_time = "bonus_action"
+targeting = "self"
+resolution = "none"
+damage_dice = "3d8"
+damage_type = &"radiant"
+upcast_dice = "1d8"
+duration_rounds = 10
+effect = &"smite"
+vfx = &"blinding_smite"

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"moonbeam"
+name_key = &"SPELL_MOONBEAM"
+srd_name = "Moonbeam"
+level = 2
+school = "evocation"
+targeting = "point"
+range_m = 36.0
+area = "sphere"
+area_size_m = 1.5
+resolution = "save"
+save_ability = &"con"
+damage_dice = "2d10"
+damage_type = &"radiant"
+half_on_save = true
+upcast_dice = "1d10"
+concentration = true
+duration_rounds = 10
+effect = &"zone"
+vfx = &"moonbeam"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"dispel_magic"
+name_key = &"SPELL_DISPEL_MAGIC"
+srd_name = "Dispel Magic"
+level = 3
+school = "abjuration"
+targeting = "creature"
+range_m = 36.0
+resolution = "none"
+effect = &"dispel_magic"
+allies = true
+vfx = &"dispel_magic"

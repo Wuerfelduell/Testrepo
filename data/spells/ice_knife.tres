@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ice_knife"
+name_key = &"SPELL_ICE_KNIFE"
+srd_name = "Ice Knife"
+level = 1
+school = "conjuration"
+targeting = "creature"
+range_m = 18.0
+resolution = "attack"
+damage_dice = "1d10"
+damage_type = &"piercing"
+effect = &"ice_knife"
+vfx = &"ice_knife"

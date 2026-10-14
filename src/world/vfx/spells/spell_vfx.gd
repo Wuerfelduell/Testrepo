@@ -30,6 +30,23 @@ const STYLES: Dictionary = {
 	"bless": ["caster", RADIANT], "aid": ["caster", RADIANT], "divine_favor": ["caster", RADIANT],
 	"mass_healing_word": ["caster", HEAL], "turn_undead": ["caster", RADIANT], "abjure_foes": ["caster", RADIANT],
 	"wild_shape": ["caster", NATURE], "revert_wild_shape": ["caster", NATURE],
+	# 2024 Cleric, Paladin and Druid spells.
+	"toll_the_dead": ["target", NECROTIC], "word_of_radiance": ["caster", RADIANT],
+	"thorn_whip": ["bolt", NATURE], "bane": ["point", NECROTIC], "command": ["target", NECROTIC],
+	"heroism": ["target", SHIELD], "protection_from_evil_and_good": ["target", SHIELD],
+	"ice_knife": ["bolt", FROST], "searing_smite": ["caster", FIRE], "thunderous_smite": ["caster", RADIANT],
+	"wrathful_smite": ["caster", NECROTIC], "compelled_duel": ["target", NECROTIC],
+	"spiritual_weapon": ["bolt", RADIANT], "spiritual_weapon_strike": ["bolt", RADIANT],
+	"prayer_of_healing": ["caster", HEAL], "blindness_deafness": ["target", NECROTIC],
+	"moonbeam": ["point", RADIANT], "flame_blade": ["caster", FIRE], "flame_blade_strike": ["bolt", FIRE],
+	"heat_metal": ["target", FIRE], "heat_metal_repeat": ["target", FIRE], "shining_smite": ["caster", RADIANT],
+	"magic_weapon": ["target", SHIELD], "silence": ["point", ARCANE], "beacon_of_hope": ["caster", HEAL],
+	"bestow_curse": ["target", NECROTIC], "dispel_magic": ["target", SHIELD], "sleet_storm": ["point", FROST],
+	"blinding_smite": ["caster", RADIANT], "crusaders_mantle": ["caster", SHIELD],
+	"aura_of_vitality": ["caster", HEAL], "aura_of_vitality_heal": ["bolt", HEAL],
+	"elemental_weapon": ["target", SHIELD], "banishment": ["target", NECROTIC], "death_ward": ["target", HEAL],
+	"stoneskin": ["target", NATURE], "greater_restoration": ["target", HEAL],
+	"insect_plague": ["point", NATURE], "contagion": ["target", NECROTIC], "wrath_of_nature": ["point", NATURE],
 }
 const FADE: float = 0.5
 
@@ -306,7 +323,9 @@ func _update_markers(state: GameState, delta: float) -> void:
 				ring.queue_free()
 				_auras.erase(id)
 			else:
-				ring.global_position = node.global_position + Vector3.UP * 0.05
+				# Spirit Guardians follow the caster; zones (Moonbeam ...) stay where they were cast.
+				ring.global_position = (node.global_position if aura.effect != &"zone" else \
+					ActiveEffects.aura_center(record, aura)) + Vector3.UP * 0.05
 				ring.rotation.y += delta * 0.6
 
 func _bolt(color: Color, radius: float, trail: bool) -> Node3D:

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"wrath_of_nature"
+name_key = &"SPELL_WRATH_OF_NATURE"
+srd_name = "Wrath of Nature"
+level = 5
+school = "evocation"
+targeting = "point"
+range_m = 36.0
+area = "sphere"
+area_size_m = 9.0
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "4d6"
+damage_type = &"slashing"
+concentration = true
+duration_rounds = 10
+effect = &"zone"
+chosen_creatures = true
+vfx = &"wrath_of_nature"

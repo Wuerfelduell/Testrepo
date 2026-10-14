@@ -61,6 +61,10 @@ func apply(state: GameState) -> Dictionary:
 		# A new concentration spell ends the previous one.
 		events.append_array(ActiveEffects.end_concentration(state, actor_id, "new_spell"))
 		caster["concentration"] = {"spell_id": spell_id, "rounds_left": spell.duration_rounds, "slot_level": used_slot}
+		if spell.effect == &"zone" and point.is_finite():
+			# Zones (Moonbeam, Silence ...) stay where they were cast.
+			caster["concentration"]["point"] = point
+	DivineSpellEffects.add_follow_up(caster, spell)
 	state.pending = SpellResolver.cast_pending(state, actor_id, spell, used_slot, target_ids, point)
 	# Armed Metamagic is spent on this spell (the pending keeps it for the impact).
 	caster.erase("metamagic")

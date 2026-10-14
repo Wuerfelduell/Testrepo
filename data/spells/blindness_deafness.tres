@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"blindness_deafness"
+name_key = &"SPELL_BLINDNESS_DEAFNESS"
+srd_name = "Blindness/Deafness"
+level = 2
+school = "transmutation"
+targeting = "creature"
+range_m = 36.0
+resolution = "save"
+save_ability = &"con"
+duration_rounds = 10
+effect = &"blinded"
+vfx = &"blindness_deafness"

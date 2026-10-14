@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"greater_restoration"
+name_key = &"SPELL_GREATER_RESTORATION"
+srd_name = "Greater Restoration"
+level = 5
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+effect = &"greater_restoration"
+allies = true
+vfx = &"greater_restoration"

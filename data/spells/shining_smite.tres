@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"shining_smite"
+name_key = &"SPELL_SHINING_SMITE"
+srd_name = "Shining Smite"
+level = 2
+school = "transmutation"
+casting_time = "bonus_action"
+targeting = "self"
+resolution = "none"
+damage_dice = "2d6"
+damage_type = &"radiant"
+upcast_dice = "1d6"
+concentration = true
+duration_rounds = 10
+effect = &"smite"
+vfx = &"shining_smite"

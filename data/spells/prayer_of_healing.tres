@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"prayer_of_healing"
+name_key = &"SPELL_PRAYER_OF_HEALING"
+srd_name = "Prayer of Healing"
+level = 2
+school = "abjuration"
+targeting = "self"
+area = "sphere"
+area_size_m = 9.0
+resolution = "heal"
+heal_dice = "2d8"
+upcast_dice = "1d8"
+allies = true
+max_targets = 5
+vfx = &"prayer_of_healing"

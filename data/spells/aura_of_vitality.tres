@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"aura_of_vitality"
+name_key = &"SPELL_AURA_OF_VITALITY"
+srd_name = "Aura of Vitality"
+level = 3
+school = "abjuration"
+targeting = "self"
+resolution = "none"
+concentration = true
+duration_rounds = 10
+effect = &"aura_of_vitality"
+follow_up = &"aura_of_vitality_heal"
+vfx = &"aura_of_vitality"

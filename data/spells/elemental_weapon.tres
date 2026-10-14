@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"elemental_weapon"
+name_key = &"SPELL_ELEMENTAL_WEAPON"
+srd_name = "Elemental Weapon"
+level = 3
+school = "transmutation"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"elemental_weapon"
+allies = true
+vfx = &"elemental_weapon"

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"spiritual_weapon_strike"
+name_key = &"SPELL_SPIRITUAL_WEAPON_STRIKE"
+srd_name = "Spiritual Weapon"
+level = 2
+school = "evocation"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 18.0
+resolution = "attack"
+damage_dice = "1d8"
+damage_type = &"force"
+add_spell_modifier = true
+feature_resource = "concentration"
+parent_spell = &"spiritual_weapon"
+vfx = &"spiritual_weapon_strike"
