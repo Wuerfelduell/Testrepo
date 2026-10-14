@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"eldritch_blast"
+name_key = &"SPELL_ELDRITCH_BLAST"
+srd_name = "Eldritch Blast"
+level = 0
+school = "evocation"
+casting_time = "action"
+targeting = "darts"
+range_m = 36.0
+resolution = "attack"
+damage_dice = "1d10"
+damage_type = &"force"
+darts = 1
+vfx = &"eldritch_blast"

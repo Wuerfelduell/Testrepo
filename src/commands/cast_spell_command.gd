@@ -37,7 +37,7 @@ func apply(state: GameState) -> Dictionary:
 	# Class free casts (Ranger Favored Enemy: Hunter's Mark) are used before slots.
 	var free_cast: bool = slot_level == 0 and ClassKits.free_cast_available(caster, spell_id)
 	var used_slot: int = SpellResolver.effective_slot(caster, spell, slot_level)
-	match spell.casting_time:
+	match SpellResolver.casting_time(caster, spell):
 		"action": caster["action_available"] = false
 		"bonus_action": caster["bonus_available"] = false
 	if spell.is_feature():
@@ -58,6 +58,8 @@ func apply(state: GameState) -> Dictionary:
 		events.append_array(ActiveEffects.end_concentration(state, actor_id, "new_spell"))
 		caster["concentration"] = {"spell_id": spell_id, "rounds_left": spell.duration_rounds, "slot_level": used_slot}
 	state.pending = SpellResolver.cast_pending(state, actor_id, spell, used_slot, target_ids, point)
+	# Armed Metamagic is spent on this spell (the pending keeps it for the impact).
+	caster.erase("metamagic")
 	events.append(SpellResolver.start_event(state.pending))
 	return {"events": events}
 

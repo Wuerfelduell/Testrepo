@@ -1,0 +1,7 @@
+{
+	"_comment": "SRD 5.2 Bard starting equipment (option A): Leather Armor, 2 Daggers, 19 GP. The instrument and pack are not items in play yet.",
+	"items": {},
+	"starting_kits": {
+		"bard": {"equipped": {"main_hand": "dagger", "armor": "leather"}, "bag": {"dagger": 1, "potion_of_healing": 1}, "gold": 19}
+	}
+}

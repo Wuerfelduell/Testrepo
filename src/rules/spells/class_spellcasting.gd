@@ -63,7 +63,7 @@ const CASTERS: Dictionary = {
 	},
 	# Bard, Sorcerer, Warlock (thread "Barde, Zauberer, Hexenmeister"); class features in
 	# src/rules/classes/<id>_kit.gd. "bardic_inspiration" is a class action cast through
-	# the spell pipeline (its kit adds it), never a pick.
+	# the spell pipeline (a feature spell, always prepared), never a pick.
 	"bard": {
 		"ability": "cha", "progression": "full",
 		"cantrips": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4],
@@ -71,6 +71,7 @@ const CASTERS: Dictionary = {
 		"list": ["vicious_mockery", "starry_wisp", "healing_word", "dissonant_whispers", "thunderwave",
 			"sleep", "cure_wounds", "shatter", "hold_person", "phantasmal_killer", "hold_monster"],
 		"start": ["vicious_mockery", "starry_wisp", "healing_word", "dissonant_whispers", "thunderwave", "sleep"],
+		"always": {"bardic_inspiration": 1},
 	},
 	"sorcerer": {
 		"ability": "cha", "progression": "full",

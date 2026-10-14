@@ -1,0 +1,7 @@
+{
+	"_comment": "SRD 5.2 Warlock starting equipment (option A): Leather Armor, Sickle, 2 Daggers, 15 GP. Arcane focus, book and pack are not items in play yet.",
+	"items": {},
+	"starting_kits": {
+		"warlock": {"equipped": {"main_hand": "sickle", "armor": "leather"}, "bag": {"dagger": 2, "potion_of_healing": 1}, "gold": 15}
+	}
+}

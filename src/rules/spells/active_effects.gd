@@ -68,15 +68,49 @@ static func ac_bonus(actor: Dictionary) -> int:
 			total += int(effect.get("amount", 0))
 	return total
 
+## Effects that give disadvantage on the creature's next attack roll only.
+const NEXT_ATTACK_DISADVANTAGE: Array[String] = ["sap", "vicious_mockery"]
+
 static func attack_disadvantages(actor: Dictionary) -> Array[StringName]:
 	var result: Array[StringName] = []
-	if has_kind(actor, String(SAP)):
-		result.append(SAP)
+	for kind: String in NEXT_ATTACK_DISADVANTAGE:
+		if has_kind(actor, kind):
+			result.append(StringName(kind))
 	return result
 
-## Sap affects only the next attack roll.
+## Sap and Vicious Mockery affect only the next attack roll.
 static func consume_attack_riders(actor: Dictionary) -> void:
-	remove_where(actor, func(effect: Dictionary) -> bool: return String(effect.get("kind", "")) == String(SAP))
+	remove_where(actor, func(effect: Dictionary) -> bool: return String(effect.get("kind", "")) in NEXT_ATTACK_DISADVANTAGE)
+
+## Bardic Inspiration: a failed attack roll or saving throw that the die could still
+## turn into a success rolls it, adds it to the d20 roll and uses the inspiration up.
+## Returns the roll event fields ({} when not used). needed = the AC or DC to reach.
+static func inspire_roll(actor: Dictionary, roll: DiceResult, needed: int, rng: RandomNumberGenerator) -> Dictionary:
+	if roll == null or not roll.is_valid() or roll.natural_1 or roll.total >= needed:
+		return {}
+	for effect: Dictionary in effects(actor):
+		if String(effect.get("kind", "")) != "bardic_inspiration":
+			continue
+		var die: int = maxi(4, int(effect.get("die", 6)))
+		if roll.total + die < needed:
+			return {}
+		var bonus: DiceResult = Dice.roll("1d%d" % die, rng)
+		roll.add_modifiers([RuleModifier.new(bonus.total, &"bardic_inspiration")])
+		remove_where(actor, func(other: Dictionary) -> bool: return String(other.get("kind", "")) == "bardic_inspiration")
+		return {"die": die, "amount": bonus.total}
+	return {}
+
+## Riders of a save spell on a creature that failed the save: Vicious Mockery's
+## disadvantage on its next attack (Hold Person and co. are ClassEffects.apply_effect).
+static func save_rider(state: GameState, caster_id: String, target_id: String, spell: SpellDefinition,
+		_dc: int) -> Array[Dictionary]:
+	var target: Dictionary = state.actors[target_id]
+	match String(spell.effect):
+		"vicious_mockery":
+			add(target, {"kind": "vicious_mockery", "source_id": caster_id, "spell_id": String(spell.id),
+				"until": "start_of_turn", "turn_of": caster_id})
+			return [{"type": "effect", "actor_id": target_id, "source_id": caster_id, "kind": "vicious_mockery"}]
+	return []
 
 static func speed_penalty(actor: Dictionary) -> float:
 	var total: float = 0.0

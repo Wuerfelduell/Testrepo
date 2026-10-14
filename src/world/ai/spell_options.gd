@@ -164,7 +164,7 @@ static func _option(spell_id: String, target_ids: Array, point: Vector3, score: 
 static func _dart_plans(state: GameState, actor_id: String, spell: SpellDefinition,
 		targets: Array[String]) -> Array[Array]:
 	var plans: Array[Array] = []
-	var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(state.actors[actor_id], spell, 0))
+	var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(state.actors[actor_id], spell, 0), int(state.actors[actor_id].get("level", 1)))
 	var by_hp: Array[String] = targets.duplicate()
 	by_hp.sort_custom(func(a: String, b: String) -> bool: return int(state.actors[a]["hp"]) < int(state.actors[b]["hp"]))
 	for target_id: String in targets:

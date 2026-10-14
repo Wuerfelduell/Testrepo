@@ -99,8 +99,17 @@ func _start(event: Dictionary) -> void:
 		"hunters_mark":
 			effect["nodes"] = [_bolt(HUNT, 0.09, true)]
 		var other:
-			if STYLES.has(other) and STYLES[other][0] == "bolt":
-				effect["nodes"] = [_bolt(STYLES[other][1], 0.13, true)]
+			if STYLES.has(other):
+				if STYLES[other][0] == "bolt":
+					effect["nodes"] = [_bolt(STYLES[other][1], 0.13, true)]
+			else:
+				# Spells without their own look: a bolt per target in the damage type's colour.
+				var spell: SpellDefinition = SpellBook.get_spell(effect["spell_id"])
+				if spell != null and spell.targeting in ["creature", "darts"]:
+					var bolts: Array = []
+					for index: int in maxi(1, effect["target_ids"].size()):
+						bolts.append(_bolt(color_for(spell), 0.12, true))
+					effect["nodes"] = bolts
 	for node: Node3D in effect["nodes"]:
 		node.visible = false
 	_active.append(effect)
@@ -162,11 +171,14 @@ func _update(effect: Dictionary, state: GameState) -> void:
 			fire.global_position = hand
 			fire.emitting = time >= release and time < impact + 0.15
 			fire.visible = true
-		var other:
-			if not effect["nodes"].is_empty():
-				var node: Node3D = effect["nodes"][0]
-				node.visible = flying
-				node.global_position = hand.lerp(_target_point(effect, state, 0), progress) + Vector3.UP * sin(progress * PI) * 0.4
+		_:
+			for index: int in effect["nodes"].size():
+				var bolt: Node3D = effect["nodes"][index]
+				var destination: Vector3 = _target_point(effect, state, index)
+				# Beams leave one after another instead of as a bundle.
+				var stagger: float = clampf(progress * effect["nodes"].size() - index * 0.35, 0.0, 1.0) if effect["nodes"].size() > 1 else progress
+				bolt.visible = flying
+				bolt.global_position = hand.lerp(destination, stagger) + Vector3.UP * sin(stagger * PI) * 0.25
 	if not bool(effect["impacted"]) and time >= impact:
 		effect["impacted"] = true
 		_impact(effect, state)
@@ -195,19 +207,47 @@ func _impact(effect: Dictionary, state: GameState) -> void:
 			if caster != null:
 				_burst(caster.global_position + Vector3.UP * 1.0, RADIANT, 120, 0.8, 5.5)
 		var other:
-			if not STYLES.has(other):
+			if STYLES.has(other):
+				var color: Color = STYLES[other][1]
+				match String(STYLES[other][0]):
+					"bolt", "target":
+						for index: int in maxi(1, effect["target_ids"].size()):
+							_burst(_target_point(effect, state, index), color, 55, 0.6, 2.6)
+					"point":
+						_burst((effect["point"] as Vector3) + Vector3.UP * 0.5, color, 110, 0.8, 5.0)
+					"caster":
+						var source: Node3D = actors.get(effect["actor_id"]) as Node3D
+						if source != null:
+							_burst(source.global_position + Vector3.UP * 1.0, color, 80, 0.7, 3.5)
 				return
-			var color: Color = STYLES[other][1]
-			match String(STYLES[other][0]):
-				"bolt", "target":
-					for index: int in maxi(1, effect["target_ids"].size()):
-						_burst(_target_point(effect, state, index), color, 55, 0.6, 2.6)
-				"point":
-					_burst((effect["point"] as Vector3) + Vector3.UP * 0.5, color, 110, 0.8, 5.0)
-				"caster":
-					var source: Node3D = actors.get(effect["actor_id"]) as Node3D
-					if source != null:
-						_burst(source.global_position + Vector3.UP * 1.0, color, 80, 0.7, 3.5)
+			var spell: SpellDefinition = SpellBook.get_spell(effect["spell_id"])
+			if spell == null:
+				return
+			if spell.area != "none":
+				var caster_node: Node3D = actors.get(effect["actor_id"]) as Node3D
+				var center: Vector3 = (effect["point"] as Vector3) + Vector3.UP * 0.5
+				if spell.targeting == "self" and caster_node != null and spell.area == "sphere":
+					center = caster_node.global_position + Vector3.UP * 0.8
+				_burst(center, color_for(spell), 90 + int(spell.area_size_m * 6.0), 0.7, maxf(2.5, spell.area_size_m * 1.2))
+			else:
+				for index: int in maxi(1, effect["target_ids"].size()):
+					_burst(_target_point(effect, state, index), color_for(spell), 50, 0.5, 3.0)
+
+## Colour of a spell without its own effect, from its damage type or effect.
+static func color_for(spell: SpellDefinition) -> Color:
+	match String(spell.damage_type):
+		"fire": return FIRE
+		"cold": return FROST
+		"radiant": return RADIANT
+		"poison", "acid": return POISON
+		"lightning": return Color(0.7, 0.85, 1.0)
+		"necrotic": return Color(0.55, 0.2, 0.6)
+		"psychic": return Color(1.0, 0.45, 0.85)
+		"thunder": return Color(0.75, 0.75, 0.95)
+		"force": return Color(0.75, 0.35, 1.0)
+	if spell.allies:
+		return HEAL
+	return SLEEP
 
 func _target_point(effect: Dictionary, state: GameState, index: int) -> Vector3:
 	var ids: Array = effect["target_ids"]
