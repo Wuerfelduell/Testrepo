@@ -179,7 +179,7 @@ INV_BAG,BAG
 INV_SLOT_MAIN_HAND,Main hand
 INV_SLOT_OFF_HAND,Off hand
 INV_SLOT_ARMOR,Armour
-INV_FOOTER,"Carrying %.1f / %.0f kg (above: slowed, above %.0f kg: badly slowed)   ·   %d gold   ·   Click: equip or drink   ·   Right-click: drop   ·   I / Esc closes"
+INV_FOOTER,"Carrying %.1f / %.0f kg (above: slowed, above %.0f kg: badly slowed)   ·   %s   ·   Click: equip or drink   ·   Right-click: drop   ·   I / Esc closes"
 INV_STAT_AC,Armour Class %d
 INV_STAT_ATTACK,%s: %+d to hit · %s %s
 INV_STAT_SPEED,Speed %.1f m
@@ -496,6 +496,11 @@ ITEM_TYPE_VALUABLE,Valuable (sell later)
 ITEM_SILVER_RING,Silver ring
 ITEM_CULT_AMULET,Cult amulet
 ITEM_BONE_DICE,Bone dice
+ITEM_TYPE_QUEST,Quest item
+ITEM_WANTED_POSTER,Wanted poster: the Ashen Man
+ITEM_SYMBOL_SKETCH,Sketch of a circle with seven lines
+ITEM_SEALED_PACKAGE,Mara's sealed package
+ITEM_BLACK_RELIC,Sealed black relic
 CLASS_WIZARD,Wizard
 LEVELUP_BUTTON,Level up to %d
 LEVELUP_TITLE,LEVEL %d · %s
@@ -673,6 +678,12 @@ DIALOGUE_CHECK,[%s DC %d]
 DIALOGUE_CHECK_SUCCESS,SUCCESS
 DIALOGUE_CHECK_FAIL,FAILED
 DIALOGUE_XP_TITLE,A choice with weight
+DIALOGUE_ITEM_GAINED,Received: %s
+DIALOGUE_ITEM_LOST,Handed over: %s
+DIALOGUE_DAMAGE,%d damage
+MONEY_GP,%d gp
+MONEY_SP,%d sp
+MONEY_CP,%d cp
 XP_REASON_DIALOGUE,Conversation
 AREA_XP_SHORT,+%d XP · %s
 COMBAT_ROLL_CHECK,%s check

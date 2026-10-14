@@ -46,6 +46,10 @@
 		"silver_ring": {"type": "valuable", "name_key": "ITEM_SILVER_RING", "weight_kg": 0.05, "value_gp": 25},
 		"cult_amulet": {"type": "valuable", "name_key": "ITEM_CULT_AMULET", "weight_kg": 0.1, "value_gp": 10},
 		"bone_dice": {"type": "valuable", "name_key": "ITEM_BONE_DICE", "weight_kg": 0.05, "value_gp": 1},
+		"wanted_poster": {"type": "quest", "name_key": "ITEM_WANTED_POSTER", "weight_kg": 0.0, "value_gp": 0},
+		"symbol_sketch": {"type": "quest", "name_key": "ITEM_SYMBOL_SKETCH", "weight_kg": 0.0, "value_gp": 0},
+		"sealed_package": {"type": "quest", "name_key": "ITEM_SEALED_PACKAGE", "weight_kg": 1.0, "value_gp": 0},
+		"black_relic": {"type": "quest", "name_key": "ITEM_BLACK_RELIC", "weight_kg": 0.5, "value_gp": 0},
 		"potion_of_healing": {"type": "consumable", "name_key": "ITEM_POTION_OF_HEALING", "effect": "heal",
 			"dice": "2d4", "bonus": 2, "cost": "bonus_action", "weight_kg": 0.225, "value_gp": 50}
 	},

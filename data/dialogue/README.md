@@ -39,10 +39,24 @@ Texts are the English source strings; a German translation can later key on them
   dice popup. Each check is rolled **once**: after that the answer is gone (RULE 4).
 - **conditions** (`if`, all must hold): `{"flag": "x"}` flag set, `{"flag": "x", "is": false}`
   not set, `{"flag": "x", "is": "killed"}` exact value, `{"class": "wizard"}`,
-  `{"proficient": "arcana"}`, and the party conditions below.
+  `{"proficient": "arcana"}`, `{"any": [conditions]}` (one of them), and the counter, money,
+  item and party conditions below.
 - **effects**: `flags` (set world flags, any value) and `xp` (paid once per node or choice,
   never farmed by repeating). Good choices and violent choices both give XP (DESIGN.md).
-  Companions in the party get the same XP.
+  Companions in the party get the same XP. All other effects happen every time the node is
+  entered or the answer picked, so guard rewards with a flag.
+- **counters**: `"add": {"garrik_relationship": -1}` adds to a flag (unset = 0). Condition
+  `{"flag": "garrik_relationship", "min": 1}` and/or `"max": -3` compares it.
+- **money** (owner's economy: copper, silver, gold; 10 cp = 1 sp, 100 cp = 1 gp):
+  `"money": -5` pays 5 copper, `"money": 3500` gives 35 silver. An answer that costs more
+  than the hero has is hidden. Condition `{"money": 100}` needs at least 100 cp (1 gp).
+- **items**: `"item": {"wanted_poster": 1}` gives, `-1` hands over (hidden when the hero
+  lacks it). Condition `{"item": "sealed_package"}` (`"is": false` = not carried). Item ids
+  come from data/items/items.json; story items have `"type": "quest"`.
+- **damage**: `"damage": {"dice": "1d4", "type": "bludgeoning"}` hurts the hero, but never
+  below 1 HP: a conversation never ends the run.
+- **fight**: `"fight": {"encounter": "gate_guards", "nonlethal": true}` ends the conversation
+  and starts that encounter of the current level (see below).
 - **party** (package K4): effect `"recruit": "companion_a"` adds that companion to the party
   (4 at most, hero included), `"dismiss": "companion_a"` sends them away (they keep their
   state and can be recruited again). Conditions `{"in_party": "companion_a"}` (add

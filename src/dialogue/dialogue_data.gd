@@ -7,7 +7,9 @@ extends RefCounted
 ## later be added as a catalogue keyed by these strings.
 
 const DIRECTORY: String = "res://data/dialogue/"
-const CONDITION_KEYS: Array[String] = ["flag", "is", "class", "proficient", "in_party", "party_room", "any"]
+const CONDITION_KEYS: Array[String] = ["flag", "is", "min", "max", "class", "proficient", "in_party", "party_room",
+	"money", "item", "any"]
+const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight"]
 
 static var _cache: Dictionary = {}
 
@@ -103,6 +105,13 @@ static func condition_problems(conditions: Variant, where: String) -> PackedStri
 		if condition.has("in_party") and String(condition["in_party"]) != "hero" and \
 				PartyRules.definition(String(condition["in_party"])).is_empty():
 			found.append(where + ": unknown companion " + String(condition["in_party"]))
+		for key: String in ["min", "max", "money"]:
+			if condition.has(key) and not _is_number(condition[key]):
+				found.append(where + ": %s must be a number" % key)
+		if (condition.has("min") or condition.has("max")) and not condition.has("flag"):
+			found.append(where + ": min and max need a flag")
+		if condition.has("item") and not ItemCatalog.has(String(condition["item"])):
+			found.append(where + ": unknown item " + String(condition["item"]))
 		if condition.has("party_room") and not condition["party_room"] is bool:
 			found.append(where + ": party_room must be true or false")
 		if condition.has("any"):
@@ -117,7 +126,7 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 		return PackedStringArray([where + ": effects must be an object"])
 	var found: PackedStringArray = []
 	for key: Variant in effects:
-		if not String(key) in ["flags", "xp", "recruit", "dismiss"]:
+		if not String(key) in EFFECT_KEYS:
 			found.append(where + ": unknown effect " + String(key))
 	for key: String in ["recruit", "dismiss"]:
 		if effects.has(key) and PartyRules.definition(String(effects[key])).is_empty():
@@ -126,7 +135,37 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 		found.append(where + ": flags must be an object")
 	if effects.has("xp") and (not (effects["xp"] is float or effects["xp"] is int) or int(effects["xp"]) < 0):
 		found.append(where + ": xp must be a positive number")
+	if effects.has("add"):
+		if not effects["add"] is Dictionary or not (effects["add"] as Dictionary).values().all(_is_number):
+			found.append(where + ": add must map flags to numbers")
+	if effects.has("money") and not _is_number(effects["money"]):
+		found.append(where + ": money must be a number of copper pieces")
+	if effects.has("item"):
+		if not effects["item"] is Dictionary:
+			found.append(where + ": item must map item ids to counts")
+		else:
+			for item_id: Variant in effects["item"]:
+				if not ItemCatalog.has(String(item_id)) or not _is_number(effects["item"][item_id]):
+					found.append(where + ": unknown item or count " + String(item_id))
+	if effects.has("damage"):
+		var damage: Variant = effects["damage"]
+		if not damage is Dictionary or Dice.parse(String(damage.get("dice", ""))).has("error") or \
+				not StringName(String(damage.get("type", ""))) in DamageRules.TYPES:
+			found.append(where + ": damage needs dice and a damage type")
+	if effects.has("fight"):
+		var fight: Variant = effects["fight"]
+		if not fight is Dictionary or not fight.get("encounter") is String or String(fight["encounter"]).is_empty():
+			found.append(where + ": fight needs an encounter id")
 	return found
+
+static func _is_number(value: Variant) -> bool:
+	return value is int or value is float
+
+## A flag read as a counter: numbers as they are, true = 1, anything else 0.
+static func number(value: Variant) -> int:
+	if _is_number(value):
+		return int(value)
+	return 1 if value is bool and value else 0
 
 # Conditions ------------------------------------------------------------------------------
 
@@ -137,13 +176,19 @@ static func flags(state: GameState) -> Dictionary:
 ## or "is": <value> for an exact value. {"class": id}, {"proficient": skill} test the hero.
 ## {"in_party": companion} needs that companion in the party ("is": false = not in it);
 ## {"party_room": true} needs a free place in the party (package K4).
+## {"flag": f, "min": n, "max": m} reads the flag as a counter (unset = 0).
+## {"money": n} needs at least n copper, {"item": id} the item in the bag ("is": false = not).
 ## {"any": [conditions]} holds when at least one of them does.
 static func conditions_met(conditions: Variant, state: GameState) -> bool:
 	if not conditions is Array:
 		return false
 	var hero: Dictionary = state.actors.get("hero", {})
 	for condition: Dictionary in conditions:
-		if condition.has("flag"):
+		if condition.has("flag") and (condition.has("min") or condition.has("max")):
+			var counter: int = number(flags(state).get(String(condition["flag"]), 0))
+			if counter < int(condition.get("min", counter)) or counter > int(condition.get("max", counter)):
+				return false
+		elif condition.has("flag"):
 			var value: Variant = flags(state).get(String(condition["flag"]), false)
 			var wanted: Variant = condition.get("is", true)
 			if wanted is bool:
@@ -160,6 +205,11 @@ static func conditions_met(conditions: Variant, state: GameState) -> bool:
 			if member != (bool(condition.get("is", true)) if condition.get("is", true) is bool else true):
 				return false
 		if condition.has("party_room") and PartyRules.has_room(state) != bool(condition["party_room"]):
+			return false
+		if condition.has("money") and Money.copper(hero) < int(condition["money"]):
+			return false
+		if condition.has("item") and (EquipmentRules.count(hero, String(condition["item"])) > 0) != \
+				bool(condition.get("is", true)):
 			return false
 		if condition.has("any") and not (condition["any"] as Array).any(
 				func(option: Dictionary) -> bool: return conditions_met([option], state)):
@@ -198,9 +248,19 @@ static func available_choices(data: Dictionary, node_id: String, state: GameStat
 	var rolled: Dictionary = state.world.get("dialogue_checks", {})
 	for index: int in range(choices.size()):
 		var choice: Dictionary = choices[index]
-		if not conditions_met(choice.get("if", []), state):
+		if not conditions_met(choice.get("if", []), state) or not affordable(choice.get("effects", {}), state):
 			continue
 		if choice.has("check") and rolled.has(check_key(String(data.get("id", "")), node_id, index)):
 			continue
 		result.append(index)
 	return result
+
+## An answer that pays copper or hands over an item is only offered when the hero has it.
+static func affordable(effects: Dictionary, state: GameState) -> bool:
+	var hero: Dictionary = state.actors.get("hero", {})
+	if int(effects.get("money", 0)) < 0 and Money.copper(hero) < -int(effects["money"]):
+		return false
+	for item_id: Variant in effects.get("item", {}):
+		if int(effects["item"][item_id]) < 0 and EquipmentRules.count(hero, String(item_id)) < -int(effects["item"][item_id]):
+			return false
+	return true

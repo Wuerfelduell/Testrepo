@@ -13,6 +13,8 @@ static func type_line(item: Dictionary) -> String:
 			return tr_key("ITEM_TYPE_SHIELD")
 		"valuable":
 			return tr_key("ITEM_TYPE_VALUABLE")
+		"quest":
+			return tr_key("ITEM_TYPE_QUEST")
 	return tr_key("ITEM_TYPE_CONSUMABLE")
 
 ## BBCode lines: stats first, then properties, weight and value.

@@ -100,7 +100,7 @@ func update_state(state: GameState) -> void:
 			bag_slots[index].set_item("")
 	_stats.text = _stat_text(actor)
 	_footer.text = MenuStyle.text("INV_FOOTER") % [EquipmentRules.total_weight_kg(actor),
-		EquipmentRules.capacity_kg(actor), EquipmentRules.capacity_kg(actor) * 2.0, int(actor.get("gold", 0))]
+		EquipmentRules.capacity_kg(actor), EquipmentRules.capacity_kg(actor) * 2.0, Money.format(Money.copper(actor))]
 	_footer.add_theme_color_override("font_color", [MenuStyle.MUTED, Color("e8b45a"), MenuStyle.RED][EquipmentRules.encumbrance(actor)])
 	if _hovered != null and tooltip != null and tooltip.visible:
 		_on_hovered(_hovered)

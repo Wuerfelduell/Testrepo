@@ -142,7 +142,7 @@ static func take(state: GameState, actor_id: String, source_id: String, item_id:
 	var taken: Dictionary = {"items": {}, "gold": 0}
 	if take_all or item_id == "gold":
 		taken["gold"] = int(loot["gold"])
-		actor["gold"] = int(actor.get("gold", 0)) + int(loot["gold"])
+		Money.change(actor, int(loot["gold"]) * Money.CP_PER_GP)
 		loot["gold"] = 0
 	var items: Dictionary = loot["items"]
 	for id: String in items.keys():

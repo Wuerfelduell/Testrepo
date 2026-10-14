@@ -3,7 +3,7 @@ extends RefCounted
 ## SRD 5.2 equipment as data (data/items/items.json). Pure lookups, no scene access.
 
 const PATH: String = "res://data/items/items.json"
-const TYPES: Array[String] = ["weapon", "armor", "shield", "consumable", "valuable"]
+const TYPES: Array[String] = ["weapon", "armor", "shield", "consumable", "valuable", "quest"]
 const LOOT_PATH: String = "res://data/items/loot_tables.json"
 const SLOTS: Array[String] = ["main_hand", "off_hand", "armor"]
 

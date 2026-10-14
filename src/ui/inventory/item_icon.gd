@@ -57,6 +57,9 @@ func _draw() -> void:
 		"silver_ring": _ring()
 		"cult_amulet": _amulet()
 		"bone_dice": _dice()
+		"wanted_poster", "symbol_sketch": _paper(item_id == "symbol_sketch")
+		"sealed_package": _package()
+		"black_relic": _relic()
 		_: draw_circle(_p(50, 50), _w(30), STEEL_DARK)
 
 func _sword(long: bool) -> void:
@@ -154,6 +157,28 @@ func _amulet() -> void:
 	draw_circle(_p(50, 62), _w(20), Color("3a1418"))
 	draw_circle(_p(50, 62), _w(12), Color("c3313b"))
 	draw_line(_p(50, 50), _p(50, 74), BRASS, _w(3))
+
+func _paper(sketch: bool) -> void:
+	_poly([Vector2(24, 14), Vector2(78, 18), Vector2(74, 88), Vector2(20, 84)], Color("e8dcc0"))
+	if sketch:
+		draw_arc(_p(48, 50), _w(18), 0, TAU, 32, Color("3a1418"), _w(3))
+		for index: int in range(7):
+			var angle: float = TAU * index / 7.0
+			draw_line(_p(48, 50), _p(48 + cos(angle) * 18, 50 + sin(angle) * 18), Color("3a1418"), _w(2))
+	else:
+		draw_circle(_p(48, 42), _w(14), Color("5a4a3a"))
+		for line: int in range(3):
+			draw_line(_p(32, 64 + line * 7), _p(64, 64 + line * 7), Color("5a4a3a"), _w(2))
+
+func _package() -> void:
+	draw_rect(Rect2(_p(18, 30), _p(82, 80) - _p(18, 30)), Color("8a6a44"))
+	draw_line(_p(50, 30), _p(50, 80), Color("3a2a1a"), _w(4))
+	draw_line(_p(18, 55), _p(82, 55), Color("3a2a1a"), _w(4))
+	draw_circle(_p(50, 55), _w(7), Color("c3313b"))
+
+func _relic() -> void:
+	_poly([Vector2(50, 12), Vector2(74, 50), Vector2(50, 90), Vector2(26, 50)], Color("1a1418"))
+	draw_circle(_p(50, 50), _w(8), Color("6b2a8a"))
 
 func _dice() -> void:
 	draw_rect(Rect2(_p(18, 40), _p(52, 74) - _p(18, 40)), Color("e8e0cf"))

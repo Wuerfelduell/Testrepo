@@ -1,7 +1,7 @@
 class_name EquipmentRules
 extends RefCounted
 ## Inventory and equipment on plain actor records. Pure: no nodes, no global RNG.
-## Actor fields: "inventory" [{item, count}], "equipment" {main_hand, off_hand, armor}, "gold".
+## Actor fields: "inventory" [{item, count}], "equipment" {main_hand, off_hand, armor}, "money" (copper, see Money).
 ## Equipping recalculates the derived combat values ("weapon", "attacks", "ac", "speed_m").
 
 const BASE_SPEED_M: float = 9.0
@@ -39,7 +39,7 @@ static func initialize(actor: Dictionary, class_id: String, training: Training) 
 		return false
 	actor["equipment"] = equipment
 	actor["inventory"] = []
-	actor["gold"] = int(kit.get("gold", 0))
+	Money.set_copper(actor, int(kit.get("gold", 0)) * Money.CP_PER_GP)
 	for item_id: String in kit.get("bag", {}):
 		if not ItemCatalog.has(item_id):
 			return false
