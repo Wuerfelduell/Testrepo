@@ -4,12 +4,32 @@
 	"title": "The eighth prisoner",
 	"start_if": [
 		{
-			"flag": "hint_eighth_prisoner"
+			"any": [
+				{
+					"flag": "hint_eighth_prisoner"
+				},
+				{
+					"flag": "vaelor_prisoner_hint"
+				}
+			]
 		}
 	],
 	"stages": [
 		{
-			"text": "Malrek: the cult killed seven people. Eight, if the boy is still alive."
+			"text": "Malrek: the cult killed seven people. Eight, if the boy is still alive.",
+			"if": [
+				{
+					"flag": "hint_eighth_prisoner"
+				}
+			]
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_prisoner_hint"
+				}
+			],
+			"text": "Vaelor needs one more life for his ritual. He glanced at a locked side door."
 		}
 	]
 }

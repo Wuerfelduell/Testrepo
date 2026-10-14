@@ -84,7 +84,7 @@
 					"text": "(Open the cell with Vaelor's key.)",
 					"if": [
 						{
-							"flag": "defeated_cult_priest"
+							"item": "vaelor_key"
 						}
 					],
 					"next": "freed"
@@ -149,7 +149,7 @@
 					"text": "(Open the cell with Vaelor's key.)",
 					"if": [
 						{
-							"flag": "defeated_cult_priest"
+							"item": "vaelor_key"
 						}
 					],
 					"next": "freed"

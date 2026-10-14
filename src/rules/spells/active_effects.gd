@@ -10,6 +10,9 @@ const SAP: StringName = &"sap"
 const HIDDEN: String = "hidden"
 const STEADY_AIM: String = "steady_aim"
 const CUNNING_POISON: String = "cunning_poison"
+## A conversation that ends in a fight can grant the hero advantage on its first attack
+## (owner's Vaelor dialogue: he hesitates, or breaks down). Set by EncounterTriggerCommand.
+const FIRST_STRIKE: String = "first_strike"
 
 static func effects(actor: Dictionary) -> Array:
 	return actor.get("effects", [])
@@ -82,10 +85,10 @@ static func attack_disadvantages(actor: Dictionary) -> Array[StringName]:
 			result.append(StringName(kind))
 	return result
 
-## Advantage sources the attacker carries: hidden and Steady Aim.
+## Advantage sources the attacker carries: hidden, Steady Aim and a first strike.
 static func attack_advantages(actor: Dictionary) -> Array[StringName]:
 	var result: Array[StringName] = []
-	for kind: String in [HIDDEN, STEADY_AIM]:
+	for kind: String in [HIDDEN, STEADY_AIM, FIRST_STRIKE]:
 		if has_kind(actor, kind):
 			result.append(StringName(kind))
 	return result
@@ -97,12 +100,12 @@ static func incoming_disadvantages(target: Dictionary) -> Array[StringName]:
 		result.append(&"target_hidden")
 	return result
 
-## Sap, Vicious Mockery and Steady Aim affect only the next attack roll; making an attack
-## roll ends hiding.
+## Sap, Vicious Mockery, Steady Aim and a first strike affect only the next attack roll;
+## making an attack roll ends hiding.
 static func consume_attack_riders(actor: Dictionary) -> void:
 	remove_where(actor, func(effect: Dictionary) -> bool:
 		var kind: String = String(effect.get("kind", ""))
-		return kind in NEXT_ATTACK_DISADVANTAGE or kind in [HIDDEN, STEADY_AIM])
+		return kind in NEXT_ATTACK_DISADVANTAGE or kind in [HIDDEN, STEADY_AIM, FIRST_STRIKE])
 
 ## Bardic Inspiration: a failed attack roll or saving throw that the die could still
 ## turn into a success rolls it, adds it to the d20 roll and uses the inspiration up.

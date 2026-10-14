@@ -45,9 +45,9 @@
 			]
 		},
 		{
-			"id": "shrine", "room": "shrine", "difficulty": "boss", "boss": true, "joins": [],
+			"id": "shrine", "room": "shrine", "difficulty": "boss", "boss": true, "joins": [], "on_dialogue": true,
 			"members": [
-				{"id": "cult_priest", "monster": "cult_priest", "position": [0.0, 1.0, -54.0], "facing": [0.0, 0.0, 1.0], "pose": "praying"},
+				{"id": "cult_priest", "monster": "cult_priest", "name_key": "NPC_VAELOR", "hook": "crypt_vaelor", "defeat_flags": {"vaelor_outcome": "killed", "vaelor_manuscript_found": true}, "position": [0.0, 1.0, -54.0], "facing": [0.0, 0.0, 1.0], "pose": "praying"},
 				{"id": "shrine_cultist_a", "monster": "cultist", "personality": "brute", "position": [-6.0, 0.0, -46.5], "facing": [0.0, 0.0, 1.0], "pose": "guarding"},
 				{"id": "shrine_cultist_b", "monster": "cultist", "personality": "brute", "position": [6.0, 0.0, -46.5], "facing": [0.0, 0.0, 1.0], "pose": "guarding"}
 			]
@@ -59,7 +59,8 @@
 		{"id": "crypt_inscription", "dialogue": "crypt_inscription", "position": [-4.0, 0.0, 16.5], "model": "", "pose": ""},
 		{"id": "crypt_wounded_cultist", "dialogue": "crypt_wounded_cultist", "hide_if": [{"any": [{"flag": "crypt_wounded_cultist", "is": "killed"}, {"flag": "crypt_wounded_cultist", "is": "freed"}]}], "position": [8.5, 0.0, -0.3], "model": "res://assets/characters/enemy_cultist/model.glb", "pose": "Fixing_Kneeling", "facing": [-1.0, 0.0, 0.0]},
 		{"id": "crypt_prisoner", "dialogue": "crypt_prisoner", "position": [18.0, 0.0, -9.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Sitting_Idle", "facing": [-1.0, 0.0, 0.0], "interact_at": [15.6, 0.0, -9.0], "hide_if": [{"any": [{"flag": "thomas_status", "is": "escorted"}, {"flag": "thomas_status", "is": "sent_home"}, {"flag": "thomas_status", "is": "watch"}, {"flag": "thomas_status", "is": "fled"}, {"flag": "thomas_status", "is": "dead"}]}]},
-		{"id": "crypt_courier", "dialogue": "crypt_courier", "position": [-9.0, 0.0, -19.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Death01", "facing": [1.0, 0.0, 0.0]}
+		{"id": "crypt_courier", "dialogue": "crypt_courier", "position": [-9.0, 0.0, -19.0], "model": "res://assets/characters/male_peasant/model.glb", "pose": "Death01", "facing": [1.0, 0.0, 0.0]},
+		{"id": "crypt_vaelor", "dialogue": "crypt_vaelor", "position": [0.0, 1.0, -54.0], "model": "res://assets/characters/boss_cult_priest/model.glb", "pose": "Spell_Simple_Idle", "facing": [0.0, 0.0, 1.0], "interact_at": [0.0, 0.0, -50.5], "approach_m": 12.5, "approach_if": [{"flag": "vaelor_encounter_started", "is": false}], "hide_if": [{"any": [{"flag": "shrine_fight", "is": "running"}, {"flag": "defeated_cult_priest"}, {"flag": "vaelor_outcome", "is": "escaped"}, {"flag": "vaelor_outcome", "is": "ritual_completed"}]}]}
 	],
 	"exits": [
 		{"id": "crypt_to_torviertel", "position": [0.0, 0.0, 18.8], "to": "res://data/encounters/torviertel.json", "arrive": [-19.6, 0.0, -14.0]}

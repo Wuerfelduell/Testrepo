@@ -10,7 +10,7 @@ const DIRECTORY: String = "res://data/dialogue/"
 const CONDITION_KEYS: Array[String] = ["flag", "is", "min", "max", "class", "proficient", "in_party", "party_room",
 	"money", "item", "any"]
 const EFFECT_KEYS: Array[String] = ["flags", "add", "xp", "money", "item", "damage", "recruit", "dismiss", "fight", "react",
-	"leave", "inventory"]
+	"leave", "inventory", "disband"]
 
 static var _cache: Dictionary = {}
 
@@ -180,6 +180,8 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 		var fight: Variant = effects["fight"]
 		if not fight is Dictionary or not fight.get("encounter") is String or String(fight["encounter"]).is_empty():
 			found.append(where + ": fight needs an encounter id")
+	if effects.has("disband") and (not effects["disband"] is String or String(effects["disband"]).is_empty()):
+		found.append(where + ": disband needs an encounter id")
 	return found
 
 static func _is_number(value: Variant) -> bool:

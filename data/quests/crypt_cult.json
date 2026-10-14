@@ -49,12 +49,44 @@
 				}
 			],
 			"text": "The cult is led by Priest Vaelor. He claims the dead will return."
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_motive_known"
+				}
+			],
+			"text": "Vaelor wants to bring his dead wife back. He believes the ritual will return the dead."
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_ritual_stone_discovered"
+				}
+			],
+			"text": "A black stone behind the altar is the source of Vaelor's ritual."
 		}
 	],
 	"done_if": [
 		{
-			"flag": "defeated_cult_priest"
+			"any": [
+				{
+					"flag": "defeated_cult_priest"
+				},
+				{
+					"flag": "vaelor_outcome",
+					"is": "captured"
+				},
+				{
+					"flag": "vaelor_outcome",
+					"is": "escaped"
+				},
+				{
+					"flag": "vaelor_outcome",
+					"is": "ritual_completed"
+				}
+			]
 		}
 	],
-	"done_text": "Priest Vaelor is dead."
+	"done_text": "Priest Vaelor no longer leads the cult."
 }

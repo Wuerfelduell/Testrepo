@@ -6,6 +6,6 @@
 		"rolls": [{"item": "silver_ring", "chance": 0.35}, {"item": "potion_of_healing", "chance": 0.25}, {"item": "dagger", "chance": 0.3}]},
 	"cultist": {"gear": {"sickle": 1, "leather": 1}, "gold": "1d6",
 		"rolls": [{"item": "cult_amulet", "chance": 0.6}, {"item": "potion_of_healing", "chance": 0.4}]},
-	"cult_priest": {"gear": {"quarterstaff": 1}, "gold": "5d10",
+	"cult_priest": {"gear": {"quarterstaff": 1, "vaelor_key": 1, "vaelor_manuscript": 1}, "gold": "5d10",
 		"rolls": [{"item": "potion_of_healing", "chance": 1.0}, {"item": "cult_amulet", "chance": 1.0}, {"item": "silver_ring", "chance": 0.5}]}
 }

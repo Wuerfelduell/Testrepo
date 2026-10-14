@@ -46,6 +46,11 @@ func apply(state: GameState) -> Dictionary:
 		state.world.erase("dialogue_fight")
 		if bool(fight.get("nonlethal", false)):
 			state.world["nonlethal"] = {"encounter": actor_id}
+	# Flag "<encounter>_first_strike" (a conversation): the hero's first attack has advantage.
+	var flags: Dictionary = state.world.get("flags", {})
+	if DialogueData.is_set(flags.get(actor_id + "_first_strike")):
+		flags[actor_id + "_first_strike"] = false
+		ActiveEffects.add(state.actors["hero"], {"kind": String(ActiveEffects.FIRST_STRIKE), "source_id": actor_id})
 	var triggered: Array = state.world.get("triggered", [])
 	triggered.append(actor_id)
 	state.world["triggered"] = triggered

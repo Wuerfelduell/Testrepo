@@ -1,0 +1,22 @@
+{
+	"version": 1,
+	"id": "the_fallen_priest",
+	"title": "The fallen priest",
+	"start_if": [
+		{
+			"flag": "vaelor_outcome",
+			"is": "captured"
+		}
+	],
+	"stages": [
+		{
+			"text": "Vaelor gave himself up and will testify. He sits bound in the crypt; take him to the city watch."
+		}
+	],
+	"done_if": [
+		{
+			"flag": "vaelor_delivered"
+		}
+	],
+	"done_text": "Vaelor is in the hands of the city watch."
+}

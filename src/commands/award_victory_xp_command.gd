@@ -41,6 +41,8 @@ func apply(state: GameState) -> Dictionary:
 			actor["xp_awarded"] = true
 			# Quests and dialogue read who is dead from the flags (data/quests/).
 			flags["defeated_" + id] = true
+			for name: Variant in actor.get("defeat_flags", {}):
+				flags[String(name)] = actor["defeat_flags"][name]
 	state.world["flags"] = flags
 	var sheet: CharacterSheet = rebuild_sheet(hero)
 	var award: Progression.Award = sheet.grant_xp(amount, REASON_KEY)

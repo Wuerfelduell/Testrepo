@@ -110,6 +110,9 @@ static func member_record(member: Dictionary, encounter_id: String) -> Dictionar
 	# This member is a dialogue hook's figure: no separate dormant figure stands next to it.
 	if member.get("hook") is String:
 		record["hook"] = String(member["hook"])
+	# Flags set when the party defeats this member (AwardVictoryXpCommand), e.g. vaelor_outcome.
+	if member.get("defeat_flags") is Dictionary:
+		record["defeat_flags"] = (member["defeat_flags"] as Dictionary).duplicate()
 	return record
 
 static func patrol_route(member: Dictionary) -> Array[Vector3]:

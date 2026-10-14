@@ -63,6 +63,19 @@ static func apply(state: GameState, effects: Dictionary, reward_key: String) -> 
 			state.world["flags"] = fight_flags
 			events.append({"type": "dialogue_fight", "encounter_id": encounter_id,
 				"nonlethal": bool(effects["fight"].get("nonlethal", false))})
+	# A waiting encounter stands down (Vaelor surrenders, his cultists lay down their arms):
+	# its members leave the area and flag "<encounter>_fight" becomes "disbanded".
+	if effects.has("disband"):
+		var disband_id: String = String(effects["disband"])
+		var waiting: Dictionary = state.world.get("dormant", {})
+		if waiting.has(disband_id):
+			var ids: Array = (waiting[disband_id] as Dictionary).keys()
+			ids.sort()
+			waiting.erase(disband_id)
+			var disband_flags: Dictionary = state.world.get("flags", {})
+			disband_flags[disband_id + "_fight"] = "disbanded"
+			state.world["flags"] = disband_flags
+			events.append({"type": "encounter_disbanded", "encounter_id": disband_id, "actor_ids": ids})
 	# Party (package K4): companions join or leave through conversations.
 	if effects.has("recruit"):
 		events.append_array(PartyRules.recruit(state, String(effects["recruit"])))

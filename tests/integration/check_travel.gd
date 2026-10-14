@@ -42,7 +42,8 @@ func _run() -> void:
 	check(yard.interact("yard_to_crypt"), "The yard's exit answers")
 	var back: DungeonLevel = await _wait_for_level(yard)
 	check(back != null and String(game.state.world["level"]) == "crypt", "Back in the crypt")
-	check(back.dormant_views.size() == 12, "The crypt's enemies are still waiting")
+	# Vaelor is his conversation's figure (hook), not a dormant view.
+	check(back.dormant_views.size() == 11, "The crypt's enemies are still waiting")
 	EncounterData._cache.erase(EncounterData.CRYPT_PATH)
 	print("TRAVEL_CHECKS: %d, failed: %s" % [checks, str(failed)])
 	get_tree().quit(1 if failed else 0)

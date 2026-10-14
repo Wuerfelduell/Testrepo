@@ -609,6 +609,8 @@ ITEM_WANTED_POSTER,Wanted poster: the Ashen Man
 ITEM_SYMBOL_SKETCH,Sketch of a circle with seven lines
 ITEM_SEALED_PACKAGE,Mara's sealed package
 ITEM_BLACK_RELIC,Sealed black relic
+ITEM_VAELOR_KEY,Vaelor's keys
+ITEM_VAELOR_MANUSCRIPT,Vaelor's manuscript
 CLASS_WIZARD,Wizard
 LEVELUP_BUTTON,Level up to %d
 LEVELUP_TITLE,LEVEL %d · %s
@@ -800,6 +802,7 @@ NPC_GATE_GUARD,Gate guard
 NPC_BORIK,Borik Hagen
 NPC_REGULAR,Regular
 NPC_MARA,Mara Veldrin
+NPC_VAELOR,Vaelor Threnn
 MONEY_GP,%d gp
 MONEY_SP,%d sp
 MONEY_CP,%d cp

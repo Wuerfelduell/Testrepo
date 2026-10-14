@@ -133,6 +133,7 @@ func _process(delta: float) -> void:
 		_pending_interaction = ""
 		if _within_reach(state, hook_id):
 			interact(hook_id)
+	_check_approach(state)
 	if _level_capture_frames >= 0:
 		_frame_times.append(delta)
 		_level_capture_frames -= 1
@@ -287,6 +288,11 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 				var fight: Dictionary = Game.state.world.get("dialogue_fight", {})
 				if not fight.is_empty():
 					_trigger.call_deferred(String(fight["encounter"]))
+			"encounter_disbanded":
+				for id: Variant in event.get("actor_ids", []):
+					if dormant_views.has(String(id)):
+						(dormant_views[String(id)] as Node3D).queue_free()
+						dormant_views.erase(String(id))
 			"nonlethal_end":
 				for id: Variant in event.get("returned", []):
 					if actors.has(String(id)):
@@ -438,6 +444,26 @@ func _rest_marker(anchor: Node3D) -> void:
 	embers.omni_range = 4.0
 	embers.position = Vector3(0.9, 0.4, 0.0)
 	anchor.add_child(embers)
+
+## A hook with "approach_m" opens its conversation by itself once the controlled hero stands
+## still that close (Vaelor speaks first when the party enters the shrine), as long as its
+## "approach_if" conditions hold; afterwards it is clicked like any other hook.
+func _check_approach(state: GameState) -> void:
+	if state.mode != &"exploration" or not state.pending.is_empty() or dialogue.is_open() or interaction.is_open():
+		return
+	if not state.actors.has(controlled_id()):
+		return
+	var hero: Vector3 = state.actors[controlled_id()]["position"]
+	for hook: Dictionary in level.get("hooks", []):
+		var id: String = String(hook["id"])
+		if not hook.has("approach_m") or not hook_views.has(id):
+			continue
+		if hook.has("approach_if") and not DialogueData.conditions_met(hook["approach_if"], state):
+			continue
+		var at: Vector3 = EncounterData.vector(hook["position"])
+		if Vector2(at.x - hero.x, at.z - hero.z).length() <= float(hook["approach_m"]):
+			interact(id)
+			return
 
 func _hook_under_cursor() -> String:
 	var cursor: Vector2 = get_viewport().get_mouse_position()

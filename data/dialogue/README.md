@@ -71,7 +71,12 @@ Texts are the English source strings; a German translation can later key on them
 - **companions leaving**: `"leave": {"kael": "camp"}` (camp, parted or hostile, see
   data/companions/README.md); `"inventory": "kael"` opens that companion's inventory after the
   talk. A reaction may leave out its text and only change loyalty.
+- **disband**: `"disband": "shrine"` makes a waiting encounter of the current level stand
+  down (its members leave, flag `shrine_fight` becomes `"disbanded"`): Vaelor gives up and
+  his cultists lay down their arms.
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
+  A hook with `"approach_m": 12.5` opens its conversation by itself once the hero stands that
+  close, while its `"approach_if"` conditions hold (Vaelor speaks first).
 
 **Fights from conversations.** The `fight` effect names an encounter of the current level
 file. It starts when the conversation closes (best on a node without answers). Mark such
@@ -79,7 +84,9 @@ encounters `"on_dialogue": true` so they never notice the hero by themselves. A 
 carry `"name_key"` and `"model"` (a named person with an SRD stat block, e.g. Garrik as a
 Guard) and `"hook": "<hook id>"` when it is that hook's figure (no second figure stands
 beside it; give the hook `"hide_if": [{"flag": "<encounter>_fight", "is": "running"}]`).
-Flag `<encounter>_fight` is `"running"` during the fight. With `"nonlethal": true` nobody
+Flag `<encounter>_fight` is `"running"` during the fight. Set flag `<encounter>_first_strike`
+before the fight starts and the hero's first attack in it has advantage (Vaelor hesitates).
+A member's `"defeat_flags": {"vaelor_outcome": "killed"}` are set when the party defeats it. With `"nonlethal": true` nobody
 dies (knocked out at 0 HP, event `knocked_out`). When the hero or all enemies are down,
 everyone knocked out stands up with 1 HP, the enemies wait at their places again (no loot,
 no XP) and the flag becomes `"won"` or `"lost"`. Lethal fights end as usual (`defeated_<id>`
@@ -90,6 +97,19 @@ never buys loyalty; consequences come from each NPC's personality and interests,
 good/evil scale; a failed check never blocks the main story, the information stays reachable
 elsewhere. Write consequences as flags or counters (e.g. `garrik_threatened`, `player_cruelty`)
 so later conversations can react to them.
+
+Design rules for all dialogue (owner, 14-10-2026, Vaelor and camp document part 8):
+1. **No endless rolls.** A failed check cannot be rolled again by clicking the same answer.
+   The engine keeps every roll (choices with the same `"id"` share one).
+2. **Consequences stay.** Whoever badly insults a companion cannot undo it with one kind
+   sentence. Loyalty and counters only move in small steps.
+3. **Companions have their own interests.** They may refuse orders that fundamentally go
+   against their convictions or personal goals.
+4. **The player can lose companions.** A relationship destroyed for good can mean that
+   companion can never be recruited again.
+5. **No early reveal of the city below.** Vaelor, Lyra and others may investigate historical
+   oddities, but nobody may know that a living, sealed-in civilisation exists beneath
+   Rabenfels. At the start only the supreme ruler knows it.
 
 Flags live in `Game.state.world["flags"]` and are saved. `tests/unit/dialogue/` checks every
 file in this folder, so a broken link between nodes fails the tests.

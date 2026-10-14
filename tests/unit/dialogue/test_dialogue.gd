@@ -106,8 +106,8 @@ func test_xp_is_paid_once_and_conditions_filter() -> void:
 	var state: GameState = _fresh()
 	var hero: Dictionary = state.actors["hero"]
 	var prisoner: Dictionary = DialogueData.load_dialogue("crypt_prisoner")
-	assert_false(5 in DialogueData.available_choices(prisoner, "first", state), "The key needs the dead priest")
-	state.world["flags"]["defeated_cult_priest"] = true
+	assert_false(5 in DialogueData.available_choices(prisoner, "first", state), "The key needs Vaelor's keys")
+	EquipmentRules.add_item(hero, "vaelor_key", 1)
 	assert_true(5 in DialogueData.available_choices(prisoner, "first", state))
 	_run(state, DialogueStartCommand.new("crypt_wounded_cultist"))
 	var before: int = int(hero.get("xp", 0))

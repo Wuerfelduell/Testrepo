@@ -39,7 +39,8 @@ func _run() -> void:
 		frames += 1
 	check(level.ready_for_input, "Crypt initializes fully")
 	check(level.dungeon.navigation.navigation_mesh.get_polygon_count() > 0, "Baked crypt navmesh loads")
-	check(level.dormant_views.size() == 12, "Every dormant enemy is drawn in its pose")
+	# Vaelor stands as his conversation's figure (hook "crypt_vaelor"), not as a dormant view.
+	check(level.dormant_views.size() == 11, "Every dormant enemy is drawn in its pose")
 	check(level.fader != null and level.fader.occluders.size() > 40, "Walls are registered for the cutaway")
 	_check_geometry()
 	level.set_physics_process(false)
@@ -82,7 +83,19 @@ func _run() -> void:
 	check(level.dormant_encounters() == ["shrine"], "Only the boss waits before the shrine")
 	var hero_hp: int = int(game.state.actors["hero"]["hp"])
 	check(hero_hp > 0 and game.state.mode == &"exploration", "The hero reaches the boss alive and rested")
-	await _walk(Vector3(0.0, 0, -44.0), "shrine", false)
+	# Vaelor speaks first (owner's dialogue, 14-10-2026); "Enough talk." starts the boss fight.
+	await _walk(Vector3(0.0, 0, -44.0), "")
+	for frame: int in range(5):
+		await get_tree().process_frame
+	check(level.dialogue.is_open() and game.state.world.get("conversation", {}).get("node", "") == "opening",
+		"Vaelor speaks to the hero entering the shrine")
+	check(not level.dormant_views.has("cult_priest") and level.hook_views.has("crypt_vaelor"), "Vaelor stands as one figure")
+	bus.submit(DialogueChooseCommand.new(5))
+	check(game.state.world.get("conversation", {}).get("node", "") == "fight", "Enough talk")
+	bus.submit(DialogueEndCommand.new())
+	for frame: int in range(10):
+		await get_tree().process_frame
+	check(not level.hook_views.has("crypt_vaelor"), "Vaelor's talking figure steps aside while he fights")
 	var state: GameState = game.state
 	check(state.mode == &"combat" and "cult_priest" in state.turn_order, "The Cult Priest's fight starts")
 	check(state.actors.has("cult_priest") and int(state.actors["cult_priest"]["max_hp"]) == 38, "Boss uses the SRD Priest's hit points")

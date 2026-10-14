@@ -10,6 +10,9 @@
 				},
 				{
 					"flag": "edrin_heard_woman"
+				},
+				{
+					"flag": "hint_voice_beneath_stone"
 				}
 			]
 		}
@@ -25,6 +28,22 @@
 				}
 			],
 			"text": "\"When the last candle dies and the last warden falls, the mother holds her children far from that stranger world.\""
+		},
+		{
+			"if": [
+				{
+					"flag": "hint_voice_beneath_stone"
+				}
+			],
+			"text": "Vaelor heard a voice beneath the crypt: a woman singing, full of grief. The voice beneath the stone."
+		},
+		{
+			"if": [
+				{
+					"flag": "hint_returned_dead"
+				}
+			],
+			"text": "Vaelor's records: old accounts of people seen alive again after their death. Not as ghosts."
 		}
 	]
 }

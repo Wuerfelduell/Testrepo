@@ -1,0 +1,1605 @@
+{
+	"version": 1,
+	"id": "crypt_vaelor",
+	"speaker": "Vaelor Threnn",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "vaelor_outcome",
+					"is": "captured"
+				}
+			],
+			"node": "bound"
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_surrendered"
+				}
+			],
+			"node": "resolution_more"
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_pact"
+				}
+			],
+			"node": "pact_wait"
+		},
+		{
+			"if": [
+				{
+					"flag": "vaelor_encounter_started"
+				}
+			],
+			"node": "again"
+		},
+		{
+			"node": "opening"
+		}
+	],
+	"nodes": {
+		"opening": {
+			"text": "Dozens of candles light a circular altar. Several bodies lie on the floor, marked with strange symbols. An old priest stands with his back to the entrance.\n\"You are late.\"\nHe draws a sign in the air.\n\"I expected you sooner.\"\nSlowly he turns around.\n\"Well then. Perhaps our guest at least has the courtesy to give his name.\"",
+			"effects": {
+				"flags": {
+					"vaelor_encounter_started": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"I'm here to put an end to this madness.\"",
+					"next": "philosophy"
+				},
+				{
+					"text": "\"You are Vaelor. The man who slaughters people for his rituals.\"",
+					"next": "sacrifice"
+				},
+				{
+					"id": "kneel",
+					"text": "\"Kneel, old man. Maybe I'll let you live.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "hesitates",
+						"failure": "pathetic"
+					}
+				},
+				{
+					"text": "\"You should find yourself a better religion. This one doesn't seem to work very well.\" [Provoke]",
+					"next": "faith"
+				},
+				{
+					"id": "understand",
+					"text": "\"I want to understand what you are trying to do here.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "understand",
+						"failure": "judge"
+					}
+				},
+				{
+					"text": "\"Enough talk.\"",
+					"next": "fight"
+				},
+				{
+					"text": "(Step back and leave him for now.)"
+				}
+			]
+		},
+		"again": {
+			"text": "Vaelor watches you over the candles. \"Back again?\"",
+			"choices": [
+				{
+					"text": "\"I'm here to put an end to this madness.\"",
+					"next": "philosophy"
+				},
+				{
+					"text": "\"You are Vaelor. The man who slaughters people for his rituals.\"",
+					"next": "sacrifice"
+				},
+				{
+					"id": "kneel",
+					"text": "\"Kneel, old man. Maybe I'll let you live.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "hesitates",
+						"failure": "pathetic"
+					}
+				},
+				{
+					"text": "\"You should find yourself a better religion. This one doesn't seem to work very well.\" [Provoke]",
+					"next": "faith"
+				},
+				{
+					"id": "understand",
+					"text": "\"I want to understand what you are trying to do here.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "understand",
+						"failure": "judge"
+					}
+				},
+				{
+					"text": "\"Enough talk.\"",
+					"next": "fight"
+				},
+				{
+					"text": "(Step back and leave him for now.)"
+				}
+			]
+		},
+		"hub": {
+			"text": "Vaelor waits, his burned hand resting on the altar.",
+			"choices": [
+				{
+					"text": "\"I'm here to put an end to this madness.\"",
+					"next": "philosophy"
+				},
+				{
+					"text": "\"You are Vaelor. The man who slaughters people for his rituals.\"",
+					"next": "sacrifice"
+				},
+				{
+					"id": "kneel",
+					"text": "\"Kneel, old man. Maybe I'll let you live.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "hesitates",
+						"failure": "pathetic"
+					}
+				},
+				{
+					"text": "\"You should find yourself a better religion. This one doesn't seem to work very well.\" [Provoke]",
+					"next": "faith"
+				},
+				{
+					"id": "understand",
+					"text": "\"I want to understand what you are trying to do here.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "understand",
+						"failure": "judge"
+					}
+				},
+				{
+					"text": "\"Enough talk.\"",
+					"next": "fight"
+				},
+				{
+					"text": "(Step back and leave him for now.)"
+				}
+			]
+		},
+		"philosophy": {
+			"text": "\"Madness?\"\nHe laughs softly.\n\"You have no idea what is happening here. And yet you are already willing to kill people for it.\"\n\n\"Tell me, stranger.\"\n\"How many people have you seen die?\"\n\"How many have you killed yourself?\"",
+			"choices": [
+				{
+					"text": "\"Enough to know nobody deserves it.\"",
+					"next": "phil_lie"
+				},
+				{
+					"text": "\"I don't care. Dying is part of living.\"",
+					"next": "phil_comfortable"
+				},
+				{
+					"text": "\"I kill when it is necessary.\"",
+					"next": "phil_necessary"
+				},
+				{
+					"text": "\"You hide behind your religion because you are a cowardly murderer.\" [Provoke]",
+					"next": "phil_careful"
+				},
+				{
+					"text": "\"You really believe you can bring back the dead?\"",
+					"next": "phil_know"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"sacrifice": {
+			"text": "\"Slaughters?\"\nHe looks at one of the bodies.\n\"How crude.\"\n\"I prefer the word offering.\"\n\n\"Every step forward demands sacrifice.\"\n\"Kingdoms were built on corpses. Wars are fought for a handful of land.\"\n\"And you condemn me because I sacrifice seven lives to save thousands?\"",
+			"effects": {
+				"flags": {
+					"boss_name_known": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"You murdered seven people.\"",
+					"next": "sacr_yes"
+				},
+				{
+					"id": "enjoy",
+					"text": "\"You enjoy watching people die.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 14,
+						"success": "sacr_trembles",
+						"failure": "sacr_dont_know"
+					}
+				},
+				{
+					"id": "yourself",
+					"text": "\"If seven people are necessary, why not sacrifice yourself?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "sacr_unsure",
+						"failure": "sacr_dead_man"
+					}
+				},
+				{
+					"text": "\"Seven people? Then an eighth won't bother you.\" [Provoke]",
+					"next": "sacr_eighth"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"hesitates": {
+			"text": "Vaelor studies you in silence.\n\"Interesting. You have killed before.\"\n\"But have you ever watched someone you loved die?\"\nVaelor hesitates.",
+			"effects": {
+				"flags": {
+					"shrine_first_strike": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "philosophy_more"
+				}
+			]
+		},
+		"pathetic": {
+			"text": "\"You threaten a man who has already looked death in the face.\"\n\"How utterly pathetic.\"\n\n\"Tell me, stranger.\"\n\"How many people have you seen die?\"\n\"How many have you killed yourself?\"",
+			"choices": [
+				{
+					"text": "\"Enough to know nobody deserves it.\"",
+					"next": "phil_lie"
+				},
+				{
+					"text": "\"I don't care. Dying is part of living.\"",
+					"next": "phil_comfortable"
+				},
+				{
+					"text": "\"I kill when it is necessary.\"",
+					"next": "phil_necessary"
+				},
+				{
+					"text": "\"You hide behind your religion because you are a cowardly murderer.\" [Provoke]",
+					"next": "phil_careful"
+				},
+				{
+					"text": "\"You really believe you can bring back the dead?\"",
+					"next": "phil_know"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"faith": {
+			"text": "\"Mock all you like.\"\n\"Your gods have abandoned people just as mine have.\"\n\n\"The gods are silent.\"\n\"My wife begged to be healed. My son fasted forty days for her.\"\n\"She died anyway.\"",
+			"choices": [
+				{
+					"text": "\"I'm sorry.\"",
+					"next": "fait_pity"
+				},
+				{
+					"text": "\"Perhaps it was the will of your gods.\" [Provoke]",
+					"next": "fait_will"
+				},
+				{
+					"id": "wife",
+					"text": "\"Your wife would never have wanted these murders.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "fait_knew",
+						"failure": "fait_no"
+					}
+				},
+				{
+					"text": "\"You lost your wife and decided others should suffer the same.\"",
+					"next": "fait_nobody"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"understand": {
+			"text": "\"Understand?\"\nFor the first time the priest shows real interest.\n\"Perhaps you are not just another armed fool after all.\"\n\n\"Something lies beneath this city.\"\n\"Something older than our kingdoms.\"\n\"I have heard its voice.\"",
+			"effects": {
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"What kind of voice?\"",
+					"next": "rese_voice"
+				},
+				{
+					"text": "\"You are mad. There is no voice.\"",
+					"next": "rese_mad"
+				},
+				{
+					"id": "records",
+					"text": "\"What is in your records?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "rese_records",
+						"failure": "rese_earned"
+					}
+				},
+				{
+					"id": "source",
+					"text": "\"Show me the source of your power.\"",
+					"check": {
+						"skill": "deception",
+						"dc": 16,
+						"success": "rese_stone",
+						"failure": "rese_idiot"
+					}
+				},
+				{
+					"text": "\"What happens when you finish the ritual?\"",
+					"next": "rese_wife"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"judge": {
+			"text": "\"No. You want to judge. That is something else entirely.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "hub"
+				}
+			]
+		},
+		"philosophy_more": {
+			"text": "\"Tell me, stranger.\"\n\"How many people have you seen die?\"\n\"How many have you killed yourself?\"",
+			"choices": [
+				{
+					"text": "\"Enough to know nobody deserves it.\"",
+					"next": "phil_lie"
+				},
+				{
+					"text": "\"I don't care. Dying is part of living.\"",
+					"next": "phil_comfortable"
+				},
+				{
+					"text": "\"I kill when it is necessary.\"",
+					"next": "phil_necessary"
+				},
+				{
+					"text": "\"You hide behind your religion because you are a cowardly murderer.\" [Provoke]",
+					"next": "phil_careful"
+				},
+				{
+					"text": "\"You really believe you can bring back the dead?\"",
+					"next": "phil_know"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"phil_lie": {
+			"text": "\"A pretty lie.\"\n\"Death does not care about justice.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "philosophy_more"
+				}
+			]
+		},
+		"phil_comfortable": {
+			"text": "\"A remarkably comfortable view for someone who still breathes.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "philosophy_more"
+				}
+			]
+		},
+		"phil_necessary": {
+			"text": "\"Ah.\"\nHe smiles.\n\"Then perhaps we are less different than you think.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "philosophy_more"
+				}
+			]
+		},
+		"phil_careful": {
+			"text": "\"Careful.\"\nThe candles begin to flicker.\n\"I am ready to sacrifice myself for my faith. Are you ready to die for yours?\"",
+			"effects": {
+				"add": {
+					"vaelor_anger": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"max": 1
+						}
+					],
+					"next": "philosophy_more"
+				},
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"min": 2
+						}
+					],
+					"next": "lashes_out"
+				}
+			]
+		},
+		"phil_know": {
+			"text": "\"No.\"\nA short pause.\n\"I know it is possible.\"\n\n\"Something lies beneath this city.\"\n\"Something older than our kingdoms.\"\n\"I have heard its voice.\"",
+			"choices": [
+				{
+					"text": "\"What kind of voice?\"",
+					"next": "rese_voice"
+				},
+				{
+					"text": "\"You are mad. There is no voice.\"",
+					"next": "rese_mad"
+				},
+				{
+					"id": "records",
+					"text": "\"What is in your records?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "rese_records",
+						"failure": "rese_earned"
+					}
+				},
+				{
+					"id": "source",
+					"text": "\"Show me the source of your power.\"",
+					"check": {
+						"skill": "deception",
+						"dc": 16,
+						"success": "rese_stone",
+						"failure": "rese_idiot"
+					}
+				},
+				{
+					"text": "\"What happens when you finish the ritual?\"",
+					"next": "rese_wife"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"sacrifice_more": {
+			"text": "\"Every step forward demands sacrifice.\"\n\"Kingdoms were built on corpses. Wars are fought for a handful of land.\"\n\"And you condemn me because I sacrifice seven lives to save thousands?\"",
+			"choices": [
+				{
+					"text": "\"You murdered seven people.\"",
+					"next": "sacr_yes"
+				},
+				{
+					"id": "enjoy",
+					"text": "\"You enjoy watching people die.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 14,
+						"success": "sacr_trembles",
+						"failure": "sacr_dont_know"
+					}
+				},
+				{
+					"id": "yourself",
+					"text": "\"If seven people are necessary, why not sacrifice yourself?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "sacr_unsure",
+						"failure": "sacr_dead_man"
+					}
+				},
+				{
+					"text": "\"Seven people? Then an eighth won't bother you.\" [Provoke]",
+					"next": "sacr_eighth"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"sacr_yes": {
+			"text": "\"Yes.\"\nHe says it completely calmly.\n\"And I will not forget their faces until the day I die.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "sacrifice_more"
+				}
+			]
+		},
+		"sacr_trembles": {
+			"text": "Vaelor's hands tremble slightly. He truly suffers under what he has done, but he justifies his guilt with fanatical conviction.",
+			"effects": {
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"You know this is wrong. You are only afraid to admit it.\"",
+					"effects": {
+						"add": {
+							"vaelor_doubt_points": 1
+						}
+					},
+					"next": "doubt"
+				},
+				{
+					"text": "(Go on.)",
+					"next": "sacrifice_more"
+				}
+			]
+		},
+		"sacr_dont_know": {
+			"text": "\"You do not know me.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "sacrifice_more"
+				}
+			]
+		},
+		"sacr_unsure": {
+			"text": "Vaelor is silent for an unusually long time.\n\"Because... someone has to complete the ceremony.\"\nFor the first time he sounds unsure.\n\nVaelor looks at his burned hand.\n\"I promised them their sacrifice would not be in vain.\"\n\"If I stop now...\"\nHis voice breaks.\n\"Then I killed them for nothing.\"",
+			"effects": {
+				"add": {
+					"vaelor_doubt_points": 1
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"id": "stop",
+					"text": "\"Then at least stop anyone else from dying.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "kneels",
+						"failure": "too_far"
+					}
+				},
+				{
+					"id": "give_up",
+					"text": "\"You are a monster. But you can still give yourself up.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 19,
+						"success": "gallows",
+						"failure": "as_monster"
+					}
+				},
+				{
+					"text": "\"Finish the ritual. I want to see whether you are right.\"",
+					"next": "ritual"
+				},
+				{
+					"text": "\"Your wife is dead. And you are about to follow her.\" [Provoke]",
+					"next": "then_come"
+				},
+				{
+					"text": "(Attack Vaelor while he breaks down.)",
+					"next": "ambush"
+				}
+			]
+		},
+		"sacr_dead_man": {
+			"text": "\"Because a dead man cannot perform rituals.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "sacrifice_more"
+				}
+			]
+		},
+		"sacr_eighth": {
+			"text": "You draw your weapon.\n\"You will find that I am not as helpless as my victims.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"research_more": {
+			"text": "\"Something lies beneath this city.\"\n\"Something older than our kingdoms.\"\n\"I have heard its voice.\"",
+			"choices": [
+				{
+					"text": "\"What kind of voice?\"",
+					"next": "rese_voice"
+				},
+				{
+					"text": "\"You are mad. There is no voice.\"",
+					"next": "rese_mad"
+				},
+				{
+					"id": "records",
+					"text": "\"What is in your records?\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "rese_records",
+						"failure": "rese_earned"
+					}
+				},
+				{
+					"id": "source",
+					"text": "\"Show me the source of your power.\"",
+					"check": {
+						"skill": "deception",
+						"dc": 16,
+						"success": "rese_stone",
+						"failure": "rese_idiot"
+					}
+				},
+				{
+					"text": "\"What happens when you finish the ritual?\"",
+					"next": "rese_wife"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"rese_voice": {
+			"text": "\"A woman.\"\n\"She sang.\"\n\"I could not understand the words, but I felt her grief.\"",
+			"effects": {
+				"flags": {
+					"hint_voice_beneath_stone": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"rese_mad": {
+			"text": "\"Perhaps.\"\n\"But then explain to me why the dead sometimes whisper my name.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"rese_records": {
+			"text": "\"There are old accounts of people who were seen again after their death.\"\n\"Not as ghosts. As living, breathing people.\"",
+			"effects": {
+				"flags": {
+					"hint_returned_dead": true,
+					"vaelor_ritual_knowledge": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"rese_earned": {
+			"text": "\"Knowledge must be earned.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"rese_stone": {
+			"text": "Vaelor points at a black stone behind the altar.\n\"There. It answers, sometimes.\"\nYou have found the weak point of the ritual.",
+			"effects": {
+				"flags": {
+					"vaelor_ritual_stone_discovered": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"rese_idiot": {
+			"text": "\"You take me for an idiot.\"",
+			"effects": {
+				"add": {
+					"vaelor_anger": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"max": 1
+						}
+					],
+					"next": "research_more"
+				},
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"min": 2
+						}
+					],
+					"next": "lashes_out"
+				}
+			]
+		},
+		"rese_wife": {
+			"text": "\"The dead will return.\"\nHe smiles sadly.\n\"My wife will return.\"",
+			"effects": {
+				"flags": {
+					"vaelor_motive_known": true,
+					"vaelor_ritual_knowledge": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "research_more"
+				}
+			]
+		},
+		"faith_more": {
+			"text": "\"The gods are silent.\"\n\"My wife begged to be healed. My son fasted forty days for her.\"\n\"She died anyway.\"",
+			"choices": [
+				{
+					"text": "\"I'm sorry.\"",
+					"next": "fait_pity"
+				},
+				{
+					"text": "\"Perhaps it was the will of your gods.\" [Provoke]",
+					"next": "fait_will"
+				},
+				{
+					"id": "wife",
+					"text": "\"Your wife would never have wanted these murders.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "fait_knew",
+						"failure": "fait_no"
+					}
+				},
+				{
+					"text": "\"You lost your wife and decided others should suffer the same.\"",
+					"next": "fait_nobody"
+				},
+				{
+					"text": "(Talk about something else.)",
+					"next": "hub"
+				}
+			]
+		},
+		"fait_pity": {
+			"text": "\"Pity brings no one back.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "faith_more"
+				}
+			]
+		},
+		"fait_will": {
+			"text": "Vaelor slams his burned hand on the altar.\n\"DO NOT SPEAK OF THEIR WILL!\"",
+			"effects": {
+				"add": {
+					"vaelor_anger": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"max": 1
+						}
+					],
+					"next": "faith_more"
+				},
+				{
+					"text": "(Go on.)",
+					"if": [
+						{
+							"flag": "vaelor_anger",
+							"min": 2
+						}
+					],
+					"next": "lashes_out"
+				}
+			]
+		},
+		"fait_knew": {
+			"text": "Vaelor's face twists.\n\"You did not know her.\"\n\nVaelor looks at his burned hand.\n\"I promised them their sacrifice would not be in vain.\"\n\"If I stop now...\"\nHis voice breaks.\n\"Then I killed them for nothing.\"",
+			"effects": {
+				"add": {
+					"vaelor_doubt_points": 1
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"id": "stop",
+					"text": "\"Then at least stop anyone else from dying.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "kneels",
+						"failure": "too_far"
+					}
+				},
+				{
+					"id": "give_up",
+					"text": "\"You are a monster. But you can still give yourself up.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 19,
+						"success": "gallows",
+						"failure": "as_monster"
+					}
+				},
+				{
+					"text": "\"Finish the ritual. I want to see whether you are right.\"",
+					"next": "ritual"
+				},
+				{
+					"text": "\"Your wife is dead. And you are about to follow her.\" [Provoke]",
+					"next": "then_come"
+				},
+				{
+					"text": "(Attack Vaelor while he breaks down.)",
+					"next": "ambush"
+				}
+			]
+		},
+		"fait_no": {
+			"text": "\"No. You did not.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "faith_more"
+				}
+			]
+		},
+		"fait_nobody": {
+			"text": "\"I decided that no one should ever have to suffer such a loss again.\"",
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "faith_more"
+				}
+			]
+		},
+		"doubt": {
+			"text": "Vaelor looks at his burned hand.\n\"I promised them their sacrifice would not be in vain.\"\n\"If I stop now...\"\nHis voice breaks.\n\"Then I killed them for nothing.\"",
+			"choices": [
+				{
+					"id": "stop",
+					"text": "\"Then at least stop anyone else from dying.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "kneels",
+						"failure": "too_far"
+					}
+				},
+				{
+					"id": "give_up",
+					"text": "\"You are a monster. But you can still give yourself up.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 19,
+						"success": "gallows",
+						"failure": "as_monster"
+					}
+				},
+				{
+					"text": "\"Finish the ritual. I want to see whether you are right.\"",
+					"next": "ritual"
+				},
+				{
+					"text": "\"Your wife is dead. And you are about to follow her.\" [Provoke]",
+					"next": "then_come"
+				},
+				{
+					"text": "(Attack Vaelor while he breaks down.)",
+					"next": "ambush"
+				}
+			]
+		},
+		"kneels": {
+			"text": "Vaelor sinks to his knees.\n\"I... cannot go on.\"\n\nVaelor kneels before the altar.\n\"What happens to me now?\"",
+			"effects": {
+				"flags": {
+					"vaelor_surrendered": true
+				},
+				"disband": "shrine",
+				"xp": 500,
+				"react": {
+					"kael": {
+						"text": "You want to let him live? After what he did here?",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "Good. A living fanatic is far more useful than a dead one.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "Tie him up properly. Men like that regret their deeds remarkably fast once they smell an advantage."
+					}
+				}
+			},
+			"choices": [
+				{
+					"text": "\"You will stand trial.\"",
+					"next": "trial"
+				},
+				{
+					"text": "\"You will tell me everything you know.\"",
+					"if": [
+						{
+							"flag": "vaelor_told_all",
+							"is": false
+						}
+					],
+					"next": "story"
+				},
+				{
+					"text": "(Take the keys from his belt.)",
+					"if": [
+						{
+							"item": "vaelor_key",
+							"is": false
+						}
+					],
+					"next": "keys"
+				},
+				{
+					"text": "\"There is no forgiveness for your crimes.\"",
+					"next": "execute"
+				},
+				{
+					"text": "\"Get out. If I see you again, I will kill you.\"",
+					"next": "escaped"
+				}
+			]
+		},
+		"gallows": {
+			"text": "\"Perhaps I deserve the gallows.\"\nVaelor gives himself up.\n\nVaelor kneels before the altar.\n\"What happens to me now?\"",
+			"effects": {
+				"flags": {
+					"vaelor_surrendered": true
+				},
+				"disband": "shrine",
+				"xp": 500,
+				"react": {
+					"kael": {
+						"text": "You want to let him live? After what he did here?",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "Good. A living fanatic is far more useful than a dead one.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "Tie him up properly. Men like that regret their deeds remarkably fast once they smell an advantage."
+					}
+				}
+			},
+			"choices": [
+				{
+					"text": "\"You will stand trial.\"",
+					"next": "trial"
+				},
+				{
+					"text": "\"You will tell me everything you know.\"",
+					"if": [
+						{
+							"flag": "vaelor_told_all",
+							"is": false
+						}
+					],
+					"next": "story"
+				},
+				{
+					"text": "(Take the keys from his belt.)",
+					"if": [
+						{
+							"item": "vaelor_key",
+							"is": false
+						}
+					],
+					"next": "keys"
+				},
+				{
+					"text": "\"There is no forgiveness for your crimes.\"",
+					"next": "execute"
+				},
+				{
+					"text": "\"Get out. If I see you again, I will kill you.\"",
+					"next": "escaped"
+				}
+			]
+		},
+		"too_far": {
+			"text": "\"No. No, I have come too far.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"as_monster": {
+			"text": "\"Then I will die as a monster.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"then_come": {
+			"text": "\"Then come.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"ambush": {
+			"text": "You strike while Vaelor is still staring at his hand.",
+			"effects": {
+				"flags": {
+					"shrine_first_strike": true
+				},
+				"fight": {
+					"encounter": "shrine"
+				},
+				"react": {
+					"kael": {
+						"text": "[Placeholder: Kael on attacking Vaelor while he breaks down.]"
+					},
+					"lyra": {
+						"text": "[Placeholder: Lyra on attacking Vaelor while he breaks down.]"
+					},
+					"seren": {
+						"text": "[Placeholder: Seren on attacking Vaelor while he breaks down.]"
+					}
+				}
+			}
+		},
+		"ritual": {
+			"text": "Vaelor looks up, surprised.\n\"You... understand?\"\n\n\"Only one sacrifice is missing.\"\nHe looks at you.\n\"A single life.\"",
+			"effects": {
+				"flags": {
+					"vaelor_ritual_knowledge": true
+				},
+				"react": {
+					"kael": {
+						"text": "Tell me you have a plan. Otherwise I draw my sword.",
+						"loyalty": -1
+					},
+					"lyra": {
+						"text": "His method is primitive. But his discovery might actually matter.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "If he tries to sacrifice you, I won't discuss it for long."
+					}
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Whose life?\"",
+					"if": [
+						{
+							"flag": "vaelor_prisoner_hint",
+							"is": false
+						}
+					],
+					"next": "whose"
+				},
+				{
+					"id": "my_life",
+					"text": "\"Take my life.\"",
+					"check": {
+						"skill": "deception",
+						"dc": 17,
+						"success": "altar",
+						"failure": "sees_through"
+					}
+				},
+				{
+					"id": "own_life",
+					"text": "\"Take your own instead.\"",
+					"if": [
+						{
+							"flag": "vaelor_doubt_points",
+							"min": 1
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 20,
+						"success": "self_sacrifice",
+						"failure": "trick"
+					}
+				},
+				{
+					"text": "\"I will bring you your sacrifice.\"",
+					"next": "pact"
+				},
+				{
+					"text": "\"Enough talk.\"",
+					"next": "fight"
+				}
+			]
+		},
+		"ritual_more": {
+			"text": "\"Only one sacrifice is missing.\"\nHe looks at you.\n\"A single life.\"",
+			"choices": [
+				{
+					"text": "\"Whose life?\"",
+					"if": [
+						{
+							"flag": "vaelor_prisoner_hint",
+							"is": false
+						}
+					],
+					"next": "whose"
+				},
+				{
+					"id": "my_life",
+					"text": "\"Take my life.\"",
+					"check": {
+						"skill": "deception",
+						"dc": 17,
+						"success": "altar",
+						"failure": "sees_through"
+					}
+				},
+				{
+					"id": "own_life",
+					"text": "\"Take your own instead.\"",
+					"if": [
+						{
+							"flag": "vaelor_doubt_points",
+							"min": 1
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 20,
+						"success": "self_sacrifice",
+						"failure": "trick"
+					}
+				},
+				{
+					"text": "\"I will bring you your sacrifice.\"",
+					"next": "pact"
+				},
+				{
+					"text": "\"Enough talk.\"",
+					"next": "fight"
+				}
+			]
+		},
+		"whose": {
+			"text": "\"That does not matter.\"\nHis eyes go to a locked side door. Someone else may be held prisoner there.",
+			"effects": {
+				"flags": {
+					"vaelor_prisoner_hint": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "ritual_more"
+				}
+			]
+		},
+		"altar": {
+			"text": "Vaelor lets you step up to the altar. The black stone hums an arm's length from your hand.",
+			"effects": {
+				"flags": {
+					"vaelor_ritual_stone_discovered": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Smash the ritual stone.)",
+					"next": "stone_broken"
+				},
+				{
+					"text": "\"On second thought... not today.\"",
+					"next": "sees_through"
+				}
+			]
+		},
+		"stone_broken": {
+			"text": "The black stone cracks under your blow and splits apart. Vaelor screams as if the blow had struck him.",
+			"effects": {
+				"flags": {
+					"vaelor_ritual_stone": "destroyed",
+					"shrine_first_strike": true
+				},
+				"xp": 50,
+				"react": {
+					"lyra": {
+						"text": "You just destroyed an irreplaceable source of arcane knowledge, you complete idiot!",
+						"loyalty": -2
+					}
+				},
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"sees_through": {
+			"text": "Vaelor sees through the lie.",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"self_sacrifice": {
+			"text": "Vaelor turns the ritual against himself. He gives up his own life force. The ritual ends in an uncontrolled magical discharge; the black stone shatters. When the light fades, Vaelor is dead.",
+			"effects": {
+				"flags": {
+					"vaelor_outcome": "ritual_sacrifice",
+					"defeated_cult_priest": true,
+					"vaelor_ritual_stone": "destroyed",
+					"vaelor_manuscript_found": true
+				},
+				"disband": "shrine",
+				"item": {
+					"vaelor_key": 1,
+					"vaelor_manuscript": 1
+				},
+				"xp": 500,
+				"react": {
+					"lyra": {
+						"text": "You just destroyed an irreplaceable source of arcane knowledge, you complete idiot!",
+						"loyalty": -2
+					}
+				}
+			}
+		},
+		"trick": {
+			"text": "\"You want to trick me.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"pact": {
+			"text": "Vaelor nods slowly. \"Then bring me a life. I will wait.\"",
+			"effects": {
+				"flags": {
+					"vaelor_pact": true
+				}
+			}
+		},
+		"pact_wait": {
+			"text": "Vaelor waits at the altar. \"Have you brought it?\"",
+			"choices": [
+				{
+					"text": "(Hand Thomas over.)",
+					"if": [
+						{
+							"any": [
+								{
+									"flag": "thomas_status",
+									"is": "freed"
+								},
+								{
+									"flag": "thomas_status",
+									"is": "guide"
+								}
+							]
+						}
+					],
+					"next": "ritual_completed"
+				},
+				{
+					"text": "(Betray him now.)",
+					"next": "betrayed"
+				},
+				{
+					"text": "\"Not yet.\""
+				}
+			]
+		},
+		"ritual_completed": {
+			"text": "[Placeholder: Vaelor completes the ritual with Thomas. What it does is up to the owner. Rule 5: nothing about the city below.]",
+			"effects": {
+				"flags": {
+					"vaelor_outcome": "ritual_completed",
+					"thomas_status": "dead",
+					"vaelor_manuscript_found": true
+				},
+				"add": {
+					"player_cruelty": 3
+				},
+				"disband": "shrine",
+				"item": {
+					"vaelor_manuscript": 1
+				},
+				"xp": 500,
+				"react": {
+					"kael": {
+						"loyalty": -2
+					},
+					"seren": {
+						"loyalty": -1
+					}
+				}
+			}
+		},
+		"betrayed": {
+			"text": "You strike while Vaelor turns back to the altar.",
+			"effects": {
+				"flags": {
+					"vaelor_betrayed": true,
+					"shrine_first_strike": true
+				},
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"resolution_more": {
+			"text": "Vaelor kneels before the altar.\n\"What happens to me now?\"",
+			"choices": [
+				{
+					"text": "\"You will stand trial.\"",
+					"next": "trial"
+				},
+				{
+					"text": "\"You will tell me everything you know.\"",
+					"if": [
+						{
+							"flag": "vaelor_told_all",
+							"is": false
+						}
+					],
+					"next": "story"
+				},
+				{
+					"text": "(Take the keys from his belt.)",
+					"if": [
+						{
+							"item": "vaelor_key",
+							"is": false
+						}
+					],
+					"next": "keys"
+				},
+				{
+					"text": "\"There is no forgiveness for your crimes.\"",
+					"next": "execute"
+				},
+				{
+					"text": "\"Get out. If I see you again, I will kill you.\"",
+					"next": "escaped"
+				}
+			]
+		},
+		"trial": {
+			"text": "\"Then I will testify.\"\nYou tie Vaelor up. He has to be taken to the city watch.",
+			"effects": {
+				"flags": {
+					"vaelor_outcome": "captured"
+				}
+			}
+		},
+		"story": {
+			"text": "\"Then sit down.\"\n\"It will be a long story.\"\n[Placeholder: additional historical hints from Vaelor. Rule 5: he knows nothing about the city below.]",
+			"effects": {
+				"flags": {
+					"vaelor_told_all": true,
+					"vaelor_manuscript_found": true
+				},
+				"item": {
+					"vaelor_manuscript": 1
+				},
+				"xp": 50
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "resolution_more"
+				}
+			]
+		},
+		"keys": {
+			"text": "Vaelor does not resist.",
+			"effects": {
+				"item": {
+					"vaelor_key": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "resolution_more"
+				}
+			]
+		},
+		"execute": {
+			"text": "You draw your weapon.\nVaelor: \"Then do it.\"",
+			"choices": [
+				{
+					"text": "(Kill him.)",
+					"next": "executed"
+				},
+				{
+					"text": "(Lower your weapon.)",
+					"next": "resolution_more"
+				}
+			]
+		},
+		"executed": {
+			"text": "Vaelor does not raise a hand. It is over quickly.",
+			"effects": {
+				"flags": {
+					"vaelor_outcome": "killed",
+					"defeated_cult_priest": true,
+					"vaelor_manuscript_found": true
+				},
+				"add": {
+					"player_cruelty": 1
+				},
+				"item": {
+					"vaelor_manuscript": 1
+				},
+				"react": {
+					"kael": {
+						"text": "One problem less.",
+						"loyalty": 1
+					},
+					"seren": {
+						"text": "You gave him a quick death. His victims were less lucky."
+					}
+				}
+			}
+		},
+		"escaped": {
+			"text": "\"You will not see me again.\"\nVaelor disappears into the dark.",
+			"effects": {
+				"flags": {
+					"vaelor_outcome": "escaped"
+				}
+			}
+		},
+		"bound": {
+			"text": "Vaelor sits bound before the altar. \"Take me to your watch, then.\"",
+			"choices": [
+				{
+					"text": "\"You will tell me everything you know.\"",
+					"if": [
+						{
+							"flag": "vaelor_told_all",
+							"is": false
+						}
+					],
+					"next": "story_bound"
+				},
+				{
+					"text": "(Take the keys from his belt.)",
+					"if": [
+						{
+							"item": "vaelor_key",
+							"is": false
+						}
+					],
+					"next": "keys_bound"
+				},
+				{
+					"text": "(Leave him.)"
+				}
+			]
+		},
+		"story_bound": {
+			"text": "\"Then sit down.\"\n\"It will be a long story.\"\n[Placeholder: additional historical hints from Vaelor. Rule 5: he knows nothing about the city below.]",
+			"effects": {
+				"flags": {
+					"vaelor_told_all": true,
+					"vaelor_manuscript_found": true
+				},
+				"item": {
+					"vaelor_manuscript": 1
+				},
+				"xp": 50
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "bound"
+				}
+			]
+		},
+		"keys_bound": {
+			"text": "Vaelor does not resist.",
+			"effects": {
+				"item": {
+					"vaelor_key": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "(Go on.)",
+					"next": "bound"
+				}
+			]
+		},
+		"lashes_out": {
+			"text": "Vaelor raises his burned hand. \"Enough. You came here to die, so die.\"",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		},
+		"fight": {
+			"text": "Vaelor raises his burned hand. The candles gutter, and his cultists draw their sickles.",
+			"effects": {
+				"fight": {
+					"encounter": "shrine"
+				}
+			}
+		}
+	}
+}

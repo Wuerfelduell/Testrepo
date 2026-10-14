@@ -60,6 +60,8 @@ func _draw() -> void:
 		"wanted_poster", "symbol_sketch": _paper(item_id == "symbol_sketch")
 		"sealed_package": _package()
 		"black_relic": _relic()
+		"vaelor_key": _key()
+		"vaelor_manuscript": _manuscript()
 		_: draw_circle(_p(50, 50), _w(30), STEEL_DARK)
 
 func _sword(long: bool) -> void:
@@ -179,6 +181,18 @@ func _package() -> void:
 func _relic() -> void:
 	_poly([Vector2(50, 12), Vector2(74, 50), Vector2(50, 90), Vector2(26, 50)], Color("1a1418"))
 	draw_circle(_p(50, 50), _w(8), Color("6b2a8a"))
+
+func _key() -> void:
+	draw_arc(_p(34, 34), _w(16), 0, TAU, 24, BRASS, _w(6))
+	draw_line(_p(46, 46), _p(80, 80), BRASS, _w(6))
+	draw_line(_p(70, 70), _p(62, 78), BRASS, _w(5))
+	draw_line(_p(78, 78), _p(70, 86), BRASS, _w(5))
+
+func _manuscript() -> void:
+	_poly([Vector2(20, 18), Vector2(80, 18), Vector2(80, 84), Vector2(20, 84)], Color("3a1418"))
+	_poly([Vector2(26, 22), Vector2(76, 22), Vector2(76, 80), Vector2(26, 80)], Color("d8c8a4"))
+	for line: int in range(5):
+		draw_line(_p(32, 32 + line * 10), _p(70, 32 + line * 10), Color("5a4a3a"), _w(2))
 
 func _dice() -> void:
 	draw_rect(Rect2(_p(18, 40), _p(52, 74) - _p(18, 40)), Color("e8e0cf"))

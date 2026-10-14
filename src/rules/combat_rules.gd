@@ -196,7 +196,7 @@ static func attack_preview(state: GameState, attacker_id: String, target_id: Str
 	var advantages: Array[StringName] = conditions_for(target).incoming_advantages(distance)
 	advantages.append_array(ClassKits.attack_advantages(state, attacker_id, target_id, weapon))
 	advantages.append_array(ClassEffects.attack_advantages(state, attacker_id, target_id, weapon))
-	# Hidden and Steady Aim (effects on the attacker); attacks against a hidden target.
+	# Hidden, Steady Aim and a first strike (effects on the attacker); attacks against a hidden target.
 	advantages.append_array(ActiveEffects.attack_advantages(attacker))
 	var disadvantages: Array[StringName] = conditions_for(attacker).attack_disadvantages()
 	disadvantages.append_array(ClassKits.attack_disadvantages(state, attacker_id, target_id, weapon))
@@ -524,5 +524,12 @@ static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	if state.mode != &"combat":
 		state.pending = {}
 		ClassKits.on_combat_end(state)
+		_drop_first_strikes(state)
 		events.append({"type": "combat_end", "mode": String(state.mode)})
 	return events
+
+## An unused first strike (ActiveEffects.FIRST_STRIKE) does not carry into the next fight.
+static func _drop_first_strikes(state: GameState) -> void:
+	for id: String in state.actors:
+		ActiveEffects.remove_where(state.actors[id], func(effect: Dictionary) -> bool:
+			return String(effect.get("kind", "")) == ActiveEffects.FIRST_STRIKE)

@@ -1,0 +1,52 @@
+{
+	"version": 1,
+	"id": "last_sacrifice",
+	"title": "The last sacrifice",
+	"start_if": [
+		{
+			"flag": "vaelor_pact"
+		}
+	],
+	"stages": [
+		{
+			"text": "I promised Vaelor a life for his ritual. He waits at the altar."
+		},
+		{
+			"if": [
+				{
+					"any": [
+						{
+							"flag": "thomas_status",
+							"is": "freed"
+						},
+						{
+							"flag": "thomas_status",
+							"is": "guide"
+						}
+					]
+				}
+			],
+			"text": "Thomas the stonemason is with me."
+		}
+	],
+	"done_if": [
+		{
+			"flag": "vaelor_outcome",
+			"is": "ritual_completed"
+		}
+	],
+	"done_text": "I brought Vaelor his sacrifice.",
+	"failed_if": [
+		{
+			"any": [
+				{
+					"flag": "defeated_cult_priest"
+				},
+				{
+					"flag": "vaelor_betrayed"
+				}
+			]
+		}
+	],
+	"failed_text": "I turned on Vaelor instead."
+}
