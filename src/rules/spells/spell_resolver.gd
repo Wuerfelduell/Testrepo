@@ -600,7 +600,7 @@ static func _hp_loss(state: GameState, source_id: String, target_id: String, amo
 		"amount": lost, "damage_type": String(damage_type), "hp": target["hp"]}]
 	events.append_array(ActiveEffects.after_damage(state, target_id, lost, rng))
 	if was_alive and not CombatRules.alive(target):
-		events.append({"type": "death", "actor_id": target_id, "killer_id": source_id})
+		events.append(NonlethalFights.fall_event(state, target_id, source_id))
 	return events
 
 ## Shield can be cast by this creature right now (reaction, slot, prepared, able to act).

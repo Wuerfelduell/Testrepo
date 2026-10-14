@@ -75,7 +75,156 @@
       ]
     }
   ],
-  "encounters": [],
+  "encounters": [
+    {
+      "id": "gate_guards",
+      "room": "torgasse",
+      "difficulty": "moderate",
+      "on_dialogue": true,
+      "joins": [],
+      "members": [
+        {
+          "id": "garrik",
+          "monster": "guard",
+          "name_key": "NPC_GARRIK",
+          "hook": "torviertel_gate_guard",
+          "position": [
+            -2.9,
+            0.0,
+            15.0
+          ],
+          "facing": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pose": "guarding"
+        },
+        {
+          "id": "gate_guard_a",
+          "monster": "guard",
+          "name_key": "NPC_GATE_GUARD",
+          "position": [
+            2.6,
+            0.0,
+            16.0
+          ],
+          "facing": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "pose": "guarding"
+        },
+        {
+          "id": "gate_guard_b",
+          "monster": "guard",
+          "name_key": "NPC_GATE_GUARD",
+          "position": [
+            -2.6,
+            0.0,
+            17.0
+          ],
+          "facing": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pose": "guarding"
+        }
+      ]
+    },
+    {
+      "id": "inn_brawl",
+      "room": "torplatz",
+      "difficulty": "moderate",
+      "on_dialogue": true,
+      "joins": [],
+      "members": [
+        {
+          "id": "borik",
+          "monster": "bandit",
+          "name_key": "NPC_BORIK",
+          "hook": "torviertel_innkeeper",
+          "model": "res://assets/characters/male_peasant/model.glb",
+          "position": [
+            -7.0,
+            0.0,
+            -23.0
+          ],
+          "facing": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pose": "guarding"
+        },
+        {
+          "id": "inn_regular_a",
+          "monster": "bandit",
+          "name_key": "NPC_REGULAR",
+          "hook": "torviertel_innkeeper",
+          "model": "res://assets/characters/male_ranger/model.glb",
+          "position": [
+            -8.6,
+            0.0,
+            -22.0
+          ],
+          "facing": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pose": "guarding"
+        },
+        {
+          "id": "inn_regular_b",
+          "monster": "bandit",
+          "name_key": "NPC_REGULAR",
+          "hook": "torviertel_innkeeper",
+          "model": "res://assets/characters/male_peasant/model.glb",
+          "position": [
+            -5.4,
+            0.0,
+            -22.0
+          ],
+          "facing": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "pose": "guarding"
+        }
+      ]
+    },
+    {
+      "id": "mara_fight",
+      "room": "torplatz",
+      "difficulty": "low",
+      "on_dialogue": true,
+      "joins": [],
+      "members": [
+        {
+          "id": "mara",
+          "monster": "bandit",
+          "name_key": "NPC_MARA",
+          "hook": "torviertel_merchant",
+          "model": "res://assets/characters/female_peasant/model.glb",
+          "position": [
+            -8.0,
+            0.0,
+            -17.5
+          ],
+          "facing": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "pose": "guarding"
+        }
+      ]
+    }
+  ],
   "hooks": [
     {
       "id": "torviertel_gate_guard",
@@ -91,7 +240,20 @@
         0.0,
         0.0
       ],
-      "dialogue": "torviertel_gate_guard"
+      "dialogue": "torviertel_gate_guard",
+      "hide_if": [
+        {
+          "any": [
+            {
+              "flag": "gate_guards_fight",
+              "is": "running"
+            },
+            {
+              "flag": "defeated_garrik"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "torviertel_merchant",
@@ -107,7 +269,20 @@
         0.0,
         0.0
       ],
-      "dialogue": "torviertel_merchant"
+      "dialogue": "torviertel_merchant",
+      "hide_if": [
+        {
+          "any": [
+            {
+              "flag": "mara_fight_fight",
+              "is": "running"
+            },
+            {
+              "flag": "defeated_mara"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "torviertel_innkeeper",
@@ -123,7 +298,20 @@
         0.0,
         1.0
       ],
-      "dialogue": "torviertel_innkeeper"
+      "dialogue": "torviertel_innkeeper",
+      "hide_if": [
+        {
+          "any": [
+            {
+              "flag": "inn_brawl_fight",
+              "is": "running"
+            },
+            {
+              "flag": "defeated_borik"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "torviertel_beggar",

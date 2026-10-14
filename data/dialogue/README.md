@@ -70,6 +70,18 @@ Texts are the English source strings; a German translation can later key on them
   that companion (banter, data/companions/banter.json).
 - Level hooks can disappear with `"hide_if": [conditions]`, checked when a conversation ends.
 
+**Fights from conversations.** The `fight` effect names an encounter of the current level
+file. It starts when the conversation closes (best on a node without answers). Mark such
+encounters `"on_dialogue": true` so they never notice the hero by themselves. A member may
+carry `"name_key"` and `"model"` (a named person with an SRD stat block, e.g. Garrik as a
+Guard) and `"hook": "<hook id>"` when it is that hook's figure (no second figure stands
+beside it; give the hook `"hide_if": [{"flag": "<encounter>_fight", "is": "running"}]`).
+Flag `<encounter>_fight` is `"running"` during the fight. With `"nonlethal": true` nobody
+dies (knocked out at 0 HP, event `knocked_out`). When the hero or all enemies are down,
+everyone knocked out stands up with 1 HP, the enemies wait at their places again (no loot,
+no XP) and the flag becomes `"won"` or `"lost"`. Lethal fights end as usual (`defeated_<id>`
+flags, permadeath).
+
 Design rules (owner, 14-10-2026, docs/STORY.md "How Rabenfels reacts"): one successful roll
 never buys loyalty; consequences come from each NPC's personality and interests, not from a
 good/evil scale; a failed check never blocks the main story, the information stays reachable

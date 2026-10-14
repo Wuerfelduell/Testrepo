@@ -22,7 +22,9 @@ func _run() -> void:
 	check(EncounterData.problems(data).is_empty(), "Torviertel data is valid: " + ", ".join(EncounterData.problems(data)))
 	bus.submit(ResetRunCommand.new())
 	check(bus.submit(LevelSetupCommand.new({}, TownLevel.TORVIERTEL_PATH)) == OK, "Torviertel setup accepted")
-	check(game.state.world.get("dormant", {}).is_empty(), "Nobody fights in the Torviertel yet")
+	check((game.state.world.get("dormant", {}) as Dictionary).keys().all(
+		func(id: String) -> bool: return bool(EncounterData.encounter(data, id).get("on_dialogue", false))),
+		"Only conversations start fights in the Torviertel")
 	level = (load(String(data["scene"])) as PackedScene).instantiate() as DungeonLevel
 	get_tree().root.add_child(level)
 	var frames: int = 0
@@ -39,6 +41,13 @@ func _run() -> void:
 	check(space.query_path(spawn, Vector3(0, 0, 24)).is_empty() or space.query_path(spawn, Vector3(0, 0, 24))[-1].z < 18.5, "The shut gate keeps the hero inside the city")
 	check(not space.visible(Vector3(0, 0, 8), Vector3(-10, 0, 8)), "Houses block sight from the street")
 	check(level.hook_views.size() == data["hooks"].size() + data["exits"].size(), "Every NPC anchor and exit is placed")
+	check(level.dormant_views.size() == 2, "Only Garrik's two guards stand as figures of their own")
+	for encounter: Dictionary in data["encounters"]:
+		for member: Dictionary in encounter["members"]:
+			var at: Vector3 = EncounterData.vector(member["position"])
+			var route: PackedVector3Array = space.query_path(spawn, at)
+			check(route.size() >= 2 and Vector2(route[-1].x - at.x, route[-1].z - at.z).length() <= 1.0,
+				"%s stands where the street reaches" % member["id"])
 	for hook: Dictionary in data["hooks"] + data["exits"]:
 		var id: String = String(hook["id"])
 		var target: Vector3 = EncounterData.vector(hook.get("interact_at", hook["position"]))
@@ -80,6 +89,29 @@ func _run() -> void:
 	check(RunFlow.scene_for(game.state) == String(data["scene"]), "A run in the Torviertel continues in the Torviertel")
 	if back != null:
 		back.queue_free()
+	await get_tree().process_frame
+	# Garrik: a provocation ends in a fight with the gate guards (owner's dialogue, 14-10-2026).
+	bus.submit(ResetRunCommand.new())
+	bus.submit(LevelSetupCommand.new({}, TownLevel.TORVIERTEL_PATH))
+	var gate: DungeonLevel = (load(String(data["scene"])) as PackedScene).instantiate() as DungeonLevel
+	get_tree().root.add_child(gate)
+	get_tree().current_scene = gate
+	frames = 0
+	while not gate.ready_for_input and frames < 240:
+		await get_tree().physics_frame
+		frames += 1
+	check(gate.dialogue.open("torviertel_gate_guard"), "Garrik talks")
+	for answer: int in [1, 0, 0, 0]:
+		bus.submit(DialogueChooseCommand.new(answer))
+	check(game.state.world.get("conversation", {}).get("node", "") == "fight", "Insulting Garrik comes to blows")
+	check(int(game.state.actors["hero"]["hp"]) < int(game.state.actors["hero"]["max_hp"]), "His fist hurts")
+	bus.submit(DialogueEndCommand.new())
+	for frame: int in range(10):
+		await get_tree().process_frame
+	check(game.state.mode == &"combat", "The conversation turns into a fight")
+	check(gate.actors.has("garrik") and gate.actors.has("gate_guard_a"), "Garrik and his guards fight")
+	check(not gate.hook_views.has("torviertel_gate_guard"), "Garrik's talking figure steps aside while he fights")
+	gate.queue_free()
 	await get_tree().process_frame
 	bus.submit(ResetRunCommand.new())
 	print("TOWN_CHECKS: %d, failed: %s" % [checks, failed])

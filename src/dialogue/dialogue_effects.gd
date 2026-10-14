@@ -51,6 +51,18 @@ static func apply(state: GameState, effects: Dictionary, reward_key: String) -> 
 		events.append({"type": "item_changed", "actor_id": "hero", "item": String(item_id), "count": count})
 	if effects.has("damage"):
 		events.append_array(_damage(state, effects["damage"], reward_key))
+	# A conversation that ends in a fight: the level starts it when the conversation closes
+	# (EncounterTriggerCommand reads world["dialogue_fight"]). Nothing happens when that
+	# encounter is not waiting in this area (already fought, or another level).
+	if effects.has("fight"):
+		var encounter_id: String = String(effects["fight"]["encounter"])
+		if (state.world.get("dormant", {}) as Dictionary).has(encounter_id):
+			state.world["dialogue_fight"] = {"encounter": encounter_id, "nonlethal": bool(effects["fight"].get("nonlethal", false))}
+			var fight_flags: Dictionary = state.world.get("flags", {})
+			fight_flags[encounter_id + "_fight"] = "running"
+			state.world["flags"] = fight_flags
+			events.append({"type": "dialogue_fight", "encounter_id": encounter_id,
+				"nonlethal": bool(effects["fight"].get("nonlethal", false))})
 	# Party (package K4): companions join or leave through conversations.
 	if effects.has("recruit"):
 		events.append_array(PartyRules.recruit(state, String(effects["recruit"])))

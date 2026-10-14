@@ -308,7 +308,7 @@ static func _graze(state: GameState, attacker_id: String, target_id: String, wea
 		"amount": lost, "damage_type": weapon["damage_type"], "hp": target["hp"], "graze": true})
 	events.append_array(ActiveEffects.after_damage(state, target_id, lost, rng))
 	if int(target["hp"]) <= 0:
-		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
+		events.append(NonlethalFights.fall_event(state, target_id, attacker_id))
 		events.append_array(check_combat_end(state))
 	return events
 
@@ -450,7 +450,7 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 	total_damage += int(riders["damage"])
 	events.append_array(ActiveEffects.after_damage(state, target_id, total_damage, rng))
 	if int(target["hp"]) <= 0:
-		events.append({"type": "death", "actor_id": target_id, "killer_id": attacker_id})
+		events.append(NonlethalFights.fall_event(state, target_id, attacker_id))
 		events.append_array(check_combat_end(state))
 	else:
 		events.append_array(ActiveEffects.on_hit(state, attacker_id, target_id, weapon))
@@ -460,6 +460,8 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 ## The run ends when the hero dies (permadeath). A fallen companion stays dead but the fight
 ## goes on (package K4). Records without a "hero" actor keep the old rule: any fallen ally.
 static func check_combat_end(state: GameState) -> Array[Dictionary]:
+	if NonlethalFights.active(state):
+		return NonlethalFights.check_end(state)
 	var enemy_alive: bool = false
 	var has_hero: bool = state.actors.has("hero")
 	for id: String in state.actors:

@@ -244,6 +244,8 @@ func _build_dormant_views() -> void:
 	for encounter_id: String in dormant:
 		for id: String in dormant[encounter_id]:
 			var record: Dictionary = dormant[encounter_id][id]
+			if record.has("hook") or dormant_views.has(id):
+				continue
 			var view: CombatActor = CombatActor.new()
 			add_child(view)
 			view.setup_actor(record)
@@ -258,10 +260,16 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 	for event: Dictionary in result.get("events", []):
 		match String(event.get("type", "")):
 			"encounter_triggered":
+				_hide_finished_hooks.call_deferred()
 				for id: Variant in event.get("actor_ids", []):
 					var view: CombatActor = dormant_views.get(String(id)) as CombatActor
 					if view == null:
-						continue
+						# A hook's figure that fights (no dormant figure of its own).
+						if actors.has(String(id)) or not Game.state.actors.has(String(id)):
+							continue
+						view = CombatActor.new()
+						add_child(view)
+						view.setup_actor(Game.state.actors[String(id)])
 					dormant_views.erase(String(id))
 					view.set_pose("")
 					(view.get_node("ActorPick") as Area3D).collision_layer = 2
@@ -273,6 +281,17 @@ func _level_command_applied(_command: Command, result: Dictionary) -> void:
 				if trap_marker != null:
 					trap_marker.visible = true
 			"dialogue_end", "party_joined":
+				_hide_finished_hooks.call_deferred()
+				# A conversation that ended in a fight (DialogueEffects "fight").
+				var fight: Dictionary = Game.state.world.get("dialogue_fight", {})
+				if not fight.is_empty():
+					_trigger.call_deferred(String(fight["encounter"]))
+			"nonlethal_end":
+				for id: Variant in event.get("returned", []):
+					if actors.has(String(id)):
+						(actors[String(id)] as Node3D).queue_free()
+						actors.erase(String(id))
+				_build_dormant_views()
 				_hide_finished_hooks.call_deferred()
 			"rest":
 				if String(event.get("rest", "")) == "long":
@@ -326,61 +345,64 @@ func _build_hooks() -> void:
 	for exit: Dictionary in level.get("exits", []):
 		entries.append({"id": String(exit["id"]), "position": exit["position"], "model": "", "exit": true})
 	for hook: Dictionary in entries:
-		var id: String = String(hook["id"])
-		if _hook_hidden(hook):
-			continue
-		var position: Vector3 = EncounterData.vector(hook["position"])
-		var anchor: Node3D = Node3D.new()
-		anchor.name = "Hook_" + id
-		anchor.position = position
-		add_child(anchor)
-		var model: String = String(hook.get("model", ""))
-		if not model.is_empty() and ResourceLoader.exists(model):
-			var figure: PreviewActor = PreviewActor.new()
-			anchor.add_child(figure)
-			figure.setup(model, "")
-			for label: Node in figure.find_children("*", "Label3D", true, false):
-				(label as Label3D).visible = false
-			var pose: String = String(hook.get("pose", ""))
-			if figure.player.has_animation(pose):
-				# A body (pose "Death01") plays its fall once and stays down; every other pose loops.
-				var lying: bool = pose.begins_with("Death")
-				figure.player.get_animation(pose).loop_mode = Animation.LOOP_NONE if lying else Animation.LOOP_LINEAR
-				figure.play_clip(pose)
-				if lying:
-					figure.player.seek(figure.player.get_animation(pose).length, true)
-			var facing: Vector3 = EncounterData.vector(hook.get("facing", [0.0, 0.0, 1.0]))
-			# The imported figures look along -Z: aim that side at the facing direction.
-			figure.look_at(figure.global_position + facing, Vector3.UP, false)
-		elif bool(hook.get("rest", false)):
-			_rest_marker(anchor)
-		# Floating rune above the hook; the click area covers rune and figure.
-		var rune: MeshInstance3D = MeshInstance3D.new()
-		var shape_mesh: PrismMesh = PrismMesh.new()
-		shape_mesh.size = Vector3(0.28, 0.36, 0.06)
-		rune.mesh = shape_mesh
-		rune.rotation_degrees.z = 180.0
-		var glow: StandardMaterial3D = StandardMaterial3D.new()
-		glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		glow.albedo_color = Color("7fe0c4") if bool(hook.get("rest", false)) else \
-			(Color("8fb8ff") if bool(hook.get("exit", false)) else Color("e9c46a"))
-		glow.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
-		rune.material_override = glow
-		rune.position = Vector3(0, 2.3, 0)
-		anchor.add_child(rune)
-		var area: Area3D = Area3D.new()
-		area.collision_layer = INTERACT_LAYER
-		area.collision_mask = 0
-		area.set_meta("interact_id", id)
-		var shape: CollisionShape3D = CollisionShape3D.new()
-		var capsule: CapsuleShape3D = CapsuleShape3D.new()
-		capsule.radius = 0.6
-		capsule.height = 2.8
-		shape.shape = capsule
-		shape.position.y = 1.3
-		area.add_child(shape)
-		anchor.add_child(area)
-		hook_views[id] = anchor
+		_build_hook(hook)
+
+func _build_hook(hook: Dictionary) -> void:
+	var id: String = String(hook["id"])
+	if _hook_hidden(hook) or hook_views.has(id):
+		return
+	var position: Vector3 = EncounterData.vector(hook["position"])
+	var anchor: Node3D = Node3D.new()
+	anchor.name = "Hook_" + id
+	anchor.position = position
+	add_child(anchor)
+	var model: String = String(hook.get("model", ""))
+	if not model.is_empty() and ResourceLoader.exists(model):
+		var figure: PreviewActor = PreviewActor.new()
+		anchor.add_child(figure)
+		figure.setup(model, "")
+		for label: Node in figure.find_children("*", "Label3D", true, false):
+			(label as Label3D).visible = false
+		var pose: String = String(hook.get("pose", ""))
+		if figure.player.has_animation(pose):
+			# A body (pose "Death01") plays its fall once and stays down; every other pose loops.
+			var lying: bool = pose.begins_with("Death")
+			figure.player.get_animation(pose).loop_mode = Animation.LOOP_NONE if lying else Animation.LOOP_LINEAR
+			figure.play_clip(pose)
+			if lying:
+				figure.player.seek(figure.player.get_animation(pose).length, true)
+		var facing: Vector3 = EncounterData.vector(hook.get("facing", [0.0, 0.0, 1.0]))
+		# The imported figures look along -Z: aim that side at the facing direction.
+		figure.look_at(figure.global_position + facing, Vector3.UP, false)
+	elif bool(hook.get("rest", false)):
+		_rest_marker(anchor)
+	# Floating rune above the hook; the click area covers rune and figure.
+	var rune: MeshInstance3D = MeshInstance3D.new()
+	var shape_mesh: PrismMesh = PrismMesh.new()
+	shape_mesh.size = Vector3(0.28, 0.36, 0.06)
+	rune.mesh = shape_mesh
+	rune.rotation_degrees.z = 180.0
+	var glow: StandardMaterial3D = StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = Color("7fe0c4") if bool(hook.get("rest", false)) else \
+		(Color("8fb8ff") if bool(hook.get("exit", false)) else Color("e9c46a"))
+	glow.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
+	rune.material_override = glow
+	rune.position = Vector3(0, 2.3, 0)
+	anchor.add_child(rune)
+	var area: Area3D = Area3D.new()
+	area.collision_layer = INTERACT_LAYER
+	area.collision_mask = 0
+	area.set_meta("interact_id", id)
+	var shape: CollisionShape3D = CollisionShape3D.new()
+	var capsule: CapsuleShape3D = CapsuleShape3D.new()
+	capsule.radius = 0.6
+	capsule.height = 2.8
+	shape.shape = capsule
+	shape.position.y = 1.3
+	area.add_child(shape)
+	anchor.add_child(area)
+	hook_views[id] = anchor
 
 ## A hook with "hide_if" conditions (DialogueData format) disappears once they hold,
 ## e.g. a figure that was killed in its conversation.
@@ -393,6 +415,9 @@ func _hide_finished_hooks() -> void:
 		if hook_views.has(id) and _hook_hidden(hook):
 			(hook_views[id] as Node3D).queue_free()
 			hook_views.erase(id)
+		elif not hook_views.has(id) and not _hook_hidden(hook):
+			# Back after a nonlethal fight (hidden while its figure fought).
+			_build_hook(hook)
 
 func _rest_marker(anchor: Node3D) -> void:
 	var roll: MeshInstance3D = MeshInstance3D.new()

@@ -102,6 +102,14 @@ static func member_record(member: Dictionary, encounter_id: String) -> Dictionar
 		record["personality"] = String(member["personality"])
 	if record["pose"] == "patrol":
 		record["patrol"] = patrol_route(member)
+	# A named person fighting with a stat block (Garrik as a Guard): name and look only.
+	if member.get("name_key") is String:
+		record["name_key"] = String(member["name_key"])
+	if member.get("model") is String and ResourceLoader.exists(String(member["model"])):
+		record["model"] = String(member["model"])
+	# This member is a dialogue hook's figure: no separate dormant figure stands next to it.
+	if member.get("hook") is String:
+		record["hook"] = String(member["hook"])
 	return record
 
 static func patrol_route(member: Dictionary) -> Array[Vector3]:
@@ -170,6 +178,9 @@ static func in_room(level: Dictionary, room_id: String, point: Vector3) -> bool:
 ## Perception (exploration and joins): sleepers only notice the hero right next to them;
 ## the awake notice him in their own room or nearby. Line of sight is checked by the caller.
 static func notices(level: Dictionary, encounter_id: String, record: Dictionary, position: Vector3, hero: Vector3) -> bool:
+	# Encounters marked "on_dialogue" only fight when a conversation says so ("fight" effect).
+	if bool(encounter(level, encounter_id).get("on_dialogue", false)):
+		return false
 	var distance: float = position.distance_to(hero)
 	if String(record.get("pose", "")) == "sleeping":
 		return distance <= float(level.get("sleep_notice_m", 4.0))
