@@ -37,6 +37,8 @@ Texts are the English source strings; a German translation can later key on them
 - **check**: skill (SRD 5.2 skill id, e.g. `persuasion`), `dc` 1-30, `success` and
   `failure` nodes. Rolled with the hero's ability, proficiency and expertise and shown in the
   dice popup. Each check is rolled **once**: after that the answer is gone (RULE 4).
+  Give the choice an `"id"` when the same check answer stands in several nodes (a menu the
+  hero returns to): all choices with that id share one roll.
 - **conditions** (`if`, all must hold): `{"flag": "x"}` flag set, `{"flag": "x", "is": false}`
   not set, `{"flag": "x", "is": "killed"}` exact value, `{"class": "wizard"}`,
   `{"proficient": "arcana"}`, `{"any": [conditions]}` (one of them), and the counter, money,

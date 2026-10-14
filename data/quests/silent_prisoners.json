@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "silent_prisoners",
+	"title": "Silent prisoners",
+	"start_if": [
+		{
+			"flag": "quest_silent_prisoners"
+		}
+	],
+	"stages": [
+		{
+			"text": "Captain Garrik: the city watch has prisoners who badly need to talk."
+		}
+	]
+}

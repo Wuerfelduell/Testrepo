@@ -1,0 +1,16 @@
+{
+	"version": 1,
+	"id": "poor_quarter",
+	"title": "A problem in the poor quarter",
+	"start_if": [
+		{
+			"flag": "garrik_job",
+			"is": "accepted"
+		}
+	],
+	"stages": [
+		{
+			"text": "Captain Garrik wants an inconvenient witness in the poor quarter intimidated. 20 silver when it is done."
+		}
+	]
+}

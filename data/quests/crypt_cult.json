@@ -1,7 +1,7 @@
 {
 	"version": 1,
 	"id": "crypt_cult",
-	"title": "[Placeholder] The cult in the crypt",
+	"title": "The abandoned crypt",
 	"start_if": [
 		{
 			"any": [
@@ -16,15 +16,15 @@
 	],
 	"stages": [
 		{
-			"text": "[Placeholder: a notice in the Torviertel warns about strange figures at the old charnel house in the Kellergasse.]"
+			"text": "A job on the notice board on the Torplatz: graves have been desecrated at the old crypt. 50 silver for dealing with those responsible."
 		},
 		{
-			"text": "[Placeholder: cultists hide in an old crypt. Find out what they are doing.]",
 			"if": [
 				{
 					"flag": "visited_crypt"
 				}
-			]
+			],
+			"text": "Cultists hide in the old crypt. Find out what they are doing there."
 		},
 		{
 			"if": [
@@ -32,15 +32,23 @@
 					"flag": "crypt_knows_priest"
 				}
 			],
-			"text": "[Placeholder: a priest leads them from the shrine at the back.]"
+			"text": "Malrek, a wounded cultist: the priest is further down in the crypt."
 		},
 		{
 			"if": [
 				{
-					"flag": "crypt_knows_cult_prayer"
+					"flag": "crypt_hidden_inscription"
 				}
 			],
-			"text": "[Placeholder: the inscription is one of their prayers.]"
+			"text": "Older letters beneath the inscription: \"We did not seal away the dead. We sealed away their voices.\""
+		},
+		{
+			"if": [
+				{
+					"flag": "boss_name_known"
+				}
+			],
+			"text": "The cult is led by Priest Vaelor. He claims the dead will return."
 		}
 	],
 	"done_if": [
@@ -48,5 +56,5 @@
 			"flag": "defeated_cult_priest"
 		}
 	],
-	"done_text": "[Placeholder: the Cult Priest is dead.]"
+	"done_text": "Priest Vaelor is dead."
 }

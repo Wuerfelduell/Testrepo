@@ -1,5 +1,5 @@
 {
-  "_comment": "Das Torviertel, the gate district of the Overcity (Rabenfels) and the start of act 1 (campaign package K2). No fights yet. hooks are NPC anchors for the dialogue system (the owner writes the dialogues; without a tree in data/dialogue/ a hook shows its placeholder line). exits: the crypt entrance in the Kellergasse. Geometry lives in src/world/level_town.gd.",
+  "_comment": "Das Torviertel, the gate district of the Overcity (Rabenfels) and the start of act 1 (campaign package K2). hooks are NPC anchors for the dialogue system (the owner's dialogues live in data/dialogue/<hook id>.json). exits: the crypt entrance in the Kellergasse. Geometry lives in src/world/level_town.gd.",
   "version": 1,
   "level": "torviertel",
   "scene": "res://scenes/levels/torviertel/torviertel.tscn",
@@ -90,7 +90,8 @@
         1.0,
         0.0,
         0.0
-      ]
+      ],
+      "dialogue": "torviertel_gate_guard"
     },
     {
       "id": "torviertel_merchant",
@@ -105,7 +106,8 @@
         1.0,
         0.0,
         0.0
-      ]
+      ],
+      "dialogue": "torviertel_merchant"
     },
     {
       "id": "torviertel_innkeeper",
@@ -120,7 +122,8 @@
         0.0,
         0.0,
         1.0
-      ]
+      ],
+      "dialogue": "torviertel_innkeeper"
     },
     {
       "id": "torviertel_beggar",
@@ -140,7 +143,8 @@
         -11.8,
         0.0,
         -19.0
-      ]
+      ],
+      "dialogue": "torviertel_beggar"
     },
     {
       "id": "torviertel_notice_board",

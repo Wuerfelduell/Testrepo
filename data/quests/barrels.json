@@ -1,0 +1,30 @@
+{
+	"version": 1,
+	"id": "barrels",
+	"title": "The barrels in the cellar",
+	"start_if": [
+		{
+			"flag": "quest_barrels"
+		}
+	],
+	"stages": [
+		{
+			"text": "Borik: carry three barrels from behind Zum Letzten Licht down into the cellar. Reward: one free night."
+		},
+		{
+			"if": [
+				{
+					"flag": "inn_cellar_discovered"
+				}
+			],
+			"text": "Behind the shelves in Borik's cellar there is a locked door."
+		}
+	],
+	"done_if": [
+		{
+			"flag": "quest_barrels",
+			"is": "done"
+		}
+	],
+	"done_text": "The barrels are in the cellar. Borik owes me a night."
+}

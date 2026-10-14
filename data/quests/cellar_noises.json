@@ -1,0 +1,23 @@
+{
+	"version": 1,
+	"id": "cellar_noises",
+	"title": "Noises in the cellar",
+	"start_if": [
+		{
+			"flag": "hint_cellar_noises"
+		}
+	],
+	"stages": [
+		{
+			"text": "Borik hears noises from his cellar every night: scratching, knocking, sometimes voices. He says it's rats."
+		},
+		{
+			"if": [
+				{
+					"flag": "inn_cellar_discovered"
+				}
+			],
+			"text": "Behind the shelves in Borik's cellar there is a locked door."
+		}
+	]
+}

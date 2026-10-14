@@ -1,59 +1,828 @@
 {
 	"version": 1,
 	"id": "crypt_prisoner",
-	"speaker": "Prisoner",
+	"speaker": "Thomas Rehn",
 	"start": [
-		{"if": [{"flag": "crypt_prisoner_promised"}], "node": "waiting"},
-		{"node": "first"}
+		{
+			"if": [
+				{
+					"flag": "thomas_status",
+					"is": "guide"
+				}
+			],
+			"node": "guide_again"
+		},
+		{
+			"if": [
+				{
+					"flag": "crypt_prisoner_freed"
+				}
+			],
+			"node": "after"
+		},
+		{
+			"if": [
+				{
+					"flag": "thomas_met"
+				}
+			],
+			"node": "cell"
+		},
+		{
+			"node": "first"
+		}
 	],
 	"nodes": {
 		"first": {
-			"text": "[Placeholder: a prisoner sits behind the iron gate and calls out to the hero.]",
+			"text": "Behind the bars of a locked cell, a man throws himself against the grate. \"Hey! YOU! Open the damned door!\"",
+			"effects": {
+				"flags": {
+					"crypt_prisoner_key_hint": true,
+					"thomas_met": true
+				}
+			},
 			"choices": [
-				{"text": "[Placeholder: ask who he is]", "next": "who"},
-				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"},
-				{"text": "[Placeholder: check if he is lying]", "check": {"skill": "insight", "dc": 12, "success": "honest", "failure": "unsure"}},
-				{"text": "[Placeholder: walk away]"}
+				{
+					"text": "\"Who are you?\"",
+					"next": "who"
+				},
+				{
+					"text": "\"Calm down. First I need to know what happened here.\"",
+					"next": "brother"
+				},
+				{
+					"text": "\"What do I get if I free you?\"",
+					"if": [
+						{
+							"flag": "thomas_deal",
+							"is": false
+						}
+					],
+					"next": "what"
+				},
+				{
+					"id": "cultist",
+					"text": "\"Maybe you're one of the cultists yourself.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 13,
+						"success": "despair",
+						"failure": "unsure"
+					}
+				},
+				{
+					"id": "shut_up",
+					"text": "\"Shut up, or I'll leave you here.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 12,
+						"success": "quiet",
+						"failure": "loud"
+					}
+				},
+				{
+					"text": "(Open the cell with Vaelor's key.)",
+					"if": [
+						{
+							"flag": "defeated_cult_priest"
+						}
+					],
+					"next": "freed"
+				},
+				{
+					"id": "lock",
+					"text": "(Pick the lock.)",
+					"check": {
+						"skill": "sleight_of_hand",
+						"dc": 15,
+						"success": "freed",
+						"failure": "lock_holds"
+					}
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"cell": {
+			"text": "Thomas grips the bars and stares at you.",
+			"choices": [
+				{
+					"text": "\"Who are you?\"",
+					"next": "who"
+				},
+				{
+					"text": "\"Calm down. First I need to know what happened here.\"",
+					"next": "brother"
+				},
+				{
+					"text": "\"What do I get if I free you?\"",
+					"if": [
+						{
+							"flag": "thomas_deal",
+							"is": false
+						}
+					],
+					"next": "what"
+				},
+				{
+					"id": "cultist",
+					"text": "\"Maybe you're one of the cultists yourself.\"",
+					"check": {
+						"skill": "insight",
+						"dc": 13,
+						"success": "despair",
+						"failure": "unsure"
+					}
+				},
+				{
+					"id": "shut_up",
+					"text": "\"Shut up, or I'll leave you here.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 12,
+						"success": "quiet",
+						"failure": "loud"
+					}
+				},
+				{
+					"text": "(Open the cell with Vaelor's key.)",
+					"if": [
+						{
+							"flag": "defeated_cult_priest"
+						}
+					],
+					"next": "freed"
+				},
+				{
+					"id": "lock",
+					"text": "(Pick the lock.)",
+					"check": {
+						"skill": "sleight_of_hand",
+						"dc": 15,
+						"success": "freed",
+						"failure": "lock_holds"
+					}
+				},
+				{
+					"text": "(Leave.)"
+				}
 			]
 		},
 		"who": {
-			"text": "[Placeholder: he says his name and where he comes from in the city.]",
+			"text": "\"Thomas Rehn. Stonemason. And if you're not one of those lunatics, get me out of here!\"",
 			"choices": [
-				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"},
-				{"text": "[Placeholder: walk away]"}
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
 			]
 		},
-		"why": {
-			"text": "[Placeholder: he says the priest has the key to the gate.]",
-			"effects": {"flags": {"crypt_prisoner_key_hint": true}},
+		"brother": {
+			"text": "\"Calm down?! They cut my brother's throat in front of me!\"",
 			"choices": [
-				{"text": "[Placeholder: promise to come back with the key]", "next": "promised"},
-				{"text": "[Placeholder: refuse to help]", "next": "refused"}
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
 			]
 		},
-		"honest": {
-			"text": "[Placeholder: the hero sees he is telling the truth.]",
-			"effects": {"flags": {"crypt_prisoner_honest": true}, "xp": 15},
+		"what": {
+			"text": "\"What?\" He stares at you in disbelief. \"I've got a wife and two children, you damned swine!\" He swallows. \"I don't own much. But I can work.\"",
 			"choices": [
-				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"}
+				{
+					"id": "twenty",
+					"text": "\"You owe me twenty silver.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 12,
+						"success": "debt_20",
+						"failure": "no_money"
+					}
+				},
+				{
+					"id": "fifty",
+					"text": "\"Your life is worth more. Fifty silver.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "debt_50",
+						"failure": "no_better"
+					}
+				},
+				{
+					"text": "\"Forget the money. I'll get you out.\"",
+					"next": "thanks"
+				},
+				{
+					"text": "\"Then stay here.\"",
+					"next": "wait"
+				}
+			]
+		},
+		"debt_20": {
+			"text": "\"Fine. Twenty silver.\"",
+			"effects": {
+				"flags": {
+					"thomas_deal": "debt",
+					"thomas_debt": 2000
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"no_money": {
+			"text": "\"I don't have the money!\" [Placeholder: Thomas offers other help instead.]",
+			"effects": {
+				"flags": {
+					"thomas_deal": "work"
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"debt_50": {
+			"text": "\"Please... I'll find it somehow.\"",
+			"effects": {
+				"flags": {
+					"thomas_deal": "debt",
+					"thomas_debt": 5000
+				},
+				"add": {
+					"thomas_trust": -3,
+					"player_cruelty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"no_better": {
+			"text": "\"You're no better than those bastards!\"",
+			"effects": {
+				"flags": {
+					"thomas_deal": "refused"
+				},
+				"add": {
+					"thomas_trust": -1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"thanks": {
+			"text": "Thomas starts to shake. \"Thank you...\"",
+			"effects": {
+				"flags": {
+					"thomas_deal": "free",
+					"thomas_free_help": true,
+					"crypt_prisoner_promised": true
+				},
+				"add": {
+					"thomas_trust": 2
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"wait": {
+			"text": "\"NO! WAIT!\" He hammers on the bars.",
+			"effects": {
+				"flags": {
+					"thomas_abandoned": true
+				}
+			}
+		},
+		"despair": {
+			"text": "\"Look at me! You think I did this to myself?\" The despair in his face is real.",
+			"effects": {
+				"flags": {
+					"crypt_prisoner_honest": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
 			]
 		},
 		"unsure": {
-			"text": "[Placeholder: the hero cannot read him.]",
+			"text": "You cannot tell for sure.",
 			"choices": [
-				{"text": "[Placeholder: ask why the cult keeps him]", "next": "why"}
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
 			]
 		},
-		"promised": {
-			"text": "[Placeholder: he thanks the hero and begs him to hurry.]",
-			"effects": {"flags": {"crypt_prisoner_promised": true}}
+		"quiet": {
+			"text": "Thomas falls silent. He will do what you say.",
+			"effects": {
+				"flags": {
+					"thomas_obeys": true
+				},
+				"add": {
+					"thomas_trust": -2
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
 		},
-		"refused": {
-			"text": "[Placeholder: he curses the hero.]",
-			"effects": {"flags": {"crypt_prisoner_refused": true}}
+		"loud": {
+			"text": "\"Then leave me here to rot!\" His shouts echo through the crypt.",
+			"effects": {
+				"flags": {
+					"crypt_alarm_triggered": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
 		},
-		"waiting": {
-			"text": "[Placeholder: he asks if the hero has the key yet.]"
+		"lock_holds": {
+			"text": "The lock holds.",
+			"choices": [
+				{
+					"text": "\"Listen...\"",
+					"next": "cell"
+				}
+			]
+		},
+		"freed": {
+			"text": "The cell door swings open. Thomas stumbles out. \"I thought I'd die in this hole.\"",
+			"effects": {
+				"flags": {
+					"crypt_prisoner_freed": true,
+					"thomas_status": "freed"
+				},
+				"xp": 50
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"after": {
+			"text": "Thomas rubs his raw wrists.",
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"how": {
+			"text": "\"I was working on old foundations. In a sealed cellar we found a wall with strange signs. Three days later, men in grey robes came for me.\"",
+			"effects": {
+				"flags": {
+					"thomas_told_wall": true,
+					"hint_old_buildings": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"sketch": {
+			"text": "Thomas describes a circular symbol with seven lines. You sketch it.",
+			"effects": {
+				"item": {
+					"symbol_sketch": 1
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"forgot": {
+			"text": "\"I don't remember exactly. I was only the stonemason.\"",
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"vaelor": {
+			"text": "\"One of them was called Vaelor. He wanted to know what lay behind the wall.\"",
+			"effects": {
+				"flags": {
+					"boss_name_known": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"palace": {
+			"text": "\"Because I walled it up again. On the orders of a man from the palace.\"",
+			"effects": {
+				"flags": {
+					"hint_palace": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"family": {
+			"text": "\"I didn't know what kind of people they were! I wanted to feed my family!\"",
+			"effects": {
+				"add": {
+					"thomas_trust": -1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"How did you end up here?\"",
+					"next": "how"
+				},
+				{
+					"id": "signs",
+					"text": "\"What signs?\"",
+					"if": [
+						{
+							"flag": "thomas_told_wall"
+						}
+					],
+					"check": {
+						"skill": "investigation",
+						"dc": 14,
+						"success": "sketch",
+						"failure": "forgot"
+					}
+				},
+				{
+					"text": "\"Who kidnapped you?\"",
+					"next": "vaelor"
+				},
+				{
+					"text": "\"Why did they want you of all people?\"",
+					"next": "palace"
+				},
+				{
+					"text": "\"So you worked for the people who kidnapped you?\"",
+					"next": "family"
+				},
+				{
+					"text": "(Decide what to do with him.)",
+					"next": "final"
+				}
+			]
+		},
+		"final": {
+			"text": "Thomas looks from you to the dark corridor.",
+			"choices": [
+				{
+					"text": "(Escort Thomas safely back to Rabenfels.)",
+					"next": "escorted"
+				},
+				{
+					"text": "(Send Thomas home alone.)",
+					"next": "sent_home"
+				},
+				{
+					"text": "(Take Thomas to the city watch.)",
+					"next": "watch"
+				},
+				{
+					"id": "force",
+					"text": "(Force Thomas to guide you further through the crypt.)",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "guide",
+						"failure": "flees"
+					}
+				},
+				{
+					"text": "(Kill Thomas.)",
+					"next": "killed"
+				}
+			]
+		},
+		"escorted": {
+			"text": "[Placeholder: on the way back, Thomas tells the hero about a room in the city archive whose door was walled up afterwards.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "escorted",
+					"thomas_archive_quest": "known"
+				},
+				"add": {
+					"player_reputation": 1
+				},
+				"xp": 50
+			}
+		},
+		"sent_home": {
+			"text": "[Placeholder: Thomas sets off alone.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "sent_home"
+				},
+				"xp": 25
+			}
+		},
+		"watch": {
+			"text": "[Placeholder: Thomas gives his statement to the watch. Later parts of it go missing.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "watch"
+				},
+				"xp": 25
+			}
+		},
+		"guide": {
+			"text": "[Placeholder: Thomas follows the hero reluctantly. He can spot secret masonry.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "guide"
+				}
+			}
+		},
+		"flees": {
+			"text": "[Placeholder: Thomas refuses and tries to run.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "fled"
+				}
+			}
+		},
+		"killed": {
+			"text": "[Placeholder: the hero kills Thomas.]",
+			"effects": {
+				"flags": {
+					"thomas_status": "dead"
+				},
+				"add": {
+					"player_cruelty": 1
+				}
+			}
+		},
+		"guide_again": {
+			"text": "Thomas keeps close to the wall and says nothing."
 		}
 	}
 }

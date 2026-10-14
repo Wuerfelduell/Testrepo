@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "gravedigger",
+	"title": "The gravedigger",
+	"start_if": [
+		{
+			"flag": "hint_gravedigger"
+		}
+	],
+	"stages": [
+		{
+			"text": "Borik: the gravedigger is always looking for help."
+		}
+	]
+}

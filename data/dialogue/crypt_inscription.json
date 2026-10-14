@@ -1,34 +1,160 @@
 {
 	"version": 1,
 	"id": "crypt_inscription",
-	"speaker": "Worn inscription",
+	"speaker": "The crypt door",
 	"start": [
-		{"if": [{"flag": "crypt_inscription_read"}], "node": "again"},
-		{"node": "first"}
+		{
+			"node": "door"
+		}
 	],
 	"nodes": {
-		"first": {
-			"text": "[Placeholder: the hero finds a worn inscription above the crypt door. Owner writes the text.]",
+		"door": {
+			"text": "Two weathered angel statues guard the entrance of the old crypt. Above the door is a partly destroyed inscription:\n\"Here rest those whose names may no longer be spoken. May their flesh pass away. May their souls be silent. And may that which sleeps beneath them never wake.\"",
+			"effects": {
+				"flags": {
+					"crypt_inscription_read": true
+				}
+			},
 			"choices": [
-				{"text": "[Placeholder: read it as a prayer]", "check": {"skill": "religion", "dc": 12, "success": "religion_success", "failure": "unreadable"}},
-				{"text": "[Placeholder: read it as old history]", "check": {"skill": "history", "dc": 12, "success": "history_success", "failure": "unreadable"}},
-				{"text": "[Placeholder: leave it]"}
+				{
+					"id": "examine",
+					"text": "(Examine the inscription closely.)",
+					"check": {
+						"skill": "investigation",
+						"dc": 13,
+						"success": "older_text",
+						"failure": "nothing"
+					}
+				},
+				{
+					"id": "magic",
+					"text": "(Search for magical traces.)",
+					"check": {
+						"skill": "arcana",
+						"dc": 15,
+						"success": "ward",
+						"failure": "discharge"
+					}
+				},
+				{
+					"text": "(Damage the angel statues.)",
+					"if": [
+						{
+							"flag": "crypt_guardian_seal_broken",
+							"is": false
+						}
+					],
+					"next": "statue"
+				},
+				{
+					"text": "(Read the names of the dead aloud.)",
+					"if": [
+						{
+							"flag": "crypt_names_spoken",
+							"is": false
+						}
+					],
+					"next": "names"
+				},
+				{
+					"text": "(Step back.)"
+				}
 			]
 		},
-		"religion_success": {
-			"text": "[Placeholder: the hero recognises a prayer of the cult. Hint at the Cult Priest.]",
-			"effects": {"flags": {"crypt_inscription_read": true, "crypt_knows_cult_prayer": true}, "xp": 15}
+		"older_text": {
+			"text": "Beneath the original inscription there are older letters:\n\"We did not seal away the dead. We sealed away their voices.\"",
+			"effects": {
+				"flags": {
+					"crypt_hidden_inscription": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
 		},
-		"history_success": {
-			"text": "[Placeholder: the hero recognises who was buried here long ago.]",
-			"effects": {"flags": {"crypt_inscription_read": true, "crypt_knows_crypt_history": true}, "xp": 15}
+		"nothing": {
+			"text": "You find nothing more.",
+			"choices": [
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
 		},
-		"unreadable": {
-			"text": "[Placeholder: the letters make no sense to the hero.]",
-			"effects": {"flags": {"crypt_inscription_read": true}}
+		"ward": {
+			"text": "The door bears a damaged warding sign.",
+			"choices": [
+				{
+					"text": "(Disable the magical alarm.)",
+					"next": "disabled"
+				},
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
 		},
-		"again": {
-			"text": "[Placeholder: short line when the hero looks at the inscription again.]"
+		"disabled": {
+			"text": "The sign flickers once and goes dark.",
+			"effects": {
+				"flags": {
+					"crypt_alarm_disabled": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
+		},
+		"discharge": {
+			"text": "A weak magical discharge strikes you. Somewhere deeper in the crypt, voices call out.",
+			"effects": {
+				"damage": {
+					"dice": "1d4",
+					"type": "necrotic"
+				},
+				"flags": {
+					"crypt_alarm_triggered": true
+				},
+				"fight": {
+					"encounter": "hall"
+				}
+			}
+		},
+		"statue": {
+			"text": "The head of one statue breaks off and shatters on the floor.",
+			"effects": {
+				"flags": {
+					"crypt_guardian_seal_broken": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
+		},
+		"names": {
+			"text": "A cold wind streams out of the crypt. A voice whispers: \"At last.\"",
+			"effects": {
+				"flags": {
+					"crypt_names_spoken": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the inscription again.)",
+					"next": "door"
+				}
+			]
 		}
 	}
 }

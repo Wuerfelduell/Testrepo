@@ -25,7 +25,7 @@ func apply(state: GameState) -> Dictionary:
 	var node_id: String = String(conversation["node"])
 	var data: Dictionary = DialogueData.load_dialogue(dialogue_id)
 	var choice: Dictionary = data["nodes"][node_id]["choices"][choice_index]
-	var key: String = DialogueData.check_key(dialogue_id, node_id, choice_index)
+	var key: String = DialogueData.check_key(dialogue_id, node_id, choice_index, choice)
 	var events: Array[Dictionary] = [{"type": "dialogue_choice", "dialogue_id": dialogue_id,
 		"node_id": node_id, "choice": choice_index}]
 	events.append_array(DialogueEffects.apply(state, choice.get("effects", {}), key))

@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "stonemasons_wall",
+	"title": "The stonemason's wall",
+	"start_if": [
+		{
+			"flag": "thomas_archive_quest"
+		}
+	],
+	"stages": [
+		{
+			"text": "Thomas Rehn: in the city archive there is a room whose door was walled up afterwards. Old building plans are said to be stored there."
+		}
+	]
+}

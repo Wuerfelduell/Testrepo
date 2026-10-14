@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "old_bathhouse",
+	"title": "The old bathhouse",
+	"start_if": [
+		{
+			"flag": "old_bathhouse_hint"
+		}
+	],
+	"stages": [
+		{
+			"text": "Edrin: five years ago they walled up a tunnel under the old bathhouse. He heard screams."
+		}
+	]
+}

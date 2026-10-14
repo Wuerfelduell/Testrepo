@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "wolves",
+	"title": "Wolves on the north road",
+	"start_if": [
+		{
+			"flag": "quest_wolves"
+		}
+	],
+	"stages": [
+		{
+			"text": "Notice board: 15 silver for getting rid of a particularly aggressive wolf pack on the north road."
+		}
+	]
+}

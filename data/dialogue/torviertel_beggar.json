@@ -1,0 +1,398 @@
+{
+	"version": 1,
+	"id": "torviertel_beggar",
+	"speaker": "Edrin",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "edrin_silent"
+				}
+			],
+			"node": "silent"
+		},
+		{
+			"if": [
+				{
+					"flag": "edrin_met"
+				}
+			],
+			"node": "hub"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "The beggar sits beside a sewer drain, muttering to himself. \"Don't stand on it. Don't stand on it...\" He looks up at you. \"You're standing on their heads.\"",
+			"effects": {
+				"flags": {
+					"edrin_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"What are you talking about?\"",
+					"next": "below"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "edrin_trust",
+							"max": 1
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "coin"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "edrin_trust",
+							"min": 2
+						},
+						{
+							"flag": "sewer_entrance_known",
+							"is": false
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "shaft"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "sewer_entrance_known"
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "coin_again"
+				},
+				{
+					"text": "\"You're completely mad.\"",
+					"next": "mad"
+				},
+				{
+					"id": "everything",
+					"text": "\"Tell me everything, old sack.\"",
+					"if": [
+						{
+							"flag": "edrin_tongue",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 16,
+						"success": "bathhouse",
+						"failure": "dont_sleep"
+					}
+				},
+				{
+					"text": "\"If you lie to me, I'll cut your tongue out.\"",
+					"if": [
+						{
+							"flag": "edrin_tongue",
+							"is": false
+						}
+					],
+					"next": "tongue"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"hub": {
+			"text": "Edrin rocks back and forth and watches the cobbles.",
+			"choices": [
+				{
+					"text": "\"What are you talking about?\"",
+					"next": "below"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "edrin_trust",
+							"max": 1
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "coin"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "edrin_trust",
+							"min": 2
+						},
+						{
+							"flag": "sewer_entrance_known",
+							"is": false
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "shaft"
+				},
+				{
+					"text": "\"Here. A copper coin.\"",
+					"if": [
+						{
+							"flag": "sewer_entrance_known"
+						}
+					],
+					"effects": {
+						"money": -1,
+						"add": {
+							"edrin_trust": 1
+						}
+					},
+					"next": "coin_again"
+				},
+				{
+					"text": "\"You're completely mad.\"",
+					"next": "mad"
+				},
+				{
+					"id": "everything",
+					"text": "\"Tell me everything, old sack.\"",
+					"if": [
+						{
+							"flag": "edrin_tongue",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "intimidation",
+						"dc": 16,
+						"success": "bathhouse",
+						"failure": "dont_sleep"
+					}
+				},
+				{
+					"text": "\"If you lie to me, I'll cut your tongue out.\"",
+					"if": [
+						{
+							"flag": "edrin_tongue",
+							"is": false
+						}
+					],
+					"next": "tongue"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"coin": {
+			"text": "Edrin looks at the coin. \"One copper. How generous. Shall I kiss your feet?\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"coin_again": {
+			"text": "Edrin looks at the coin. \"One copper. How generous. Shall I kiss your feet?\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"shaft": {
+			"text": "Edrin looks at the coin for a long time. \"You're less shit than most around here.\" He shows you an old maintenance shaft behind the drain.",
+			"effects": {
+				"flags": {
+					"sewer_entrance_known": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"mad": {
+			"text": "\"Mad? Maybe.\" He smiles. \"But at least I've noticed that the ground sometimes knocks back.\"",
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"bathhouse": {
+			"text": "\"Five years ago they walled up a tunnel. Under the old bathhouse. I heard screams. The guards said it was rats.\"",
+			"effects": {
+				"flags": {
+					"old_bathhouse_hint": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"dont_sleep": {
+			"text": "\"DON'T SLEEP! THEY COME WHEN YOU SLEEP!\" Edrin turns away and won't say another word today.",
+			"effects": {
+				"flags": {
+					"edrin_silent": true
+				}
+			}
+		},
+		"silent": {
+			"text": "Edrin hums to himself and does not look up. Not today.",
+			"effects": {
+				"flags": {
+					"edrin_silent": false
+				}
+			}
+		},
+		"tongue": {
+			"text": "\"Go on then.\" He opens his mouth wide. \"Maybe the voices will finally stop.\"",
+			"effects": {
+				"flags": {
+					"edrin_tongue": true
+				},
+				"add": {
+					"edrin_trust": -1,
+					"player_cruelty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Something else.\"",
+					"next": "hub"
+				}
+			]
+		},
+		"below": {
+			"text": "\"About the people beneath us.\" He knocks on the cobbles. \"The ones down there don't like it when you trample on their heads.\"",
+			"choices": [
+				{
+					"text": "\"What people?\"",
+					"next": "walls"
+				},
+				{
+					"id": "song",
+					"text": "\"Can you sing me the song?\"",
+					"if": [
+						{
+							"flag": "edrin_heard_woman"
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 12,
+						"success": "song",
+						"failure": "wont_sing"
+					}
+				},
+				{
+					"text": "\"Have you seen anyone down there?\"",
+					"next": "boy"
+				},
+				{
+					"text": "\"You're making all this up.\"",
+					"next": "forget"
+				}
+			]
+		},
+		"walls": {
+			"text": "\"The ones in the walls. I hear them sometimes. A woman sings. Always the same song.\"",
+			"effects": {
+				"flags": {
+					"edrin_heard_woman": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "below"
+				}
+			]
+		},
+		"song": {
+			"text": "Edrin begins to sing in a cracked voice:\n\"When the last candle dies\nand the last warden falls,\nthe mother holds her children\nfar from that stranger world.\"",
+			"effects": {
+				"flags": {
+					"edrin_song_known": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "below"
+				}
+			]
+		},
+		"wont_sing": {
+			"text": "\"No. No, I won't sing it. Then she'll hear me.\"",
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "below"
+				}
+			]
+		},
+		"boy": {
+			"text": "\"Once. Behind a grate. A boy. Maybe ten. When I came back the next morning, the grate had been walled up.\"",
+			"effects": {
+				"flags": {
+					"hint_sealed_canal": true
+				},
+				"xp": 15
+			},
+			"choices": [
+				{
+					"text": "\"Go on.\"",
+					"next": "below"
+				}
+			]
+		},
+		"forget": {
+			"text": "\"Then forget it. Probably better that way.\""
+		}
+	}
+}

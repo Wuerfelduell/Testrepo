@@ -1,0 +1,704 @@
+{
+	"version": 1,
+	"id": "torviertel_gate_guard",
+	"speaker": "Captain Garrik Voss",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "gate_guards_fight",
+					"is": "won"
+				},
+				{
+					"flag": "garrik_after_fight",
+					"is": false
+				}
+			],
+			"node": "after_won"
+		},
+		{
+			"if": [
+				{
+					"flag": "gate_guards_fight",
+					"is": "lost"
+				},
+				{
+					"flag": "garrik_after_fight",
+					"is": false
+				}
+			],
+			"node": "after_lost"
+		},
+		{
+			"if": [
+				{
+					"flag": "garrik_met"
+				}
+			],
+			"node": "again"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Two guards stand beside a barrier. Garrik sits on a wooden chair, sharpening his dagger, and looks the newcomer over. \"Shut your mouth and stand still.\" He eyes you from head to toe. \"Another damned vagrant with a weapon. What do you want in Rabenfels?\"",
+			"effects": {
+				"flags": {
+					"garrik_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"I'm looking for work. Maybe someone who needs a sword arm.\"",
+					"next": "work"
+				},
+				{
+					"text": "\"None of your damn business.\"",
+					"next": "provoked"
+				},
+				{
+					"text": "\"I don't want trouble. I just need somewhere to sleep.\"",
+					"next": "fee"
+				},
+				{
+					"text": "\"I could ask why you're doing your duty drunk.\"",
+					"next": "drunk"
+				},
+				{
+					"id": "tense",
+					"text": "\"Has something happened? You seem unusually tense.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 13,
+						"success": "eyeless",
+						"failure": "tense"
+					}
+				}
+			]
+		},
+		"work": {
+			"text": "\"Great. Another idiot who thinks he's a hero.\" He spits on the ground. \"The adventurers' guild takes any scum. Go there before you start busting my balls. What can you even do? Apart from talking big?\"",
+			"choices": [
+				{
+					"text": "\"I can fight.\"",
+					"next": "can_fight"
+				},
+				{
+					"id": "talk",
+					"text": "\"I can make people talk.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 15,
+						"success": "silent_prisoners",
+						"failure": "mother"
+					}
+				},
+				{
+					"text": "\"Better than you, apparently. I don't need a chair to do my duty.\"",
+					"effects": {
+						"add": {
+							"garrik_relationship": -1
+						}
+					},
+					"next": "chair"
+				},
+				{
+					"text": "\"Do you have a job yourself?\"",
+					"if": [
+						{
+							"flag": "garrik_job",
+							"is": false
+						}
+					],
+					"next": "dirty_job"
+				}
+			]
+		},
+		"can_fight": {
+			"text": "\"Anyone can fight. The trick is not to die doing it.\"",
+			"effects": {
+				"flags": {
+					"hint_adventurers_guild": true
+				}
+			}
+		},
+		"silent_prisoners": {
+			"text": "\"Then you should go to the city watch. We've got a few prisoners who badly need to talk.\"",
+			"effects": {
+				"flags": {
+					"quest_silent_prisoners": true
+				},
+				"xp": 25
+			}
+		},
+		"mother": {
+			"text": "\"You couldn't even make my mother talk. And she's been dead for ten years.\""
+		},
+		"chair": {
+			"text": "\"One more word and I'll show you what the chair is good for.\""
+		},
+		"dirty_job": {
+			"text": "\"Depends. How much do you mind getting your hands dirty?\" [Placeholder: Garrik wants an inconvenient witness in the poor quarter intimidated.]",
+			"choices": [
+				{
+					"text": "\"I'll do it.\"",
+					"effects": {
+						"flags": {
+							"garrik_job": "accepted"
+						},
+						"add": {
+							"corruption_reputation": 1
+						}
+					},
+					"next": "job_accepted"
+				},
+				{
+					"text": "\"Not my kind of work.\"",
+					"effects": {
+						"flags": {
+							"garrik_job": "refused"
+						}
+					},
+					"next": "job_refused"
+				},
+				{
+					"text": "\"I could report you for this.\"",
+					"effects": {
+						"flags": {
+							"garrik_job": "threatened"
+						},
+						"add": {
+							"garrik_relationship": -2
+						}
+					},
+					"next": "job_threatened"
+				}
+			]
+		},
+		"job_accepted": {
+			"text": "[Placeholder: Garrik tells the hero where to find the witness. Pays 20 silver when it is done.]",
+			"effects": {
+				"xp": 15
+			}
+		},
+		"job_refused": {
+			"text": "[Placeholder: Garrik shrugs it off.]"
+		},
+		"job_threatened": {
+			"text": "[Placeholder: Garrik's answer to the threat.]"
+		},
+		"fee": {
+			"text": "\"Then stop wasting my time. Five copper entry fee.\"",
+			"choices": [
+				{
+					"text": "\"Here are five copper.\"",
+					"effects": {
+						"money": -5,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "\"Five copper? That buys me a hot meal.\"",
+					"next": "meal"
+				},
+				{
+					"id": "no_money",
+					"text": "\"I have no money.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "free_once",
+						"failure": "stay_out"
+					}
+				},
+				{
+					"id": "pocket",
+					"text": "\"How much of that ends up in your own pocket?\"",
+					"check": {
+						"skill": "insight",
+						"dc": 12,
+						"success": "corrupt",
+						"failure": "no_tell"
+					}
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"meal": {
+			"text": "\"Then eat the gate. It costs nothing.\""
+		},
+		"free_once": {
+			"text": "\"Once. And if I catch you begging, I'll throw you out myself.\"",
+			"effects": {
+				"flags": {
+					"gate_entry": "free"
+				},
+				"add": {
+					"garrik_relationship": -1
+				}
+			}
+		},
+		"stay_out": {
+			"text": "\"Then stay outside.\" [Placeholder: a small job or a later entry as the way in.]",
+			"effects": {
+				"flags": {
+					"gate_entry_refused": true
+				}
+			}
+		},
+		"no_tell": {
+			"text": "Garrik's face gives nothing away.",
+			"choices": [
+				{
+					"text": "\"Here are five copper.\"",
+					"effects": {
+						"money": -5,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"corrupt": {
+			"text": "Garrik throws a quick glance at the other guards.",
+			"effects": {
+				"flags": {
+					"garrik_corrupt_known": true
+				}
+			},
+			"choices": [
+				{
+					"id": "bribe",
+					"text": "\"Three copper. And we both forget this conversation.\"",
+					"if": [
+						{
+							"money": 3
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "bribed",
+						"failure": "regular"
+					}
+				},
+				{
+					"text": "\"Here are five copper.\"",
+					"effects": {
+						"money": -5,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"bribed": {
+			"text": "Garrik pockets the three coins without a word.",
+			"effects": {
+				"money": -3,
+				"flags": {
+					"gate_entry": "bribed",
+					"garrik_bribed": true
+				},
+				"add": {
+					"garrik_relationship": 1
+				}
+			}
+		},
+		"regular": {
+			"text": "Garrik holds out his hand. Five copper, not one less.",
+			"choices": [
+				{
+					"text": "\"Here are five copper.\"",
+					"effects": {
+						"money": -5,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"paid": {
+			"text": "Garrik pockets the coins and waves you through.",
+			"effects": {
+				"xp": 10
+			}
+		},
+		"drunk": {
+			"text": "Garrik's face darkens. \"Watch it, kid. I've sent men to the gallows for less.\"",
+			"choices": [
+				{
+					"text": "\"Then try it.\"",
+					"next": "conflict"
+				},
+				{
+					"text": "\"Just an observation.\"",
+					"next": "fee10"
+				},
+				{
+					"id": "superiors",
+					"text": "\"Your superiors would surely be interested.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 16,
+						"success": "threatened",
+						"failure": "searched"
+					}
+				}
+			]
+		},
+		"fee10": {
+			"text": "\"Ten copper. For the observation.\"",
+			"choices": [
+				{
+					"text": "\"Here are ten copper.\"",
+					"effects": {
+						"money": -10,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"threatened": {
+			"text": "\"You'd better not make any trouble.\" He steps aside.",
+			"effects": {
+				"flags": {
+					"gate_entry": "free",
+					"garrik_threatened": true
+				},
+				"add": {
+					"garrik_relationship": -1
+				}
+			}
+		},
+		"searched": {
+			"text": "\"My superiors? They drink with me.\" The guards search you from head to toe. \"Fifteen copper now.\"",
+			"effects": {
+				"flags": {
+					"gate_searched": true
+				}
+			},
+			"choices": [
+				{
+					"text": "\"Here are fifteen copper.\"",
+					"effects": {
+						"money": -15,
+						"flags": {
+							"gate_entry": "paid"
+						}
+					},
+					"next": "paid"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"provoked": {
+			"text": "\"Excuse me?\" He slowly gets up. \"You're standing at MY gate, you little bastard. One more wrong word and I'll knock the teeth out of your mouth.\"",
+			"choices": [
+				{
+					"text": "(Say nothing.)",
+					"next": "conflict"
+				}
+			]
+		},
+		"conflict": {
+			"text": "\"Last warning. Apologise.\"",
+			"choices": [
+				{
+					"text": "\"Kiss my arse.\"",
+					"next": "punched"
+				},
+				{
+					"text": "\"All right. My mistake.\"",
+					"next": "good_dog"
+				},
+				{
+					"id": "lapdogs",
+					"text": "\"If you want to fight, do it without your two lapdogs.\"",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "balls",
+						"failure": "knees"
+					}
+				},
+				{
+					"id": "pathetic",
+					"text": "\"Think about it. Three armed men against one traveller? What a pathetic captain.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 17,
+						"success": "pathetic",
+						"failure": "arrest"
+					}
+				}
+			]
+		},
+		"punched": {
+			"text": "Garrik slams his armoured fist into your face. Behind him, the guards draw their weapons.",
+			"effects": {
+				"damage": {
+					"dice": "1d4",
+					"type": "bludgeoning"
+				}
+			},
+			"choices": [
+				{
+					"text": "(Fight.)",
+					"effects": {
+						"flags": {
+							"gate_crime_committed": true,
+							"garrik_attacked": true
+						}
+					},
+					"next": "fight"
+				},
+				{
+					"text": "(Run.)",
+					"effects": {
+						"flags": {
+							"gate_fled": true
+						},
+						"add": {
+							"garrik_relationship": -2,
+							"city_guard_reputation": -1
+						}
+					},
+					"next": "fled"
+				},
+				{
+					"text": "(Surrender.)",
+					"effects": {
+						"flags": {
+							"gate_surrendered": true
+						},
+						"add": {
+							"city_guard_reputation": -1
+						}
+					},
+					"next": "surrender"
+				}
+			]
+		},
+		"fight": {
+			"text": "Garrik grins and reaches for his mace.",
+			"effects": {
+				"fight": {
+					"encounter": "gate_guards"
+				}
+			}
+		},
+		"fled": {
+			"text": "[Placeholder: the hero runs and the guards shout after them.]"
+		},
+		"surrender": {
+			"text": "[Placeholder: Garrik over the hero who gives up.]"
+		},
+		"good_dog": {
+			"text": "\"Good dog.\"",
+			"effects": {
+				"flags": {
+					"gate_entry": "apologised"
+				},
+				"add": {
+					"city_guard_reputation": -1
+				}
+			}
+		},
+		"balls": {
+			"text": "Garrik laughs dryly. \"You've got balls. Maybe more than brains.\"",
+			"effects": {
+				"flags": {
+					"gate_entry": "free",
+					"garrik_favour_owed": true
+				},
+				"xp": 25
+			}
+		},
+		"knees": {
+			"text": "Garrik: \"Boys. Break some knees.\"",
+			"effects": {
+				"fight": {
+					"encounter": "gate_guards",
+					"nonlethal": true
+				}
+			}
+		},
+		"pathetic": {
+			"text": "The two guards exchange uncomfortable looks. Garrik: \"Get lost. Before I change my mind.\"",
+			"effects": {
+				"flags": {
+					"gate_entry": "free",
+					"garrik_humiliated": true,
+					"gate_guards_respect": true
+				},
+				"add": {
+					"garrik_relationship": -2
+				},
+				"xp": 25
+			}
+		},
+		"arrest": {
+			"text": "Garrik nods at his guards. They come at you to drag you off to the cells.",
+			"effects": {
+				"fight": {
+					"encounter": "gate_guards",
+					"nonlethal": true
+				},
+				"flags": {
+					"gate_arrest_attempt": true
+				}
+			}
+		},
+		"eyeless": {
+			"text": "\"Three bodies this week. All without eyes.\" He looks you over. \"If you find any that still have theirs, let me know.\"",
+			"effects": {
+				"flags": {
+					"hint_eyeless": true
+				},
+				"xp": 25
+			}
+		},
+		"tense": {
+			"text": "\"Yes. You happened. Get lost.\""
+		},
+		"again": {
+			"text": "Garrik barely looks up from his dagger.",
+			"choices": [
+				{
+					"text": "\"About the entry fee.\"",
+					"if": [
+						{
+							"flag": "gate_entry",
+							"is": false
+						}
+					],
+					"next": "fee"
+				},
+				{
+					"text": "\"Do you have a job yourself?\"",
+					"if": [
+						{
+							"flag": "garrik_job",
+							"is": false
+						}
+					],
+					"next": "dirty_job"
+				},
+				{
+					"text": "\"I found a package someone was smuggling.\"",
+					"if": [
+						{
+							"item": "black_relic"
+						},
+						{
+							"item": "sealed_package",
+							"is": false
+						},
+						{
+							"flag": "mara_package_handed",
+							"is": false
+						}
+					],
+					"next": "package_watch_relic"
+				},
+				{
+					"text": "\"I found a package someone was smuggling.\"",
+					"if": [
+						{
+							"item": "sealed_package"
+						},
+						{
+							"flag": "mara_package_handed",
+							"is": false
+						}
+					],
+					"next": "package_watch"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		},
+		"package_watch": {
+			"text": "[Placeholder: Garrik takes the package and asks where it comes from.]",
+			"effects": {
+				"flags": {
+					"mara_package_handed": "watch",
+					"mara_package_status": "watch"
+				},
+				"item": {
+					"sealed_package": -1
+				},
+				"add": {
+					"merchant_reputation": -1,
+					"city_guard_reputation": 1
+				}
+			}
+		},
+		"after_won": {
+			"text": "[Placeholder: Garrik, bruised, after the hero beat him and his guards.]",
+			"effects": {
+				"flags": {
+					"garrik_after_fight": true,
+					"gate_entry": "fought"
+				}
+			}
+		},
+		"after_lost": {
+			"text": "[Placeholder: Garrik over the beaten hero. What does losing cost?]",
+			"effects": {
+				"flags": {
+					"garrik_after_fight": true,
+					"gate_entry": "beaten"
+				}
+			}
+		},
+		"package_watch_relic": {
+			"text": "[Placeholder: Garrik takes the package and asks where it comes from.]",
+			"effects": {
+				"flags": {
+					"mara_package_handed": "watch",
+					"mara_package_status": "watch"
+				},
+				"item": {
+					"black_relic": -1
+				},
+				"add": {
+					"merchant_reputation": -1,
+					"city_guard_reputation": 1
+				}
+			}
+		}
+	}
+}

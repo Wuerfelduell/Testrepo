@@ -1,0 +1,90 @@
+{
+	"version": 1,
+	"id": "crypt_courier",
+	"speaker": "Dead courier",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "mara_package_found"
+				}
+			],
+			"node": "searched"
+		},
+		{
+			"node": "body"
+		}
+	],
+	"nodes": {
+		"body": {
+			"text": "A dead courier lies against the wall. A sealed package is still strapped to his back.",
+			"choices": [
+				{
+					"text": "(Take the package.)",
+					"effects": {
+						"item": {
+							"sealed_package": 1
+						},
+						"flags": {
+							"mara_package_found": true
+						}
+					},
+					"next": "taken"
+				},
+				{
+					"text": "(Leave it.)"
+				}
+			]
+		},
+		"taken": {
+			"text": "The package is heavier than it looks. The seal is unbroken.",
+			"choices": [
+				{
+					"text": "(Break the seal and open it.)",
+					"effects": {
+						"item": {
+							"sealed_package": -1,
+							"black_relic": 1
+						}
+					},
+					"next": "relic"
+				},
+				{
+					"text": "(Leave it sealed.)"
+				}
+			]
+		},
+		"relic": {
+			"text": "Inside, wrapped in black cloth, lies a sealed black relic. Its surface is cold to the touch.",
+			"effects": {
+				"flags": {
+					"mara_package_opened": true
+				},
+				"xp": 15
+			}
+		},
+		"searched": {
+			"text": "Only the dead courier is left.",
+			"choices": [
+				{
+					"text": "(Break the seal of the package and open it.)",
+					"if": [
+						{
+							"item": "sealed_package"
+						}
+					],
+					"effects": {
+						"item": {
+							"sealed_package": -1,
+							"black_relic": 1
+						}
+					},
+					"next": "relic"
+				},
+				{
+					"text": "(Leave.)"
+				}
+			]
+		}
+	}
+}

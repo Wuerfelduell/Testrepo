@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "apprentice",
+	"title": "The missing apprentice",
+	"start_if": [
+		{
+			"flag": "quest_apprentice"
+		}
+	],
+	"stages": [
+		{
+			"text": "Notice board: the smith is looking for his apprentice, last seen near the old mill. 25 silver."
+		}
+	]
+}

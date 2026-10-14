@@ -1,14 +1,44 @@
 {
 	"version": 1,
 	"id": "crypt_prisoner",
-	"title": "[Placeholder] The prisoner behind the gate",
-	"start_if": [{"flag": "crypt_prisoner_key_hint"}],
-	"stages": [
-		{"text": "[Placeholder: a prisoner sits in a locked cell. The priest has the key.]"},
-		{"if": [{"flag": "crypt_prisoner_promised"}], "text": "[Placeholder: the hero promised to come back with the key.]"}
+	"title": "The stonemason in the cell",
+	"start_if": [
+		{
+			"flag": "crypt_prisoner_key_hint"
+		}
 	],
-	"done_if": [{"flag": "crypt_prisoner_freed"}],
-	"done_text": "[Placeholder: the prisoner is free.]",
-	"failed_if": [{"flag": "crypt_prisoner_refused"}],
-	"failed_text": "[Placeholder: the hero refused to help him.]"
+	"stages": [
+		{
+			"text": "Thomas Rehn, a stonemason, is locked in a cell in the crypt, behind the iron gate next to the side chamber."
+		},
+		{
+			"if": [
+				{
+					"flag": "crypt_key_vaelor"
+				}
+			],
+			"text": "Malrek: Vaelor has the key."
+		},
+		{
+			"if": [
+				{
+					"flag": "crypt_prisoner_promised"
+				}
+			],
+			"text": "I promised Thomas to get him out."
+		}
+	],
+	"done_if": [
+		{
+			"flag": "crypt_prisoner_freed"
+		}
+	],
+	"done_text": "Thomas is free.",
+	"failed_if": [
+		{
+			"flag": "thomas_status",
+			"is": "dead"
+		}
+	],
+	"failed_text": "Thomas is dead."
 }

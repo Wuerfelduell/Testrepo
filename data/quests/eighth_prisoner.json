@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "eighth_prisoner",
+	"title": "The eighth prisoner",
+	"start_if": [
+		{
+			"flag": "hint_eighth_prisoner"
+		}
+	],
+	"stages": [
+		{
+			"text": "Malrek: the cult killed seven people. Eight, if the boy is still alive."
+		}
+	]
+}

@@ -3,27 +3,283 @@
 	"id": "torviertel_notice_board",
 	"speaker": "Notice board",
 	"start": [
-		{"node": "first"}
+		{
+			"node": "board"
+		}
 	],
 	"nodes": {
-		"first": {
-			"text": "[Placeholder: notices on the board on the Torplatz. Owner writes them.]",
+		"board": {
+			"text": "A large wooden board hangs beside the guardhouse. Yellowed parchments flutter in the wind: jobs, wanted posters and announcements. Some notices have clearly been torn down by force.",
 			"choices": [
-				{"text": "[Placeholder: read the torn notice about the Kellergasse]", "next": "crypt_notice"},
-				{"text": "[Placeholder: look for hidden marks between the notices]", "check": {"skill": "investigation", "dc": 13, "success": "cult_mark", "failure": "nothing"}},
-				{"text": "[Placeholder: step back]"}
+				{
+					"text": "(Job: Wolves on the north road.)",
+					"next": "wolves"
+				},
+				{
+					"text": "(Job: Missing apprentice.)",
+					"next": "apprentice"
+				},
+				{
+					"text": "(Job: The abandoned crypt.)",
+					"next": "crypt"
+				},
+				{
+					"text": "(Wanted: The Ashen Man.)",
+					"next": "ashen_man"
+				},
+				{
+					"text": "(Announcement of the city council.)",
+					"next": "council"
+				},
+				{
+					"id": "tear",
+					"text": "(Tear down the wanted poster.)",
+					"if": [
+						{
+							"flag": "wanted_poster_torn",
+							"is": false
+						}
+					],
+					"check": {
+						"skill": "sleight_of_hand",
+						"dc": 12,
+						"success": "torn_unseen",
+						"failure": "guard"
+					}
+				},
+				{
+					"text": "(Put up a notice of your own. 5 copper.)",
+					"if": [
+						{
+							"flag": "own_notice",
+							"is": false
+						}
+					],
+					"effects": {
+						"money": -5
+					},
+					"next": "own_notice"
+				},
+				{
+					"text": "(Step back.)"
+				}
 			]
 		},
-		"crypt_notice": {
-			"text": "[Placeholder: people saw hooded figures at the old charnel house in the Kellergasse at night.]",
-			"effects": {"flags": {"torviertel_heard_of_crypt": true}}
+		"wolves": {
+			"text": "\"Reward: 15 silver for getting rid of a particularly aggressive wolf pack.\"",
+			"effects": {
+				"flags": {
+					"quest_wolves": "known"
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
 		},
-		"cult_mark": {
-			"text": "[Placeholder: a small cult sign is scratched into the wood, the same as in the crypt.]",
-			"effects": {"flags": {"torviertel_heard_of_crypt": true, "torviertel_cult_mark": true}, "xp": 15}
+		"apprentice": {
+			"text": "\"The smith is looking for his apprentice. Last seen near the old mill. Reward: 25 silver.\"",
+			"effects": {
+				"flags": {
+					"quest_apprentice": "known"
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
 		},
-		"nothing": {
-			"text": "[Placeholder: only old notices.]"
+		"crypt": {
+			"text": "\"Several graves have been desecrated. 50 silver will be paid for dealing with those responsible.\"",
+			"effects": {
+				"flags": {
+					"torviertel_heard_of_crypt": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"ashen_man": {
+			"text": "\"Wanted for murder, arson and grave desecration. Reward: 100 silver.\" The poster shows a man with a burned face.",
+			"effects": {
+				"flags": {
+					"hint_ashen_man": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"council": {
+			"text": "\"Entering old tunnels, sealed cellars and abandoned vaults without a permit is forbidden.\"",
+			"effects": {
+				"flags": {
+					"hint_council_ban": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"torn_unseen": {
+			"text": "You fold the wanted poster and put it away. Nobody noticed.",
+			"effects": {
+				"item": {
+					"wanted_poster": 1
+				},
+				"flags": {
+					"wanted_poster_torn": true,
+					"hint_ashen_man": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"guard": {
+			"text": "A guard shouts across the square: \"Hey! That's city property!\"",
+			"effects": {
+				"item": {
+					"wanted_poster": 1
+				},
+				"flags": {
+					"wanted_poster_torn": true,
+					"hint_ashen_man": true
+				}
+			},
+			"choices": [
+				{
+					"text": "(Hang it back up.)",
+					"effects": {
+						"item": {
+							"wanted_poster": -1
+						},
+						"flags": {
+							"wanted_poster_torn": false
+						}
+					},
+					"next": "board"
+				},
+				{
+					"text": "(Pay the five copper fine.)",
+					"effects": {
+						"money": -5
+					},
+					"next": "board"
+				},
+				{
+					"id": "hunt",
+					"text": "\"I need it for the hunt.\"",
+					"check": {
+						"skill": "persuasion",
+						"dc": 12,
+						"success": "guard_convinced",
+						"failure": "guard_not_convinced"
+					}
+				},
+				{
+					"text": "(Insult the guard.)",
+					"effects": {
+						"add": {
+							"city_guard_reputation": -1
+						}
+					},
+					"next": "insulted"
+				}
+			]
+		},
+		"guard_convinced": {
+			"text": "[Placeholder: the guard lets the hero keep the poster.]",
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"guard_not_convinced": {
+			"text": "[Placeholder: the guard makes the hero hang it back up.]",
+			"effects": {
+				"item": {
+					"wanted_poster": -1
+				},
+				"flags": {
+					"wanted_poster_torn": false
+				}
+			},
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"insulted": {
+			"text": "[Placeholder: the guard's reply to the insult.]",
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
+		},
+		"own_notice": {
+			"text": "You pay the fee and get a blank sheet. What do you write?",
+			"choices": [
+				{
+					"text": "(Looking for work.)",
+					"effects": {
+						"flags": {
+							"own_notice": "work"
+						}
+					},
+					"next": "posted"
+				},
+				{
+					"text": "(Looking for companions.)",
+					"effects": {
+						"flags": {
+							"own_notice": "companions"
+						}
+					},
+					"next": "posted"
+				},
+				{
+					"text": "(Searching for someone missing.)",
+					"effects": {
+						"flags": {
+							"own_notice": "missing"
+						}
+					},
+					"next": "posted"
+				}
+			]
+		},
+		"posted": {
+			"text": "You pin your notice between the others. [Placeholder: who answers it comes later.]",
+			"choices": [
+				{
+					"text": "(Look at the other notices.)",
+					"next": "board"
+				}
+			]
 		}
 	}
 }

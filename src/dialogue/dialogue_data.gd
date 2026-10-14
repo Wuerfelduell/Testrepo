@@ -161,6 +161,11 @@ static func _effect_problems(effects: Variant, where: String) -> PackedStringArr
 static func _is_number(value: Variant) -> bool:
 	return value is int or value is float
 
+## A flag counts as set unless it is missing, false, 0 or "" (values like "killed" are set).
+static func is_set(value: Variant) -> bool:
+	return not (value == null or (value is bool and not value) or (_is_number(value) and value == 0) or \
+		(value is String and String(value).is_empty()))
+
 ## A flag read as a counter: numbers as they are, true = 1, anything else 0.
 static func number(value: Variant) -> int:
 	if _is_number(value):
@@ -192,7 +197,7 @@ static func conditions_met(conditions: Variant, state: GameState) -> bool:
 			var value: Variant = flags(state).get(String(condition["flag"]), false)
 			var wanted: Variant = condition.get("is", true)
 			if wanted is bool:
-				if bool(value) != wanted:
+				if is_set(value) != wanted:
 					return false
 			elif str(value) != str(wanted):
 				return false
@@ -235,8 +240,12 @@ static func start_node(data: Dictionary, state: GameState) -> String:
 			return String(entry["node"])
 	return ""
 
-## Key under which a check's result is remembered: every check is rolled only once.
-static func check_key(dialogue_id: String, node_id: String, index: int) -> String:
+## Key under which a check's result is remembered: every check is rolled only once. A choice
+## with an "id" shares its roll with every other choice of that id in the conversation, so the
+## same answer can stand in several nodes (a menu the hero comes back to) and still roll once.
+static func check_key(dialogue_id: String, node_id: String, index: int, choice: Dictionary = {}) -> String:
+	if choice.get("id") is String and not String(choice["id"]).is_empty():
+		return "%s/%s" % [dialogue_id, choice["id"]]
 	return "%s/%s/%d" % [dialogue_id, node_id, index]
 
 ## Indices into the node's choices that the hero may pick right now: conditions hold and
@@ -250,7 +259,7 @@ static func available_choices(data: Dictionary, node_id: String, state: GameStat
 		var choice: Dictionary = choices[index]
 		if not conditions_met(choice.get("if", []), state) or not affordable(choice.get("effects", {}), state):
 			continue
-		if choice.has("check") and rolled.has(check_key(String(data.get("id", "")), node_id, index)):
+		if choice.has("check") and rolled.has(check_key(String(data.get("id", "")), node_id, index, choice)):
 			continue
 		result.append(index)
 	return result

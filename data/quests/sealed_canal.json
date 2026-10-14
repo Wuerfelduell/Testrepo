@@ -1,0 +1,15 @@
+{
+	"version": 1,
+	"id": "sealed_canal",
+	"title": "The sealed canal",
+	"start_if": [
+		{
+			"flag": "hint_sealed_canal"
+		}
+	],
+	"stages": [
+		{
+			"text": "Edrin once saw a boy behind a grate under the city. The next morning the grate was walled up."
+		}
+	]
+}
