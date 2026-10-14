@@ -980,9 +980,9 @@ FEATURE_PACT_MAGIC,Pact Magic
 FEATURE_PACT_MAGIC_HINT_LEVELUP,"Few spell slots, all of your highest level, and all of them come back on a short rest."
 FEATURE_ELDRITCH_INVOCATIONS,Eldritch Invocations
 FEATURE_MAGICAL_CUNNING,Magical Cunning
-FEATURE_MAGICAL_CUNNING_HINT_LEVELUP,"Once per long rest, an action: regain half your pact slots (rounded up)."
+FEATURE_MAGICAL_CUNNING_HINT_LEVELUP,"Once per long rest, outside combat: regain half your pact slots (rounded up)."
 FEATURE_MAGICAL_CUNNING_BUTTON,Magical Cunning %d/%d
-FEATURE_MAGICAL_CUNNING_HINT,Action: regain half your pact slots (rounded up)
+FEATURE_MAGICAL_CUNNING_HINT,Outside combat: regain half your pact slots (rounded up)
 FEATURE_SLOTS_FULL,Your spell slots are full
 FEATURE_CONTACT_PATRON,Contact Patron
 LEVELUP_SECTION_BARD_EXPERTISE,EXPERTISE (%d)
@@ -1100,3 +1100,4 @@ ROLL_SOURCE_ARMOR_STEALTH,Armour hinders Stealth
 LEVELUP_SECTION_EXPERTISE_ROGUE,EXPERTISE (%d)
 LEVELUP_SECTION_EXPERTISE_ROGUE_NOTE,Double your proficiency bonus for two of these skills.
 COLOR_CHARCOAL,Charcoal
+FEATURE_NOT_IN_COMBAT,Not during combat

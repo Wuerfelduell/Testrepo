@@ -466,7 +466,8 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		if entry.begins_with("feature:") and not id in UseFeatureCommand.FEATURES:
 			# Class kit features (ClassKits): label, reason and hint come from the kit.
 			button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, ClassKits.feature_label(hero, id)]
-			reason = "COMBAT_WAIT_TURN" if not player_turn else ClassKits.feature_reason(state, hero_id, id)
+			# Outside combat the kit decides too (Magical Cunning is only usable there).
+			reason = ClassKits.feature_reason(state, hero_id, id) if player_turn or state.mode == &"exploration" else "COMBAT_WAIT_TURN"
 			button.disabled = not reason.is_empty()
 			button.tooltip_text = tr(reason) if not reason.is_empty() else tr("FEATURE_%s_HINT" % id.to_upper())
 			continue
