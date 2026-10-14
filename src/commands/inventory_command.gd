@@ -6,7 +6,7 @@ static func training_for(actor: Dictionary) -> EquipmentRules.Training:
 	var path: String = "res://data/classes/%s.tres" % String(actor.get("class_id", ""))
 	if String(actor.get("class_id", "")).is_empty() or not ResourceLoader.exists(path):
 		return EquipmentRules.Training.new()
-	return EquipmentRules.Training.from_class(load(path) as ClassDefinition)
+	return EquipmentRules.Training.for_actor(actor, load(path) as ClassDefinition)
 
 static func equipment_event(actor_id: String, actor: Dictionary) -> Dictionary:
 	return {"type": "equipment_changed", "actor_id": actor_id,

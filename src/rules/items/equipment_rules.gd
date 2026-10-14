@@ -23,6 +23,18 @@ class Training extends RefCounted:
 			result.weapons = definition.weapon_proficiencies.duplicate()
 		return result
 
+	## Class training plus extra training granted by class features (Cleric Protector,
+	## Druid Warden): features["extra_training"] = {"armor": [...], "weapons": [...]}.
+	static func for_actor(actor: Dictionary, definition: ClassDefinition) -> Training:
+		var result: Training = from_class(definition)
+		var extra: Dictionary = actor.get("features", {}).get("extra_training", {})
+		for kind: String in ["armor", "weapons"]:
+			var target: Array[StringName] = result.armor if kind == "armor" else result.weapons
+			for value: Variant in extra.get(kind, []):
+				if not StringName(String(value)) in target:
+					target.append(StringName(String(value)))
+		return result
+
 static func has_inventory(actor: Dictionary) -> bool:
 	return actor.get("equipment") is Dictionary and actor.get("inventory") is Array
 

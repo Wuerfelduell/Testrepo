@@ -322,7 +322,7 @@ static func refresh_derived(actor: Dictionary) -> void:
 	dice["max"] = level
 	var source: ClassDefinition = ClassFeatures.definition(String(actor.get("class_id", "")))
 	if EquipmentRules.has_inventory(actor) and source != null:
-		var training: EquipmentRules.Training = EquipmentRules.Training.from_class(source)
+		var training: EquipmentRules.Training = EquipmentRules.Training.for_actor(actor, source)
 		EquipmentRules.refresh_weapon(actor, training)
 		EquipmentRules.refresh_armor(actor, training)
 	else:

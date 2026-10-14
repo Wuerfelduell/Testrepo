@@ -44,12 +44,8 @@ func _ready() -> void:
 	for index: int in HeroFactory.CLASS_ORDER.size():
 		var id: String = HeroFactory.CLASS_ORDER[index]
 		var playable: bool = HeroFactory.is_playable(id)
-		var rect: Rect2
-		if playable:
-			rect = Rect2(110 + HeroFactory.PLAYABLE.find(id) * 285, 145, 275, 56)
-		else:
-			var slot: int = index - HeroFactory.PLAYABLE.size()
-			rect = Rect2(110 + (slot % 2) * 285, 215 + floori(slot / 2.0) * 46, 275, 40)
+		# Two columns in CLASS_ORDER; classes not built yet stay greyed out in place.
+		var rect: Rect2 = Rect2(110 + (index % 2) * 285, 145 + floori(index / 2.0) * 58, 275, 50)
 		var text: String = tr("CREATION_CLASS_" + id.to_upper())
 		if not playable:
 			text = tr("CREATION_COMING_LATER") % text
