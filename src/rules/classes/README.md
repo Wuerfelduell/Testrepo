@@ -50,7 +50,8 @@ Combat (state = GameState)
 - `extra_damage_dice(state, attacker_id, target_id, weapon, critical) -> [{"dice", "damage_type"?, "source"}]`
   called once per real hit (may spend once-per-turn resources); `expected_extra_damage(...)` for previews, no state change
 - `halve_attack_damage(state, attacker_id, target_id, weapon) -> String` (target's kit) before a weapon
-  hit's damage: return a feature id to halve all of it (Uncanny Dodge; spend the reaction here), "" = no
+  hit's damage: a feature id whose reaction may halve all of it (Uncanny Dodge), "" = no. Must not
+  change state: the target gets a reaction offer and accepting spends its reaction
 - `extra_damage_dice` sees `weapon["attack_roll"] = {"advantage": bool, "disadvantage": bool}` (Sneak Attack)
 - `resistances(actor) -> Array` damage types
 - `damage_reduction(state, attacker_id, target_id, weapon, amount, rng) -> {"amount", "events"}` (target's kit, reactions like Deflect Attacks)

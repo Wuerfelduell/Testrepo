@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"false_life"
+name_key = &"SPELL_FALSE_LIFE"
+srd_name = "False Life"
+level = 1
+school = "necromancy"
+targeting = "self"
+resolution = "none"
+effect = &"false_life"
+vfx = &"false_life"

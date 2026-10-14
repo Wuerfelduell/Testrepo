@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"color_spray"
+name_key = &"SPELL_COLOR_SPRAY"
+srd_name = "Color Spray"
+level = 1
+school = "illusion"
+targeting = "self"
+area = "cone"
+area_size_m = 4.5
+resolution = "save"
+save_ability = &"con"
+effect = &"blind"
+vfx = &"color_spray"

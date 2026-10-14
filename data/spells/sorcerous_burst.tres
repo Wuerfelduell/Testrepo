@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sorcerous_burst"
+name_key = &"SPELL_SORCEROUS_BURST"
+srd_name = "Sorcerous Burst"
+level = 0
+school = "evocation"
+targeting = "creature"
+range_m = 36.0
+resolution = "attack"
+damage_dice = "1d8"
+damage_type = &"acid"
+damage_types = Array[StringName]([&"acid", &"cold", &"fire", &"lightning", &"poison", &"psychic", &"thunder"])
+vfx = &"sorcerous_burst"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"grease"
+name_key = &"SPELL_GREASE"
+srd_name = "Grease"
+level = 1
+school = "conjuration"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 1.5
+resolution = "save"
+save_ability = &"dex"
+effect = &"prone"
+vfx = &"grease"

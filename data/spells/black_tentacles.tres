@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"black_tentacles"
+name_key = &"SPELL_BLACK_TENTACLES"
+srd_name = "Black Tentacles"
+level = 4
+school = "conjuration"
+targeting = "point"
+range_m = 27.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"str"
+damage_dice = "3d6"
+damage_type = &"bludgeoning"
+concentration = true
+duration_rounds = 10
+effect = &"entangle"
+vfx = &"black_tentacles"

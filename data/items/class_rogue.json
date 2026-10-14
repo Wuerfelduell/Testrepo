@@ -1,7 +1,7 @@
 {
 	"items": {},
 	"starting_kits": {
-		"rogue": {"equipped": {"main_hand": "dagger", "armor": "leather"},
-			"bag": {"dagger": 1, "shortbow": 1, "potion_of_healing": 1}, "gold": 8}
+		"rogue": {"equipped": {"main_hand": "dagger", "off_hand": "dagger", "armor": "leather"},
+			"bag": {"shortbow": 1, "potion_of_healing": 1}, "gold": 8}
 	}
 }

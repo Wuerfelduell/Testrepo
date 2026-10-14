@@ -13,6 +13,9 @@ const CUNNING_POISON: String = "cunning_poison"
 ## A conversation that ends in a fight can grant the hero advantage on its first attack
 ## (owner's Vaelor dialogue: he hesitates, or breaks down). Set by EncounterTriggerCommand.
 const FIRST_STRIKE: String = "first_strike"
+## Invisibility ends with the creature's next attack roll; Greater Invisibility does not.
+const INVISIBILITY: String = "invisibility"
+const GREATER_INVISIBILITY: String = "greater_invisibility"
 
 static func effects(actor: Dictionary) -> Array:
 	return actor.get("effects", [])
@@ -88,7 +91,7 @@ static func attack_disadvantages(actor: Dictionary) -> Array[StringName]:
 ## Advantage sources the attacker carries: hidden, Steady Aim and a first strike.
 static func attack_advantages(actor: Dictionary) -> Array[StringName]:
 	var result: Array[StringName] = []
-	for kind: String in [HIDDEN, STEADY_AIM, FIRST_STRIKE]:
+	for kind: String in [HIDDEN, STEADY_AIM, FIRST_STRIKE, INVISIBILITY, GREATER_INVISIBILITY]:
 		if has_kind(actor, kind):
 			result.append(StringName(kind))
 	return result
@@ -96,8 +99,10 @@ static func attack_advantages(actor: Dictionary) -> Array[StringName]:
 ## Attacks against a hidden creature have Disadvantage (SRD 5.2 Invisible).
 static func incoming_disadvantages(target: Dictionary) -> Array[StringName]:
 	var result: Array[StringName] = []
-	if has_kind(target, HIDDEN):
+	if has_kind(target, HIDDEN) or has_kind(target, INVISIBILITY) or has_kind(target, GREATER_INVISIBILITY):
 		result.append(&"target_hidden")
+	if has_kind(target, "blur"):
+		result.append(&"blur")
 	return result
 
 ## Sap, Vicious Mockery, Steady Aim and a first strike affect only the next attack roll;
@@ -105,7 +110,7 @@ static func incoming_disadvantages(target: Dictionary) -> Array[StringName]:
 static func consume_attack_riders(actor: Dictionary) -> void:
 	remove_where(actor, func(effect: Dictionary) -> bool:
 		var kind: String = String(effect.get("kind", ""))
-		return kind in NEXT_ATTACK_DISADVANTAGE or kind in [HIDDEN, STEADY_AIM, FIRST_STRIKE])
+		return kind in NEXT_ATTACK_DISADVANTAGE or kind in [HIDDEN, STEADY_AIM, FIRST_STRIKE, INVISIBILITY])
 
 ## Bardic Inspiration: a failed attack roll or saving throw that the die could still
 ## turn into a success rolls it, adds it to the d20 roll and uses the inspiration up.
@@ -135,13 +140,31 @@ static func save_rider(state: GameState, caster_id: String, target_id: String, s
 			add(target, {"kind": "vicious_mockery", "source_id": caster_id, "spell_id": String(spell.id),
 				"until": "start_of_turn", "turn_of": caster_id})
 			return [{"type": "effect", "actor_id": target_id, "source_id": caster_id, "kind": "vicious_mockery"}]
+		"blind":
+			# Color Spray: Blinded until the start of the caster's next turn.
+			add(target, {"kind": "blind", "condition": "blinded", "source_id": caster_id, "spell_id": String(spell.id),
+				"until": "start_of_turn", "turn_of": caster_id})
+			return [{"type": "condition", "actor_id": target_id, "condition": "blinded", "source_id": caster_id}]
+		"prone":
+			# Grease: the creature falls.
+			if not "prone" in target.get("conditions", []):
+				if not target.has("conditions"):
+					target["conditions"] = []
+				target["conditions"].append("prone")
+			return [{"type": "condition", "actor_id": target_id, "condition": "prone", "source_id": caster_id}]
 	return []
 
 static func speed_penalty(actor: Dictionary) -> float:
 	var total: float = 0.0
 	for effect: Dictionary in effects(actor):
-		if String(effect.get("kind", "")) == "speed_penalty":
-			total += float(effect.get("amount", 0.0))
+		match String(effect.get("kind", "")):
+			"speed_penalty":
+				total += float(effect.get("amount", 0.0))
+			"slow":
+				total += float(actor.get("speed_m", 0.0)) / 2.0
+			"haste":
+				# Haste doubles the Speed: a negative penalty.
+				total -= float(actor.get("speed_m", 0.0))
 	return total
 
 ## Effects that last "until the start of X's next turn" end now; X's concentration ticks.

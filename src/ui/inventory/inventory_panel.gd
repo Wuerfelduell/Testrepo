@@ -140,6 +140,10 @@ func _on_clicked(slot: ItemSlot) -> void:
 	if not slot.slot_name.is_empty():
 		if EquipmentRules.unequip_reason(_state, actor_id, slot.slot_name).is_empty():
 			command_requested.emit(UnequipItemCommand.new(actor_id, slot.slot_name))
+	elif Input.is_key_pressed(KEY_SHIFT) and EquipmentRules.off_hand_weapon_item(ItemCatalog.get_item(slot.item_id)):
+		# Shift+click: a Light weapon into the off hand (dual wielding).
+		if EquipmentRules.equip_reason(_state, actor_id, slot.item_id, "off_hand").is_empty():
+			command_requested.emit(EquipItemCommand.new(actor_id, slot.item_id, "off_hand"))
 	elif _action_reason(slot.item_id).is_empty():
 		if String(ItemCatalog.get_item(slot.item_id).get("type", "")) == "consumable":
 			command_requested.emit(UseItemCommand.new(actor_id, slot.item_id))
@@ -172,6 +176,8 @@ func _on_hovered(slot: ItemSlot) -> void:
 		hint = MenuStyle.text("INV_CLICK_EQUIP")
 		if ItemCatalog.slot_for(item) == "main_hand":
 			hint += " · " + MenuStyle.text("INV_FREE_SWAP")
+		if EquipmentRules.off_hand_weapon_item(item):
+			hint += " · " + MenuStyle.text("INV_SHIFT_OFF_HAND")
 	if not reason.is_empty():
 		hint = ""
 	if slot.slot_name.is_empty() and EquipmentRules.drop_reason(_state, actor_id, slot.item_id).is_empty():

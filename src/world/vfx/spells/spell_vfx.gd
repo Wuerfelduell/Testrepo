@@ -47,6 +47,11 @@ const STYLES: Dictionary = {
 	"elemental_weapon": ["target", SHIELD], "banishment": ["target", NECROTIC], "death_ward": ["target", HEAL],
 	"stoneskin": ["target", NATURE], "greater_restoration": ["target", HEAL],
 	"insect_plague": ["point", NATURE], "contagion": ["target", NECROTIC], "wrath_of_nature": ["point", NATURE],
+	"chromatic_orb": ["bolt", ARCANE], "sorcerous_burst": ["bolt", ARCANE], "ray_of_sickness": ["bolt", POISON],
+	"vampiric_touch": ["target", NECROTIC], "hideous_laughter": ["target", SLEEP], "mage_armor": ["target", SHIELD],
+	"invisibility": ["target", ARCANE], "greater_invisibility": ["target", ARCANE], "haste": ["target", LIGHTNING],
+	"false_life": ["caster", NECROTIC], "blur": ["caster", ARCANE], "misty_step": ["caster", SLEEP],
+	"dimension_door": ["caster", ARCANE],
 }
 const FADE: float = 0.5
 

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"blur"
+name_key = &"SPELL_BLUR"
+srd_name = "Blur"
+level = 2
+school = "illusion"
+targeting = "self"
+resolution = "none"
+concentration = true
+duration_rounds = 10
+effect = &"blur"
+vfx = &"blur"

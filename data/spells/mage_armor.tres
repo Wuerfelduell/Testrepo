@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"mage_armor"
+name_key = &"SPELL_MAGE_ARMOR"
+srd_name = "Mage Armor"
+level = 1
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+effect = &"mage_armor"
+allies = true
+vfx = &"mage_armor"

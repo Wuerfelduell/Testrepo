@@ -115,7 +115,8 @@ func test_rolled_hit_points_use_the_hit_die_and_show_a_roll() -> void:
 	var events: Array = []
 	var listener: Callable = func(_command: Command, result: Dictionary) -> void: events.append_array(result.get("events", []))
 	CommandBus.command_applied.connect(listener)
-	assert_eq(level({"hp": "roll", "expertise": "arcana", "prepared": ["magic_missile", "burning_hands", "shield", "sleep"]}), OK)
+	assert_eq(level({"hp": "roll", "expertise": "arcana", "spellbook": ["mage_armor", "grease"],
+		"prepared": ["magic_missile", "burning_hands", "shield", "sleep"]}), OK)
 	CommandBus.command_applied.disconnect(listener)
 	var roll: Dictionary = events.filter(func(event: Dictionary) -> bool: return event["type"] == "roll")[0]
 	assert_eq(roll["kind"], "hit_points")
@@ -161,7 +162,7 @@ func test_skilled_feat_adds_three_skills() -> void:
 	use(record)
 	assert_eq(level({"hp": "average", "feat": "skilled", "skills": ["stealth", "stealth", "insight"]}), ERR_INVALID_PARAMETER)
 	assert_eq(level({"hp": "average", "feat": "skilled", "skills": ["stealth", "insight", "medicine"],
-		"cantrips": ["acid_splash"], "spellbook": ["shatter"]}), OK)
+		"cantrips": ["acid_splash"], "spellbook": ["shatter", "misty_step"]}), OK)
 	var skills: Array = current()["skill_proficiencies"].map(func(skill: Variant) -> String: return String(skill))
 	for skill: String in ["stealth", "insight", "medicine"]:
 		assert_has(skills, skill)
@@ -263,26 +264,28 @@ func test_great_weapon_fighting_raises_ones_and_twos() -> void:
 func test_wizard_spell_choices_follow_the_rules() -> void:
 	var record: Dictionary = hero(&"wizard", 300)
 	var plan: Dictionary = ProgressionRules.plan(record)
-	assert_eq(plan["spellbook_count"], 0, "no unknown level-1 spells exist yet")
+	assert_eq(plan["spellbook_count"], 2, "two new level-1 spells for the book")
 	assert_eq(plan["prepared_limit"], 5)
 	assert_eq(ProgressionRules.validate(record, {"hp": "average", "expertise": "arcana", "spellbook": ["shatter"]}),
 		"LEVELUP_REASON_SPELLBOOK", "a level-2 spell needs a level-2 slot")
 	use(record)
-	assert_eq(level({"hp": "average"}), ERR_INVALID_PARAMETER, "Scholar asks for its skill")
-	assert_eq(level({"hp": "average", "expertise": "arcana"}), OK)
+	assert_eq(level({"hp": "average", "spellbook": ["mage_armor", "grease"]}), ERR_INVALID_PARAMETER,
+		"Scholar asks for its skill")
+	assert_eq(level({"hp": "average", "expertise": "arcana", "spellbook": ["mage_armor", "grease"]}), OK)
 	record = current()
 	record["xp"] = 900
 	plan = ProgressionRules.plan(record)
-	assert_eq(plan["spellbook_options"], ["shatter"])
-	assert_eq(plan["spellbook_count"], 1)
-	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["sleep"]}), "LEVELUP_REASON_SPELLBOOK",
+	assert_has(plan["spellbook_options"], "shatter")
+	assert_does_not_have(plan["spellbook_options"], "mage_armor", "already in the book")
+	assert_eq(plan["spellbook_count"], 2)
+	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["sleep", "shatter"]}), "LEVELUP_REASON_SPELLBOOK",
 		"a spell already in the book")
-	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["shatter"],
+	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["shatter", "misty_step"],
 		"prepared": ["magic_missile", "burning_hands", "shield", "sleep", "shatter", "shatter"]}), "LEVELUP_REASON_PREPARED")
-	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["shatter"],
+	assert_eq(ProgressionRules.validate(record, {"hp": "average", "spellbook": ["shatter", "misty_step"],
 		"prepared": ["magic_missile", "burning_hands", "shield", "sleep", "shatter", "fireball"]}), "LEVELUP_REASON_PREPARED")
 	use(record)
-	assert_eq(level({"hp": "average", "spellbook": ["shatter"]}), OK)
+	assert_eq(level({"hp": "average", "spellbook": ["shatter", "misty_step"]}), OK)
 	var wizard: Dictionary = current()
 	assert_eq(wizard["spell_slots_max"], [4, 2])
 	assert_eq(wizard["spell_slots"], [4, 2], "new slots arrive full; spent ones stay spent")
@@ -292,19 +295,19 @@ func test_wizard_spell_choices_follow_the_rules() -> void:
 
 func test_wizard_levels_one_to_five_with_cantrip_and_fireball() -> void:
 	use(hero(&"wizard", 6500))
-	assert_eq(level({"hp": "average", "expertise": "investigation"}), OK)
-	assert_eq(level({"hp": "average", "spellbook": ["shatter"]}), OK)
+	assert_eq(level({"hp": "average", "expertise": "investigation", "spellbook": ["mage_armor", "grease"]}), OK)
+	assert_eq(level({"hp": "average", "spellbook": ["shatter", "misty_step"]}), OK)
 	assert_eq(level({"hp": "roll", "feat": "ability_score_improvement", "ability_increases": {"int": 1, "con": 1}}),
 		ERR_INVALID_PARAMETER, "level 4 also asks for a cantrip")
 	assert_eq(level({"hp": "roll", "feat": "ability_score_improvement", "ability_increases": {"int": 1, "con": 1},
-		"cantrips": ["acid_splash"]}), OK)
-	assert_eq(level({"hp": "average", "spellbook": ["fireball"]}), OK)
+		"cantrips": ["acid_splash"], "spellbook": ["web", "blur"]}), OK)
+	assert_eq(level({"hp": "average", "spellbook": ["fireball", "haste"]}), OK)
 	var wizard: Dictionary = current()
 	assert_eq(wizard["level"], 5)
 	assert_eq(wizard["spell_slots_max"], [4, 3, 2])
 	assert_has(wizard["spells"], "acid_splash")
 	assert_has(wizard["spells"], "fireball")
-	assert_eq(ClassFeatures.prepared_spells(wizard).size(), 6)
+	assert_eq(ClassFeatures.prepared_spells(wizard).size(), 9, "the 2024 Wizard prepares nine spells at level 5")
 	assert_true(wizard["features"].has("memorize_spell"))
 	assert_eq(ProgressionRules.score(wizard, "int"), 16)
 	assert_eq(wizard["spell_attack_bonus"], 3 + 3)
@@ -317,13 +320,13 @@ func test_scholar_expertise_at_wizard_level_two() -> void:
 	assert_eq(plan["expertise_options"], ["arcana", "investigation"], "only Scholar skills the Wizard is proficient in")
 	assert_eq(ProgressionRules.validate(record, {"hp": "average", "expertise": "history"}), "LEVELUP_REASON_EXPERTISE")
 	use(record)
-	assert_eq(level({"hp": "average", "expertise": "arcana"}), OK)
+	assert_eq(level({"hp": "average", "expertise": "arcana", "spellbook": ["mage_armor", "grease"]}), OK)
 	assert_eq(current()["skill_expertise"], ["arcana"])
 
 func test_level_up_choices_survive_save_and_load() -> void:
 	use(hero(&"wizard", 900))
-	assert_eq(level({"hp": "roll", "expertise": "arcana"}), OK)
-	assert_eq(level({"hp": "average", "spellbook": ["shatter"]}), OK)
+	assert_eq(level({"hp": "roll", "expertise": "arcana", "spellbook": ["mage_armor", "grease"]}), OK)
+	assert_eq(level({"hp": "average", "spellbook": ["shatter", "misty_step"]}), OK)
 	assert_eq(SaveGame.save(Game.state), OK)
 	var loaded: SaveGame.LoadResult = SaveGame.load_save()
 	assert_true(loaded.is_valid())

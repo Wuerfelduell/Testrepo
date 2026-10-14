@@ -1057,7 +1057,7 @@ FEATURE_STEADY_AIM_HINT_LEVELUP,"Bonus action before you move: advantage on your
 FEATURE_CUNNING_STRIKE,Cunning Strike
 FEATURE_CUNNING_STRIKE_HINT_LEVELUP,"Trade 1d6 of your Sneak Attack to poison, trip or slip away from the target."
 FEATURE_UNCANNY_DODGE,Uncanny Dodge
-FEATURE_UNCANNY_DODGE_HINT_LEVELUP,"Reaction: halve the damage of an attack that hits you (used automatically)."
+FEATURE_UNCANNY_DODGE_HINT_LEVELUP,"Reaction: halve the damage of an attack that hits you. You are asked each time."
 FEATURE_EVASION_HINT_LEVELUP,"Dexterity saves for half damage: no damage on a success, half on a failure."
 FEATURE_RELIABLE_TALENT,Reliable Talent
 FEATURE_RELIABLE_TALENT_HINT_LEVELUP,"Skill checks you are proficient in: a d20 roll of 9 or lower counts as 10."
@@ -1103,6 +1103,49 @@ LEVELUP_SECTION_EXPERTISE_ROGUE,EXPERTISE (%d)
 LEVELUP_SECTION_EXPERTISE_ROGUE_NOTE,Double your proficiency bonus for two of these skills.
 COLOR_CHARCOAL,Charcoal
 FEATURE_NOT_IN_COMBAT,Not during combat
+INV_SHIFT_OFF_HAND,Shift+click: off hand
+COMBAT_OFFHAND_BUTTON,%s (off hand)
+COMBAT_OFFHAND_HINT,"Bonus action after attacking with a light weapon: strike with the light weapon in your other hand (no ability bonus to its damage)."
+COMBAT_OFFHAND_HINT_NICK,"Nick: part of your Attack action, no bonus action needed. Strike with the light weapon in your other hand (no ability bonus to its damage)."
+COMBAT_OFFHAND_NONE,No weapon in the off hand
+COMBAT_OFFHAND_NOT_LIGHT,Needs a light weapon in the main hand too
+COMBAT_OFFHAND_ATTACK_FIRST,Attack with your light main-hand weapon first
+COMBAT_OFFHAND_USED,Off-hand attack already used this turn
+COMBAT_REACTION_UNCANNY_DODGE_TITLE,Uncanny Dodge?
+COMBAT_REACTION_UNCANNY_DODGE_TEXT,"%s hits %s. Use your reaction to halve the damage of this hit?"
+COMBAT_REACTION_UNCANNY_DODGE_ACCEPT,Halve the damage (reaction)
+COMBAT_REACTION_UNCANNY_DODGE_DECLINE,Take the full hit
+SPELL_SORCEROUS_BURST,Sorcerous Burst
+SPELL_CHROMATIC_ORB,Chromatic Orb
+SPELL_RAY_OF_SICKNESS,Ray of Sickness
+SPELL_COLOR_SPRAY,Color Spray
+SPELL_GREASE,Grease
+SPELL_HIDEOUS_LAUGHTER,Hideous Laughter
+SPELL_FALSE_LIFE,False Life
+SPELL_FALSE_LIFE_HINT,9 temporary hit points (+5 per higher slot) until a long rest
+SPELL_MAGE_ARMOR,Mage Armor
+SPELL_MAGE_ARMOR_HINT,"Without armour: AC 13 + Dexterity modifier, until a long rest"
+SPELL_BLUR,Blur
+SPELL_BLUR_HINT,Attacks against you have disadvantage while you concentrate
+SPELL_INVISIBILITY,Invisibility
+SPELL_INVISIBILITY_HINT,Invisible until the target makes an attack roll
+SPELL_WEB,Web
+SPELL_MISTY_STEP,Misty Step
+SPELL_MISTY_STEP_HINT,Bonus action: teleport to a free spot you can see
+SPELL_HASTE,Haste
+SPELL_HASTE_HINT,"+2 AC and double Speed while you concentrate"
+SPELL_SLOW,Slow
+SPELL_HYPNOTIC_PATTERN,Hypnotic Pattern
+SPELL_FEAR,Fear
+SPELL_VAMPIRIC_TOUCH,Vampiric Touch
+SPELL_GREATER_INVISIBILITY,Greater Invisibility
+SPELL_GREATER_INVISIBILITY_HINT,"Invisible while you concentrate, even when attacking"
+SPELL_BLACK_TENTACLES,Black Tentacles
+SPELL_DIMENSION_DOOR,Dimension Door
+SPELL_DIMENSION_DOOR_HINT,Teleport up to 150 m to a free spot you can see
+ROLL_SOURCE_BLUR,Blur
+ROLL_SOURCE_INVISIBILITY,Invisible
+ROLL_SOURCE_GREATER_INVISIBILITY,Invisible
 SPELL_TOLL_THE_DEAD,Toll the Dead
 SPELL_WORD_OF_RADIANCE,Word of Radiance
 SPELL_THORN_WHIP,Thorn Whip

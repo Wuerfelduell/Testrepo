@@ -40,6 +40,9 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	# Extra Attack: further attacks of an Attack action already taken this turn.
 	actor["attacks_left"] = 0
 	actor["moved_this_turn"] = false
+	# Dual wielding: an Attack action with a Light weapon this turn, and the off-hand attack.
+	actor["light_attack_made"] = false
+	actor["offhand_used"] = false
 	actor["move_left"] = 0.0 if conditions_for(actor).speed_is_zero() else \
 		maxf(0.0, float(actor["speed_m"]) - ActiveEffects.speed_penalty(actor))
 	if ActiveEffects.in_hostile_aura(state, actor_id) or DivineSpellEffects.slowing_zone(state, actor_id):
@@ -48,6 +51,45 @@ static func begin_turn(state: GameState, actor_id: String) -> Array[Dictionary]:
 	events.append_array(reveal_hidden(state))
 	events.append_array(ClassKits.on_turn_start(state, actor_id))
 	return events
+
+## SRD 5.2 Light property: after an Attack action with a Light weapon, one extra attack
+## with a different Light weapon in the other hand as a Bonus Action (Nick mastery: no
+## Bonus Action), without the ability modifier on its damage unless that is negative.
+## "" when the actor may make it now, else a translation key.
+static func offhand_reason(state: GameState, actor_id: String) -> String:
+	var actor: Dictionary = state.actors.get(actor_id, {})
+	var offhand: Dictionary = actor.get("off_hand_weapon", {})
+	if offhand.is_empty():
+		return "COMBAT_OFFHAND_NONE"
+	if valid_actor_turn(state, actor_id) != OK:
+		return "COMBAT_WAIT_TURN"
+	if not "light" in actor.get("weapon", {}).get("properties", []):
+		return "COMBAT_OFFHAND_NOT_LIGHT"
+	if not bool(actor.get("light_attack_made", false)):
+		return "COMBAT_OFFHAND_ATTACK_FIRST"
+	if bool(actor.get("offhand_used", false)) or not conditions_for(actor).can_act():
+		return "COMBAT_OFFHAND_USED"
+	if offhand_needs_bonus(actor) and not bool(actor.get("bonus_available", false)):
+		return "COMBAT_NO_BONUS"
+	return ""
+
+## Nick (Weapon Mastery): the off-hand attack is part of the Attack action.
+static func offhand_needs_bonus(actor: Dictionary) -> bool:
+	return WeaponMasteries.mastery_of(actor, actor.get("off_hand_weapon", {})) != "nick"
+
+## The off-hand weapon as an attack: no positive ability modifier on the damage.
+static func offhand_weapon(actor: Dictionary) -> Dictionary:
+	var weapon: Dictionary = actor.get("off_hand_weapon", {}).duplicate(true)
+	if weapon.is_empty():
+		return weapon
+	var kept: Array = []
+	for modifier: Dictionary in weapon.get("damage_modifiers", []):
+		if not String(modifier.get("source", "")) in ["str", "dex"] or int(modifier.get("amount", 0)) < 0:
+			kept.append(modifier)
+	weapon["damage_modifiers"] = kept
+	weapon["damage_bonus"] = mini(0, int(weapon.get("damage_bonus", 0)))
+	weapon["offhand"] = true
+	return weapon
 
 ## Hiding needs Three-Quarters Cover or no line of sight from every enemy (SRD 5.2 Hide).
 static func hidden_from_enemies(state: GameState, actor_id: String) -> bool:
@@ -416,6 +458,13 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 			{"attack": outcome, "weapon": weapon.duplicate(true), "target_id": target_id})
 		events.append(SpellResolver.reaction_offer_event(state.pending))
 		return events
+	# A reaction that halves the damage (Rogue Uncanny Dodge) is offered before damage rolls.
+	var halving: String = ClassKits.damage_halved_by(state, attacker_id, target_id, weapon) if attack.hit else ""
+	if not halving.is_empty():
+		state.pending = SpellResolver.reaction_pending(target_id, attacker_id, source_pending,
+			{"attack": outcome, "weapon": weapon.duplicate(true), "target_id": target_id}, halving)
+		events.append(SpellResolver.reaction_offer_event(state.pending))
+		return events
 	events.append_array(finish_attack(state, attacker_id, target_id, weapon, outcome, rng))
 	return events
 
@@ -444,10 +493,8 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		events.append_array(ClassKits.after_attack(state, attacker_id, target_id, weapon, false, rng))
 		return events
 	var defenses: DamageRules.Defenses = defenses_for(target)
-	# A target's reaction may halve this attack's damage (Rogue Uncanny Dodge); the kit spends it.
-	var halved_by: String = ClassKits.damage_halved_by(state, attacker_id, target_id, weapon)
-	if not halved_by.is_empty():
-		events.append({"type": "feature", "actor_id": target_id, "feature_id": halved_by, "source_id": attacker_id})
+	# The target's accepted reaction halves this attack's damage (Rogue Uncanny Dodge).
+	var halved_by: String = String(outcome.get("halved_by", ""))
 	var damage_modifiers: Array[RuleModifier] = weapon_modifiers(weapon, "damage")
 	damage_modifiers.append_array(ClassKits.damage_bonus(state, attacker_id, target_id, weapon))
 	damage_modifiers.append_array(DivineSpellEffects.damage_modifiers(state.actors.get(attacker_id, {}), weapon))

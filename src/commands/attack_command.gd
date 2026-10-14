@@ -3,8 +3,10 @@ extends Command
 
 var target_id: String = ""
 ## Which entry of the actor's "attacks" to use (Multiattack: mace or Radiant Flame).
-## Empty uses the equipped weapon.
+## Empty uses the equipped weapon; OFF_HAND the off-hand Light weapon (dual wielding).
 var weapon_id: String = ""
+
+const OFF_HAND: String = "off_hand"
 
 func _init(p_actor_id: String = "", p_target_id: String = "", p_weapon_id: String = "") -> void:
 	actor_id = p_actor_id
@@ -14,6 +16,8 @@ func _init(p_actor_id: String = "", p_target_id: String = "", p_weapon_id: Strin
 static func weapon_for(actor: Dictionary, wanted_id: String) -> Dictionary:
 	if wanted_id.is_empty():
 		return actor.get("weapon", {})
+	if wanted_id == OFF_HAND:
+		return CombatRules.offhand_weapon(actor)
 	for attack: Variant in actor.get("attacks", []):
 		if attack is Dictionary and String(attack.get("id", "")) == wanted_id:
 			return attack
@@ -24,6 +28,11 @@ func validate(state: GameState) -> Error:
 	if reason != OK:
 		return reason
 	var actor: Dictionary = state.actors[actor_id]
+	if weapon_id == OFF_HAND:
+		if not CombatRules.offhand_reason(state, actor_id).is_empty():
+			return ERR_UNAVAILABLE
+		return OK if bool(CombatRules.attack_preview(state, actor_id, target_id, Vector3.INF,
+			weapon_for(actor, weapon_id))["legal"]) else ERR_INVALID_PARAMETER
 	if not CombatRules.can_use_action(actor) and \
 			not (int(actor.get("attacks_left", 0)) > 0 and CombatRules.conditions_for(actor).can_act()):
 		return ERR_UNAVAILABLE
@@ -36,6 +45,15 @@ func validate(state: GameState) -> Error:
 
 func apply(state: GameState) -> Dictionary:
 	var actor: Dictionary = state.actors[actor_id]
+	if weapon_id == OFF_HAND:
+		# The Light property's extra attack: a Bonus Action, or free with Nick.
+		actor["offhand_used"] = true
+		if CombatRules.offhand_needs_bonus(actor):
+			actor["bonus_available"] = false
+		state.pending = CombatRules.attack_pending(actor_id, target_id, false, weapon_for(actor, weapon_id))
+		return {"events": [CombatRules.attack_start_event(state.pending)]}
+	if "light" in weapon_for(actor, weapon_id).get("properties", []):
+		actor["light_attack_made"] = true
 	if bool(actor.get("action_available", false)):
 		# Extra Attack (Fighter 5) and Multiattack: the Attack action holds more than one attack.
 		actor["action_available"] = false

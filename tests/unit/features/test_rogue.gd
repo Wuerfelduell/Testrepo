@@ -104,8 +104,9 @@ func test_starting_kit_is_two_daggers_shortbow_and_leather() -> void:
 	var training: EquipmentRules.Training = InventoryCommand.training_for(record)
 	assert_true(EquipmentRules.initialize(record, "rogue", training))
 	assert_eq(record["equipment"]["main_hand"], "dagger")
+	assert_eq(record["equipment"]["off_hand"], "dagger", "the second dagger in the off hand")
 	assert_eq(record["equipment"]["armor"], "leather")
-	assert_eq(EquipmentRules.count(record, "dagger"), 1, "the second dagger is in the bag")
+	assert_eq(record["off_hand_weapon"]["item_id"], "dagger")
 	assert_eq(EquipmentRules.count(record, "shortbow"), 1)
 	assert_eq(record["ac"], 13)
 	EquipmentRules.equip(record, "shortbow", training)
@@ -237,20 +238,106 @@ func test_steady_aim_gives_advantage_only_before_moving() -> void:
 	ActiveEffects.on_turn_end(state, "hero", rng())
 	assert_false(ActiveEffects.has_kind(state.actors["hero"], ActiveEffects.STEADY_AIM), "ends with the turn")
 
-func test_uncanny_dodge_halves_the_damage_and_spends_the_reaction() -> void:
+## Hits until one lands (a natural 1 always misses); returns the events of that attack.
+func land_hit(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> Array[Dictionary]:
+	for seed_value: int in range(1, 30):
+		var events: Array[Dictionary] = CombatRules.resolve_attack(state, attacker_id, target_id, weapon, rng(seed_value))
+		if events.any(func(event: Dictionary) -> bool: return event.get("type") == "reaction_offer" or bool(event.get("hit", false))):
+			return events
+	return []
+
+func damage_total(events: Array[Dictionary]) -> int:
+	return int(events.filter(func(event: Dictionary) -> bool: return event.get("kind") == "damage")[0]["roll"]["total"])
+
+func test_uncanny_dodge_asks_first_then_halves_and_spends_the_reaction() -> void:
 	var hero: Dictionary = rogue(5)
 	hero["hp"] = 40
 	var state: GameState = state_with({"hero": hero, "enemy": enemy(Vector3(1, 0, 0))})
-	var weapon: Dictionary = {"ranged": false, "reach": 1.5, "damage_dice": "2d6+9", "damage_type": "slashing",
-		"attack_bonus": 4, "damage_bonus": 0}
-	var events: Array[Dictionary] = CombatRules.finish_attack(state, "enemy", "hero", weapon, hit(), rng())
-	var rolled: int = int(events.filter(func(event: Dictionary) -> bool: return event.get("kind") == "damage")[0]["roll"]["total"])
-	assert_eq(int(state.actors["hero"]["hp"]), 40 - floori(rolled / 2.0), "damage halved")
+	var weapon: Dictionary = state.actors["enemy"]["weapon"].duplicate(true)
+	weapon["attack_bonus"] = 30
+	weapon["damage_dice"] = "2d6+9"
+	var offer: Array[Dictionary] = land_hit(state, "enemy", "hero", weapon)
+	assert_eq(offer[-1]["type"], "reaction_offer", "the Rogue is asked before damage")
+	assert_eq(state.pending["reaction"], "uncanny_dodge")
+	assert_eq(int(state.actors["hero"]["hp"]), 40, "no damage before the answer")
+	var events: Array[Dictionary] = CastReactionCommand.new("hero", true).apply(state)["events"]
+	assert_eq(int(state.actors["hero"]["hp"]), 40 - floori(damage_total(events) / 2.0), "damage halved")
 	assert_false(bool(state.actors["hero"]["reaction_available"]))
 	assert_true(events.any(func(event: Dictionary) -> bool: return event.get("feature_id") == "uncanny_dodge"))
-	events = CombatRules.finish_attack(state, "enemy", "hero", weapon, hit(), rng(9))
-	var second: int = int(events.filter(func(event: Dictionary) -> bool: return event.get("kind") == "damage")[0]["roll"]["total"])
-	assert_eq(int(state.actors["hero"]["hp"]), 40 - floori(rolled / 2.0) - second, "no reaction left: full damage")
+	assert_true(state.pending.is_empty())
+	var hp: int = int(state.actors["hero"]["hp"])
+	events = land_hit(state, "enemy", "hero", weapon)
+	assert_true(state.pending.is_empty(), "no reaction left: no question")
+	assert_eq(int(state.actors["hero"]["hp"]), hp - damage_total(events), "full damage")
+
+func test_declining_uncanny_dodge_keeps_the_reaction() -> void:
+	var hero: Dictionary = rogue(5)
+	hero["hp"] = 40
+	var state: GameState = state_with({"hero": hero, "enemy": enemy(Vector3(1, 0, 0))})
+	var weapon: Dictionary = state.actors["enemy"]["weapon"].duplicate(true)
+	weapon["attack_bonus"] = 30
+	land_hit(state, "enemy", "hero", weapon)
+	assert_eq(CastReactionCommand.new("hero", false).validate(state), OK)
+	var events: Array[Dictionary] = CastReactionCommand.new("hero", false).apply(state)["events"]
+	assert_eq(int(state.actors["hero"]["hp"]), 40 - damage_total(events))
+	assert_true(bool(state.actors["hero"]["reaction_available"]))
+	assert_false(CastReactionCommand.auto_accept(state, "hero"), "nothing pending any more")
+
+func armed_rogue(level: int = 1) -> Dictionary:
+	var record: Dictionary = rogue(level)
+	assert_true(EquipmentRules.initialize(record, "rogue", InventoryCommand.training_for(record)))
+	return record
+
+func test_off_hand_attack_after_a_light_attack_costs_the_bonus_action() -> void:
+	var hero: Dictionary = armed_rogue()
+	hero["features"]["weapon_mastery"]["weapons"] = ["shortbow"]
+	var state: GameState = state_with({"hero": hero, "enemy": enemy(Vector3(1, 0, 0))})
+	CombatRules.begin_turn(state, "hero")
+	var offhand: AttackCommand = AttackCommand.new("hero", "enemy", AttackCommand.OFF_HAND)
+	assert_eq(CombatRules.offhand_reason(state, "hero"), "COMBAT_OFFHAND_ATTACK_FIRST")
+	assert_eq(offhand.validate(state), ERR_UNAVAILABLE)
+	AttackCommand.new("hero", "enemy").apply(state)
+	state.pending = {}
+	assert_eq(offhand.validate(state), OK)
+	var weapon: Dictionary = AttackCommand.weapon_for(state.actors["hero"], AttackCommand.OFF_HAND)
+	assert_eq(int(weapon["damage_bonus"]), 0, "no Dex bonus on the off-hand damage")
+	assert_true(weapon["damage_modifiers"].all(func(modifier: Dictionary) -> bool: return modifier["source"] != "dex"))
+	assert_eq(int(weapon["attack_bonus"]), 4, "the attack roll keeps Dex and proficiency")
+	offhand.apply(state)
+	assert_false(bool(state.actors["hero"]["bonus_available"]), "a Bonus Action without Nick")
+	assert_eq(state.pending["weapon"]["item_id"], "dagger")
+	state.pending = {}
+	assert_eq(CombatRules.offhand_reason(state, "hero"), "COMBAT_OFFHAND_USED", "once per turn")
+
+func test_nick_makes_the_off_hand_attack_free() -> void:
+	var state: GameState = state_with({"hero": armed_rogue(), "enemy": enemy(Vector3(1, 0, 0))})
+	CombatRules.begin_turn(state, "hero")
+	AttackCommand.new("hero", "enemy").apply(state)
+	state.pending = {}
+	assert_false(CombatRules.offhand_needs_bonus(state.actors["hero"]), "the Rogue masters the dagger (Nick)")
+	AttackCommand.new("hero", "enemy", AttackCommand.OFF_HAND).apply(state)
+	assert_true(bool(state.actors["hero"]["bonus_available"]), "Cunning Action stays free")
+
+func test_off_hand_needs_light_weapons_in_both_hands() -> void:
+	var hero: Dictionary = armed_rogue()
+	var training: EquipmentRules.Training = InventoryCommand.training_for(hero)
+	EquipmentRules.add_item(hero, "mace")
+	EquipmentRules.equip(hero, "mace", training)
+	var state: GameState = state_with({"hero": hero, "enemy": enemy(Vector3(1, 0, 0))})
+	CombatRules.begin_turn(state, "hero")
+	assert_eq(CombatRules.offhand_reason(state, "hero"), "COMBAT_OFFHAND_NOT_LIGHT", "the mace is not Light")
+	assert_eq(EquipmentRules.equip_reason(state, "hero", "shortbow", "off_hand"), "INV_REASON_NOT_EQUIPPABLE")
+	EquipmentRules.equip(hero, "shortbow", training)
+	assert_eq(hero["equipment"]["off_hand"], "", "a two-handed bow frees the off hand")
+	assert_false(hero.has("off_hand_weapon"))
+	EquipmentRules.equip(hero, "dagger", training)
+	EquipmentRules.equip(hero, "dagger", training, "off_hand")
+	assert_eq(hero["equipment"]["off_hand"], "dagger")
+	assert_eq(hero["equipment"]["main_hand"], "dagger")
+	EquipmentRules.add_item(hero, "shield")
+	EquipmentRules.equip(hero, "shield", training)
+	assert_eq(hero["equipment"]["off_hand"], "shield", "a shield replaces the off-hand dagger")
+	assert_false(hero.has("off_hand_weapon"))
 
 func test_evasion_turns_dex_saves_for_half_into_none_or_half() -> void:
 	assert_true(ClassKits.evades(rogue(7), &"dex"))
