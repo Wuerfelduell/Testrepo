@@ -20,6 +20,8 @@ dialogue document; `[Placeholder: ...]` lines are slots he still writes. The kni
   class skills and starting kit, like a created hero (HeroFactory).
 - **model**: any hero look scene; **colors**: per-piece colours (HeroColors), may be empty.
 - **dialogue**: the conversation in data/dialogue/ that recruits them (effect `"recruit"`).
+- **camp_dialogue**: what they say when the player talks to them in the party (right-click on
+  their portrait, out of combat): the owner's camp talks (camp_<short>.json).
 
 How the party works:
 - Party = hero + up to 3 companions (`PartyRules.MAX_SIZE` = 4). The order is saved in
@@ -45,6 +47,15 @@ Loyalty, reactions and arguments (owner, 14-10-2026, docs/STORY.md "How Rabenfel
   in the party and alive, after a long rest (`"trigger": "rest"`) or on entering an area
   (`"arrive"`). Nodes name who speaks (`"speaker": "lyra"`); taking sides is a choice with
   `"react"`. The tree's start node must set flag `banter_<id>`.
+- Parting (owner's part 7): dialogue effect `"leave": {"kael": "camp" | "parted" | "hostile"}`.
+  Camp: waits (on the Torplatz until there is a real camp), no loyalty change. Parted: on good
+  terms, can be recruited again. Hostile: `<short>_permanently_left`, never again. State flags
+  per companion: `<short>_recruited`, `_active`, `_at_camp`, `_loyalty`,
+  `_personal_quest_stage`, `_permanently_left`. Kind words count once, insults every time.
+- "Show me your gear": effect `"inventory": "kael"` opens their inventory when the talk ends.
+- Camp talks: high loyalty from +3, low from -2 (answers like "What do you think of me?").
+- Camp events A-C are in banter.json (B only in the Torviertel, C once `vaelor_manuscript_found`).
+- Training duels and the magical conflict are skill checks until the dialogue fight exists.
 - Trial job ("Probeauftrag"): the companion joins with flag `<short>_trial`.
 - Kael's duel is an Athletics check (DC 14) until the non-lethal dialogue fight is in.
 - Rumour-only answers need `kael_rumor_heard` / `seren_rumor_heard`, set by a district

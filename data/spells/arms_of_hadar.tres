@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"arms_of_hadar"
+name_key = &"SPELL_ARMS_OF_HADAR"
+srd_name = "Arms of Hadar"
+level = 1
+school = "conjuration"
+casting_time = "action"
+targeting = "self"
+range_m = 0.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"str"
+damage_dice = "2d6"
+damage_type = &"necrotic"
+half_on_save = true
+upcast_dice = "1d6"
+vfx = &"arms_of_hadar"

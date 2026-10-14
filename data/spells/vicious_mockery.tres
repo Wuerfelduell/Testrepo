@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"vicious_mockery"
+name_key = &"SPELL_VICIOUS_MOCKERY"
+srd_name = "Vicious Mockery"
+level = 0
+school = "enchantment"
+casting_time = "action"
+targeting = "creature"
+range_m = 18.0
+resolution = "save"
+save_ability = &"wis"
+damage_dice = "1d6"
+damage_type = &"psychic"
+effect = &"vicious_mockery"
+vfx = &"vicious_mockery"

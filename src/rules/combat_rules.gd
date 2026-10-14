@@ -366,6 +366,9 @@ static func resolve_attack(state: GameState, attacker_id: String, target_id: Str
 	var attack: Attacks.Result = Attacks.resolve(int(preview["armor_class"]), modifiers, rng, context)
 	ActiveEffects.consume_attack_riders(attacker)
 	ClassEffects.consume_on_attacked(target)
+	if not attack.hit and not ActiveEffects.inspire_roll(attacker, attack.roll, int(preview["armor_class"]), rng).is_empty():
+		# Bardic Inspiration turned the miss into a hit (the die is in the roll's modifiers).
+		attack.hit = true
 	if attack.hit and (conditions_for(target).has(&"unconscious") or conditions_for(target).has(&"paralyzed")) \
 			and float(preview["distance"]) <= 1.5:
 		attack.critical = true

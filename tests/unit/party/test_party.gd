@@ -229,7 +229,7 @@ func test_reactions_move_loyalty_once_and_low_loyalty_leaves() -> void:
 	assert_eq(left.size(), 1, "Below -3 Kael leaves")
 	assert_eq(String(left[0]["reason"]), "loyalty")
 	assert_false(PartyRules.is_member(state, "companion_kael"))
-	assert_true(DialogueData.conditions_met([{"flag": "kael_left"}], state), "His hook stays hidden")
+	assert_true(DialogueData.conditions_met([{"flag": "kael_permanently_left"}], state), "His hook stays hidden")
 	# Lyra has no leaves_below: she stays whatever happens.
 	_recruit(state, "companion_lyra")
 	DialogueEffects.apply(state, {"react": {"lyra": {"text": "x", "loyalty": -9}}}, "test/c")
@@ -244,21 +244,103 @@ func test_banter_plays_once_when_both_are_in_the_party() -> void:
 	assert_eq(PartyRules.next_banter(state, "arrive"), "")
 	assert_eq(PartyRules.next_banter(state, "rest"), "banter_kael_lyra")
 	_run(state, DialogueStartCommand.new("banter_kael_lyra"))
-	var data: Dictionary = DialogueData.load_dialogue("banter_kael_lyra")
-	assert_eq(DialogueData.speaker_name(data, "first"), "Kael Dorn")
 	assert_eq(PartyRules.next_banter(state, "rest"), "", "Not while a conversation runs")
-	_run(state, DialogueChooseCommand.new(0))
+	# Event A: "Kael, let her read."
 	var result: Dictionary = _run(state, DialogueChooseCommand.new(0))
 	assert_eq(_events(result, "companion_reaction").size(), 2, "Taking sides: both react")
-	assert_eq(PartyRules.loyalty(state, "companion_kael"), 1)
-	assert_eq(PartyRules.loyalty(state, "companion_lyra"), -1)
-	_run(state, DialogueEndCommand.new())
+	assert_eq(PartyRules.loyalty(state, "companion_kael"), -1)
+	assert_eq(PartyRules.loyalty(state, "companion_lyra"), 1)
+	assert_false(state.world.has("conversation"))
 	assert_eq(PartyRules.next_banter(state, "rest"), "", "Each banter plays once")
+	# Event B only in the Torviertel, event C only once Vaelor's notes were found.
+	_recruit(state, "companion_seren")
+	state.world["level"] = "crypt"
+	assert_eq(PartyRules.next_banter(state, "arrive"), "banter_kael_seren")
+	state.world["flags"]["banter_kael_seren"] = true
+	assert_eq(PartyRules.next_banter(state, "arrive"), "")
+	state.world["level"] = "torviertel"
+	assert_eq(PartyRules.next_banter(state, "arrive"), "banter_seren_ring")
+	state.world["flags"]["banter_lyra_seren"] = true
+	assert_eq(PartyRules.next_banter(state, "rest"), "")
+	state.world["flags"]["vaelor_manuscript_found"] = true
+	assert_eq(PartyRules.next_banter(state, "rest"), "banter_lyra_manuscript")
 
 func test_dialogue_validation_knows_reactions_and_speakers() -> void:
 	var tree: Dictionary = {"id": "x", "speaker": "X", "start": [{"node": "a"}], "nodes": {
-		"a": {"text": "t", "speaker": "nobody", "effects": {"react": {"ghost": {"text": "t"}, "kael": {"loyalty": 1}}}}}}
+		"a": {"text": "t", "speaker": "nobody", "effects": {"react": {"ghost": {"text": "t"}, "kael": {"mood": 1}}}}}}
 	assert_eq(DialogueData.problems(tree).size(), 3, str(DialogueData.problems(tree)))
 	tree["nodes"]["a"] = {"text": "t", "speaker": "seren", "effects": {"react": {"kael": {"text": "t", "loyalty": 1}}}}
 	assert_eq(DialogueData.problems(tree), PackedStringArray())
 	assert_eq(DialogueData.speaker_name(tree, "a"), "Seren Nachtfall")
+
+## Talks to a party member through their camp dialogue: the given raw choice indices in order.
+func _camp(state: GameState, short: String, picks: Array) -> Dictionary:
+	_run(state, DialogueStartCommand.new("camp_" + short))
+	var result: Dictionary = {}
+	for pick: int in picks:
+		result = _run(state, DialogueChooseCommand.new(pick))
+	if state.world.has("conversation"):
+		_run(state, DialogueEndCommand.new())
+	return result
+
+func test_three_ways_to_part() -> void:
+	var state: GameState = _fresh()
+	for id: String in ["companion_kael", "companion_lyra", "companion_seren"]:
+		_recruit(state, id)
+	var flags: Dictionary = DialogueData.flags(state)
+	assert_true(bool(flags["kael_recruited"]) and bool(flags["kael_active"]) and not bool(flags["kael_at_camp"]))
+	# Kael waits in the camp: no loyalty change, comes back on asking.
+	var result: Dictionary = _camp(state, "kael", [4, 0])
+	assert_eq(String(_events(result, "party_left")[0]["mode"]), "camp")
+	flags = DialogueData.flags(state)
+	assert_true(bool(flags["kael_at_camp"]) and not bool(flags["kael_active"]))
+	assert_eq(PartyRules.loyalty(state, "companion_kael"), 0)
+	assert_eq(PartyRules.recruit_reason(state, "companion_kael"), "")
+	# Lyra parts on good terms: not at camp, can be recruited again.
+	_camp(state, "lyra", [4, 1])
+	flags = DialogueData.flags(state)
+	assert_false(bool(flags["lyra_at_camp"]))
+	assert_false(flags.has("lyra_permanently_left"))
+	assert_eq(PartyRules.recruit_reason(state, "companion_lyra"), "")
+	# Seren is driven off (once the threat works): gone for good, loyalty -4.
+	var data: Dictionary = DialogueData.load_dialogue("camp_seren")
+	_run(state, DialogueStartCommand.new("camp_seren"))
+	_run(state, DialogueChooseCommand.new(4))
+	result = _run(state, DialogueChooseCommand.new(4))
+	var threatened: bool = bool(_events(result, "roll")[0]["success"])
+	if state.world.has("conversation"):
+		_run(state, DialogueEndCommand.new())
+	if threatened:
+		assert_true(bool(DialogueData.flags(state)["seren_permanently_left"]))
+		assert_eq(PartyRules.loyalty(state, "companion_seren"), -4)
+		assert_eq(PartyRules.recruit_reason(state, "companion_seren"), "PARTY_REASON_GONE")
+	else:
+		assert_true(PartyRules.is_member(state, "companion_seren"), "A failed threat does not send her away")
+	# Rule 1: the threat is never rolled again.
+	assert_false(4 in DialogueData.available_choices(data, "leave", state))
+
+func test_camp_talk_depends_on_loyalty_and_shows_gear() -> void:
+	var state: GameState = _fresh()
+	_recruit(state, "companion_kael")
+	var data: Dictionary = DialogueData.load_dialogue("camp_kael")
+	_run(state, DialogueStartCommand.new("camp_kael"))
+	_run(state, DialogueChooseCommand.new(1))
+	var me: Array = DialogueData.available_choices(data, "opinion", state).filter(
+		func(index: int) -> bool: return String(data["nodes"]["opinion"]["choices"][index]["text"]) == "What do you think of me?")
+	assert_eq(me, [4], "Neutral loyalty answer only")
+	assert_false(1 in DialogueData.available_choices(data, "opinion", state), "Lyra not recruited yet")
+	state.world["flags"]["kael_loyalty"] = 3
+	assert_true(3 in DialogueData.available_choices(data, "opinion", state), "High loyalty answer")
+	assert_true(0 in DialogueData.available_choices(data, "past", state), "His men only from loyalty 2")
+	_run(state, DialogueEndCommand.new())
+	# "Show me your gear" ends the talk and asks the level to open his inventory.
+	var result: Dictionary = _camp(state, "kael", [3])
+	assert_eq(String(_events(result, "open_inventory")[0]["actor_id"]), "companion_kael")
+	# A kind word counts once, an insult every time (owner's rule 2).
+	_camp(state, "kael", [2, 2])
+	_camp(state, "kael", [2])
+	assert_false(2 in DialogueData.available_choices(data, "past", state))
+	assert_eq(PartyRules.loyalty(state, "companion_kael"), 4)
+	_camp(state, "kael", [0, 4])
+	_camp(state, "kael", [0, 4])
+	assert_eq(PartyRules.loyalty(state, "companion_kael"), 2)

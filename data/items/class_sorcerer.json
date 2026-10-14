@@ -1,0 +1,7 @@
+{
+	"_comment": "SRD 5.2 Sorcerer starting equipment (option A): Spear, 2 Daggers, 28 GP. Arcane focus and pack are not items in play yet.",
+	"items": {},
+	"starting_kits": {
+		"sorcerer": {"equipped": {"main_hand": "spear"}, "bag": {"dagger": 2, "potion_of_healing": 1}, "gold": 28}
+	}
+}

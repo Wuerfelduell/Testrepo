@@ -557,6 +557,9 @@ ACTOR_CULT_PRIEST,Cult Priest
 LOOK_FIGHTER_PLATE,Fighter • plate and shield
 LOOK_WIZARD_HOOD,Wizard • hooded robe
 LOOK_WIZARD_HAT,Wizard • pointed hat
+LOOK_BARBARIAN_FUR,Barbarian • fur mantle
+LOOK_MONK_ROBE,Monk • robe and sash
+LOOK_RANGER_HOOD,Ranger • hood and quiver
 GALLERY_M1_ENEMIES,Enemies
 GALLERY_M1_HEROES,Hero looks
 GALLERY_M1_WEAPONS,Weapons
@@ -753,6 +756,7 @@ COLOR_BLOOD,Blood red
 COLOR_WINE,Wine
 COLOR_VIOLET,Violet
 COLOR_TEAL,Teal
+COLOR_PINE,Pine
 COLOR_FOREST,Forest green
 COLOR_MOSS,Moss
 COLOR_OCHRE,Ochre
@@ -902,9 +906,127 @@ PARTY_LOG_APPROVES,%s approves
 PARTY_LOG_DISAPPROVES,%s disapproves
 PARTY_APPROVES,approves
 PARTY_DISAPPROVES,disapproves
+PARTY_TALK_HINT,"Left-click: command. Right-click: talk."
+PARTY_REASON_GONE,They want nothing more to do with you.
+PARTY_LOG_CAMP,%s waits in the camp
+CLASS_BARD,Bard
+CLASS_SORCERER,Sorcerer
+CLASS_WARLOCK,Warlock
+ACTOR_BARD,Bard
+ACTOR_SORCERER,Sorcerer
+ACTOR_WARLOCK,Warlock
+CREATION_DESCRIPTION_BARD,"A performer whose words carry magic. Inspires allies, mocks foes to pieces and heals in a pinch. Leather armour and a dagger: stay behind the front line."
+CREATION_DESCRIPTION_SORCERER,"Magic runs in the blood. Fewer spells than a wizard, but Sorcery Points bend them: faster, farther, harder to resist. No armour at all."
+CREATION_DESCRIPTION_WARLOCK,"Power bought with a pact. Few spell slots that all come back after a short rest, Eldritch Blast as a deadly cantrip and invocations that shape the build."
+SPELL_ELDRITCH_BLAST,Eldritch Blast
+SPELL_VICIOUS_MOCKERY,Vicious Mockery
+SPELL_SHOCKING_GRASP,Shocking Grasp
+SPELL_CHILL_TOUCH,Chill Touch
+SPELL_DISSONANT_WHISPERS,Dissonant Whispers
+SPELL_THUNDERWAVE,Thunderwave
+SPELL_HEX,Hex
+SPELL_HEX_HINT,"1d6 necrotic on every hit you land on the target, while you concentrate"
+SPELL_ARMS_OF_HADAR,Arms of Hadar
+SPELL_SCORCHING_RAY,Scorching Ray
+SPELL_LIGHTNING_BOLT,Lightning Bolt
+SPELL_PHANTASMAL_KILLER,Phantasmal Killer
+SPELL_CONE_OF_COLD,Cone of Cold
+SPELL_HOLD_MONSTER,Hold Monster
+SPELL_BARDIC_INSPIRATION,Bardic Inspiration
+SPELL_BARDIC_INSPIRATION_HINT,The ally adds your inspiration die to a failed attack roll or save that it can still save
+COMBAT_SPELL_EFFECT,%s · %s
+FEATURE_COST_BARDIC_INSPIRATION,Inspiration %d/%d
+FEATURE_BARDIC_INSPIRATION,Bardic Inspiration
+FEATURE_BARDIC_INSPIRATION_HINT_LEVELUP,"Bonus action: an ally gains your inspiration die (d6, d8 from level 5, d10 from level 10). Uses: your Charisma modifier."
+FEATURE_EXPERTISE,Expertise
+FEATURE_EXPERTISE_HINT_LEVELUP,Double your proficiency bonus for two of your skills.
+FEATURE_JACK_OF_ALL_TRADES,Jack of All Trades
+FEATURE_FONT_OF_INSPIRATION,Font of Inspiration
+FEATURE_FONT_OF_INSPIRATION_HINT_LEVELUP,All Bardic Inspiration uses also come back on a short rest.
+FEATURE_COUNTERCHARM,Countercharm
+FEATURE_MAGICAL_SECRETS,Magical Secrets
+FEATURE_MAGICAL_SECRETS_HINT_LEVELUP,Learn two spells from the other classes' lists.
+FEATURE_INNATE_SORCERY,Innate Sorcery
+FEATURE_INNATE_SORCERY_BUTTON,Innate Sorcery %d/%d
+FEATURE_INNATE_SORCERY_HINT,"Bonus action, 1 minute: +1 spell save DC and advantage on spell attacks"
+FEATURE_INNATE_SORCERY_HINT_LEVELUP,"Bonus action, twice per long rest: for 1 minute your spell save DC rises by 1 and your spell attacks have advantage."
+FEATURE_FONT_OF_MAGIC,Font of Magic
+FEATURE_FONT_OF_MAGIC_HINT_LEVELUP,"Sorcery Points equal to your level. Turn them into spell slots, or slots into points."
+FEATURE_FONT_CREATE_SLOT_BUTTON,Points → Slot %d/%d
+FEATURE_FONT_CREATE_SLOT_HINT,Bonus action: spend Sorcery Points to regain your highest spent spell slot
+FEATURE_FONT_GAIN_POINTS_BUTTON,Slot → Points %d/%d
+FEATURE_FONT_GAIN_POINTS_HINT,Free: spend your lowest spell slot for as many Sorcery Points as its level
+FEATURE_METAMAGIC,Metamagic
+FEATURE_METAMAGIC_HINT_LEVELUP,Spend Sorcery Points to change your next spell.
+FEATURE_METAMAGIC_BUTTON,%s (%d SP)
+FEATURE_METAMAGIC_BUTTON_ARMED,%s ready (%d SP)
+FEATURE_METAMAGIC_QUICKENED_HINT,Your next spell with a casting time of an action is cast as a bonus action
+FEATURE_METAMAGIC_DISTANT_HINT,"Your next spell has double range (touch spells reach 9 m)"
+FEATURE_METAMAGIC_CAREFUL_HINT,Your allies are left out of your next area spell
+FEATURE_METAMAGIC_HEIGHTENED_HINT,The first target of your next spell makes its save with disadvantage
+FEATURE_SORCEROUS_RESTORATION,Sorcerous Restoration
+FEATURE_SORCEROUS_RESTORATION_HINT_LEVELUP,"Once per long rest, a short rest gives back Sorcery Points equal to half your level."
+FEATURE_SORCERY_INCARNATE,Sorcery Incarnate
+FEATURE_SORCERY_INCARNATE_HINT_LEVELUP,Without uses left you can start Innate Sorcery for 2 Sorcery Points.
+FEATURE_ALREADY_ACTIVE,Already active
+FEATURE_FONT_NO_SLOT,No spent slot your points can pay for
+FEATURE_FONT_POINTS_FULL,Sorcery Points are full
+FEATURE_METAMAGIC_ARMED,A Metamagic is already ready
+FEATURE_NO_POINTS,Not enough Sorcery Points
+FEATURE_PACT_MAGIC,Pact Magic
+FEATURE_PACT_MAGIC_HINT_LEVELUP,"Few spell slots, all of your highest level, and all of them come back on a short rest."
+FEATURE_ELDRITCH_INVOCATIONS,Eldritch Invocations
+FEATURE_MAGICAL_CUNNING,Magical Cunning
+FEATURE_MAGICAL_CUNNING_HINT_LEVELUP,"Once per long rest, an action: regain half your pact slots (rounded up)."
+FEATURE_MAGICAL_CUNNING_BUTTON,Magical Cunning %d/%d
+FEATURE_MAGICAL_CUNNING_HINT,Action: regain half your pact slots (rounded up)
+FEATURE_SLOTS_FULL,Your spell slots are full
+FEATURE_CONTACT_PATRON,Contact Patron
+LEVELUP_SECTION_BARD_EXPERTISE,EXPERTISE (%d)
+LEVELUP_SECTION_BARD_EXPERTISE_NOTE,Double your proficiency bonus for these skills.
+LEVELUP_SECTION_MAGICAL_SECRETS,MAGICAL SECRETS (%d)
+LEVELUP_SECTION_MAGICAL_SECRETS_NOTE,Spells from other classes' lists. They count as Bard spells and stay prepared.
+LEVELUP_SECTION_METAMAGIC,METAMAGIC (%d)
+LEVELUP_SECTION_METAMAGIC_NOTE,Each one costs Sorcery Points and shows up on your hotbar.
+LEVELUP_SECTION_INVOCATIONS,ELDRITCH INVOCATIONS (%d)
+LEVELUP_SECTION_INVOCATIONS_NOTE,Invocations marked (no effect in play yet) only count for the story so far.
+METAMAGIC_QUICKENED,Quickened Spell
+METAMAGIC_DISTANT,Distant Spell
+METAMAGIC_CAREFUL,Careful Spell
+METAMAGIC_HEIGHTENED,Heightened Spell
+INVOCATION_ARMOR_OF_SHADOWS,Armor of Shadows (AC 13 + Dex without armour)
+INVOCATION_ELDRITCH_MIND,Eldritch Mind (advantage to keep concentration)
+INVOCATION_PACT_OF_THE_BLADE,Pact of the Blade (melee weapon uses Charisma)
+INVOCATION_BEGUILING_INFLUENCE,Beguiling Influence (Deception and Persuasion)
+INVOCATION_AGONIZING_BLAST,Agonizing Blast (+Charisma to Eldritch Blast)
+INVOCATION_DEVILS_SIGHT,Devil's Sight (no effect in play yet)
+INVOCATION_MASK_OF_MANY_FACES,Mask of Many Faces (no effect in play yet)
+INVOCATION_MISTY_VISIONS,Misty Visions (no effect in play yet)
+INVOCATION_OTHERWORLDLY_LEAP,Otherworldly Leap (no effect in play yet)
+INVOCATION_EYES_OF_THE_RUNE_KEEPER,Eyes of the Rune Keeper (no effect in play yet)
+INVOCATION_THIRSTING_BLADE,Thirsting Blade (Extra Attack with Pact of the Blade)
+INVOCATION_ONE_WITH_SHADOWS,One with Shadows (no effect in play yet)
+INVOCATION_ASCENDANT_STEP,Ascendant Step (no effect in play yet)
+INVOCATION_GIFT_OF_THE_DEPTHS,Gift of the Depths (no effect in play yet)
+ROLL_SOURCE_BARDIC_INSPIRATION,Bardic Inspiration
+ROLL_SOURCE_INNATE_SORCERY,Innate Sorcery
+ROLL_SOURCE_AGONIZING_BLAST,Agonizing Blast
+ROLL_SOURCE_HEX,Hex
+ROLL_SOURCE_ELDRITCH_MIND,Eldritch Mind
+ROLL_SOURCE_HEIGHTENED,Heightened Spell
+ROLL_SOURCE_VICIOUS_MOCKERY,Vicious Mockery
 LOOK_CLERIC_VESTMENTS,Cleric • vestments and mail
 LOOK_PALADIN_PLATE,Paladin • plate and tabard
 LOOK_DRUID_ANTLERS,Druid • antler circlet
 COLOR_SLOT_VESTMENT,Vestments
 COLOR_SLOT_TABARD,Tabard
 COLOR_SLOT_MANTLE,Mantle
+CLASS_CLERIC,Cleric
+CLASS_PALADIN,Paladin
+CLASS_DRUID,Druid
+ACTOR_CLERIC,Cleric
+ACTOR_PALADIN,Paladin
+ACTOR_DRUID,Druid
+CREATION_DESCRIPTION_CLERIC,"A priest in mail who heals, blesses and burns the unholy. Chain shirt, shield and mace; Divine Spark and Turn Undead from level 2."
+CREATION_DESCRIPTION_PALADIN,"A holy knight in chain mail with longsword and shield. Lay on Hands heals, Divine Smite turns a hit into a blaze of radiant damage."
+CREATION_DESCRIPTION_DRUID,"A keeper of the wild with nature magic: fire, lightning, binding roots and healing. From level 2 turns into a wolf."

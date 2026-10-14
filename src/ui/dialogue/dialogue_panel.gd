@@ -129,7 +129,11 @@ static func reactions_for(events: Array) -> String:
 		var mood: String = ""
 		if change != 0:
 			mood = " (" + TranslationServer.translate("PARTY_APPROVES" if change > 0 else "PARTY_DISAPPROVES") + ")"
-		lines.append("%s%s: %s" % [name, mood, TranslationServer.translate(String(event["text"]))])
+		var said: String = String(event.get("text", ""))
+		if said.is_empty() and not mood.is_empty():
+			lines.append(name + mood)
+		elif not said.is_empty():
+			lines.append("%s%s: %s" % [name, mood, TranslationServer.translate(said)])
 	return "\n".join(lines)
 
 func _pick(slot: int) -> void:

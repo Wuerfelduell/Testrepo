@@ -1,0 +1,1220 @@
+{
+	"version": 1,
+	"id": "camp_kael",
+	"speaker": "Kael Dorn",
+	"start": [
+		{
+			"if": [
+				{
+					"flag": "kael_camp_met"
+				}
+			],
+			"node": "again"
+		},
+		{
+			"node": "first"
+		}
+	],
+	"nodes": {
+		"first": {
+			"text": "Kael sits at the fire, sharpening his greatsword.\n\n\"What?\"\n\nHe glances up.\n\n\"If you want to talk, make it quick. My blade won't sharpen itself.\"",
+			"effects": {
+				"flags": {
+					"kael_camp_met": true
+				}
+			},
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our journey so far?",
+					"next": "opinion"
+				},
+				{
+					"text": "I want to talk about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "kael"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're starting to get on my nerves.",
+					"next": "conflict_nerves"
+				},
+				{
+					"text": "Forget it."
+				}
+			]
+		},
+		"again": {
+			"text": "[Placeholder: Kael at the fire, any later talk.]",
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our journey so far?",
+					"next": "opinion"
+				},
+				{
+					"text": "I want to talk about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "kael"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're starting to get on my nerves.",
+					"next": "conflict_nerves"
+				},
+				{
+					"text": "Forget it."
+				}
+			]
+		},
+		"leave": {
+			"text": "You: \"Kael, we need to talk about your place in the party.\"\n\n\"Go on. Spit it out.\"",
+			"choices": [
+				{
+					"text": "I don't need you right now. Wait here in the camp.",
+					"next": "l_camp"
+				},
+				{
+					"text": "Our paths part here. Thanks for your help.",
+					"next": "l_parted"
+				},
+				{
+					"text": "You're useless. Get lost.",
+					"next": "l_useless"
+				},
+				{
+					"text": "If you don't leave, I'll kill you.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 18,
+						"success": "l_threat",
+						"failure": "l_draw"
+					}
+				},
+				{
+					"text": "Forget it. Stay with us.",
+					"next": "l_stay"
+				}
+			]
+		},
+		"l_camp": {
+			"text": "\"Fine. But don't you dare leave me rotting here for weeks.\"",
+			"effects": {
+				"leave": {
+					"kael": "camp"
+				}
+			}
+		},
+		"l_parted": {
+			"text": "\"Hm.\"\n\n\"Make sure you don't get yourself killed without me.\"",
+			"effects": {
+				"leave": {
+					"kael": "parted"
+				}
+			}
+		},
+		"l_useless": {
+			"text": "\"Useless?\"\n\nHe stands up.",
+			"effects": {
+				"add": {
+					"kael_loyalty": -3
+				}
+			},
+			"choices": [
+				{
+					"text": "[Placeholder: hold his gaze]",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -3
+						}
+					],
+					"next": "l_pay"
+				},
+				{
+					"text": "[Placeholder: hold his gaze]",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -2
+						}
+					],
+					"next": "again"
+				}
+			]
+		},
+		"l_pay": {
+			"text": "\"You want rid of me? Fine. Then pay what you owe me, and I'm gone.\"",
+			"choices": [
+				{
+					"text": "[Pay him 10 silver]",
+					"next": "l_paid",
+					"effects": {
+						"money": -100
+					}
+				},
+				{
+					"text": "[Placeholder: refuse to pay]",
+					"next": "l_unpaid"
+				}
+			]
+		},
+		"l_paid": {
+			"text": "[Placeholder: Kael takes the money and leaves for good.]",
+			"effects": {
+				"leave": {
+					"kael": "hostile"
+				}
+			}
+		},
+		"l_unpaid": {
+			"text": "[Placeholder: Kael leaves for good, unpaid and angry.]",
+			"effects": {
+				"leave": {
+					"kael": "hostile"
+				},
+				"flags": {
+					"kael_hostile": true
+				}
+			}
+		},
+		"l_threat": {
+			"text": "\"You really want to push it?\"",
+			"effects": {
+				"add": {
+					"kael_loyalty": -4
+				},
+				"leave": {
+					"kael": "hostile"
+				},
+				"flags": {
+					"kael_hostile": true
+				}
+			}
+		},
+		"l_draw": {
+			"text": "\"Draw your sword.\"",
+			"choices": [
+				{
+					"text": "[Placeholder: accept the non-lethal duel]",
+					"next": "duel"
+				},
+				{
+					"text": "[Placeholder: back down]",
+					"next": "again"
+				}
+			]
+		},
+		"l_stay": {
+			"text": "\"Then don't waste my time.\"",
+			"choices": [
+				{
+					"text": "How are you?",
+					"next": "personal"
+				},
+				{
+					"text": "What do you think of our journey so far?",
+					"next": "opinion"
+				},
+				{
+					"text": "I want to talk about your past.",
+					"next": "past"
+				},
+				{
+					"text": "Show me your gear.",
+					"effects": {
+						"inventory": "kael"
+					}
+				},
+				{
+					"text": "You need to leave the party.",
+					"next": "leave"
+				},
+				{
+					"text": "You're starting to get on my nerves.",
+					"next": "conflict_nerves"
+				},
+				{
+					"text": "Forget it."
+				}
+			]
+		},
+		"conflict_nerves": {
+			"text": "\"Then stop busting my balls.\"\n\n\"You've got something to say? Then say it.\"",
+			"choices": [
+				{
+					"text": "You're nothing but a failed captain.",
+					"next": "c_captain"
+				},
+				{
+					"text": "You badly need someone to show you how to follow orders.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_order",
+						"failure": "c_not_captain"
+					}
+				},
+				{
+					"text": "Fine. I didn't want a fight.",
+					"next": "c_calm"
+				},
+				{
+					"text": "You and me. A duel.",
+					"next": "duel"
+				}
+			]
+		},
+		"conflict_coward": {
+			"text": "\"Say that again.\"\n\n\"You've got something to say? Then say it.\"",
+			"choices": [
+				{
+					"text": "You're nothing but a failed captain.",
+					"next": "c_captain"
+				},
+				{
+					"text": "You badly need someone to show you how to follow orders.",
+					"check": {
+						"skill": "intimidation",
+						"dc": 17,
+						"success": "c_order",
+						"failure": "c_not_captain"
+					}
+				},
+				{
+					"text": "Fine. I didn't want a fight.",
+					"next": "c_calm"
+				},
+				{
+					"text": "You and me. A duel.",
+					"next": "duel"
+				}
+			]
+		},
+		"c_captain": {
+			"text": "\"You don't know what happened back then.\"",
+			"effects": {
+				"add": {
+					"kael_loyalty": -2
+				}
+			}
+		},
+		"c_order": {
+			"text": "\"Then give me an order that makes sense.\"",
+			"effects": {
+				"add": {
+					"kael_respect": 1,
+					"kael_loyalty": -1
+				}
+			}
+		},
+		"c_not_captain": {
+			"text": "\"You're not my captain.\"",
+			"effects": {
+				"add": {
+					"kael_loyalty": -2
+				}
+			}
+		},
+		"c_calm": {
+			"text": "\"Then don't start one.\""
+		},
+		"duel": {
+			"text": "\"Finally.\"",
+			"choices": [
+				{
+					"text": "[Placeholder: start the training duel]",
+					"check": {
+						"skill": "athletics",
+						"dc": 14,
+						"success": "duel_won",
+						"failure": "duel_lost"
+					}
+				}
+			]
+		},
+		"duel_won": {
+			"text": "[Placeholder: Kael after losing the training duel; the real non-lethal fight replaces this check.]",
+			"effects": {
+				"add": {
+					"kael_respect": 1
+				},
+				"xp": 25
+			}
+		},
+		"duel_lost": {
+			"text": "[Placeholder: Kael after winning the training duel.]"
+		},
+		"personal": {
+			"text": "\"I'm breathing. I'm not bleeding. So, better off than most.\"\n\n\"What do you want to know?\"",
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_family": {
+			"text": "\"I did.\"\n\nHe keeps sharpening his blade.",
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_why": {
+			"text": "\"Because honest work pays badly.\"\n\n\"And because I noticed early on that I'm good at hurting people.\"",
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_regret": {
+			"text": "\"Some.\"\n\n\"Most of them, no.\"",
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_running": {
+			"text": "\"Maybe.\"\n\n\"Maybe I'm running towards something.\"",
+			"effects": {
+				"flags": {
+					"kael_quest_hint_running": true
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_think_less": {
+			"text": "\"You should think less. It's healthier.\"",
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"p_murderer": {
+			"text": "\"And you're the one paying me. Think about that.\"",
+			"effects": {
+				"add": {
+					"kael_loyalty": -1
+				}
+			},
+			"choices": [
+				{
+					"text": "Do you have family?",
+					"next": "p_family"
+				},
+				{
+					"text": "Why did you become a mercenary?",
+					"next": "p_why"
+				},
+				{
+					"text": "Do you regret the people you've killed?",
+					"next": "p_regret"
+				},
+				{
+					"text": "You seem like you're running from something.",
+					"check": {
+						"skill": "insight",
+						"dc": 15,
+						"success": "p_running",
+						"failure": "p_think_less"
+					}
+				},
+				{
+					"text": "You're really just a paid murderer.",
+					"next": "p_murderer"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"opinion": {
+			"text": "\"Too much talk. Too little gold.\"\n\n\"You really want to know what I think?\"",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_city": {
+			"text": "\"A shithole full of rich pigs and starving children.\"\n\n\"So, an ordinary city.\"",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_lyra": {
+			"text": "\"The witch?\"\n\n\"I don't trust anyone who can kill a man without touching him.\"",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"o_seren": {
+			"text": "\"Dangerous.\"\n\n\"If she wanted to kill you, you'd probably only notice once you were already dead.\"",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_high": {
+			"text": "You're a decent leader.\n\n\"Don't tell anyone.\"",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_neutral": {
+			"text": "You're still alive. That speaks for you.",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"me_low": {
+			"text": "You're an idiot with too much luck.",
+			"choices": [
+				{
+					"text": "What do you think of Rabenfels?",
+					"next": "o_city"
+				},
+				{
+					"text": "What do you think of Lyra?",
+					"if": [
+						{
+							"flag": "lyra_recruited"
+						}
+					],
+					"next": "o_lyra"
+				},
+				{
+					"text": "What do you think of Seren?",
+					"if": [
+						{
+							"flag": "seren_recruited"
+						}
+					],
+					"next": "o_seren"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 3
+						}
+					],
+					"next": "me_high"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": -1,
+							"max": 2
+						}
+					],
+					"next": "me_neutral"
+				},
+				{
+					"text": "What do you think of me?",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"max": -2
+						}
+					],
+					"next": "me_low"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"past": {
+			"text": "\"I don't.\"",
+			"choices": [
+				{
+					"text": "Tell me about your men.",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "x_men",
+						"failure": "x_not_today"
+					}
+				},
+				{
+					"text": "You're a coward, Kael.",
+					"next": "conflict_coward"
+				},
+				{
+					"text": "You don't have to talk about it.",
+					"if": [
+						{
+							"flag": "kael_camp_past_respected",
+							"is": false
+						}
+					],
+					"next": "x_fine"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_men": {
+			"text": "\"Twelve men.\"\n\n\"I led them into a mine.\"\n\n\"Three came back out.\"\n\n\"Two died on the way back.\"\n\nHe stares into the fire.\n\n\"I was the last.\"",
+			"effects": {
+				"flags": {
+					"kael_personal_quest_stage": 2
+				},
+				"xp": 25
+			},
+			"choices": [
+				{
+					"text": "Tell me about your men.",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "x_men",
+						"failure": "x_not_today"
+					}
+				},
+				{
+					"text": "You're a coward, Kael.",
+					"next": "conflict_coward"
+				},
+				{
+					"text": "You don't have to talk about it.",
+					"if": [
+						{
+							"flag": "kael_camp_past_respected",
+							"is": false
+						}
+					],
+					"next": "x_fine"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_not_today": {
+			"text": "\"Not today.\"",
+			"choices": [
+				{
+					"text": "Tell me about your men.",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "x_men",
+						"failure": "x_not_today"
+					}
+				},
+				{
+					"text": "You're a coward, Kael.",
+					"next": "conflict_coward"
+				},
+				{
+					"text": "You don't have to talk about it.",
+					"if": [
+						{
+							"flag": "kael_camp_past_respected",
+							"is": false
+						}
+					],
+					"next": "x_fine"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		},
+		"x_fine": {
+			"text": "\"Good.\"",
+			"effects": {
+				"flags": {
+					"kael_camp_past_respected": true
+				},
+				"add": {
+					"kael_loyalty": 1
+				}
+			},
+			"choices": [
+				{
+					"text": "Tell me about your men.",
+					"if": [
+						{
+							"flag": "kael_loyalty",
+							"min": 2
+						}
+					],
+					"check": {
+						"skill": "persuasion",
+						"dc": 16,
+						"success": "x_men",
+						"failure": "x_not_today"
+					}
+				},
+				{
+					"text": "You're a coward, Kael.",
+					"next": "conflict_coward"
+				},
+				{
+					"text": "You don't have to talk about it.",
+					"if": [
+						{
+							"flag": "kael_camp_past_respected",
+							"is": false
+						}
+					],
+					"next": "x_fine"
+				},
+				{
+					"text": "Something else.",
+					"next": "again"
+				}
+			]
+		}
+	}
+}

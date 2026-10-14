@@ -683,7 +683,7 @@
 			"text": "\"Then help me with my research.\"",
 			"effects": {
 				"flags": {
-					"lyra_personal_quest": "black_manuscript"
+					"lyra_personal_quest_stage": 1
 				}
 			},
 			"choices": [
@@ -1027,7 +1027,7 @@
 			"effects": {
 				"flags": {
 					"lyra_recruited": true,
-					"lyra_personal_quest": "crypt"
+					"lyra_personal_quest_stage": 1
 				},
 				"recruit": "companion_lyra",
 				"xp": 25,

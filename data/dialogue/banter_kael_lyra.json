@@ -1,7 +1,7 @@
 {
 	"version": 1,
 	"id": "banter_kael_lyra",
-	"speaker": "Companions",
+	"speaker": "Kael & Lyra",
 	"start": [
 		{
 			"node": "first"
@@ -9,8 +9,7 @@
 	],
 	"nodes": {
 		"first": {
-			"speaker": "kael",
-			"text": "[Placeholder: Kael says magic is a coward's weapon]",
+			"text": "Kael stands at the campfire. Lyra sits next to him, reading.\n\nKael: \"Can't you put that damn book down for once?\"\n\nLyra: \"Can you form a single thought without swearing?\"\n\nKael: \"You arrogant witch.\"\n\nLyra: \"You remarkably primitive specimen of human evolution.\"\n\nBoth turn to you.",
 			"effects": {
 				"flags": {
 					"banter_kael_lyra": true
@@ -18,70 +17,65 @@
 			},
 			"choices": [
 				{
-					"text": "[Placeholder: listen]",
-					"next": "answer"
-				}
-			]
-		},
-		"answer": {
-			"speaker": "lyra",
-			"text": "[Placeholder: Lyra calls Kael a primitive thug]",
-			"choices": [
-				{
-					"text": "[Placeholder: side with Kael]",
-					"next": "end_a",
-					"effects": {
-						"flags": {
-							"banter_kael_lyra": "kael"
-						},
-						"react": {
-							"kael": {
-								"text": "[Placeholder: kael is pleased]",
-								"loyalty": 1
-							},
-							"lyra": {
-								"text": "[Placeholder: lyra is annoyed]",
-								"loyalty": -1
-							}
-						}
-					}
-				},
-				{
-					"text": "[Placeholder: side with Lyra]",
-					"next": "end_b",
+					"text": "Kael, let her read.",
 					"effects": {
 						"flags": {
 							"banter_kael_lyra": "lyra"
 						},
 						"react": {
 							"lyra": {
-								"text": "[Placeholder: lyra is pleased]",
 								"loyalty": 1
 							},
 							"kael": {
-								"text": "[Placeholder: kael is annoyed]",
 								"loyalty": -1
 							}
 						}
 					}
 				},
 				{
-					"text": "[Placeholder: stay out of it]",
-					"next": "end_none"
+					"text": "Lyra, stop insulting him all the time.",
+					"effects": {
+						"flags": {
+							"banter_kael_lyra": "kael"
+						},
+						"react": {
+							"kael": {
+								"loyalty": 1
+							},
+							"lyra": {
+								"loyalty": -1
+							}
+						}
+					}
+				},
+				{
+					"text": "You're behaving like children. Pull yourselves together.",
+					"check": {
+						"skill": "persuasion",
+						"dc": 14,
+						"success": "calm",
+						"failure": "stay_out"
+					}
+				},
+				{
+					"text": "If you want to fight, then fight.",
+					"next": "spar"
 				}
 			]
 		},
-		"end_a": {
-			"speaker": "lyra",
-			"text": "[Placeholder: lyra has the last word]"
+		"calm": {
+			"text": "Kael: \"Fine by me.\"\n\nLyra: \"Finally someone with a shred of sense.\""
 		},
-		"end_b": {
-			"speaker": "kael",
-			"text": "[Placeholder: kael has the last word]"
+		"stay_out": {
+			"text": "Both: \"Stay out of this!\""
 		},
-		"end_none": {
-			"speaker": "kael",
-			"text": "[Placeholder: the argument dies down]"
+		"spar": {
+			"text": "[Placeholder: Kael and Lyra spar. Risk of injury; the winner gets a short respect bonus. Needs the dialogue fight effect.]",
+			"effects": {
+				"flags": {
+					"kael_lyra_sparred": true
+				}
+			}
 		}
 	}
 }

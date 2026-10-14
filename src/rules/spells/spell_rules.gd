@@ -77,7 +77,8 @@ static func damage_expression(spell: SpellDefinition, character_level: int, slot
 		return ""
 	var parsed: Dictionary = Dice.parse(spell.damage_dice)
 	var count: int = int(parsed["count"])
-	if spell.is_cantrip():
+	# Beam cantrips (Eldritch Blast) gain beams, not dice (dart_count).
+	if spell.is_cantrip() and spell.targeting != "darts":
 		count *= cantrip_multiplier(character_level)
 	elif not spell.upcast_dice.is_empty() and slot_level > spell.level:
 		count += int(Dice.parse(spell.upcast_dice)["count"]) * (slot_level - spell.level)
@@ -86,7 +87,11 @@ static func damage_expression(spell: SpellDefinition, character_level: int, slot
 			count += 1
 	return "%dd%d" % [count, int(parsed["sides"])]
 
-static func dart_count(spell: SpellDefinition, slot_level: int) -> int:
+## Darts (Magic Missile) or beams (Scorching Ray +1 per slot level; Eldritch Blast gains
+## beams at character levels 5, 11 and 17 like other cantrips gain dice).
+static func dart_count(spell: SpellDefinition, slot_level: int, character_level: int = 1) -> int:
+	if spell.is_cantrip():
+		return spell.darts * cantrip_multiplier(character_level)
 	return spell.darts + spell.upcast_darts * maxi(0, slot_level - spell.level)
 
 static func average_damage(expression: String, flat: int = 0) -> float:
@@ -200,7 +205,8 @@ static func _lookup(dictionary: Dictionary, key: StringName, fallback: Variant) 
 ## "dc", "ability"}; the roll is serialized for the dice popup. Unconscious and
 ## stunned creatures fail STR/DEX saves automatically without consuming RNG.
 static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: RandomNumberGenerator,
-		extra: Array[RuleModifier] = [], advantages: Array[StringName] = []) -> Dictionary:
+		extra: Array[RuleModifier] = [], advantages: Array[StringName] = [],
+		extra_disadvantages: Array[StringName] = []) -> Dictionary:
 	var conditions: ConditionState = CombatRules.conditions_for(actor)
 	var result: Dictionary = {"success": false, "automatic": false, "dc": dc,
 		"ability": String(ability), "roll": {}}
@@ -208,7 +214,7 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 		result["automatic"] = true
 		result["reason"] = "unconscious" if conditions.has(&"unconscious") else ("paralyzed" if conditions.has(&"paralyzed") else "stunned")
 		return result
-	var disadvantages: Array[StringName] = []
+	var disadvantages: Array[StringName] = extra_disadvantages.duplicate()
 	if ability == &"dex" and conditions.has(&"restrained"):
 		disadvantages.append(&"restrained")
 	var modifiers: Array[RuleModifier] = save_modifiers(actor, ability)
@@ -216,6 +222,7 @@ static func roll_save(actor: Dictionary, ability: StringName, dc: int, rng: Rand
 	var all_advantages: Array[StringName] = advantages.duplicate()
 	all_advantages.append_array(ClassKits.save_advantages(actor, ability))
 	var roll: DiceResult = Dice.d20(rng, modifiers, all_advantages, disadvantages)
+	ActiveEffects.inspire_roll(actor, roll, dc, rng)
 	result["success"] = roll.is_valid() and roll.total >= dc
 	result["roll"] = CombatRules.serialize_roll(roll)
 	return result

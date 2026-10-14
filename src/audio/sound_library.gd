@@ -25,7 +25,11 @@ const SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "bu
 	"aid", "barkskin", "hold_person", "mass_healing_word", "call_lightning", "blight", "ice_storm",
 	"flame_strike", "mass_cure_wounds", "divine_spark", "divine_spark_heal", "turn_undead",
 	"abjure_foes", "lay_on_hands", "wild_shape", "revert_wild_shape",
-	"hunters_mark"]
+	"hunters_mark",
+	# Bard, Sorcerer, Warlock spells (existing sound files, see CUES).
+	"eldritch_blast", "vicious_mockery", "shocking_grasp", "chill_touch", "dissonant_whispers", "thunderwave", "hex",
+	"arms_of_hadar", "scorching_ray", "lightning_bolt", "phantasmal_killer", "cone_of_cold", "hold_monster",
+	"bardic_inspiration"]
 
 ## cue -> {"files": [paths, one picked at random], "volume_db": float, "bus": String}.
 ## Paths are relative to SFX_DIR unless they start with "res://".
@@ -139,6 +143,34 @@ const CUES: Dictionary = {
 	# Ranger (class kits) reuses existing files until it gets its own.
 	"spell_cast_hunters_mark": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
 	"spell_impact_hunters_mark": {"files": ["spell_impact.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_cast_eldritch_blast": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_eldritch_blast": {"files": ["spell_impact_arcane.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_vicious_mockery": {"files": ["spell_cast_sleep.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_vicious_mockery": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_shocking_grasp": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_shocking_grasp": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_chill_touch": {"files": ["spell_cast_frost.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_chill_touch": {"files": ["spell_impact_frost.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_dissonant_whispers": {"files": ["spell_cast_sleep.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_dissonant_whispers": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_thunderwave": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_thunderwave": {"files": ["spell_impact_arcane.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_hex": {"files": ["spell_cast_sleep.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_hex": {"files": ["spell_impact.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_arms_of_hadar": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_arms_of_hadar": {"files": ["spell_impact_arcane.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_scorching_ray": {"files": ["spell_cast_fire.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_scorching_ray": {"files": ["spell_impact_fire.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_lightning_bolt": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_lightning_bolt": {"files": ["spell_impact_arcane.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_phantasmal_killer": {"files": ["spell_cast_sleep.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_phantasmal_killer": {"files": ["spell_impact_arcane.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_cone_of_cold": {"files": ["spell_cast_frost.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_cone_of_cold": {"files": ["spell_impact_frost.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_hold_monster": {"files": ["spell_cast_sleep.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_hold_monster": {"files": ["spell_impact_sleep.ogg"], "volume_db": -6.0, "bus": "Effects"},
+	"spell_cast_bardic_inspiration": {"files": ["heal.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_bardic_inspiration": {"files": ["heal.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"spell_blocked": {"files": ["spell_shield.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"heal": {"files": ["heal.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"level_up": {"files": ["level_up.ogg"], "volume_db": -4.0, "bus": "UI"},

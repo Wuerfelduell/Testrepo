@@ -237,6 +237,10 @@ static func apply_effect(state: GameState, caster_id: String, target_id: String,
 			effect["amount"] = bonus
 			events.append({"type": "heal", "actor_id": target_id, "target_id": target_id, "source_id": caster_id,
 				"spell_id": String(spell.id), "amount": bonus, "hp": target["hp"]})
+		"bardic_inspiration":
+			# Kept until the inspired creature uses it (ActiveEffects.inspire_roll).
+			effect["until"] = "used"
+			effect["die"] = int(caster.get("features", {}).get("bardic_inspiration", {}).get("die", 6))
 		"guiding_bolt":
 			# Until the end of the caster's next turn; ends at the start of it here.
 			effect["until"] = "rounds"

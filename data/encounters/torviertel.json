@@ -360,7 +360,7 @@
               "in_party": "companion_kael"
             },
             {
-              "flag": "kael_left"
+              "flag": "kael_permanently_left"
             }
           ]
         }
@@ -388,7 +388,7 @@
               "in_party": "companion_lyra"
             },
             {
-              "flag": "lyra_left"
+              "flag": "lyra_permanently_left"
             }
           ]
         }
@@ -416,7 +416,7 @@
               "in_party": "companion_seren"
             },
             {
-              "flag": "seren_left"
+              "flag": "seren_permanently_left"
             }
           ]
         }

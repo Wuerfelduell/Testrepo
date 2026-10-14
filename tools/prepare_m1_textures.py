@@ -97,6 +97,12 @@ ranger("wizard_albedo.png", cloth=[.10, .09, .30], leather=[.40, .27, .15], seed
 # Robe skirts: the stretched tunic hem sits in the atlas' leather area, so it gets cloth colour.
 ranger("wizard_skirt_albedo.png", cloth=[.10, .09, .30], leather=[.09, .08, .27], seed=23)
 ranger("priest_skirt_albedo.png", cloth=[.10, .07, .13], leather=[.09, .06, .11], metal=.85, seed=24)
+# Barbarian: earth-brown jerkin, dark leather. Monk: ochre robe, tan leather. Ranger: pine
+# green, brown leather. Cloth colours are the hero_colors.json palette defaults of their slots.
+ranger("barbarian_albedo.png", cloth=[.60, .38, .22], leather=[.14, .09, .06], seed=25)
+ranger("monk_albedo.png", cloth=[.90, .63, .20], leather=[.40, .27, .15], seed=26)
+ranger("monk_skirt_albedo.png", cloth=[.90, .63, .20], leather=[.81, .57, .18], seed=27)
+ranger("ranger_albedo.png", cloth=[.09, .22, .12], leather=[.26, .16, .10], seed=28)
 # Cleric: linen vestments, brown leather. Druid: forest-green robe, brown leather.
 ranger("cleric_albedo.png", cloth=[.85, .80, .68], leather=[.26, .16, .10], seed=25)
 ranger("cleric_skirt_albedo.png", cloth=[.85, .80, .68], leather=[.80, .75, .64], seed=26)

@@ -55,6 +55,18 @@ func _run() -> void:
 	check(not level.hook_views.has("companion_lyra"), "The hook figure is gone once they joined")
 	var spot: Vector3 = game.state.actors["companion_lyra"]["position"]
 	check(not level.space.query_path(spot, Vector3(0, 0, 8)).is_empty(), "The companion stands on walkable ground")
+	# Right-click on her portrait: the camp talk; "Show me your gear" opens her inventory.
+	var right: InputEventMouseButton = InputEventMouseButton.new()
+	right.button_index = MOUSE_BUTTON_RIGHT
+	right.pressed = true
+	level.hud._party_clicked(right, "companion_lyra")
+	check(level.dialogue.is_open() and String(game.state.world["conversation"]["id"]) == "camp_lyra", "Right-click opens Lyra's camp talk")
+	level.dialogue.choice_buttons[3].pressed.emit()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(not level.dialogue.is_open() and level.menus.inventory.visible and level.menus.actor_id == "companion_lyra", "Her gear opens")
+	level.menus.close_all()
+	level.select_member("hero")
 	# Portrait click / Tab hand the commands to the companion.
 	level.hud.actor_selected.emit("companion_lyra")
 	check(level.controlled_id() == "companion_lyra", "A portrait click takes command of the companion")

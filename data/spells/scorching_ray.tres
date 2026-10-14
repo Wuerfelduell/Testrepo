@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"scorching_ray"
+name_key = &"SPELL_SCORCHING_RAY"
+srd_name = "Scorching Ray"
+level = 2
+school = "evocation"
+casting_time = "action"
+targeting = "darts"
+range_m = 36.0
+resolution = "attack"
+damage_dice = "2d6"
+damage_type = &"fire"
+darts = 3
+upcast_darts = 1
+vfx = &"scorching_ray"

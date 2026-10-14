@@ -95,7 +95,7 @@ func hover(actor_id: String, point: Vector3) -> void:
 	var full: Array = target_ids.duplicate()
 	if spell.targeting == "darts" and not last_target.is_empty():
 		full.append(last_target)
-	var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(caster, spell, 0))
+	var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(caster, spell, 0), int(caster.get("level", 1)))
 	if spell.targeting == "darts":
 		while full.size() < count and not full.is_empty():
 			full.append(full[-1])
@@ -121,7 +121,7 @@ func click() -> Command:
 			var probe: Array = dart_targets.duplicate()
 			probe.append(last_target)
 			var caster: Dictionary = Game.state.actors[caster_id]
-			var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(caster, spell, 0))
+			var count: int = SpellRules.dart_count(spell, SpellResolver.effective_slot(caster, spell, 0), int(caster.get("level", 1)))
 			var filled: Array = probe.duplicate()
 			while filled.size() < count:
 				filled.append(filled[-1])
@@ -141,7 +141,8 @@ func click() -> Command:
 	return command
 
 func _draw_range(state: GameState, spell: SpellDefinition) -> void:
-	if spell.range_m <= 0.0:
+	var range_m: float = SpellResolver.spell_range(state.actors[caster_id], spell)
+	if range_m <= 0.0:
 		_range_ring.mesh = null
 		return
 	var center: Vector3 = state.actors[caster_id]["position"]
@@ -151,8 +152,8 @@ func _draw_range(state: GameState, spell: SpellDefinition) -> void:
 	for index: int in segments:
 		var a: float = TAU * index / segments
 		var b: float = TAU * (index + 1) / segments
-		mesh.surface_add_vertex(center + Vector3(cos(a), 0.07, sin(a)) * Vector3(spell.range_m, 1.0, spell.range_m))
-		mesh.surface_add_vertex(center + Vector3(cos(b), 0.07, sin(b)) * Vector3(spell.range_m, 1.0, spell.range_m))
+		mesh.surface_add_vertex(center + Vector3(cos(a), 0.07, sin(a)) * Vector3(range_m, 1.0, range_m))
+		mesh.surface_add_vertex(center + Vector3(cos(b), 0.07, sin(b)) * Vector3(range_m, 1.0, range_m))
 	mesh.surface_end()
 	_range_ring.mesh = mesh
 

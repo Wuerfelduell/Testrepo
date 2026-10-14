@@ -20,6 +20,7 @@ const SPOT_CLEARANCE_M: float = 0.85
 
 const BANTER_PATH: String = "res://data/companions/banter.json"
 const BANTER_TRIGGERS: Array[String] = ["rest", "arrive"]
+const LEAVE_MODES: Array[String] = ["camp", "parted", "hostile"]
 
 static var _definitions: Dictionary = {}
 static var _banter: Array = []
@@ -73,6 +74,8 @@ static func problems() -> PackedStringArray:
 			found.append(id + ": short must be a unique identifier")
 		if not ResourceLoader.exists(String(entry.get("model", ""))):
 			found.append(id + ": model does not exist")
+		if entry.has("camp_dialogue") and not DialogueData.exists(String(entry["camp_dialogue"])):
+			found.append(id + ": camp_dialogue does not exist")
 		if create_record(id).is_empty():
 			found.append(id + ": record could not be built")
 	return found
@@ -125,6 +128,8 @@ static func recruit_reason(state: GameState, companion_id: String) -> String:
 		return "PARTY_REASON_FULL"
 	if not state.actors.has("hero") or not CombatRules.alive(state.actors["hero"]):
 		return "PARTY_REASON_NO_HERO"
+	if DialogueData.flags(state).get(short_name(companion_id) + "_permanently_left", false):
+		return "PARTY_REASON_GONE"
 	return ""
 
 ## Adds a companion next to the hero. Only called from commands (dialogue effects).
@@ -146,6 +151,7 @@ static func recruit(state: GameState, companion_id: String) -> Array[Dictionary]
 		order.push_front("hero")
 	order.append(companion_id)
 	state.world["party"] = order
+	_set_flags(state, companion_id, {"recruited": true, "active": true, "at_camp": false})
 	return [{"type": "party_joined", "actor_id": companion_id, "party": members(state)}]
 
 ## A companion leaves: their record waits in world["companions"], the actor disappears.
@@ -159,7 +165,34 @@ static func dismiss(state: GameState, companion_id: String) -> Array[Dictionary]
 	var order: Array = state.world.get("party", []).duplicate()
 	order.erase(companion_id)
 	state.world["party"] = order
+	_set_flags(state, companion_id, {"active": false})
 	return [{"type": "party_left", "actor_id": companion_id, "party": members(state)}]
+
+## The three ways to part (owner, 14-10-2026): "camp" waits in the camp, no loyalty change;
+## "parted" leaves on good terms and can be recruited again; "hostile" leaves for good
+## (<short>_permanently_left). Loyalty changes come from the dialogue that sends them away.
+static func leave(state: GameState, companion_id: String, mode: String) -> Array[Dictionary]:
+	if not mode in LEAVE_MODES:
+		return [{"type": "party_refused", "actor_id": companion_id, "reason_key": "PARTY_REASON_UNKNOWN"}]
+	var events: Array[Dictionary] = dismiss(state, companion_id)
+	if events.is_empty() or String(events[0]["type"]) != "party_left":
+		return events
+	_set_flags(state, companion_id, {"at_camp": mode == "camp"})
+	if mode == "hostile":
+		_set_flags(state, companion_id, {"permanently_left": true})
+	for event: Dictionary in events:
+		event["mode"] = mode
+	return events
+
+## Seb's state flags per companion: <short>_recruited, _active, _at_camp, _permanently_left.
+static func _set_flags(state: GameState, companion_id: String, values: Dictionary) -> void:
+	var short: String = short_name(companion_id)
+	if short.is_empty():
+		return
+	var flags: Dictionary = state.world.get("flags", {})
+	for key: String in values:
+		flags[short + "_" + key] = values[key]
+	state.world["flags"] = flags
 
 # Placement -----------------------------------------------------------------------------
 
@@ -236,7 +269,7 @@ static func loyalty(state: GameState, companion_id: String) -> int:
 	return DialogueData.number(DialogueData.flags(state).get(short_name(companion_id) + "_loyalty", 0))
 
 ## Companions whose loyalty fell below their "leaves_below" leave the party for good: their
-## record stays in world["companions"], the flag "<short>_left" keeps them away.
+## record stays in world["companions"], the flag "<short>_permanently_left" keeps them away.
 static func loyalty_departures(state: GameState) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	for id: String in members(state):
@@ -244,10 +277,7 @@ static func loyalty_departures(state: GameState) -> Array[Dictionary]:
 		if id == "hero" or not entry.has("leaves_below") or not CombatRules.alive(state.actors[id]):
 			continue
 		if loyalty(state, id) < int(entry["leaves_below"]):
-			var flags: Dictionary = state.world.get("flags", {})
-			flags[short_name(id) + "_left"] = true
-			state.world["flags"] = flags
-			var left: Array[Dictionary] = dismiss(state, id)
+			var left: Array[Dictionary] = leave(state, id, "hostile")
 			for event: Dictionary in left:
 				event["reason"] = "loyalty"
 			events.append_array(left)
@@ -300,6 +330,8 @@ static func next_banter(state: GameState, trigger: String) -> String:
 		for short: Variant in entry.get("members", []):
 			var id: String = id_for(String(short))
 			ready = ready and is_member(state, id) and CombatRules.alive(state.actors[id])
+		if entry.has("level") and String(entry["level"]) != String(state.world.get("level", "")):
+			continue
 		if ready and DialogueData.conditions_met(entry.get("if", []), state):
 			return String(entry.get("dialogue", ""))
 	return ""

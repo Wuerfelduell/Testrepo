@@ -25,6 +25,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 		result["reason_key"] = reason
 		return result
 	result["slot_level"] = effective_slot(caster, spell, slot_level)
+	var reach_m: float = spell_range(caster, spell)
 	result["dc"] = int(caster.get("spell_save_dc", 10))
 	result["save_ability"] = String(spell.save_ability)
 	var origin: Vector3 = caster["position"]
@@ -35,7 +36,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 				result["reason_key"] = "SPELL_REASON_PICK_TARGET"
 				return result
 			if spell.resolution == "heal" or (spell.resolution == "none" and spell.allies):
-				if not _valid_heal_target(state, caster_id, String(target_ids[0]), spell.range_m):
+				if not _valid_heal_target(state, caster_id, String(target_ids[0]), reach_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
 				var patient: Dictionary = state.actors[String(target_ids[0])]
@@ -47,7 +48,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 				return result
 			if spell.resolution == "save":
 				var victim_id: String = String(target_ids[0])
-				if not _valid_creature_target(state, caster_id, victim_id, spell.range_m) or \
+				if not _valid_creature_target(state, caster_id, victim_id, reach_m) or \
 						not _type_allowed(spell, state.actors[victim_id]):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
@@ -58,7 +59,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 				return result
 			if spell.resolution == "none":
 				# A mark on an enemy without attack or save (Hunter's Mark): see _apply_mark.
-				if not _valid_creature_target(state, caster_id, String(target_ids[0]), spell.range_m):
+				if not _valid_creature_target(state, caster_id, String(target_ids[0]), reach_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
 				result["targets"] = [{"id": String(target_ids[0]), "ally": false, "chance": 1.0, "expected_damage": 0.0}]
@@ -75,14 +76,14 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 			entry["ally"] = false
 			result["targets"] = [entry]
 		"darts":
-			var count: int = SpellRules.dart_count(spell, int(result["slot_level"]))
+			var count: int = SpellRules.dart_count(spell, int(result["slot_level"]), int(caster.get("level", 1)))
 			if target_ids.size() != count:
 				result["reason_key"] = "SPELL_REASON_PICK_DARTS"
 				return result
 			var per_target: Dictionary = {}
 			for value: Variant in target_ids:
 				var target_id: String = String(value)
-				if not _valid_creature_target(state, caster_id, target_id, spell.range_m):
+				if not _valid_creature_target(state, caster_id, target_id, reach_m):
 					result["reason_key"] = "SPELL_REASON_TARGET"
 					return result
 				per_target[target_id] = int(per_target.get(target_id, 0)) + 1
@@ -90,6 +91,19 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 			var dice: String = spell.damage_dice
 			for target_id: String in per_target:
 				var darts: int = int(per_target[target_id])
+				if spell.resolution == "attack":
+					# Beams: one attack roll each, through the weapon attack preview.
+					var beam: Dictionary = CombatRules.attack_preview(state, caster_id, target_id, Vector3.INF, attack_weapon(caster, spell))
+					if not bool(beam["legal"]):
+						result["reason_key"] = "SPELL_REASON_TARGET"
+						return result
+					var entry: Dictionary = beam.duplicate(true)
+					entry["id"] = target_id
+					entry["ally"] = false
+					entry["darts"] = darts
+					entry["expected_damage"] = float(beam["expected_damage"]) * darts
+					entries.append(entry)
+					continue
 				entries.append({"id": target_id, "ally": false, "chance": 1.0, "darts": darts,
 					"expected_damage": SpellRules.average_damage(dice, spell.dart_bonus) * darts})
 			result["targets"] = entries
@@ -102,7 +116,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 					result["reason_key"] = "SPELL_REASON_PICK_POINT"
 					return result
 				if spell.targeting == "point":
-					if origin.distance_to(aim) > spell.range_m + CombatRules.EPSILON:
+					if origin.distance_to(aim) > reach_m + CombatRules.EPSILON:
 						result["reason_key"] = "SPELL_REASON_RANGE"
 						return result
 					if not geometry.visible(origin, aim):
@@ -113,7 +127,7 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 					result["reason_key"] = "SPELL_REASON_PICK_POINT"
 					return result
 				var entries: Array = []
-				for target_id: String in area_targets(state, caster_id, spell, aim):
+				for target_id: String in area_targets(state, caster_id, spell, aim, String(caster.get("metamagic", ""))):
 					entries.append(_save_entry(state, caster, target_id, spell, int(result["slot_level"]), aim))
 				result["targets"] = entries
 	result["legal"] = true
@@ -136,7 +150,7 @@ static func availability_reason(state: GameState, caster_id: String, spell: Spel
 		# Untrained armour (EquipmentRules) forbids spellcasting.
 		return "SPELL_REASON_ARMOR"
 	if not ignore_economy:
-		match spell.casting_time:
+		match casting_time(caster, spell):
 			"action":
 				if not bool(caster.get("action_available", false)):
 					return "COMBAT_NO_ACTION"
@@ -193,8 +207,12 @@ static func attack_weapon(caster: Dictionary, spell: SpellDefinition) -> Diction
 	var potent: int = ClassEffects.cantrip_damage_bonus(caster, spell)
 	if potent != 0:
 		damage_modifiers.append({"amount": potent, "source": "potent_spellcasting"})
+	# Touch spells (Shocking Grasp, Chill Touch) are melee spell attacks unless Distant Spell
+	# turned their touch into 9 m.
+	var range_m: float = spell_range(caster, spell)
+	var melee: bool = range_m <= 1.5 + CombatRules.EPSILON
 	return {"id": String(spell.id), "name_key": String(spell.name_key), "spell_id": String(spell.id),
-		"ranged": true, "reach": 1.5, "range": spell.range_m, "long_range": spell.range_m,
+		"ranged": not melee, "reach": 1.5, "range": 0.0 if melee else range_m, "long_range": 0.0 if melee else range_m,
 		"attack_modifiers": caster.get("spell_attack_modifiers", []).duplicate(true),
 		"damage_dice": SpellRules.damage_expression(spell, int(caster.get("level", 1)), 0),
 		"damage_modifiers": damage_modifiers, "damage_type": String(spell.damage_type), "on_hit": on_hit,
@@ -215,7 +233,22 @@ static func _type_allowed(spell: SpellDefinition, target: Dictionary) -> bool:
 
 ## Living creatures inside the area. Burning Hands hits everyone, allies included;
 ## Sleep affects only creatures of the caster's choice (its enemies).
-static func area_targets(state: GameState, caster_id: String, spell: SpellDefinition, point: Vector3) -> Array[String]:
+## Sorcerer Metamagic armed for the next spell (actor["metamagic"], set by the Sorcerer kit
+## and cleared by CastSpellCommand): Quickened turns an action into a bonus action.
+static func casting_time(caster: Dictionary, spell: SpellDefinition) -> String:
+	if spell.casting_time == "action" and String(caster.get("metamagic", "")) == "quickened":
+		return "bonus_action"
+	return spell.casting_time
+
+## Distant Spell doubles the range (touch becomes 9 m).
+static func spell_range(caster: Dictionary, spell: SpellDefinition) -> float:
+	if String(caster.get("metamagic", "")) == "distant" and spell.targeting in ["creature", "point", "darts"]:
+		return 9.0 if spell.range_m <= 1.5 + CombatRules.EPSILON else spell.range_m * 2.0
+	return spell.range_m
+
+## Careful Spell (metamagic "careful") keeps the caster's allies out of the area.
+static func area_targets(state: GameState, caster_id: String, spell: SpellDefinition, point: Vector3,
+		metamagic: String = "") -> Array[String]:
 	var result: Array[String] = []
 	var caster: Dictionary = state.actors[caster_id]
 	var origin: Vector3 = caster["position"]
@@ -230,7 +263,7 @@ static func area_targets(state: GameState, caster_id: String, spell: SpellDefini
 		var other: Dictionary = state.actors[id]
 		if not CombatRules.alive(other) or not other.get("position") is Vector3:
 			continue
-		if spell.chosen_creatures and other.get("team") == caster.get("team"):
+		if (spell.chosen_creatures or metamagic == "careful") and other.get("team") == caster.get("team"):
 			continue
 		if spell.allies and other.get("team") != caster.get("team"):
 			continue
@@ -299,6 +332,7 @@ static func heal_expression(spell: SpellDefinition, slot_level: int, caster_leve
 			count += 1
 	return "%dd%d" % [count, int(parsed["sides"])]
 
+## A living creature of the caster's side other than the caster, in range and sight.
 static func _valid_creature_target(state: GameState, caster_id: String, target_id: String, range_m: float) -> bool:
 	if target_id == caster_id or not state.actors.has(target_id):
 		return false
@@ -358,7 +392,8 @@ static func cast_pending(state: GameState, caster_id: String, spell: SpellDefini
 	var pending: Dictionary = {"type": "spell", "actor_id": caster_id, "spell_id": String(spell.id),
 		"slot_level": slot_level, "target_ids": target_ids.duplicate(), "point": point if point.is_finite() else origin,
 		"origin": origin, "elapsed": 0.0, "release_time": RELEASE_TIME, "impact_time": impact,
-		"duration": impact + AFTER_IMPACT, "impacted": false, "reactions_decided": []}
+		"duration": impact + AFTER_IMPACT, "impacted": false, "reactions_decided": [],
+		"metamagic": String(caster.get("metamagic", ""))}
 	if spell.resolution == "attack":
 		var weapon: Dictionary = attack_weapon(caster, spell)
 		pending["weapon"] = weapon
@@ -380,6 +415,8 @@ static func resolve_impact(state: GameState, pending: Dictionary, rng: RandomNum
 		return events
 	match spell.resolution:
 		"attack":
+			if spell.targeting == "darts":
+				return _resolve_beams(state, caster_id, pending, rng)
 			pending["impacted"] = true
 			var weapon: Dictionary = pending["weapon"]
 			events.append_array(CombatRules.resolve_attack(state, caster_id, String(pending["target_ids"][0]), weapon, rng, pending))
@@ -486,7 +523,7 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 			if state.actors.has(String(value)) and CombatRules.alive(state.actors[String(value)]):
 				targets.append(String(value))
 	else:
-		targets = area_targets(state, caster_id, spell, point)
+		targets = area_targets(state, caster_id, spell, point, String(pending.get("metamagic", "")))
 	var dc: int = int(caster.get("spell_save_dc", 10))
 	var damage_total: int = 0
 	var extra_total: int = 0
@@ -520,7 +557,11 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 		var cover: int = save_cover_bonus(caster, spell, point, target) if spell.targeting != "creature" else 0
 		if cover > 0:
 			extra.append(RuleModifier.new(cover, &"cover"))
-		var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, dc, rng, extra)
+		# Heightened Spell: the first target saves with disadvantage.
+		var hindered: Array[StringName] = []
+		if String(pending.get("metamagic", "")) == "heightened" and target_id == targets[0]:
+			hindered.append(&"heightened")
+		var save: Dictionary = SpellRules.roll_save(target, spell.save_ability, dc, rng, extra, [], hindered)
 		events.append(ActiveEffects.save_event(caster_id, target_id, String(spell.id), save))
 		var failed: bool = not bool(save["success"])
 		if spell.effect == &"spirit_guardians":
@@ -546,7 +587,25 @@ static func _resolve_area(state: GameState, caster_id: String, spell: SpellDefin
 			events.append_array(_apply_damage(state, caster_id, target_id, sear, &"radiant", rng))
 		if failed and CombatRules.alive(target) and spell.effect in [&"hold", &"entangle", &"faerie_fire", &"turned", &"frightened"]:
 			events.append_array(ClassEffects.apply_effect(state, caster_id, target_id, spell, int(pending["slot_level"])))
+		if failed and CombatRules.alive(target):
+			events.append_array(ActiveEffects.save_rider(state, caster_id, target_id, spell, dc))
 	events.append_array(CombatRules.check_combat_end(state))
+	return events
+
+## Beams (Eldritch Blast, Scorching Ray): one attack roll per beam, in target order. A
+## Shield reaction pauses between beams; the spell then resumes with the next beam.
+static func _resolve_beams(state: GameState, caster_id: String, pending: Dictionary,
+		rng: RandomNumberGenerator) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	var ids: Array = pending["target_ids"]
+	while int(pending.get("beam_index", 0)) < ids.size():
+		var index: int = int(pending.get("beam_index", 0))
+		pending["beam_index"] = index + 1
+		events.append_array(CombatRules.resolve_attack(state, caster_id, String(ids[index]), pending["weapon"], rng, pending))
+		if state.mode != &"combat" or state.pending.get("type") == "reaction" or not CombatRules.alive(state.actors[caster_id]):
+			break
+	if int(pending.get("beam_index", 0)) >= ids.size() or state.mode != &"combat":
+		pending["impacted"] = true
 	return events
 
 static func _resolve_heal(state: GameState, caster_id: String, spell: SpellDefinition,

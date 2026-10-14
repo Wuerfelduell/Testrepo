@@ -4,6 +4,8 @@ extends CanvasLayer
 
 signal action_requested(kind: String)
 signal actor_selected(actor_id: String)
+## Right-click on a companion's portrait: talk to them (camp dialogue).
+signal actor_talk(actor_id: String)
 signal skip_roll()
 signal rolls_finished()
 signal spell_requested(spell_id: String)
@@ -152,7 +154,9 @@ func update_state(state: GameState) -> void:
 	_move_label.text = tr("COMBAT_FREE_MOVEMENT") if state.mode == &"exploration" else tr("COMBAT_MOVEMENT") % [float(hero.get("move_left", 0.0)), float(hero.get("speed_m", 0.0))]
 	_resource_label.text = tr("COMBAT_RESOURCES") % [_pip(bool(hero.get("action_available", false))), _pip(bool(hero.get("bonus_available", false))), _pip(bool(hero.get("reaction_available", false)))]
 	if hero.has("spell_slots"):
-		_resource_label.text += "   " + tr("COMBAT_SLOTS") % slot_pips(hero, 1)
+		# Level-1 slots, or a warlock's pact slots (all of one higher level).
+		var shown_level: int = maxi(1, SpellRules.lowest_slot(hero.get("spell_slots_max", []), 1))
+		_resource_label.text += "   " + tr("COMBAT_SLOTS") % slot_pips(hero, shown_level)
 	_conditions.text = tr("COMBAT_DISENGAGED") if bool(hero.get("disengaged", false)) else _condition_text(hero)
 	var active: Dictionary = state.actors.get(current_id, {})
 	var pending: Dictionary = state.get("pending") as Dictionary
@@ -215,6 +219,8 @@ func _rebuild_portraits(state: GameState, current_id: String) -> void:
 		portrait.name = "Party_" + actor_id
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.gui_input.connect(_party_clicked.bind(actor_id))
+		if actor_id != "hero":
+			portrait.tooltip_text = tr("PARTY_TALK_HINT")
 		_party_column.add_child(portrait)
 
 func set_attack_mode(active: bool) -> void:
@@ -355,7 +361,12 @@ func consume_events(events: Array[Dictionary]) -> void:
 				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))
 			"party_left":
 				var left_name: String = tr(String(PartyRules.definition(String(event.get("actor_id", ""))).get("name", "")))
-				_append_log(tr("PARTY_LOG_LOYALTY_LEFT" if String(event.get("reason", "")) == "loyalty" else "PARTY_LOG_LEFT") % left_name)
+				var left_key: String = "PARTY_LOG_LEFT"
+				if String(event.get("reason", "")) == "loyalty":
+					left_key = "PARTY_LOG_LOYALTY_LEFT"
+				elif String(event.get("mode", "")) == "camp":
+					left_key = "PARTY_LOG_CAMP"
+				_append_log(tr(left_key) % left_name)
 			"companion_reaction":
 				var change: int = int(event.get("loyalty", 0))
 				if change != 0:
@@ -473,6 +484,11 @@ func _update_spellbar(state: GameState, hero: Dictionary, player_turn: bool) -> 
 		var cost_line: String = tr("SPELL_CANTRIP") if spell.is_cantrip() else tr("SPELL_LEVEL_SLOTS") % [spell.level, slot_pips(hero, spell.level)]
 		if spell.is_feature():
 			cost_line = feature_cost_line(hero, spell)
+		elif not spell.is_cantrip() and slot_pips(hero, spell.level).is_empty():
+			# Pact Magic: the spell is cast with the warlock's higher pact slot.
+			var pact: int = SpellRules.lowest_slot(hero.get("spell_slots", []), spell.level)
+			if pact > 0:
+				cost_line = tr("SPELL_LEVEL_SLOTS") % [pact, slot_pips(hero, pact)]
 		button.text = tr("COMBAT_HOTKEY_SPELL") % [hotkey, tr(String(spell.name_key))] + "\n" + cost_line
 		if spell.casting_time == "reaction":
 			button.disabled = true
@@ -538,9 +554,13 @@ func show_spell_preview(preview: Dictionary, spell: SpellDefinition, caster: Dic
 					reasons.append(tr("COMBAT_COVER") % int(preview["targets"][0]["cover"]))
 			_target_detail.text = tr("COMBAT_SPELL_ATTACK") % [tr(String(spell.name_key)), chance, expression, damage_type]
 		"auto":
-			var darts: int = SpellRules.dart_count(spell, maxi(1, int(preview.get("slot_level", 1))))
+			var darts: int = SpellRules.dart_count(spell, maxi(1, int(preview.get("slot_level", 1))), int(caster.get("level", 1)))
 			_target_detail.text = tr("COMBAT_SPELL_DARTS") % [tr(String(spell.name_key)), mini(darts_chosen + 1, darts), darts,
 				"%s%+d" % [spell.damage_dice, spell.dart_bonus], damage_type]
+		"none":
+			var hint_key: String = String(spell.name_key) + "_HINT"
+			_target_detail.text = tr("COMBAT_SPELL_EFFECT") % [tr(String(spell.name_key)), tr(hint_key)] \
+				if tr(hint_key) != hint_key else tr(String(spell.name_key))
 		"save":
 			var effect: String = tr("COMBAT_SPELL_SAVE_DAMAGE") % [expression, damage_type] if not spell.damage_dice.is_empty() else tr("COMBAT_SPELL_SAVE_SLEEP")
 			_target_detail.text = tr("COMBAT_SPELL_SAVE") % [tr(String(spell.name_key)), int(caster.get("spell_save_dc", 10)),
@@ -760,6 +780,8 @@ func _portrait(actor: Dictionary, active: bool, dimensions: Vector2) -> Portrait
 func _party_clicked(event: InputEvent, actor_id: String) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		actor_selected.emit(actor_id)
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		actor_talk.emit(actor_id)
 
 func _condition_text(actor: Dictionary) -> String:
 	var conditions: PackedStringArray = []
