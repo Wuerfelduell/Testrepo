@@ -49,8 +49,7 @@ const CASTERS: Dictionary = {
 		"list": ["produce_flame", "starry_wisp", "poison_spray", "resistance", "guidance", "cure_wounds", "healing_word",
 			"entangle", "faerie_fire", "barkskin", "hold_person", "call_lightning", "blight",
 			"ice_storm", "mass_cure_wounds"],
-		# Primal Order Magician adds a third cantrip (features.bonus_cantrips).
-		"start": ["produce_flame", "starry_wisp", "poison_spray", "cure_wounds", "healing_word", "entangle", "faerie_fire"],
+		"start": ["produce_flame", "poison_spray", "cure_wounds", "healing_word", "entangle", "faerie_fire"],
 		"always": {"wild_shape": 2, "revert_wild_shape": 2},
 	},
 	"paladin": {

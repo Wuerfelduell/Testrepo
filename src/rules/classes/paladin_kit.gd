@@ -4,8 +4,8 @@ extends RefCounted
 ## Auras live in ClassEffects.save_modifiers / fear_immune.
 ## Divine Smite is a toggle: armed, the next melee weapon hit on the Paladin's turn spends
 ## the bonus action and the free use (Paladin's Smite) or the lowest spell slot.
-## Defaults until the owner decides: Fighting Style Defense, Weapon Mastery longsword
-## and greatsword.
+## Follows BG3: Fighting Style is picked at level 2 (Defense, Dueling, Great Weapon
+## Fighting); no Weapon Mastery.
 
 const PRIORITY: Array[StringName] = [&"str", &"cha", &"con", &"wis", &"dex", &"int"]
 const SKILLS: Dictionary = {"class": [&"athletics", &"persuasion"], "human": &"perception"}
@@ -14,17 +14,14 @@ const DATA_ONLY: Dictionary = {
 }
 const FEATURES: Array[String] = ["divine_smite"]
 const SMITE_TYPES: Array[StringName] = [&"fiend", &"undead"]
-
-static func activate(record: Dictionary) -> void:
-	record["features"]["weapon_mastery"] = {"weapons": ["longsword", "greatsword"]}
+const FIGHTING_STYLES: Array[String] = ["defense", "dueling", "great_weapon_fighting"]
+const DUELING_BONUS: int = 2
 
 static func advance(actor: Dictionary, level: int) -> void:
 	var features: Dictionary = actor["features"]
 	# The pool is "uses": hit points left to give (5 x Paladin level).
 	ClassKits.set_uses(features, "lay_on_hands", 5 * level, "long")
 	if level >= 2:
-		if not features.has("fighting_style"):
-			features["fighting_style"] = "defense"
 		ClassKits.set_uses(features, "divine_smite", 1, "long")
 		features["divine_smite"]["armed"] = bool(features["divine_smite"].get("armed", false))
 	if level >= 3:
@@ -35,6 +32,26 @@ static func advance(actor: Dictionary, level: int) -> void:
 		features["aura_of_protection"] = {}
 	if level >= 10:
 		features["aura_of_courage"] = {}
+
+static func level_choices(actor: Dictionary, level: int) -> Array:
+	if level == 2 and String(actor.get("features", {}).get("fighting_style", "")).is_empty():
+		return [{"key": "fighting_style", "count": 1, "title_key": "LEVELUP_SECTION_RANGER_STYLE",
+			"options": FIGHTING_STYLES.duplicate(), "option_prefix": "FEAT_"}]
+	return []
+
+static func apply_level_choices(actor: Dictionary, _level: int, picks: Dictionary) -> void:
+	for style: Variant in picks.get("fighting_style", []):
+		actor["features"]["fighting_style"] = String(style)
+
+## Fighting Style Dueling: +2 damage with a melee weapon held in one hand.
+static func damage_bonus(state: GameState, attacker_id: String, _target_id: String, weapon: Dictionary) -> Array:
+	var attacker: Dictionary = state.actors[attacker_id]
+	if String(attacker.get("features", {}).get("fighting_style", "")) != "dueling":
+		return []
+	if bool(weapon.get("ranged", false)) or not weapon.get("spell_id", "") in ["", null] or \
+			bool(weapon.get("two_handed_grip", false)) or "two_handed" in weapon.get("properties", []):
+		return []
+	return [{"amount": DUELING_BONUS, "source": "dueling"}]
 
 ## Fighting Style Defense: +1 AC while wearing armour.
 static func ac_bonus(actor: Dictionary, armor_id: StringName) -> Array:
@@ -105,23 +122,6 @@ static func use_feature(state: GameState, actor_id: String, feature_id: String, 
 static func feature_label(actor: Dictionary, feature_id: String) -> String:
 	var smite: Dictionary = actor.get("features", {}).get(feature_id, {})
 	return TranslationServer.translate("FEATURE_DIVINE_SMITE_ARMED" if bool(smite.get("armed", false)) else "FEATURE_DIVINE_SMITE_BUTTON")
-
-# --- Weapon Mastery (Vex, Slow, Topple, Cleave; Sap and Graze are in CombatRules) ---
-
-static func attack_advantages(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> Array[StringName]:
-	return WeaponMasteries.attack_advantages(state, attacker_id, target_id)
-
-static func after_attack(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
-		hit: bool, rng: RandomNumberGenerator) -> Array[Dictionary]:
-	return WeaponMasteries.after_attack(state, attacker_id, target_id, weapon, hit, rng)
-
-static func on_turn_start(state: GameState, actor_id: String) -> Array[Dictionary]:
-	WeaponMasteries.on_turn_start(state, actor_id)
-	return []
-
-static func on_turn_end(state: GameState, actor_id: String, rng: RandomNumberGenerator) -> Array[Dictionary]:
-	WeaponMasteries.on_turn_end(state, actor_id)
-	return []
 
 static func on_combat_end(state: GameState, actor_id: String) -> void:
 	var smite: Dictionary = state.actors[actor_id].get("features", {}).get("divine_smite", {})

@@ -1,5 +1,5 @@
 extends GutTest
-## Cleric, Paladin and Druid (SRD 5.2): creation, class features, feature spells
+## Cleric, Paladin and Druid (SRD 5.2, BG3 choices): creation, class features, feature spells
 ## (Divine Spark, Lay on Hands, Wild Shape), Divine Smite and Divine Strike, rests.
 
 class Setup extends Command:
@@ -73,16 +73,16 @@ func test_all_three_classes_are_playable_with_their_kits() -> void:
 		for spell_id: String in ClassSpellcasting.spell_list(class_id):
 			assert_true(SpellBook.get_spell(spell_id).is_valid(), spell_id)
 
-func test_cleric_starts_with_wisdom_spells_and_protector_training() -> void:
+func test_cleric_starts_with_wisdom_spells_and_bg3_training() -> void:
 	var cleric: Dictionary = hero(&"cleric")
 	assert_eq(String(cleric["spell_ability"]), "wis")
 	assert_eq(cleric["spell_slots_max"], [2])
 	assert_true("sacred_flame" in cleric["spells"])
 	assert_true("bless" in cleric["spells"])
-	assert_eq(String(cleric["features"]["divine_order"]), "protector")
+	assert_false(cleric["features"].has("divine_order"))
 	var training: EquipmentRules.Training = EquipmentRules.Training.for_actor(cleric, ClassFeatures.definition("cleric"))
-	assert_true(&"heavy" in training.armor)
-	assert_true(&"martial" in training.weapons)
+	assert_false(&"heavy" in training.armor)
+	assert_false(&"martial" in training.weapons)
 
 func test_cleric_channel_divinity_grows_and_recharges() -> void:
 	var cleric: Dictionary = hero(&"cleric", 6)
@@ -107,7 +107,8 @@ func test_divine_spark_spends_channel_divinity_not_a_slot() -> void:
 	assert_lt(int(Game.state.actors["foe"]["hp"]), 200)
 
 func test_divine_strike_once_per_turn() -> void:
-	var cleric: Dictionary = hero(&"cleric", 7)
+	assert_false(hero(&"cleric", 7)["features"].has("blessed_strikes"))
+	var cleric: Dictionary = hero(&"cleric", 8)
 	assert_eq(String(cleric["features"]["blessed_strikes"]), "divine_strike")
 	var state: GameState = GameState.new()
 	state.mode = &"combat"
@@ -130,11 +131,27 @@ func test_paladin_lay_on_hands_heals_from_the_pool() -> void:
 	assert_eq(int(Game.state.actors["ally"]["hp"]), int(ally["max_hp"]))
 	assert_eq(int(Game.state.actors["paladin"]["features"]["lay_on_hands"]["uses"]), 6)
 
-func test_paladin_defense_style_adds_armour_class() -> void:
+func test_paladin_picks_a_fighting_style_at_level_two() -> void:
 	var paladin: Dictionary = hero(&"paladin", 2)
+	assert_false(paladin["features"].has("fighting_style"))
+	assert_false(paladin["features"].has("weapon_mastery"))
+	var choices: Array = ClassKits.level_choices(paladin, 2)
+	assert_eq(choices[0]["options"], ["defense", "dueling", "great_weapon_fighting"])
+	ClassKits.call_kit("paladin", "apply_level_choices", [paladin, 2, {"fighting_style": ["defense"]}])
 	assert_eq(String(paladin["features"]["fighting_style"]), "defense")
+	assert_eq(ClassKits.level_choices(paladin, 2), [])
 	assert_eq(ClassKits.ac_bonus(paladin, &"chain_mail"), [{"amount": 1, "source": "defense"}])
 	assert_eq(ClassKits.ac_bonus(paladin, &"none"), [])
+
+func test_paladin_dueling_adds_damage_to_one_handed_melee() -> void:
+	var paladin: Dictionary = hero(&"paladin", 2)
+	paladin["features"]["fighting_style"] = "dueling"
+	var state: GameState = GameState.new()
+	state.actors = {"paladin": paladin, "foe": dummy(Vector3(0, 0, -1))}
+	var one_hand: Dictionary = {"id": "longsword", "ranged": false, "properties": ["versatile"]}
+	assert_eq(ClassKits.call_kit("paladin", "damage_bonus", [state, "paladin", "foe", one_hand], []), [{"amount": 2, "source": "dueling"}])
+	var two_hands: Dictionary = {"id": "greatsword", "ranged": false, "properties": ["two_handed"]}
+	assert_eq(ClassKits.call_kit("paladin", "damage_bonus", [state, "paladin", "foe", two_hands], []), [])
 
 func test_divine_smite_uses_the_free_use_then_a_slot() -> void:
 	var paladin: Dictionary = hero(&"paladin", 2)
@@ -167,10 +184,11 @@ func test_aura_of_protection_adds_charisma_to_ally_saves() -> void:
 	ally["position"] = Vector3(0, 0, -6)
 	assert_eq(ClassEffects.aura_of_protection(state, "ally"), 0)
 
-func test_druid_magician_gets_a_third_cantrip() -> void:
+func test_druid_starts_with_two_cantrips_like_bg3() -> void:
 	var druid: Dictionary = hero(&"druid")
-	assert_eq(ClassSpellcasting.cantrips_for(druid, 1), 3)
-	assert_eq(ClassFeatures.known_cantrips(druid).size(), 3)
+	assert_eq(ClassSpellcasting.cantrips_for(druid, 1), 2)
+	assert_eq(ClassFeatures.known_cantrips(druid).size(), 2)
+	assert_false(hero(&"druid", 7)["features"].has("elemental_fury"))
 	assert_false(druid["features"].has("wild_shape"))
 
 func test_wild_shape_turns_the_druid_into_a_wolf_and_back() -> void:

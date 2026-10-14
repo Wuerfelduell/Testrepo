@@ -2,8 +2,8 @@ extends RefCounted
 ## Cleric (SRD 5.2, levels 1-10, no subclass). Spells: ClassSpellcasting["cleric"];
 ## spell effects (Bless, Spirit Guardians, Turn Undead ...): ClassEffects.
 ## Channel Divinity is paid by Divine Spark and Turn Undead (feature spells).
-## Defaults until the owner decides: Divine Order Protector (heavy armour, martial
-## weapons), Blessed Strikes Divine Strike.
+## Follows BG3: no Divine Order (light and medium armour, shields, simple weapons);
+## Divine Strike from level 8 like most BG3 domains.
 
 const PRIORITY: Array[StringName] = [&"wis", &"con", &"str", &"dex", &"cha", &"int"]
 const SKILLS: Dictionary = {"class": [&"insight", &"medicine"], "human": &"perception"}
@@ -13,11 +13,6 @@ const FEATURES: Array[String] = ["divine_intervention"]
 static func _turn_key(state: GameState) -> String:
 	return "%d:%d" % [state.round_number, state.turn_index]
 
-static func activate(record: Dictionary) -> void:
-	var features: Dictionary = record["features"]
-	features["divine_order"] = "protector"
-	features["extra_training"] = {"armor": ["heavy"], "weapons": ["martial"]}
-
 static func advance(actor: Dictionary, level: int) -> void:
 	var features: Dictionary = actor["features"]
 	if level >= 2:
@@ -25,7 +20,7 @@ static func advance(actor: Dictionary, level: int) -> void:
 		ClassKits.set_uses(features, "channel_divinity", 3 if level >= 6 else 2, "long", 1)
 	if level >= 5:
 		features["sear_undead"] = {}
-	if level >= 7 and not features.has("blessed_strikes"):
+	if level >= 8 and not features.has("blessed_strikes"):
 		features["blessed_strikes"] = "divine_strike"
 	if level >= 10:
 		ClassKits.set_uses(features, "divine_intervention", 1, "long")
