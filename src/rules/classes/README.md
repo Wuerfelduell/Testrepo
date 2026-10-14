@@ -50,6 +50,12 @@ Combat (state = GameState)
 - `extra_damage_dice(state, attacker_id, target_id, weapon, critical) -> [{"dice", "damage_type"?, "source"}]`
   called once per real hit (may spend once-per-turn resources); `expected_extra_damage(...)` for previews, no state change
 - `resistances(actor) -> Array` damage types
+- `damage_reduction(state, attacker_id, target_id, weapon, amount, rng) -> {"amount", "events"}` (target's kit, reactions like Deflect Attacks)
+- `evades(actor, ability) -> bool` Evasion on half-damage area saves
+- `initiative_advantages(actor) -> Array[StringName]`
+- `on_combat_end(state, actor_id)` per-fight state (Rage, toggles)
+- `free_casts(actor) -> {spell_id: feature_id}` spells cast without a slot, paid by that feature's uses
+- `ac_bonus(actor, armor_id) -> [{"amount", "source"}]` (Fighting Style Defense)
 - `save_advantages(actor, ability) -> Array[StringName]`
 - `on_turn_start(state, actor_id)`, `on_turn_end(state, actor_id, rng)` -> events
 - `after_attack(state, attacker_id, target_id, weapon, hit, rng)` / `after_attacked(...)` -> events
@@ -60,6 +66,13 @@ Hotbar features (UseFeatureCommand with any id the kit lists)
 - `use_feature(state, actor_id, feature_id, rng) -> Array[Dictionary]` events
 - `feature_label(actor, feature_id) -> String` optional; default `tr("FEATURE_<ID>_BUTTON") % [uses, max]`
 - Hover text: `FEATURE_<ID>_HINT`.
+
+Shared helpers
+- `WeaponMasteries` (weapon_masteries.gd): Vex, Slow, Topple, Cleave for kit classes; call its
+  `attack_advantages`, `after_attack`, `on_turn_start`, `on_turn_end` from the kit.
+- Spells with `resolution = "none"`, creature targeting and an `effect` put that effect on the
+  target (until concentration ends); a kit reads it (Hunter's Mark).
+- Effects with a `"condition"` field grant that condition while they last.
 
 Rests
 - A feature stored as `{"uses", "max", "recharge": "short"|"long", "short_regain"?}` recharges

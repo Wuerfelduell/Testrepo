@@ -78,6 +78,10 @@ static func level_choices(actor: Dictionary, level: int) -> Array:
 static func unarmored_ac(actor: Dictionary, shield: bool) -> int:
 	return int(call_kit(class_of(actor), "unarmored_ac", [actor, shield], 0))
 
+## Extra AC entries [{"amount", "source"}] (Fighting Style Defense).
+static func ac_bonus(actor: Dictionary, armor_id: StringName) -> Array:
+	return call_kit(class_of(actor), "ac_bonus", [actor, armor_id], [])
+
 static func speed_bonus_m(actor: Dictionary) -> float:
 	return float(call_kit(class_of(actor), "speed_bonus_m", [actor], 0.0))
 
@@ -123,6 +127,39 @@ static func extra_damage_dice(state: GameState, attacker_id: String, target_id: 
 static func expected_extra_damage(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary) -> float:
 	return float(call_kit(class_of(state.actors.get(attacker_id, {})), "expected_extra_damage",
 		[state, attacker_id, target_id, weapon], 0.0))
+
+## The target's kit may lower a weapon hit's damage with a reaction (Deflect Attacks):
+## returns {"amount", "events"}.
+static func damage_reduction(state: GameState, attacker_id: String, target_id: String, weapon: Dictionary,
+		amount: int, rng: RandomNumberGenerator) -> Dictionary:
+	return call_kit(class_of(state.actors.get(target_id, {})), "damage_reduction",
+		[state, attacker_id, target_id, weapon, amount, rng], {})
+
+## Evasion: half-damage saves of this ability deal nothing on a success, half on a failure.
+static func evades(actor: Dictionary, ability: StringName) -> bool:
+	return bool(call_kit(class_of(actor), "evades", [actor, ability], false))
+
+static func initiative_advantages(actor: Dictionary) -> Array[StringName]:
+	var result: Array[StringName] = []
+	result.assign(call_kit(class_of(actor), "initiative_advantages", [actor], []))
+	return result
+
+## Every kit actor when a fight ends (Rage ends, per-combat flags clear).
+static func on_combat_end(state: GameState) -> void:
+	for id: String in state.actors:
+		call_kit(class_of(state.actors[id]), "on_combat_end", [state, id])
+
+## Spells a class may cast without a slot (Ranger Favored Enemy): kit free_casts(actor)
+## returns {spell_id: feature_id}; that feature's "uses" pay for the cast.
+static func free_cast_available(caster: Dictionary, spell_id: String) -> bool:
+	var feature_id: String = String(call_kit(class_of(caster), "free_casts", [caster], {}).get(spell_id, ""))
+	return not feature_id.is_empty() and int(caster.get("features", {}).get(feature_id, {}).get("uses", 0)) > 0
+
+static func spend_free_cast(caster: Dictionary, spell_id: String) -> void:
+	var feature_id: String = String(call_kit(class_of(caster), "free_casts", [caster], {}).get(spell_id, ""))
+	var feature: Dictionary = caster.get("features", {}).get(feature_id, {})
+	if not feature.is_empty():
+		feature["uses"] = maxi(0, int(feature.get("uses", 0)) - 1)
 
 static func resistances(actor: Dictionary) -> Array:
 	return call_kit(class_of(actor), "resistances", [actor], [])

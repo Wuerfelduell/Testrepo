@@ -21,6 +21,9 @@ static func add(actor: Dictionary, effect: Dictionary) -> void:
 		actor["conditions"].append(condition)
 
 static func granted_condition(effect: Dictionary) -> String:
+	if effect.has("condition"):
+		# Class features (Stunning Strike) name the condition they grant.
+		return String(effect["condition"])
 	if String(effect.get("kind", "")) == "sleep":
 		return "unconscious" if int(effect.get("stage", 1)) >= 2 else "incapacitated"
 	return ""

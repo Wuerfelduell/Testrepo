@@ -407,10 +407,14 @@ static func finish_attack(state: GameState, attacker_id: String, target_id: Stri
 		damage_die_minimum(state.actors.get(attacker_id, {}), weapon))
 	events.append({"type": "roll", "kind": "damage", "actor_id": attacker_id, "target_id": target_id,
 		"roll": serialize_roll(damage.roll), "damage_type": weapon["damage_type"], "amount": damage.total})
-	target["hp"] = maxi(0, int(target["hp"]) - damage.total)
+	# Class reactions that lower the damage of this hit (Monk Deflect Attacks).
+	var reduction: Dictionary = ClassKits.damage_reduction(state, attacker_id, target_id, weapon, damage.total, rng)
+	events.append_array(reduction.get("events", []))
+	var dealt: int = maxi(0, damage.total - int(reduction.get("amount", 0)))
+	target["hp"] = maxi(0, int(target["hp"]) - dealt)
 	events.append({"type": "damage", "actor_id": attacker_id, "target_id": target_id,
-		"amount": damage.total, "damage_type": weapon["damage_type"], "hp": target["hp"]})
-	var total_damage: int = damage.total
+		"amount": dealt, "damage_type": weapon["damage_type"], "hp": target["hp"]})
+	var total_damage: int = dealt
 	# A separate typed damage instance: flat riders are never critical dice.
 	for extra: Dictionary in weapon.get("extra_damage", []):
 		var extra_result: DamageRules.Result = DamageRules.apply(int(extra["amount"]),
@@ -462,5 +466,6 @@ static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	if state.mode != &"combat":
 		state.pending = {}
+		ClassKits.on_combat_end(state)
 		events.append({"type": "combat_end", "mode": String(state.mode)})
 	return events

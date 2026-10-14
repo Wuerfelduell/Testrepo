@@ -28,6 +28,7 @@ func apply(state: GameState) -> Dictionary:
 		if CombatRules.alive(actor):
 			var participant: Initiative.Participant = Initiative.Participant.new(StringName(id), int(actor["dex"]))
 			participant.context.conditions = CombatRules.conditions_for(actor)
+			participant.context.advantages.append_array(ClassKits.initiative_advantages(actor))
 			participants.append(participant)
 	var initiative: Initiative.Result = Initiative.roll(participants, Rng.rng)
 	var events: Array[Dictionary] = []

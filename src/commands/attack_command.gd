@@ -39,7 +39,8 @@ func apply(state: GameState) -> Dictionary:
 	if bool(actor.get("action_available", false)):
 		# Extra Attack (Fighter 5) and Multiattack: the Attack action holds more than one attack.
 		actor["action_available"] = false
-		actor["attacks_left"] = ClassFeatures.attacks_per_action(actor) - 1
+		# Bonus attacks granted earlier this turn (Monk Martial Arts) are kept.
+		actor["attacks_left"] = int(actor.get("attacks_left", 0)) + ClassFeatures.attacks_per_action(actor) - 1
 	else:
 		actor["attacks_left"] = int(actor["attacks_left"]) - 1
 	var weapon: Dictionary = {} if weapon_id.is_empty() else weapon_for(actor, weapon_id)
