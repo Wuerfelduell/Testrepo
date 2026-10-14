@@ -40,6 +40,12 @@ func apply(state: GameState) -> Dictionary:
 	var dormant: Dictionary = state.world["dormant"]
 	var members: Dictionary = dormant[actor_id]
 	dormant.erase(actor_id)
+	# A fight a conversation started (DialogueEffects): nonlethal ones knock out instead of killing.
+	var fight: Dictionary = state.world.get("dialogue_fight", {})
+	if String(fight.get("encounter", "")) == actor_id:
+		state.world.erase("dialogue_fight")
+		if bool(fight.get("nonlethal", false)):
+			state.world["nonlethal"] = {"encounter": actor_id}
 	var triggered: Array = state.world.get("triggered", [])
 	triggered.append(actor_id)
 	state.world["triggered"] = triggered

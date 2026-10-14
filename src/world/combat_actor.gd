@@ -68,6 +68,8 @@ func update_actor(record: Dictionary, pending: Dictionary, delta: float) -> void
 	var displacement: Vector3 = next_position - global_position
 	global_position = next_position
 	var hp: int = int(record.get("hp", _last_hp))
+	if _dead and hp > 0:
+		_revive()
 	if hp < _last_hp:
 		if hp > 0:
 			_hit_remaining = player.get_animation("Hit_Chest").length
@@ -226,6 +228,13 @@ func _advance_once(delta: float) -> void:
 		player.pause()
 	else:
 		player.advance(delta)
+
+
+## Knocked out in a nonlethal fight, now back on their feet (NonlethalFights).
+func _revive() -> void:
+	_dead = false
+	_set_animation("idle")
+	(get_node("ActorPick") as Area3D).collision_layer = 2
 
 
 func _die() -> void:

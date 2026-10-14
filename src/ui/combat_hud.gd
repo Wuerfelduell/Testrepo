@@ -301,8 +301,13 @@ func consume_events(events: Array[Dictionary]) -> void:
 					var killer: Dictionary = _state.actors.get(String(event.get("killer_id", "")), {})
 					_death_killer = _actor_name(killer)
 					_death_detail.text = tr("COMBAT_DEATH_DETAIL") % [_actor_name(actor), tr("CLASS_FIGHTER"), int(actor.get("level", 1)), _death_killer, _state.round_number, int(actor.get("xp", 0))]
+			"knocked_out":
+				_append_log(tr("COMBAT_LOG_KNOCKED_OUT") % _actor_name(actor))
 			"combat_end":
-				_append_log(tr("COMBAT_DEFEAT" if String(event.get("mode", "")) == "defeat" else "COMBAT_VICTORY"))
+				if event.has("nonlethal"):
+					_append_log(tr("COMBAT_NONLETHAL_WON" if String(event["nonlethal"]) == "party" else "COMBAT_NONLETHAL_LOST"))
+				else:
+					_append_log(tr("COMBAT_DEFEAT" if String(event.get("mode", "")) == "defeat" else "COMBAT_VICTORY"))
 			"start_spell":
 				var spell: SpellDefinition = SpellBook.get_spell(String(event.get("spell_id", "")))
 				if spell != null:

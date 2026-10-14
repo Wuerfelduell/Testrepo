@@ -788,6 +788,14 @@ DIALOGUE_XP_TITLE,A choice with weight
 DIALOGUE_ITEM_GAINED,Received: %s
 DIALOGUE_ITEM_LOST,Handed over: %s
 DIALOGUE_DAMAGE,%d damage
+COMBAT_LOG_KNOCKED_OUT,%s is knocked out
+COMBAT_NONLETHAL_WON,You win the fight. Nobody died.
+COMBAT_NONLETHAL_LOST,You are beaten. Nobody died.
+NPC_GARRIK,Captain Garrik Voss
+NPC_GATE_GUARD,Gate guard
+NPC_BORIK,Borik Hagen
+NPC_REGULAR,Regular
+NPC_MARA,Mara Veldrin
 MONEY_GP,%d gp
 MONEY_SP,%d sp
 MONEY_CP,%d cp
