@@ -1,0 +1,10 @@
+{
+	"items": {},
+	"starting_kits": {
+		"paladin": {
+			"equipped": {"main_hand": "longsword", "off_hand": "shield", "armor": "chain_mail"},
+			"bag": {"potion_of_healing": 1},
+			"gold": 9
+		}
+	}
+}

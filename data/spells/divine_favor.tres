@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"divine_favor"
+name_key = &"SPELL_DIVINE_FAVOR"
+srd_name = "Divine Favor"
+level = 1
+school = "transmutation"
+casting_time = "bonus_action"
+targeting = "self"
+resolution = "none"
+duration_rounds = 10
+effect = &"divine_favor"
+vfx = &"divine_favor"

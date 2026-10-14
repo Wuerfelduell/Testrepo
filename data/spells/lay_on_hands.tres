@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lay_on_hands"
+name_key = &"SPELL_LAY_ON_HANDS"
+srd_name = "Lay On Hands"
+level = 0
+school = "abjuration"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 1.5
+resolution = "heal"
+effect = &"lay_on_hands"
+feature_resource = "lay_on_hands"
+vfx = &"lay_on_hands"

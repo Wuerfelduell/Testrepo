@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"blight"
+name_key = &"SPELL_BLIGHT"
+srd_name = "Blight"
+level = 4
+school = "necromancy"
+targeting = "creature"
+range_m = 9.0
+resolution = "save"
+save_ability = &"con"
+damage_dice = "8d8"
+damage_type = &"necrotic"
+half_on_save = true
+upcast_dice = "1d8"
+vfx = &"blight"

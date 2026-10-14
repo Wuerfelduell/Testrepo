@@ -1,0 +1,10 @@
+{
+	"items": {},
+	"starting_kits": {
+		"cleric": {
+			"equipped": {"main_hand": "mace", "off_hand": "shield", "armor": "chain_shirt"},
+			"bag": {"potion_of_healing": 1},
+			"gold": 7
+		}
+	}
+}

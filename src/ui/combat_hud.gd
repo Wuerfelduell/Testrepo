@@ -312,7 +312,11 @@ func consume_events(events: Array[Dictionary]) -> void:
 			"spell_blocked":
 				_append_log(tr("COMBAT_LOG_BLOCKED") % _actor_name(actor))
 			"condition":
-				_append_log(tr("COMBAT_LOG_UNCONSCIOUS" if String(event.get("condition", "")) == "unconscious" else "COMBAT_LOG_ASLEEP") % _actor_name(actor))
+				var condition: String = String(event.get("condition", ""))
+				if condition in ["unconscious", "incapacitated"]:
+					_append_log(tr("COMBAT_LOG_UNCONSCIOUS" if condition == "unconscious" else "COMBAT_LOG_ASLEEP") % _actor_name(actor))
+				else:
+					_append_log(tr("COMBAT_LOG_CONDITION") % [_actor_name(actor), tr("CONDITION_" + condition.to_upper())])
 			"condition_end":
 				_append_log(tr("COMBAT_LOG_WAKES") % _actor_name(actor))
 			"concentration_end":
@@ -323,6 +327,17 @@ func consume_events(events: Array[Dictionary]) -> void:
 			"effect":
 				if String(event.get("kind", "")) == "sap":
 					_append_log(tr("COMBAT_LOG_SAPPED") % _actor_name(actor))
+				elif event.has("spell_id"):
+					var source: SpellDefinition = SpellBook.get_spell(String(event["spell_id"]))
+					if source != null:
+						_append_log(tr("COMBAT_LOG_EFFECT") % [_actor_name(actor), tr(String(source.name_key))])
+			"feature_toggle":
+				_append_log(tr("COMBAT_LOG_FEATURE_ARMED" if bool(event.get("armed", false)) else "COMBAT_LOG_FEATURE_DISARMED") % \
+					[_actor_name(actor), tr("FEATURE_" + String(event.get("feature_id", "")).to_upper())])
+			"wild_shape":
+				_append_log(tr("COMBAT_LOG_WILD_SHAPE") % [_actor_name(actor), tr("FORM_" + String(event.get("form", "")).to_upper())])
+			"wild_shape_end":
+				_append_log(tr("COMBAT_LOG_WILD_SHAPE_END") % _actor_name(actor))
 			"party_joined":
 				var joined: Dictionary = PartyRules.definition(String(event.get("actor_id", "")))
 				_append_log(tr("PARTY_LOG_JOINED") % tr(String(joined.get("name", ""))))

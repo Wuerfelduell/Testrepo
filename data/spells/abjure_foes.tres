@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"abjure_foes"
+name_key = &"SPELL_ABJURE_FOES"
+srd_name = "Abjure Foes"
+level = 0
+school = "enchantment"
+targeting = "self"
+area = "sphere"
+area_size_m = 18.0
+resolution = "save"
+save_ability = &"wis"
+duration_rounds = 10
+effect = &"frightened"
+chosen_creatures = true
+feature_resource = "channel_divinity"
+vfx = &"abjure_foes"

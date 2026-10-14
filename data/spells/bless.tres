@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"bless"
+name_key = &"SPELL_BLESS"
+srd_name = "Bless"
+level = 1
+school = "enchantment"
+targeting = "self"
+area = "sphere"
+area_size_m = 9.0
+resolution = "none"
+concentration = true
+duration_rounds = 10
+effect = &"bless"
+allies = true
+max_targets = 3
+upcast_targets = 1
+vfx = &"bless"

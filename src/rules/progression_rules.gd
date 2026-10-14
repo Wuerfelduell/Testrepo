@@ -116,7 +116,9 @@ static func plan(actor: Dictionary) -> Dictionary:
 			result["spellbook_options"] = ClassSpellcasting.spell_options(class_id, level, book)
 			result["spellbook_count"] = mini(ClassSpellcasting.new_spells_per_level(class_id), result["spellbook_options"].size())
 		result["cantrip_options"] = ClassSpellcasting.cantrip_options(class_id, cantrips)
-		var new_cantrips: int = ClassSpellcasting.cantrips_for(actor, level) - ClassSpellcasting.cantrips_for(actor, level - 1)
+		# Against the cantrips actually known, so a cantrip owed earlier (no option yet) is
+		# offered again once one exists.
+		var new_cantrips: int = ClassSpellcasting.cantrips_for(actor, level) - cantrips.size()
 		result["cantrip_count"] = clampi(new_cantrips, 0, result["cantrip_options"].size())
 		result["prepared_limit"] = ClassSpellcasting.prepared_limit(class_id, level)
 		result["slots_before"] = ClassSpellcasting.slots(class_id, level - 1)

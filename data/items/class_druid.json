@@ -1,0 +1,10 @@
+{
+	"items": {},
+	"starting_kits": {
+		"druid": {
+			"equipped": {"main_hand": "sickle", "off_hand": "shield", "armor": "leather"},
+			"bag": {"quarterstaff": 1, "potion_of_healing": 1},
+			"gold": 9
+		}
+	}
+}

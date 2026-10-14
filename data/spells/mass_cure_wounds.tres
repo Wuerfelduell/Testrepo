@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"mass_cure_wounds"
+name_key = &"SPELL_MASS_CURE_WOUNDS"
+srd_name = "Mass Cure Wounds"
+level = 5
+school = "abjuration"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 9.0
+resolution = "heal"
+heal_dice = "5d8"
+upcast_dice = "1d8"
+allies = true
+max_targets = 6
+vfx = &"mass_cure_wounds"

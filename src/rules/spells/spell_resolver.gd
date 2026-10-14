@@ -108,7 +108,8 @@ static func preview(state: GameState, caster_id: String, spell_id: String, slot_
 					if not geometry.visible(origin, aim):
 						result["reason_key"] = "SPELL_REASON_SIGHT"
 						return result
-				elif Vector2(aim.x - origin.x, aim.z - origin.z).length() < 0.1:
+				elif spell.area != "sphere" and Vector2(aim.x - origin.x, aim.z - origin.z).length() < 0.1:
+					# Cones and lines need a direction; a sphere around the caster does not.
 					result["reason_key"] = "SPELL_REASON_PICK_POINT"
 					return result
 				var entries: Array = []

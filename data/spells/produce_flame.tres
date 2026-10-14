@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"produce_flame"
+name_key = &"SPELL_PRODUCE_FLAME"
+srd_name = "Produce Flame"
+level = 0
+school = "conjuration"
+targeting = "creature"
+range_m = 18.0
+resolution = "attack"
+damage_dice = "1d8"
+damage_type = &"fire"
+vfx = &"produce_flame"

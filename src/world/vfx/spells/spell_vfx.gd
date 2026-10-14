@@ -12,6 +12,24 @@ const SHIELD: Color = Color(0.45, 0.75, 1.0)
 const RADIANT: Color = Color(1.0, 0.86, 0.45)
 const HEAL: Color = Color(0.6, 1.0, 0.62)
 const POISON: Color = Color(0.55, 0.95, 0.25)
+const NECROTIC: Color = Color(0.45, 0.85, 0.55)
+const LIGHTNING: Color = Color(0.75, 0.85, 1.0)
+const NATURE: Color = Color(0.45, 0.8, 0.3)
+## Simple looks for the Cleric, Paladin and Druid spells: "bolt" flies to the target and
+## bursts there, "target" bursts on each target, "point" on the aimed point, "caster" on
+## the caster.
+const STYLES: Dictionary = {
+	"guiding_bolt": ["bolt", RADIANT], "produce_flame": ["bolt", FIRE], "starry_wisp": ["bolt", RADIANT],
+	"inflict_wounds": ["bolt", NECROTIC], "blight": ["bolt", NECROTIC], "divine_spark": ["bolt", RADIANT],
+	"divine_spark_heal": ["bolt", HEAL], "cure_wounds": ["bolt", HEAL], "hold_person": ["bolt", ARCANE],
+	"sacred_flame": ["target", RADIANT], "shield_of_faith": ["target", SHIELD], "barkskin": ["target", NATURE],
+	"resistance": ["target", SHIELD], "lay_on_hands": ["target", HEAL],
+	"flame_strike": ["point", FIRE], "call_lightning": ["point", LIGHTNING], "ice_storm": ["point", FROST],
+	"entangle": ["point", NATURE], "faerie_fire": ["point", ARCANE], "mass_cure_wounds": ["point", HEAL],
+	"bless": ["caster", RADIANT], "aid": ["caster", RADIANT], "divine_favor": ["caster", RADIANT],
+	"mass_healing_word": ["caster", HEAL], "turn_undead": ["caster", RADIANT], "abjure_foes": ["caster", RADIANT],
+	"wild_shape": ["caster", NATURE], "revert_wild_shape": ["caster", NATURE],
+}
 const FADE: float = 0.5
 
 var actors: Dictionary = {}
@@ -75,6 +93,9 @@ func _start(event: Dictionary) -> void:
 			effect["nodes"] = [_bolt(HEAL, 0.1, true)]
 		"poison_spray":
 			effect["nodes"] = [_bolt(POISON, 0.14, true)]
+		var other:
+			if STYLES.has(other) and STYLES[other][0] == "bolt":
+				effect["nodes"] = [_bolt(STYLES[other][1], 0.13, true)]
 	for node: Node3D in effect["nodes"]:
 		node.visible = false
 	_active.append(effect)
@@ -136,6 +157,11 @@ func _update(effect: Dictionary, state: GameState) -> void:
 			fire.global_position = hand
 			fire.emitting = time >= release and time < impact + 0.15
 			fire.visible = true
+		var other:
+			if not effect["nodes"].is_empty():
+				var node: Node3D = effect["nodes"][0]
+				node.visible = flying
+				node.global_position = hand.lerp(_target_point(effect, state, 0), progress) + Vector3.UP * sin(progress * PI) * 0.4
 	if not bool(effect["impacted"]) and time >= impact:
 		effect["impacted"] = true
 		_impact(effect, state)
@@ -161,6 +187,20 @@ func _impact(effect: Dictionary, state: GameState) -> void:
 			var caster: Node3D = actors.get(effect["actor_id"]) as Node3D
 			if caster != null:
 				_burst(caster.global_position + Vector3.UP * 1.0, RADIANT, 120, 0.8, 5.5)
+		var other:
+			if not STYLES.has(other):
+				return
+			var color: Color = STYLES[other][1]
+			match String(STYLES[other][0]):
+				"bolt", "target":
+					for index: int in maxi(1, effect["target_ids"].size()):
+						_burst(_target_point(effect, state, index), color, 55, 0.6, 2.6)
+				"point":
+					_burst((effect["point"] as Vector3) + Vector3.UP * 0.5, color, 110, 0.8, 5.0)
+				"caster":
+					var source: Node3D = actors.get(effect["actor_id"]) as Node3D
+					if source != null:
+						_burst(source.global_position + Vector3.UP * 1.0, color, 80, 0.7, 3.5)
 
 func _target_point(effect: Dictionary, state: GameState, index: int) -> Vector3:
 	var ids: Array = effect["target_ids"]

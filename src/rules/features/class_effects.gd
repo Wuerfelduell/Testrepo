@@ -361,11 +361,6 @@ static func revert_wild_shape(actor: Dictionary, actor_id: String) -> Array[Dict
 	actor.erase("wild_shape")
 	return [{"type": "wild_shape_end", "actor_id": actor_id}]
 
-## Fights end, rests and incapacitation end every Wild Shape.
-static func revert_all(state: GameState) -> void:
-	for id: String in state.actors:
-		revert_wild_shape(state.actors[id], id)
-
 # ---------------------------------------------------------------- feature resources
 
 ## Can this feature spell be paid right now? (Wild Resurgence: a spell slot buys a

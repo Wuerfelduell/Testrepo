@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"call_lightning"
+name_key = &"SPELL_CALL_LIGHTNING"
+srd_name = "Call Lightning"
+level = 3
+school = "conjuration"
+targeting = "point"
+range_m = 36.0
+area = "sphere"
+area_size_m = 1.5
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "3d10"
+damage_type = &"lightning"
+half_on_save = true
+upcast_dice = "1d10"
+vfx = &"call_lightning"

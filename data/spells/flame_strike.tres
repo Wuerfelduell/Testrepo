@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"flame_strike"
+name_key = &"SPELL_FLAME_STRIKE"
+srd_name = "Flame Strike"
+level = 5
+school = "evocation"
+targeting = "point"
+range_m = 18.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"dex"
+damage_dice = "5d6"
+damage_type = &"fire"
+extra_damage_dice = "5d6"
+extra_damage_type = &"radiant"
+half_on_save = true
+upcast_dice = "1d6"
+vfx = &"flame_strike"

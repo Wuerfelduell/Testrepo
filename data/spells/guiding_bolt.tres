@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"guiding_bolt"
+name_key = &"SPELL_GUIDING_BOLT"
+srd_name = "Guiding Bolt"
+level = 1
+school = "evocation"
+targeting = "creature"
+range_m = 36.0
+resolution = "attack"
+damage_dice = "4d6"
+damage_type = &"radiant"
+upcast_dice = "1d6"
+duration_rounds = 1
+effect = &"guiding_bolt"
+vfx = &"guiding_bolt"

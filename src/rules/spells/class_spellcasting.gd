@@ -28,6 +28,39 @@ const CASTERS: Dictionary = {
 		# The third cantrip, Poison Spray (1d12), is the owner's wish for a strong one (13-10-2026).
 		"start": ["fire_bolt", "ray_of_frost", "poison_spray", "magic_missile", "burning_hands", "shield", "sleep"],
 	},
+	# Cleric, Druid, Paladin (thread "Kleriker, Paladin, Druide"); class features in
+	# src/rules/classes/<id>_kit.gd. Channel Divinity, Lay on Hands and Wild Shape are
+	# "always" feature spells (SpellDefinition.feature_resource), never picks.
+	"cleric": {
+		"ability": "wis", "progression": "full",
+		"cantrips": [3, 3, 3, 4, 4, 4, 4, 4, 4, 5],
+		"prepared": [4, 5, 6, 7, 9, 10, 11, 12, 14, 15],
+		"list": ["sacred_flame", "resistance", "bless", "cure_wounds", "guiding_bolt", "healing_word",
+			"inflict_wounds", "shield_of_faith", "aid", "hold_person", "mass_healing_word",
+			"spirit_guardians", "flame_strike", "mass_cure_wounds"],
+		# Only two SRD Cleric cantrips work in combat yet; the third pick stays open.
+		"start": ["sacred_flame", "resistance", "bless", "cure_wounds", "guiding_bolt", "healing_word"],
+		"always": {"divine_spark": 2, "divine_spark_heal": 2, "turn_undead": 2},
+	},
+	"druid": {
+		"ability": "wis", "progression": "full",
+		"cantrips": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4],
+		"prepared": [4, 5, 6, 7, 9, 10, 11, 12, 14, 15],
+		"list": ["produce_flame", "starry_wisp", "poison_spray", "resistance", "cure_wounds", "healing_word",
+			"entangle", "faerie_fire", "barkskin", "hold_person", "call_lightning", "blight",
+			"ice_storm", "mass_cure_wounds"],
+		# Primal Order Magician adds a third cantrip (features.bonus_cantrips).
+		"start": ["produce_flame", "starry_wisp", "poison_spray", "cure_wounds", "healing_word", "entangle", "faerie_fire"],
+		"always": {"wild_shape": 2, "revert_wild_shape": 2},
+	},
+	"paladin": {
+		"ability": "cha", "progression": "half",
+		"cantrips": [],
+		"prepared": [2, 3, 4, 5, 6, 6, 7, 7, 9, 9],
+		"list": ["bless", "cure_wounds", "divine_favor", "shield_of_faith", "aid"],
+		"start": ["bless", "divine_favor"],
+		"always": {"lay_on_hands": 1, "abjure_foes": 9},
+	},
 	# Bard, Sorcerer, Warlock (thread "Barde, Zauberer, Hexenmeister"); class features in
 	# src/rules/classes/<id>_kit.gd. "bardic_inspiration" is a class action cast through
 	# the spell pipeline (its kit adds it), never a pick.

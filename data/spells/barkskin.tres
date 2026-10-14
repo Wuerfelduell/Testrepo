@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"barkskin"
+name_key = &"SPELL_BARKSKIN"
+srd_name = "Barkskin"
+level = 2
+school = "transmutation"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 1.5
+resolution = "none"
+effect = &"barkskin"
+allies = true
+vfx = &"barkskin"

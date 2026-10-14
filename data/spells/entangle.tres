@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"entangle"
+name_key = &"SPELL_ENTANGLE"
+srd_name = "Entangle"
+level = 1
+school = "conjuration"
+targeting = "point"
+range_m = 27.0
+area = "sphere"
+area_size_m = 3.0
+resolution = "save"
+save_ability = &"str"
+concentration = true
+duration_rounds = 10
+effect = &"entangle"
+vfx = &"entangle"

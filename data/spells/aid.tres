@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"aid"
+name_key = &"SPELL_AID"
+srd_name = "Aid"
+level = 2
+school = "abjuration"
+targeting = "self"
+area = "sphere"
+area_size_m = 9.0
+resolution = "none"
+effect = &"aid"
+allies = true
+max_targets = 3
+vfx = &"aid"

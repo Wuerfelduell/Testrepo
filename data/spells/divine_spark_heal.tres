@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"divine_spark_heal"
+name_key = &"SPELL_DIVINE_SPARK_HEAL"
+srd_name = "Divine Spark"
+level = 0
+school = "evocation"
+targeting = "creature"
+range_m = 9.0
+resolution = "heal"
+heal_dice = "1d8"
+scale_levels = Array[int]([7, 13, 18])
+feature_resource = "channel_divinity"
+vfx = &"divine_spark_heal"

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"divine_spark"
+name_key = &"SPELL_DIVINE_SPARK"
+srd_name = "Divine Spark"
+level = 0
+school = "evocation"
+targeting = "creature"
+range_m = 9.0
+resolution = "save"
+save_ability = &"con"
+damage_dice = "1d8"
+damage_type = &"radiant"
+half_on_save = true
+scale_levels = Array[int]([7, 13, 18])
+add_spell_modifier = true
+feature_resource = "channel_divinity"
+vfx = &"divine_spark"

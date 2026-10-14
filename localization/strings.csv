@@ -703,3 +703,85 @@ PARTY_REASON_MEMBER,Already in the party.
 PARTY_REASON_FULL,The party is full (4 at most).
 PARTY_REASON_NO_HERO,Only a living hero can lead a party.
 PARTY_REASON_NOT_MEMBER,Not in the party.
+SPELL_SACRED_FLAME,Sacred Flame
+SPELL_RESISTANCE,Resistance
+SPELL_PRODUCE_FLAME,Produce Flame
+SPELL_STARRY_WISP,Starry Wisp
+SPELL_BLESS,Bless
+SPELL_CURE_WOUNDS,Cure Wounds
+SPELL_GUIDING_BOLT,Guiding Bolt
+SPELL_INFLICT_WOUNDS,Inflict Wounds
+SPELL_SHIELD_OF_FAITH,Shield of Faith
+SPELL_DIVINE_FAVOR,Divine Favor
+SPELL_ENTANGLE,Entangle
+SPELL_FAERIE_FIRE,Faerie Fire
+SPELL_AID,Aid
+SPELL_BARKSKIN,Barkskin
+SPELL_HOLD_PERSON,Hold Person
+SPELL_MASS_HEALING_WORD,Mass Healing Word
+SPELL_CALL_LIGHTNING,Call Lightning
+SPELL_BLIGHT,Blight
+SPELL_ICE_STORM,Ice Storm
+SPELL_FLAME_STRIKE,Flame Strike
+SPELL_MASS_CURE_WOUNDS,Mass Cure Wounds
+SPELL_DIVINE_SPARK,Divine Spark
+SPELL_DIVINE_SPARK_HEAL,Divine Spark (Heal)
+SPELL_TURN_UNDEAD,Turn Undead
+SPELL_ABJURE_FOES,Abjure Foes
+SPELL_LAY_ON_HANDS,Lay On Hands
+SPELL_WILD_SHAPE,Wild Shape (Wolf)
+SPELL_REVERT_WILD_SHAPE,End Wild Shape
+FEATURE_DIVINE_ORDER,Divine Order
+FEATURE_DIVINE_ORDER_HINT_LEVELUP,Protector: training with heavy armour and martial weapons.
+FEATURE_CHANNEL_DIVINITY,Channel Divinity
+FEATURE_CHANNEL_DIVINITY_HINT_LEVELUP,"Divine Spark (heal or harm 1d8 + Wisdom) and Turn Undead. One use back on a short rest, all on a long rest."
+FEATURE_SEAR_UNDEAD,Sear Undead
+FEATURE_SEAR_UNDEAD_HINT_LEVELUP,Turn Undead also deals Wisdom modifier d8 radiant damage to every undead that fails.
+FEATURE_BLESSED_STRIKES,Blessed Strikes
+FEATURE_BLESSED_STRIKES_HINT_LEVELUP,"Divine Strike: once on each of your turns, a weapon hit deals 1d8 extra radiant damage."
+FEATURE_DIVINE_INTERVENTION,Divine Intervention
+FEATURE_DIVINE_INTERVENTION_HINT_LEVELUP,Once per long rest: cast a Cleric spell of level 5 or lower without a spell slot.
+FEATURE_DIVINE_INTERVENTION_BUTTON,Intervention %d/%d
+FEATURE_DIVINE_INTERVENTION_ARMED,Intervention: ready
+FEATURE_DIVINE_INTERVENTION_HINT,Your next Cleric spell of level 1-5 needs no spell slot. Click again to cancel.
+FEATURE_LAY_ON_HANDS,Lay On Hands
+FEATURE_LAY_ON_HANDS_HINT_LEVELUP,A pool of 5 HP per Paladin level; bonus action: heal a creature you touch from it.
+FEATURE_PALADIN_S_SMITE,Paladin's Smite
+FEATURE_PALADIN_S_SMITE_HINT_LEVELUP,"Divine Smite: arm it, and your next melee hit deals 2d8 radiant damage (more with higher slots). One free use per long rest."
+FEATURE_DIVINE_SMITE,Divine Smite
+FEATURE_DIVINE_SMITE_BUTTON,Smite: off
+FEATURE_DIVINE_SMITE_ARMED,Smite: ARMED
+FEATURE_DIVINE_SMITE_HINT,Armed: your next melee weapon hit on your turn uses your bonus action and a spell slot (or the free use) for 2d8+ radiant damage.
+FEATURE_FIGHTING_STYLE_HINT_LEVELUP,Defense: +1 AC while you wear armour.
+FEATURE_FAITHFUL_STEED,Faithful Steed
+FEATURE_AURA_OF_PROTECTION,Aura of Protection
+FEATURE_AURA_OF_PROTECTION_HINT_LEVELUP,You and allies within 3 m add your Charisma modifier to saving throws.
+FEATURE_ABJURE_FOES,Abjure Foes
+FEATURE_ABJURE_FOES_HINT_LEVELUP,Channel Divinity: frighten up to Charisma modifier foes within 18 m.
+FEATURE_AURA_OF_COURAGE,Aura of Courage
+FEATURE_AURA_OF_COURAGE_HINT_LEVELUP,You and allies in your aura cannot be frightened.
+FEATURE_DRUIDIC,Druidic
+FEATURE_PRIMAL_ORDER,Primal Order
+FEATURE_PRIMAL_ORDER_HINT_LEVELUP,Magician: one extra cantrip.
+FEATURE_WILD_SHAPE,Wild Shape
+FEATURE_WILD_SHAPE_HINT_LEVELUP,"Bonus action: become a Wolf (AC 12, bite 1d6+2, knocks prone) with temporary HP equal to your level. No spells in beast form."
+FEATURE_WILD_COMPANION,Wild Companion
+FEATURE_WILD_RESURGENCE,Wild Resurgence
+FEATURE_WILD_RESURGENCE_HINT_LEVELUP,"Out of Wild Shape uses? Spend a spell slot instead, once per turn."
+FEATURE_ELEMENTAL_FURY,Elemental Fury
+FEATURE_ELEMENTAL_FURY_HINT_LEVELUP,Potent Spellcasting: add your Wisdom modifier to cantrip damage.
+FEATURE_COST_FREE,Free
+FEATURE_COST_POOL,Pool: %d HP
+FEATURE_COST_CHANNEL_DIVINITY,Channel Divinity %d/%d
+FEATURE_COST_WILD_SHAPE,Wild Shape %d/%d
+SPELL_REASON_WILD_SHAPE,No spellcasting in beast form
+INV_REASON_WILD_SHAPE,No gear in beast form
+FORM_WOLF,Wolf
+WEAPON_WOLF_BITE,Bite
+CONDITION_PARALYZED,Paralyzed
+COMBAT_LOG_CONDITION,%s is %s.
+COMBAT_LOG_EFFECT,%s: %s.
+COMBAT_LOG_FEATURE_ARMED,%s readies %s.
+COMBAT_LOG_FEATURE_DISARMED,%s holds back %s.
+COMBAT_LOG_WILD_SHAPE,%s turns into a %s.
+COMBAT_LOG_WILD_SHAPE_END,%s returns to their true form.

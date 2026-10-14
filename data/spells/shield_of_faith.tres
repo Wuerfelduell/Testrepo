@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"shield_of_faith"
+name_key = &"SPELL_SHIELD_OF_FAITH"
+srd_name = "Shield of Faith"
+level = 1
+school = "abjuration"
+casting_time = "bonus_action"
+targeting = "creature"
+range_m = 18.0
+resolution = "none"
+concentration = true
+duration_rounds = 100
+effect = &"ac_bonus"
+effect_amount = 2.0
+allies = true
+vfx = &"shield_of_faith"

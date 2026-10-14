@@ -473,7 +473,6 @@ static func check_combat_end(state: GameState) -> Array[Dictionary]:
 	var events: Array[Dictionary] = []
 	if state.mode != &"combat":
 		state.pending = {}
-		ClassEffects.revert_all(state)
 		ClassKits.on_combat_end(state)
 		events.append({"type": "combat_end", "mode": String(state.mode)})
 	return events

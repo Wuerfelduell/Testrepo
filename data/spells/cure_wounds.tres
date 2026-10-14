@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/rules/spells/spell_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"cure_wounds"
+name_key = &"SPELL_CURE_WOUNDS"
+srd_name = "Cure Wounds"
+level = 1
+school = "abjuration"
+targeting = "creature"
+range_m = 1.5
+resolution = "heal"
+heal_dice = "2d8"
+upcast_dice = "2d8"
+vfx = &"cure_wounds"

@@ -110,6 +110,9 @@ static func turn_reason(state: GameState, actor_id: String) -> String:
 		return "INV_REASON_BUSY"
 	if state.mode == &"combat" and state.current_actor_id() != actor_id:
 		return "INV_REASON_NOT_YOUR_TURN"
+	if state.actors[actor_id].has("wild_shape"):
+		# A Druid in beast form has no hands for gear (ClassEffects.wild_shape).
+		return "INV_REASON_WILD_SHAPE"
 	return ""
 
 ## Empty string when allowed, otherwise a translation key with the reason.
