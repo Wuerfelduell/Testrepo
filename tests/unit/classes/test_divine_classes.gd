@@ -208,3 +208,14 @@ func test_bless_adds_to_saves_of_up_to_three_allies() -> void:
 			blessed += 1
 	assert_eq(blessed, 3)
 	assert_eq(ClassEffects.save_modifiers(Game.state, "cleric", Rng.rng).size(), 1)
+
+func test_guidance_helps_the_clerics_dialogue_checks() -> void:
+	var cleric: Dictionary = hero(&"cleric")
+	assert_eq(ClassFeatures.known_cantrips(cleric).size(), 3)
+	assert_true("guidance" in cleric["spells"])
+	var event: Dictionary = DialogueChooseCommand.roll_check(cleric, "insight", 12)
+	var sources: Array = event["roll"]["modifiers"].map(func(modifier: Dictionary) -> String: return modifier["source"])
+	assert_true("guidance" in sources)
+	var fighter: Dictionary = HeroKit.create(&"fighter", Vector3.ZERO)
+	var plain: Dictionary = DialogueChooseCommand.roll_check(fighter, "insight", 12)
+	assert_false("guidance" in plain["roll"]["modifiers"].map(func(modifier: Dictionary) -> String: return modifier["source"]))

@@ -35,18 +35,18 @@ const CASTERS: Dictionary = {
 		"ability": "wis", "progression": "full",
 		"cantrips": [3, 3, 3, 4, 4, 4, 4, 4, 4, 5],
 		"prepared": [4, 5, 6, 7, 9, 10, 11, 12, 14, 15],
-		"list": ["sacred_flame", "resistance", "bless", "cure_wounds", "guiding_bolt", "healing_word",
+		"list": ["sacred_flame", "resistance", "guidance", "bless", "cure_wounds", "guiding_bolt", "healing_word",
 			"inflict_wounds", "shield_of_faith", "aid", "hold_person", "mass_healing_word",
 			"spirit_guardians", "flame_strike", "mass_cure_wounds"],
-		# Only two SRD Cleric cantrips work in combat yet; the third pick stays open.
-		"start": ["sacred_flame", "resistance", "bless", "cure_wounds", "guiding_bolt", "healing_word"],
+		# Guidance helps the hero's skill checks in dialogues (DialogueChooseCommand.roll_check).
+		"start": ["sacred_flame", "resistance", "guidance", "bless", "cure_wounds", "guiding_bolt", "healing_word"],
 		"always": {"divine_spark": 2, "divine_spark_heal": 2, "turn_undead": 2},
 	},
 	"druid": {
 		"ability": "wis", "progression": "full",
 		"cantrips": [2, 2, 2, 3, 3, 3, 3, 3, 3, 4],
 		"prepared": [4, 5, 6, 7, 9, 10, 11, 12, 14, 15],
-		"list": ["produce_flame", "starry_wisp", "poison_spray", "resistance", "cure_wounds", "healing_word",
+		"list": ["produce_flame", "starry_wisp", "poison_spray", "resistance", "guidance", "cure_wounds", "healing_word",
 			"entangle", "faerie_fire", "barkskin", "hold_person", "call_lightning", "blight",
 			"ice_storm", "mass_cure_wounds"],
 		# Primal Order Magician adds a third cantrip (features.bonus_cantrips).

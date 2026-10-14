@@ -24,7 +24,7 @@ const STYLES: Dictionary = {
 	"inflict_wounds": ["bolt", NECROTIC], "blight": ["bolt", NECROTIC], "divine_spark": ["bolt", RADIANT],
 	"divine_spark_heal": ["bolt", HEAL], "cure_wounds": ["bolt", HEAL], "hold_person": ["bolt", ARCANE],
 	"sacred_flame": ["target", RADIANT], "shield_of_faith": ["target", SHIELD], "barkskin": ["target", NATURE],
-	"resistance": ["target", SHIELD], "lay_on_hands": ["target", HEAL],
+	"resistance": ["target", SHIELD], "guidance": ["target", RADIANT], "lay_on_hands": ["target", HEAL],
 	"flame_strike": ["point", FIRE], "call_lightning": ["point", LIGHTNING], "ice_storm": ["point", FROST],
 	"entangle": ["point", NATURE], "faerie_fire": ["point", ARCANE], "mass_cure_wounds": ["point", HEAL],
 	"bless": ["caster", RADIANT], "aid": ["caster", RADIANT], "divine_favor": ["caster", RADIANT],

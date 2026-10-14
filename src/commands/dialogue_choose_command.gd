@@ -54,6 +54,12 @@ static func roll_check(hero: Dictionary, skill: String, dc: int) -> Dictionary:
 	var result: CheckResult = Checks.skill_check(StringName(skill), scores, dc, Rng.rng,
 		clampi(int(hero.get("level", 1)), 1, 10), proficient, null,
 		proficient and DialogueData.has_expertise(hero, skill))
+	if result.roll != null and result.roll.is_valid() and "guidance" in hero.get("spells", []):
+		# Guidance (SRD 5.2): a hero who knows it casts it before the check, +1d4.
+		var bonus: int = Dice.roll("1d4", Rng.rng).total
+		result.roll.modifiers.append(RuleModifier.new(bonus, &"guidance"))
+		result.roll.total += bonus
+		result.success = result.roll.total >= dc
 	var event: Dictionary = {"type": "roll", "kind": "check", "actor_id": "hero", "skill": skill,
 		"dc": dc, "success": result.success}
 	if result.roll != null:

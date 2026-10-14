@@ -1030,3 +1030,5 @@ ACTOR_DRUID,Druid
 CREATION_DESCRIPTION_CLERIC,"A priest in mail who heals, blesses and burns the unholy. Chain shirt, shield and mace; Divine Spark and Turn Undead from level 2."
 CREATION_DESCRIPTION_PALADIN,"A holy knight in chain mail with longsword and shield. Lay on Hands heals, Divine Smite turns a hit into a blaze of radiant damage."
 CREATION_DESCRIPTION_DRUID,"A keeper of the wild with nature magic: fire, lightning, binding roots and healing. From level 2 turns into a wolf."
+SPELL_GUIDANCE,Guidance
+ROLL_SOURCE_GUIDANCE,Guidance

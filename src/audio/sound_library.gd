@@ -24,7 +24,7 @@ const SPELLS: Array[String] = ["fire_bolt", "ray_of_frost", "magic_missile", "bu
 	"guiding_bolt", "inflict_wounds", "shield_of_faith", "divine_favor", "entangle", "faerie_fire",
 	"aid", "barkskin", "hold_person", "mass_healing_word", "call_lightning", "blight", "ice_storm",
 	"flame_strike", "mass_cure_wounds", "divine_spark", "divine_spark_heal", "turn_undead",
-	"abjure_foes", "lay_on_hands", "wild_shape", "revert_wild_shape",
+	"abjure_foes", "lay_on_hands", "wild_shape", "revert_wild_shape", "guidance",
 	"hunters_mark",
 	# Bard, Sorcerer, Warlock spells (existing sound files, see CUES).
 	"eldritch_blast", "vicious_mockery", "shocking_grasp", "chill_touch", "dissonant_whispers", "thunderwave", "hex",
@@ -84,6 +84,8 @@ const CUES: Dictionary = {
 	"spell_cast_spirit_guardians": {"files": ["spell_cast_sleep.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"spell_impact_spirit_guardians": {"files": ["spell_impact_arcane.ogg"], "volume_db": -5.0, "bus": "Effects"},
 	# Cleric, Paladin and Druid spells reuse existing files until they get their own.
+	"spell_cast_guidance": {"files": ["spell_shield.ogg"], "volume_db": -8.0, "bus": "Effects"},
+	"spell_impact_guidance": {"files": ["spell_shield.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"spell_cast_sacred_flame": {"files": ["spell_cast_arcane.ogg"], "volume_db": -8.0, "bus": "Effects"},
 	"spell_impact_sacred_flame": {"files": ["spell_impact_fire.ogg"], "volume_db": -6.0, "bus": "Effects"},
 	"spell_cast_resistance": {"files": ["spell_shield.ogg"], "volume_db": -8.0, "bus": "Effects"},
