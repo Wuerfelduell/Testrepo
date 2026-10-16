@@ -125,7 +125,7 @@ werden vom Export ausgeschlossen.
 ## Combat arena (Auftrag 04)
 
 The project now starts in `scenes/arena/arena.tscn`. Click ground to move or an enemy to
-attack; Q/E rotate, WASD/middle mouse pan, wheel zoom, 1 selects attack, Space ends a turn, 2 dashes,
+attack; Q/E or middle mouse drag rotate, WASD or Shift + middle mouse drag pan, wheel zoom, 1 selects attack, Space ends a turn, 2 dashes,
 3 disengages, F3 shows AI scores. Every roll appears on screen. The level-one Fighter
 faces Guard, Bandit and Cultist stat blocks; death ends the run.
 

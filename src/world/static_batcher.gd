@@ -8,6 +8,9 @@ extends Node3D
 ## Colliders, navigation and picking never depend on these meshes.
 
 const CHUNK_M: float = 12.0
+## Builders with many varied kit meshes and few cutaway walls (the town) use bigger chunks:
+## fewer draw calls matter more there than finer culling.
+var chunk_m: float = CHUNK_M
 
 ## Wrapper node -> [{"multimesh": MultiMesh, "index": int, "local": Transform3D}].
 var _instances: Dictionary = {}
@@ -26,7 +29,7 @@ func batch(source: Node3D, wrappers: Array[Node3D] = []) -> void:
 		if item.mesh == null or not item.is_visible_in_tree() or _has_surface_overrides(item):
 			continue
 		var world: Transform3D = item.global_transform
-		var chunk: Vector2i = Vector2i(floori(world.origin.x / CHUNK_M), floori(world.origin.z / CHUNK_M))
+		var chunk: Vector2i = Vector2i(floori(world.origin.x / chunk_m), floori(world.origin.z / chunk_m))
 		var key: Array = [item.mesh, item.material_override, item.cast_shadow, chunk]
 		if not groups.has(key):
 			groups[key] = []

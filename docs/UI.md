@@ -106,7 +106,8 @@ The save is deleted (ironman).
 
 ## 7. Options (M1 minimum)
 
-Resolution, fullscreen, volume (master, music, effects), dice popup speed
+Resolution, fullscreen, graphics quality (low / medium / high, default low), show FPS,
+volume (master, music, effects), dice popup speed
 (slow / normal / fast / off), camera rotation speed. Language comes with the German version.
 
 ## 8. Decisions

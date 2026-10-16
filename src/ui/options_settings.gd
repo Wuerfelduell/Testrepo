@@ -20,8 +20,14 @@ var volumes: Dictionary = {"Master": 1.0, "Music": 0.8, "Effects": 1.0}
 var dice_speed: String = "normal"
 ## Multiplier on the camera's base rotation speed.
 var camera_rotation_speed: float = 1.0
+## Graphics preset (GraphicsQuality.LEVELS); low is the default so a first start runs well.
+var graphics_quality: String = GraphicsQuality.DEFAULT
+## Small frame counter in the top right corner.
+var show_fps: bool = false
+var _fps_label: Label
 
 func _ready() -> void:
+	get_tree().node_added.connect(_node_added)
 	# Without a stored file the window keeps its launch size (--resolution, captures).
 	apply(load_settings())
 
@@ -40,12 +46,18 @@ func load_settings() -> bool:
 	if speed is String and speed in DICE_SPEEDS:
 		dice_speed = speed
 	camera_rotation_speed = clampf(float(config.get_value("gameplay", "camera_rotation_speed", camera_rotation_speed)), 0.25, 3.0)
+	var quality: Variant = config.get_value("display", "graphics_quality", graphics_quality)
+	if quality is String and quality in GraphicsQuality.LEVELS:
+		graphics_quality = quality
+	show_fps = bool(config.get_value("display", "show_fps", show_fps))
 	return true
 
 func save_settings() -> Error:
 	var config: ConfigFile = ConfigFile.new()
 	config.set_value("display", "resolution", resolution)
 	config.set_value("display", "fullscreen", fullscreen)
+	config.set_value("display", "graphics_quality", graphics_quality)
+	config.set_value("display", "show_fps", show_fps)
 	for bus: String in BUSES:
 		config.set_value("audio", bus.to_lower(), volumes[bus])
 	config.set_value("gameplay", "dice_speed", dice_speed)
@@ -59,6 +71,10 @@ func set_option(key: String, value: Variant) -> void:
 			if value is Vector2i and value in RESOLUTIONS:
 				resolution = value
 		"fullscreen": fullscreen = bool(value)
+		"graphics_quality":
+			if String(value) in GraphicsQuality.LEVELS:
+				graphics_quality = String(value)
+		"show_fps": show_fps = bool(value)
 		"dice_speed":
 			if String(value) in DICE_SPEEDS:
 				dice_speed = String(value)
@@ -90,4 +106,43 @@ func apply(include_window: bool = true) -> void:
 			if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 			DisplayServer.window_set_size(resolution)
+	_apply_graphics()
 	changed.emit()
+
+func _apply_graphics() -> void:
+	if not is_inside_tree():
+		return
+	GraphicsQuality.apply_viewport(get_tree().root, graphics_quality)
+	for node: Node in get_tree().root.find_children("*", "WorldEnvironment", true, false):
+		GraphicsQuality.apply_environment((node as WorldEnvironment).environment, graphics_quality)
+	for node: Node in get_tree().root.find_children("*", "Light3D", true, false):
+		GraphicsQuality.apply_light(node as Light3D, graphics_quality)
+	if show_fps and _fps_label == null:
+		var layer: CanvasLayer = CanvasLayer.new()
+		layer.layer = 100
+		add_child(layer)
+		_fps_label = Label.new()
+		_fps_label.position = Vector2(1780, 8)
+		_fps_label.add_theme_font_size_override("font_size", 22)
+		_fps_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		_fps_label.add_theme_constant_override("outline_size", 4)
+		layer.add_child(_fps_label)
+	if _fps_label != null:
+		_fps_label.get_parent().visible = show_fps
+	set_process(show_fps)
+
+func _process(_delta: float) -> void:
+	if _fps_label != null:
+		_fps_label.text = "%d FPS" % Engine.get_frames_per_second()
+
+## Levels, menus and dice views build their environments and lights at runtime.
+func _node_added(node: Node) -> void:
+	if node is WorldEnvironment:
+		# The environment is usually assigned right after add_child.
+		_apply_environment_later.call_deferred(node)
+	elif node is Light3D:
+		GraphicsQuality.apply_light.call_deferred(node, graphics_quality)
+
+func _apply_environment_later(node: WorldEnvironment) -> void:
+	if is_instance_valid(node):
+		GraphicsQuality.apply_environment(node.environment, graphics_quality)

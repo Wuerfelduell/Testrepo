@@ -62,7 +62,7 @@ COMBAT_DISENGAGE,Disengage
 COMBAT_END_TURN,END TURN  [Space]
 COMBAT_END_TURN_HINT,End the active character’s turn. Unused resources are lost.
 COMBAT_HOTKEY_ACTION,[%s]  %s
-COMBAT_CONTROLS,"Q / E orbit · W A S D pan · Wheel zoom
+COMBAT_CONTROLS,"Q / E or middle drag orbit · W A S D pan · Wheel zoom
 Click move / attack · Tab party · Esc cancel · F3 AI"
 COMBAT_TARGET_PREVIEW,"%s · %d%% to hit
 %s %s · AC %d"
@@ -494,6 +494,11 @@ WEAPON_QUARTERSTAFF,Quarterstaff
 OPTIONS_TITLE,Options
 OPTIONS_RESOLUTION,Resolution
 OPTIONS_FULLSCREEN,Fullscreen
+OPTIONS_GRAPHICS,Graphics quality
+OPTIONS_GRAPHICS_LOW,Low
+OPTIONS_GRAPHICS_MEDIUM,Medium
+OPTIONS_GRAPHICS_HIGH,High
+OPTIONS_SHOW_FPS,Show FPS
 OPTIONS_VOLUME_MASTER,Master volume
 OPTIONS_VOLUME_MUSIC,Music volume
 OPTIONS_VOLUME_EFFECTS,Effects volume

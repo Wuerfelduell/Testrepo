@@ -33,6 +33,7 @@ const GATE_CENTER: Vector3 = Vector3(16.5, 0, -9)
 var occluders: Array[Dictionary] = []
 ## All static kit meshes end up in MultiMeshes (StaticBatcher) once the level is built.
 var batcher: StaticBatcher
+var batch_chunk_m: float = StaticBatcher.CHUNK_M
 var _cells: Dictionary = {}
 
 func build() -> void:
@@ -90,6 +91,7 @@ func bake() -> void:
 func _batch_meshes() -> void:
 	batcher = StaticBatcher.new()
 	batcher.name = "StaticBatches"
+	batcher.chunk_m = batch_chunk_m
 	add_child(batcher)
 	var wrappers: Array[Node3D] = []
 	for entry: Dictionary in occluders:

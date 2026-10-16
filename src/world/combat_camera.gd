@@ -6,6 +6,8 @@ const MIN_ZOOM: float = 9.0
 const MAX_ZOOM: float = 34.0
 const PAN_SPEED: float = 12.0
 const ROTATION_SPEED: float = 1.3
+## Radians per pixel of a middle-mouse drag (BG3 style: drag sideways to turn).
+const DRAG_ROTATION: float = 0.006
 ## Options scale this (camera rotation speed); ROTATION_SPEED stays the default.
 var rotation_speed: float = ROTATION_SPEED
 
@@ -78,11 +80,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			_zoom_target = clampf(_zoom_target * 1.1, MIN_ZOOM, MAX_ZOOM)
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _dragging:
+		# Middle-mouse drag turns the view like in BG3; Shift + drag still pans.
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
-		var viewport_height: float = maxf(1.0, get_viewport().get_visible_rect().size.y)
-		var scale_per_pixel: float = camera.size / viewport_height
-		# Compensate for the tilted view so vertical drags cover the same screen distance.
-		_pan_offset -= global_basis.x * motion.relative.x * scale_per_pixel
-		_pan_offset -= global_basis.z * motion.relative.y * scale_per_pixel / sin(-camera.rotation.x)
-		_focus_remaining = 0.0
+		if motion.shift_pressed:
+			var viewport_height: float = maxf(1.0, get_viewport().get_visible_rect().size.y)
+			var scale_per_pixel: float = camera.size / viewport_height
+			# Compensate for the tilted view so vertical drags cover the same screen distance.
+			_pan_offset -= global_basis.x * motion.relative.x * scale_per_pixel
+			_pan_offset -= global_basis.z * motion.relative.y * scale_per_pixel / sin(-camera.rotation.x)
+			_focus_remaining = 0.0
+		else:
+			rotation.y -= motion.relative.x * DRAG_ROTATION * rotation_speed / ROTATION_SPEED
 		get_viewport().set_input_as_handled()
